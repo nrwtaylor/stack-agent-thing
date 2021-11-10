@@ -257,11 +257,13 @@ class Agent
             $this->thing->log($error_text, "ERROR");
             // Executed only in PHP 5, will not be reached in PHP 7
         }
+
+
         if ($this->agent_input == null or $this->agent_input == "") {
-
             $this->respond();
-
         }
+
+
         if (!isset($this->response)) {
             $this->response = "No response found.";
         }

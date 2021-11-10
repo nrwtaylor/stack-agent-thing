@@ -82,17 +82,12 @@ class Latitude extends Agent
     public function doLatitude()
     {
         if ($this->agent_input == null) {
-            $array = ["observation", "polaris", "sun"];
-            $k = array_rand($array);
-            $v = $array[$k];
+
+            $response = "Got longitude. ";
 
             if (!is_numeric($this->latitude)) {
                 $response = "No latitude available. ";
             }
-
-            //            if ($this->latitude !== false) {
-            //                $response = "Latitude is " . $this->latitude .". ";
-            //            }
 
             $this->message = $response; // mewsage?
         } else {

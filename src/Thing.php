@@ -1285,6 +1285,13 @@ $class_name = $this->agent_class_name_current;
             }
         }
     }
+
+    public function isThing($thing) {
+
+//var_dump(get_class($thing));
+//echo 'isThing?';
+
+    }
     //}
 
     function exception_error_handler($errno, $errstr, $errfile, $errline)

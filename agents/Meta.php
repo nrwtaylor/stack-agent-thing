@@ -55,7 +55,7 @@ class Meta extends Agent
 */
     }
 
-    function getMeta($thing = null)
+    public function getMeta($thing = null)
     {
         if ($thing == null) {
             if (!isset($this->thing)) {
@@ -130,6 +130,8 @@ class Meta extends Agent
 
         $this->meta = $data_gram;
         $this->meta_string = implode(" ", $data_gram);
+
+        return $this->meta;
     }
 
     function extractMeta($input = null)

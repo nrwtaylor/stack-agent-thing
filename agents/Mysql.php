@@ -1766,6 +1766,10 @@ if (!isset($this->pdo) or $this->pdo == null) {return false;}
         $task_exclusions = null,
         $nom_to_exclusions = null
     ) {
+
+
+if (!isset($this->pdo)) {return true;}
+
         // Example:
         // SELECT * FROM stack WHERE nom_from='test@test.test' and ((task not like '%?%') or (nom_from not like '%transit%') or (nom_from not like '%test%')) ORDER BY RAND() LIMIT 3;
 
@@ -1809,7 +1813,7 @@ if (!isset($this->pdo) or $this->pdo == null) {return false;}
             ") ORDER BY RAND() LIMIT 3";
 
         $sth = $this->pdo->prepare($query);
-        $sth->bindParam("nom_from", $nom_from);
+//        $sth->bindParam("nom_from", $nom_from);
         $sth->execute();
         $things = $sth->fetchAll();
 

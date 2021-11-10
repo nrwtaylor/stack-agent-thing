@@ -34,7 +34,7 @@ class Database
     //public function init()
     function __construct($thing = null, $agent_input = null)
     {
-        //$agent_input = $this->agent_input;
+
         $uuid = $agent_input["uuid"];
         $nom_from = $agent_input["from"];
         $to = isset($agent_input["to"]) ? $agent_input["to"] : null;

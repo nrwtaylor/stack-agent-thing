@@ -111,7 +111,7 @@ class Stackgraph extends Agent
         $this->setVariable("name", $this->name);
     }
 
-    function setVariable($variable = null, $value)
+    function setVariable($variable = null, $value = null)
     {
         // Take a variable in the variables_thing and save
         // into the database.  Probably end

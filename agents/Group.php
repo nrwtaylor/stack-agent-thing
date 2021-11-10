@@ -62,23 +62,14 @@ class Group extends Agent
 
     public function get()
     {
-        $time_string = $this->thing->Read([
-            "group",
-            "refreshed_at",
-        ]);
+        $time_string = $this->thing->Read(["group", "refreshed_at"]);
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->Write(
-                ["group", "refreshed_at"],
-                $time_string
-            );
+            $this->thing->Write(["group", "refreshed_at"], $time_string);
         }
 
-        $this->group_id = $this->thing->Read([
-            "group",
-            "group_id",
-        ]);
+        $this->group_id = $this->thing->Read(["group", "group_id"]);
     }
 
     public function makeChoices()
@@ -129,17 +120,11 @@ class Group extends Agent
         $this->thing->log('joined group ' . $group_id . '');
         $this->group_id = $group_id;
 
-        $names = $this->thing->Write(
-            ["group", "group_id"],
-            $this->group_id
-        );
+        $names = $this->thing->Write(["group", "group_id"], $this->group_id);
 
         // Super primitive, but it does have this.
         $time_string = $this->thing->time();
-        $this->thing->Write(
-            ["group", "refreshed_at"],
-            $time_string
-        );
+        $this->thing->Write(["group", "refreshed_at"], $time_string);
 
         $this->thing->log('joined group ' . $group_id);
 
@@ -155,20 +140,14 @@ class Group extends Agent
 
     public function leaveGroup($group = null)
     {
-        $names = $this->thing->Write(
-            ["group", "action"],
-            'leave'
-        );
+        $names = $this->thing->Write(["group", "action"], 'leave');
 
         $this->response .= "Left group. ";
     }
 
     public function startGroup($type = null)
     {
-        $names = $this->thing->Write(
-            ["group", "action"],
-            'start'
-        );
+        $names = $this->thing->Write(["group", "action"], 'start');
 
         if ($type == null) {
             $type = 'alphafour';
@@ -184,16 +163,10 @@ class Group extends Agent
         //$this->message = $this->group_id;
         $this->response .= "Type 'SAY' followed by your message. ";
 
-        $names = $this->thing->Write(
-            ["group", "group_id"],
-            $this->group_id
-        );
+        $names = $this->thing->Write(["group", "group_id"], $this->group_id);
 
         $time_string = $this->thing->time();
-        $this->thing->Write(
-            ["group", "refreshed_at"],
-            $time_string
-        );
+        $this->thing->Write(["group", "refreshed_at"], $time_string);
 
         $this->thing->choice->Create(
             $this->agent_name,
@@ -226,10 +199,7 @@ class Group extends Agent
                 $groups[] = $group_id;
             }
 
-            $refreshed_at = $thing->Read([
-                "group",
-                "refreshed_at",
-            ]);
+            $refreshed_at = $thing->Read(["group", "refreshed_at"]);
         }
 
         if (count($groups) == 0) {
@@ -240,10 +210,7 @@ class Group extends Agent
         } else {
             $this->group_id = $groups[0];
 
-            $this->thing->Write(
-                ["group", "group_id"],
-                $this->group_id
-            );
+            $this->thing->Write(["group", "group_id"], $this->group_id);
 
             $this->thing_report['groups'] = $groups;
         }
@@ -261,10 +228,7 @@ class Group extends Agent
     public function listenGroup($group = null)
     {
         $this->members = [];
-        $names = $this->thing->Write(
-            ["group", "action"],
-            'listen'
-        );
+        $names = $this->thing->Write(["group", "action"], 'listen');
 
         if ($group == null) {
             $group = $this->group_id;
@@ -287,11 +251,16 @@ class Group extends Agent
 
         $ages = [];
 
-        if (count($this->thing_report['things']) != 0) {
+        $things = $this->thing_report['things'];
+        if ($things === false) {
+            return $this->members;
+        }
+
+        if (count($things) != 0) {
             $this->response .= "";
         }
 
-        foreach ($this->thing_report['things'] as $thing) {
+        foreach ($things as $thing) {
             $age = time() - strtotime($thing['created_at']);
             $ages[] = $age;
 

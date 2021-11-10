@@ -76,6 +76,8 @@ Show 1 minute.
 
         $this->runtime->setVariable("seconds", $this->seconds);
         $this->runtime->setVariable("units", $this->units);
+
+
         $this->runtime->setVariable("refreshed_at", $this->current_time);
     }
 
@@ -86,7 +88,10 @@ Show 1 minute.
     function getRuntime()
     {
         if (!isset($this->run_time)) {
-            if (isset($run_time)) {
+
+        $this->runtime->setVariable("seconds", $this->seconds);
+        $this->runtime->setVariable("units", $this->units);           
+ if (isset($run_time)) {
                 $this->run_time = $run_time;
             } else {
                 return true;
@@ -454,7 +459,6 @@ Show 1 minute.
             return;
         }
         $measurement = $this->extractMeasurement($filtered_input);
-
         if ($measurement !== false) {
             $amount = $measurement["amount"];
             $units = $measurement["units"];

@@ -107,10 +107,13 @@ class Response extends Agent
 
     public function metaResponse()
     {
-        $this->getMeta();
+        $m = $this->getMeta();
+//var_dump($m);
         $t = "";
-        $t .= $this->meta;
-        $t .= " " . $this->meta_string;
+        $t .= $m['from'] ." ";
+        $t .= $m['to'] . " ";
+        $t .= $m['message'];
+        //$t .= " " . $this->meta_string;
         $t .= " " . $this->agent_name;
         return $t;
     }

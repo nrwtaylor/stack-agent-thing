@@ -44,17 +44,12 @@ class Longitude extends Agent
     public function doLongitude()
     {
         if ($this->agent_input == null) {
-            $array = ["board", "longitude", "meridian"];
-            $k = array_rand($array);
-            $v = $array[$k];
+
+            $response = "Got longitude. ";
 
             if (!is_numeric($this->longitude)) {
                 $response = "No longitude available. ";
             }
-
-            //            if ($this->longitude !== false) {
-            //                $response = "Longitude is " . $this->longitude .". ";
-            //            }
 
             $this->message = $response; // mewsage?
         } else {
@@ -106,7 +101,6 @@ class Longitude extends Agent
         $message_thing = new Message($this->thing, $this->thing_report);
         $thing_report["info"] = $message_thing->thing_report["info"];
 
-        //return $this->thing_report;
     }
 
     function makeSMS()
