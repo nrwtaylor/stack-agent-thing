@@ -262,6 +262,10 @@ class Runat extends Agent
 
     public function textRunat() {
 
+
+
+//return $this->textAt();
+
         if (isset($this->day)) {
             $day = $this->day;
         }

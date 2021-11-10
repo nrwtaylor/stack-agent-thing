@@ -1362,52 +1362,6 @@ class Train extends Agent
         if (!isset($this->runat)) {
             $this->runat = new Runat($this->train_thing, "runat");
         }
-/*
-        $day = $this->runat->day;
-        $hour = $this->runat_agent->hour;
-        $minute = $this->runat_agent->minute;
-
-        //        $this->runat = ["day" => $day, "hour" => $hour, "minute" => $minute];
-
-        if (!isset($this->runat)) {
-            $this->runat = new \stdClass();
-        }
-
-        $this->runat->day = $day;
-        $this->runat->hour = $hour;
-        $this->runat->minute = $minute;
-*/
-        return;
-
-        if (!isset($this->end_at) and !isset($this->runtime)) {
-            if (!isset($this->runat)) {
-                $this->hour = "X";
-                $this->minute = "X";
-            }
-            return $this->runat;
-        }
-
-        if (!isset($this->end_at)) {
-            $this->getEndat();
-        }
-
-        if (!isset($this->runtime)) {
-            $this->getRuntime();
-        }
-
-        switch (true) {
-            case strtoupper($this->end_at) != "X" and
-                strtoupper($this->end_at) != "Z":
-                $this->runat = strtotime(
-                    $this->end_at . "-" . $this->runtime . "minutes"
-                );
-
-                break;
-            default:
-                $this->runat = $this->trainTime();
-        }
-
-        return $this->runat;
     }
 
     function getAvailable()
@@ -2193,6 +2147,12 @@ $txt .= $table_text;
 
             }
 
+            if ($variable_name == 'endat') {
+
+            $txt .= "runat " . $this->textEndat() . " ";
+            continue;
+
+            }
 
 
 
