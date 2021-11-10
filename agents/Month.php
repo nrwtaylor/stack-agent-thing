@@ -201,7 +201,10 @@ class Month extends Agent
      */
     public function makeSMS()
     {
-        $sms = "MONTH";
+        $sms = "MONTH | ";
+
+        $sms .= $this->web_prefix . "thing/" . $this->uuid . "/month";
+
 
         $months = [];
         if (isset($this->months)) {
@@ -213,6 +216,11 @@ class Month extends Agent
             $month_text = $this->month;
             $sms .= " | " . $month_text;
         }
+
+
+
+
+
         $sms .= " " . $this->response;
         //$sms .= " | " . $this->message . " " . $this->response;
         $this->sms_message = $sms;
@@ -467,6 +475,7 @@ class Month extends Agent
 
     public function drawMonth($type = null)
     {
+$type = "spiral";
         if ($type == null) {
             $type = $this->type;
         }
@@ -474,6 +483,12 @@ class Month extends Agent
             $this->wedgeMonth();
             return;
         }
+
+        if ($type == "spiral") {
+            $this->spiralMonth();
+            return;
+        }
+
 
         $this->sliceMonth();
     }
@@ -517,6 +532,80 @@ class Month extends Agent
             );
         }
     }
+
+    public function spiralMonth()
+    {
+        $size = null;
+        if ($size == null) {
+            $size = $this->size;
+        }
+        $border = 100;
+        $size = 1000 - $border;
+
+        if (isset($this->canvas_size_x)) {
+            $canvas_size_x = $this->canvas_size_x;
+            $canvas_size_y = $this->canvas_size_y;
+        } else {
+            $canvas_size_x = $this->default_canvas_size_x;
+            $canvas_size_y = $this->default_canvas_size_y;
+        }
+
+        // Draw out the state
+        $center_x = $canvas_size_x / 2;
+        $center_y = $canvas_size_y / 2;
+
+//         $this->drawSpiral($size_start, $size_end, $a, $b, $init_degrees);
+
+        //$this->image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
+
+
+$spiral_agent = new Spiral($this->thing, 'spiral');
+$spiral_agent->image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
+
+        imagefilledrectangle(
+            $spiral_agent->image,
+            0,
+            0,
+            $canvas_size_x,
+            $canvas_size_y,
+            $this->white
+        );
+
+
+
+$image = $spiral_agent->drawSpiral(190,407.5,10,15,0);
+
+
+$number = 7;
+//        if ($type == "wedge") {
+            $round_agent = new Spokes($this->thing, "spokes ".$number);
+            $image_spokes = $round_agent->image;
+
+
+        $width = imagesx($this->image);
+        $height = imagesy($this->image);
+
+
+    //$dest = @imagecreatefrompng('image1.png');
+    //$src = @imagecreatefrompng('image2.png');
+
+    // Copy and merge
+    imagecopymerge($this->image, $round_agent->image, 0, 0, 0, 0, $width, $height, 75);
+
+    imagecopymerge($this->image, $spiral_agent->image, 0, 0, 0, 0, $width, $height, 70);
+
+
+
+
+
+//$this->image = $spiral_agent->image;
+
+
+
+
+    }
+
+
 
     public function wedgeMonth()
     {

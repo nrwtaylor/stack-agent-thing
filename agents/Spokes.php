@@ -1,6 +1,6 @@
 <?php
 /**
- * Spiral.php
+ * Spokes.php
  *
  * @package default
  */
@@ -9,19 +9,17 @@ namespace Nrwtaylor\StackAgentThing;
 
 //use QR_Code\QR_Code;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 use setasign\Fpdi;
 
 ini_set("allow_url_fopen", 1);
 
-// TODO: Respond to fourth parameter. Init start angle.
-
-class Spiral extends Agent
+class Spokes extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      *
@@ -32,44 +30,31 @@ class Spiral extends Agent
     {
         $this->test = "Development code";
 
-        $this->thing_report["info"] = "A SPIRAL is a repeating pattern.";
-        $this->thing_report["help"] = 'Click on the image for a PDF.';
+        $this->thing_report["info"] = "SPOKES radiate outwards from a point.";
+        $this->thing_report["help"] = "Click on the image for a PDF.";
 
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+        $this->resource_path = $GLOBALS["stack_path"] . "resources/";
 
         $command_line = null;
 
         $this->node_list = [
-            "spiral" => ["spiral", "spirals"],
+            "spoke" => ["spokes", "round"],
         ];
 
         $this->current_time = $this->thing->time();
 
         // Get some stuff from the stack which will be helpful.
-        $this->entity_name = $this->thing->container['stack']['entity_name'];
+        $this->entity_name = $this->thing->container["stack"]["entity_name"];
 
         $this->default_canvas_size_x = 2000;
         $this->default_canvas_size_y = 2000;
 
-        $this->thing->refresh_at = $this->thing->time(
-            time() + 2 * 24 * 60 * 60
-        ); // Never refresh.
+        $this->default_spokes = [7];
 
-        $agent = new Retention($this->thing, "retention");
-        $this->retain_to = $agent->retain_to;
-
-        $agent = new Persistence($this->thing, "persistence");
-        $this->time_remaining = $agent->time_remaining;
-        $this->persist_to = $agent->persist_to;
-
-        // Archimedean spiral
-        // length, a, b, (start angle)
-        $this->default_spirals = [200, 10, 25];
-
-        $this->initSpiral();
+        $this->initSpoke();
 
         $this->draw_center = false;
-        $this->draw_outline = false;
+        $this->draw_outline = false; //Draw hexagon line
 
         $this->canvas_size_x = $this->default_canvas_size_x;
         $this->canvas_size_y = $this->default_canvas_size_y;
@@ -79,14 +64,14 @@ class Spiral extends Agent
             $this->default_canvas_size_y
         );
 
-        if (isset($this->thing->container['stack']['font'])) {
-            $this->font = $this->thing->container['stack']['font'];
+        if (isset($this->thing->container["stack"]["font"])) {
+            $this->font = $this->thing->container["stack"]["font"];
         }
     }
 
     public function set()
     {
-        $this->setSpiral();
+        $this->setSpoke();
     }
 
     /**
@@ -95,7 +80,7 @@ class Spiral extends Agent
      */
     function getWhatis($input)
     {
-        $whatis = "spiral";
+        $whatis = "spoke";
         $whatIWant = $input;
         if (($pos = strpos(strtolower($input), $whatis . " is")) !== false) {
             $whatIWant = substr(
@@ -123,7 +108,7 @@ class Spiral extends Agent
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
     }
 
@@ -133,7 +118,7 @@ class Spiral extends Agent
     public function makeChoices()
     {
         $this->choices = false;
-        $this->thing_report['choices'] = $this->choices;
+        $this->thing_report["choices"] = $this->choices;
     }
 
     /**
@@ -141,11 +126,12 @@ class Spiral extends Agent
      */
     public function makeSMS()
     {
-        $sms = "SPIRAL | ";
-        $sms .= $this->web_prefix . "thing/" . $this->uuid . "/spiral";
+        //        $cell = $this->lattice[0][0][0];
+        $sms = "SPOKE | ";
+        $sms .= $this->web_prefix . "thing/" . $this->uuid . "/spoke";
         $sms .= " | " . $this->response;
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     /**
@@ -153,30 +139,30 @@ class Spiral extends Agent
      */
     public function makeMessage()
     {
-        $message = "Made a spiral for you.<br>";
+        $message = "Made a spoke for you.<br>";
 
         $uuid = $this->uuid;
 
         $message .=
             "Keep on stacking.\n\n<p>" .
             $this->web_prefix .
-            "thing/$uuid/spiral.png\n \n\n<br> ";
+            "thing/$uuid/spoke.png\n \n\n<br> ";
         $message .=
             '<img src="' .
             $this->web_prefix .
-            'thing/' .
+            "thing/" .
             $uuid .
-            '/spiral.png" alt="spiral" height="92" width="92">';
+            '/spoke.png" alt="spoke" height="92" width="92">';
 
-        $this->thing_report['message'] = $message;
+        $this->thing_report["message"] = $message;
     }
 
     /**
      *
      */
-    public function setSpiral()
+    public function setSpoke()
     {
-        $this->thing->Write(["spiral", "spirals"], $this->spirals);
+        $this->thing->Write(["spoke", "spokes"], $this->spokes);
     }
 
     /**
@@ -184,16 +170,16 @@ class Spiral extends Agent
      * @return unknown
      */
     // TODO
-    public function getSpiral()
+    public function getSpoke()
     {
-        $spirals = $this->thing->Read(["spiral", "spirals"]);
+        $spokes = $this->thing->Read(["spoke", "spokes"]);
 
-        if ($spirals == false) {
+        if ($spokes == false) {
             $this->thing->log(
-                $this->agent_prefix . ' did not find spirals.',
+                $this->agent_prefix . " did not find spokes.",
                 "INFORMATION"
             );
-            // No spirals saved.  Return.
+            // No spoke saved.  Return.
             return true;
         }
     }
@@ -201,10 +187,10 @@ class Spiral extends Agent
     /**
      *
      */
-    public function initSpiral()
+    public function initSpoke()
     {
         if (!isset($this->size)) {
-            $this->size = 50;
+            $this->size = 3.7;
         }
     }
 
@@ -217,14 +203,15 @@ class Spiral extends Agent
      */
     public function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/spiral.pdf';
-        $this->node_list = ["spiral" => ["week"]];
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/spoke.pdf";
+        $this->node_list = ["spoke" => ["week"]];
         $web = "";
         $web .= '<a href="' . $link . '">';
         $web .= $this->html_image;
         $web .= "</a>";
         $web .= "<br>";
-        $this->thing_report['web'] = $web;
+
+        $this->thing_report["web"] = $web;
     }
 
     /**
@@ -232,10 +219,10 @@ class Spiral extends Agent
      */
     public function makeTXT()
     {
-        $txt = 'This is a SPIRAL';
+        $txt = "This is a SPOKE";
         $txt .= "\n";
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
@@ -249,8 +236,6 @@ class Spiral extends Agent
     {
         $this->rgb = imagecolorallocate($this->image, $r, $g, $b);
     }
-
-    // TODO: Factor out as seperate common class to multiple agents.
 
     /**
      *
@@ -266,7 +251,6 @@ class Spiral extends Agent
             $canvas_size_y = 164;
         }
         $this->image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
-        //$this->getColours();
         //$this->image = imagecreatetruecolor(164, 164);
 
         $this->white = imagecolorallocate($this->image, 255, 255, 255);
@@ -341,8 +325,6 @@ class Spiral extends Agent
 
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
 
-        $this->drawSpirals();
-
         $this->drawSpokes();
 
         // Write the string at the top left
@@ -353,14 +335,13 @@ class Spiral extends Agent
 
         // devstack add path
         $font = $this->default_font;
-        $text = "A spiral in slices...";
+        $text = "A spoke in slices...";
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
 
         $size = $canvas_size_x - 90;
         $size = 20;
         $angle = 0;
-
         if (file_exists($font)) {
             $bbox = imagettfbbox($size, $angle, $font, $text);
             $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
@@ -371,7 +352,7 @@ class Spiral extends Agent
             $bbox["height"] =
                 max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
                 min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-            extract($bbox, EXTR_PREFIX_ALL, 'bb');
+            extract($bbox, EXTR_PREFIX_ALL, "bb");
         }
         //check width of the image
         $width = imagesx($this->image);
@@ -393,110 +374,69 @@ class Spiral extends Agent
 
         ob_end_clean();
 
-        $this->thing_report['png'] = $imagedata;
+        $this->thing_report["png"] = $imagedata;
 
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
-            '"alt="spiral"/>';
+            '"alt="spoke"/>';
 
         $this->html_image =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
-            '"alt="spiral"/>';
+            '"alt="spoke"/>';
 
         $this->PNG_embed = "data:image/png;base64," . base64_encode($imagedata);
         $this->PNG = $imagedata;
 
         return $response;
+
+        //        $this->PNG = $image;
+        //        $this->thing_report['png'] = $image;
+
+        //        return;
     }
 
     public function drawSpokes()
     {
-        $number = 7;
-        //        if ($type == "wedge") {
-        $this->round_agent = new Round($this->thing, "round " . $number);
-        $image = $this->round_agent->image;
+        $border = 100;
+        $size = 1000 - $border;
 
-        $width = imagesx($this->image);
-        $height = imagesy($this->image);
+        $round_width = $size / (count($this->spokes) + 1);
 
-        //$dest = @imagecreatefrompng('image1.png');
-        //$src = @imagecreatefrompng('image2.png');
+        foreach ($this->spokes as $i => $round) {
+            $next_size = $size - $round_width;
+            if ($i == count($this->spokes) - 1) {
+                $next_size = 0;
+            }
 
-        // Copy and merge
-        //imagecopymerge($this->image, $image, 0, 0, 0, 0, $width, $height, 50);
+            $this->drawSpoke($round, $size, $next_size);
+            $size = $next_size;
+        }
     }
 
-    public function drawLine()
-    {
-    }
+    /*
+     *
+     */
 
-    public function drawSpirals()
-    {
-        //        $border = 100;
-        //        $size = 1000 - $border;
-
-        //        $nautilus_width = $size / (count($this->nautilii) + 1);
-        //        $nautilus = 1000;
-
-        $size_start = 0;
-        $size_end = 200;
-        if (isset($this->spirals[0])) {
-            $size_end = $this->spirals[0];
-        }
-
-        $a = 50;
-        if (isset($this->spirals[1])) {
-            $a = $this->spirals[1];
-        }
-
-        $b = 10;
-        if (isset($this->spirals[2])) {
-            $b = $this->spirals[2];
-        }
-
-        $init_degrees = 0;
-        if (isset($this->spirals[3])) {
-            $init_degrees = $this->spirals[3];
-        }
-
-        $this->drawSpiral($size_start, $size_end, $a, $b, $init_degrees);
-    }
-
-    public function drawSpiral(
-        $size_start = 100,
-        $size_end = 200,
-        $a = 10,
-        $b = 25,
-        $init_degrees = null
+    public function drawSpoke(
+        $n = 7,
+        $size = null,
+        $next_size = null,
+        $type = null
     ) {
-
-        /*
-
-    t = i / 20 * pi
-    x = (1 + 5 * t) * cos(t)
-    y = (1 + 5 * t) * sin(t)
-    goto(x, y)
-
-*/
-
-        /*
-
-        if ($mu_degrees == null) {
-            $mu_degrees = 0;
+        if ($type == null) {
+            $type = $this->type;
         }
-        $mu_radians = ($mu_degrees / 360) * 2 * pi();
+        $this->wedgeSpoke($n, $size, $next_size);
+    }
 
-        if ($init_degrees == null) {
-            $init_degrees = 0;
-        }
-        $init_radians = ($init_degrees / 360) * 2 * pi();
-
+    public function wedgeSpoke($n = 7, $size = null, $next_size = null)
+    {
         if ($size == null) {
             $size = $this->size;
         }
-*/
+
         if (isset($this->canvas_size_x)) {
             $canvas_size_x = $this->canvas_size_x;
             $canvas_size_y = $this->canvas_size_y;
@@ -513,134 +453,28 @@ class Spiral extends Agent
         if (!isset($this->angle)) {
             $this->angle = 0;
         }
+        if ($n > 1) {
+            $init_angle = (-1 * pi()) / 2;
+            $angle = (2 * 3.14159) / $n;
+            //$x_pt =  230;
+            //$y_pt = 230;
 
-        //$size = 50;
-        $next_x_pt = 0;
-        $next_y_pt = $size_end;
-        $x_path_old = 0;
-        $y_path_old = 0;
-
-        if ($size_end > 1) {
-            //            $init_angle = (-1 * pi()) / 2;
-            //            $angle = (2 * 3.14159) / $n;
-
-            $coords = [];
-
-            //$a = 10;
-            //$b = 10;
-            //$size_start = 100;
-            //$size_end = 200;
-
-            foreach (range($size_start, $size_end, 1) as $i) {
-                //            foreach (range(0, $n, 1) as $i) {
-                //                if ($next_x_pt - 0 == 0) {
-                //                    $radial_angle = 0;
-                //                } else {
-                //                    $radial_angle = atan(($next_y_pt - 0) / ($next_x_pt - 0));
-                //                }
-
-                //if ($i == 0) {$radial_angle = $init_radians;}
-
-                //                $radial_angle = $radial_angle + $mu_radians;
-
+            foreach (range(0, $n - 1, 1) as $i) {
+                $x_pt = $size * cos($angle * $i + $init_angle);
+                $y_pt = $size * sin($angle * $i + $init_angle);
                 /*
-                $sign = 1;
-                if ($next_x_pt < 0 and $next_y_pt < 0) {
-                    $sign = +1;
-                }
-                if ($next_x_pt < 0 and $next_y_pt > 0) {
-                    $sign = +1;
-                }
-                if ($next_x_pt > 0 and $next_y_pt < 0) {
-                    $sign = -1;
-                }
-                if ($next_x_pt > 0 and $next_y_pt > 0) {
-                    $sign = -1;
-                }
+            imageline(
+                $this->image,
+                $center_x + $x_pt,
+                $center_y + $y_pt,
+                $center_x + $x_pt,
+                $center_y + $y_pt,
+                $this->black
+            );
 */
-                /*
-                imageline(
-                    $this->image,
-                    $center_x ,
-                    $center_y ,
-                    $center_x + 1000,
-                    $center_y + 1000,
-                    $this->black
-                );
-*/
+                $next_x_pt = $next_size * cos($angle * $i + $init_angle);
+                $next_y_pt = $next_size * sin($angle * $i + $init_angle);
 
-                $x_pt = $next_x_pt;
-                $y_pt = $next_y_pt;
-
-                //                $next_x_pt =
-                //                    $x_pt + $size * cos($radial_angle + $sign * (pi() / 2));
-                //                $next_y_pt =
-                //                    $y_pt + $size * sin($radial_angle + $sign * (pi() / 2));
-
-                $t = ($i / 20) * pi();
-                $next_x_pt = ($a + $b * $t) * cos($t);
-                $next_y_pt = ($a + $b * $t) * sin($t);
-
-                // Check for intersection on path
-                $x_path = 0;
-                $y_path = 0;
-                $intersection_point = true;
-
-                if (false) {
-                    foreach (array_reverse($coords) as $j => $coord) {
-                        if (!isset($coords[$j - 1])) {
-                            continue;
-                        }
-                        $x_path_old = array_reverse($coords)[$j - 1]['x'];
-                        $y_path_old = array_reverse($coords)[$j - 1]['y'];
-
-                        $x_path = $coord['x'];
-                        $y_path = $coord['y'];
-
-                        $intersection_point = $this->intersectLine(
-                            [
-                                ['x' => $x_path_old, 'y' => $y_path_old],
-                                ['x' => $x_path, 'y' => $y_path],
-                            ],
-                            [
-                                ['x' => 0, 'y' => 0],
-                                ['x' => $next_x_pt, 'y' => $next_y_pt],
-                            ]
-                        );
-
-                        // Plot the spiral path from saved coords
-                        /*
-                imageline(
-                    $this->image,
-                    $center_x + $x_path_old,
-                    $center_y + $y_path_old,
-                    $center_x + $x_path,
-                    $center_y + $y_path,
-                    $this->red
-                );
-*/
-
-                        /*
-                imageline(
-                    $this->image,
-                    $center_x + 0,
-                    $center_y + 0,
-                    $center_x + $next_x_pt,
-                    $center_y + $next_y_pt,
-                    $this->green
-                );
-*/
-
-                        if ($intersection_point !== true) {
-                            break;
-                        }
-                    }
-                }
-                //$inner_x_pt = 0;
-                //$inner_y_pt = 0;
-
-                $coords[] = ["x" => $next_x_pt, "y" => $next_y_pt];
-if ($i != $size_start) {
                 imageline(
                     $this->image,
                     $center_x + $next_x_pt,
@@ -649,79 +483,36 @@ if ($i != $size_start) {
                     $center_y + $y_pt,
                     $this->black
                 );
-}
-  
-              /*
-                if ($intersection_point !== true) {
-                    imageline(
-                        $this->image,
-                        $center_x + $intersection_point['x'],
-                        $center_y + $intersection_point['y'],
-                        $center_x + $next_x_pt,
-                        $center_y + $next_y_pt,
-                        $this->black
-                    );
-                } else {
-                    imageline(
-                        $this->image,
-                        $center_x + 0,
-                        $center_y + 0,
-                        $center_x + $next_x_pt,
-                        $center_y + $next_y_pt,
-                        $this->black
-                    );
-                }
-*/
             }
         }
-        return $this->image;
+/*
+        imagearc(
+            $this->image,
+            $center_x,
+            $center_y,
+            2 * $size,
+            2 * $size,
+            0,
+            360,
+            $this->black
+        );
+*/
     }
 
     public function get()
     {
-        $time_string = $this->thing->Read(["spiral", "refreshed_at"]);
+        $time_string = $this->thing->Read([
+            "spoke",
+            "refreshed_at",
+        ]);
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->Write(["spiral", "refreshed_at"], $time_string);
+            $this->thing->Write(
+                ["spoke", "refreshed_at"],
+                $time_string
+            );
         }
-    }
-
-    // https://rosettacode.org/wiki/Find_the_intersection_of_two_lines#Python
-    public function intersectLine($line1, $line2)
-    {
-        $Ax1 = $line1[0]['x'];
-        $Ay1 = $line1[0]['y'];
-        $Ax2 = $line1[1]['x'];
-        $Ay2 = $line1[1]['y'];
-
-        $Bx1 = $line2[0]['x'];
-        $By1 = $line2[0]['y'];
-        $Bx2 = $line2[1]['x'];
-        $By2 = $line2[1]['y'];
-
-        //    """ returns a (x, y) tuple or None if there is no intersection """
-        $d = ($By2 - $By1) * ($Ax2 - $Ax1) - ($Bx2 - $Bx1) * ($Ay2 - $Ay1);
-        if ($d != 0) {
-            $uA =
-                (($Bx2 - $Bx1) * ($Ay1 - $By1) -
-                    ($By2 - $By1) * ($Ax1 - $Bx1)) /
-                $d;
-            $uB =
-                (($Ax2 - $Ax1) * ($Ay1 - $By1) -
-                    ($Ay2 - $Ay1) * ($Ax1 - $Bx1)) /
-                $d;
-        } else {
-            return true;
-        }
-
-        if (!(0 <= $uA and $uA <= 1 and (0 <= $uB and $uB <= 1))) {
-            return true;
-        }
-        $x = $Ax1 + $uA * ($Ax2 - $Ax1);
-        $y = $Ay1 + $uA * ($Ay2 - $Ay1);
-
-        return ['x' => $x, 'y' => $y];
     }
 
     /**
@@ -730,12 +521,9 @@ if ($i != $size_start) {
      */
     public function makePDF()
     {
-        if (
-            $this->default_pdf_page_template === null or
-            !file_exists($this->default_pdf_page_template)
-        ) {
-            $this->thing_report['pdf'] = false;
-            return $this->thing_report['pdf'];
+        if ($this->default_pdf_page_template === null) {
+            $this->thing_report["pdf"] = false;
+            return $this->thing_report["pdf"];
         }
 
         $this->getWhatis($this->subject);
@@ -744,20 +532,20 @@ if ($i != $size_start) {
             $pdf = new Fpdi\Fpdi();
 
             $pdf->setSourceFile($this->default_pdf_page_template);
-            $pdf->SetFont('Helvetica', '', 10);
+            $pdf->SetFont("Helvetica", "", 10);
 
-            $tplidx1 = $pdf->importPage(1, '/MediaBox');
+            $tplidx1 = $pdf->importPage(1, "/MediaBox");
             $s = $pdf->getTemplatesize($tplidx1);
 
-            $pdf->addPage($s['orientation'], $s);
+            $pdf->addPage($s["orientation"], $s);
             $pdf->useTemplate($tplidx1);
 
-            $pdf->Image($this->PNG_embed, 7, 30, 200, 200, 'PNG');
+            $pdf->Image($this->PNG_embed, 7, 30, 200, 200, "PNG");
 
             $pdf->SetTextColor(0, 0, 0);
             $pdf->SetXY(1, 1);
 
-            $pdf->SetFont('Helvetica', '', 26);
+            $pdf->SetFont("Helvetica", "", 26);
             $this->txt = "" . $this->whatis . ""; // Pure uuid.
 
             $pdf->SetXY(140, 7);
@@ -775,22 +563,22 @@ if ($i != $size_start) {
                     $top_y,
                     -300,
                     -300,
-                    'PNG'
+                    "PNG"
                 );
             }
 
             // Page 2
             $tplidx2 = $pdf->importPage(2);
 
-            $pdf->addPage($s['orientation'], $s);
+            $pdf->addPage($s["orientation"], $s);
 
             $pdf->useTemplate($tplidx2, 0, 0);
             // Generate some content for page 2
 
-            $pdf->SetFont('Helvetica', '', 10);
+            $pdf->SetFont("Helvetica", "", 10);
             $this->txt = "" . $this->uuid . ""; // Pure uuid.
 
-            $link = $this->web_prefix . 'thing/' . $this->uuid . '/spiral';
+            $link = $this->web_prefix . "thing/" . $this->uuid . "/spoke";
 
             $pdf->SetTextColor(0, 0, 0);
 
@@ -798,7 +586,7 @@ if ($i != $size_start) {
 
             $line_height = 4;
 
-            $t = $this->thing_report['sms'];
+            $t = $this->thing_report["sms"];
 
             $t = str_replace(" | ", "\n", $t);
 
@@ -824,13 +612,13 @@ if ($i != $size_start) {
                 "Pre-printed text and graphics (c) 2020 " . $this->entity_name;
             $pdf->MultiCell(150, $line_height, $text, 0, "L");
 
-            $image = $pdf->Output('', 'S');
-            $this->thing_report['pdf'] = $image;
+            $image = $pdf->Output("", "S");
+            $this->thing_report["pdf"] = $image;
         } catch (Exception $e) {
-            $this->error .= 'Caught exception: ' . $e->getMessage() . ". ";
+            $this->error .= "Caught exception: " . $e->getMessage() . ". ";
         }
 
-        return $this->thing_report['pdf'];
+        return $this->thing_report["pdf"];
     }
 
     /**
@@ -846,37 +634,37 @@ if ($i != $size_start) {
         $t = $number_agent->extractNumbers($input);
 
         if ($t == []) {
-            $t = $this->default_spirals;
+            $t = $this->default_spokes;
         }
 
-        $this->spirals = $t;
+        $this->spokes = $t;
         $this->response .=
-            "Saw a request to make a spiral with these parameters: " .
-            implode(" ", $this->spirals) .
+            "Saw a request to make a spoke with these parameters: " .
+            implode(" ", $this->spokes) .
             ". ";
 
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'spiral') {
-                $this->getSpiral();
+            if ($input == "spoke") {
+                $this->getSpoke();
 
                 $this->size = 4;
-                $this->response .= "Made a spiral pattern. ";
+                $this->response .= "Made a spoke. Which will pass. ";
                 return;
             }
         }
 
         $input_agent = new Input($this->thing, "input");
-        $discriminators = ['spiral', 'spirals'];
-        $input_agent->aliases['spiral'] = ['wheel'];
-        $input_agent->aliases['spirals'] = ['wheels'];
+        $discriminators = ["wedge", "slice"];
+        $input_agent->aliases["wedge"] = ["pizza", "wheel", "wedge"];
+        $input_agent->aliases["slice"] = ["slice", "column", "columns"];
         $type = $input_agent->discriminateInput($input, $discriminators);
         if ($type != false) {
             $this->type = $type;
         }
 
-        $keywords = ["pattern"];
+        $keywords = ["uuid", "iterate", "pride", "flag", "hex"];
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
@@ -887,6 +675,6 @@ if ($i != $size_start) {
             }
         }
 
-        $this->getSpiral();
+        $this->getSpoke();
     }
 }
