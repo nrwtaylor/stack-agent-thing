@@ -461,42 +461,16 @@ class Spiral extends Agent
             $init_degrees = $this->spirals[3];
         }
 
-        $this->drawSpiral($size_start, $size_end, $a, $b, $init_degrees);
+        $this->drawSpiral($a, $b, $init_degrees);
     }
 
     public function drawSpiral(
-        $size_start = 100,
-        $size_end = 200,
         $a = 10,
         $b = 25,
-        $init_degrees = null
+        $init_degrees = null,
+        $end_degrees = null
     ) {
 
-        /*
-
-    t = i / 20 * pi
-    x = (1 + 5 * t) * cos(t)
-    y = (1 + 5 * t) * sin(t)
-    goto(x, y)
-
-*/
-
-        /*
-
-        if ($mu_degrees == null) {
-            $mu_degrees = 0;
-        }
-        $mu_radians = ($mu_degrees / 360) * 2 * pi();
-
-        if ($init_degrees == null) {
-            $init_degrees = 0;
-        }
-        $init_radians = ($init_degrees / 360) * 2 * pi();
-
-        if ($size == null) {
-            $size = $this->size;
-        }
-*/
         if (isset($this->canvas_size_x)) {
             $canvas_size_x = $this->canvas_size_x;
             $canvas_size_y = $this->canvas_size_y;
@@ -514,102 +488,54 @@ class Spiral extends Agent
             $this->angle = 0;
         }
 
-        //$size = 50;
         $next_x_pt = 0;
-        $next_y_pt = $size_end;
+        $next_y_pt = 0;
         $x_path_old = 0;
         $y_path_old = 0;
 
-        if ($size_end > 1) {
-            //            $init_angle = (-1 * pi()) / 2;
-            //            $angle = (2 * 3.14159) / $n;
 
-            $coords = [];
+        $coords = [];
 
-            //$a = 10;
-            //$b = 10;
-            //$size_start = 100;
-            //$size_end = 200;
+        $first_point = true;
 
-            foreach (range($size_start, $size_end, 1) as $i) {
-                //            foreach (range(0, $n, 1) as $i) {
-                //                if ($next_x_pt - 0 == 0) {
-                //                    $radial_angle = 0;
-                //                } else {
-                //                    $radial_angle = atan(($next_y_pt - 0) / ($next_x_pt - 0));
-                //                }
+        foreach (range($init_degrees, $end_degrees, 1) as $i) {
 
-                //if ($i == 0) {$radial_angle = $init_radians;}
+            $x_pt = $next_x_pt;
+            $y_pt = $next_y_pt;
 
-                //                $radial_angle = $radial_angle + $mu_radians;
+            $t = ($i * pi()) / 180;
+            $next_x_pt = ($a + $b * $t) * cos($t);
+            $next_y_pt = ($a + $b * $t) * sin($t);
 
-                /*
-                $sign = 1;
-                if ($next_x_pt < 0 and $next_y_pt < 0) {
-                    $sign = +1;
-                }
-                if ($next_x_pt < 0 and $next_y_pt > 0) {
-                    $sign = +1;
-                }
-                if ($next_x_pt > 0 and $next_y_pt < 0) {
-                    $sign = -1;
-                }
-                if ($next_x_pt > 0 and $next_y_pt > 0) {
-                    $sign = -1;
-                }
-*/
-                /*
-                imageline(
-                    $this->image,
-                    $center_x ,
-                    $center_y ,
-                    $center_x + 1000,
-                    $center_y + 1000,
-                    $this->black
-                );
-*/
+            // Check for intersection on path
+            $x_path = 0;
+            $y_path = 0;
+            $intersection_point = true;
 
-                $x_pt = $next_x_pt;
-                $y_pt = $next_y_pt;
+            if (false) {
+                foreach (array_reverse($coords) as $j => $coord) {
+                    if (!isset($coords[$j - 1])) {
+                        continue;
+                    }
+                    $x_path_old = array_reverse($coords)[$j - 1]['x'];
+                    $y_path_old = array_reverse($coords)[$j - 1]['y'];
 
-                //                $next_x_pt =
-                //                    $x_pt + $size * cos($radial_angle + $sign * (pi() / 2));
-                //                $next_y_pt =
-                //                    $y_pt + $size * sin($radial_angle + $sign * (pi() / 2));
+                    $x_path = $coord['x'];
+                    $y_path = $coord['y'];
 
-                $t = ($i / 20) * pi();
-                $next_x_pt = ($a + $b * $t) * cos($t);
-                $next_y_pt = ($a + $b * $t) * sin($t);
+                    $intersection_point = $this->intersectLine(
+                        [
+                            ['x' => $x_path_old, 'y' => $y_path_old],
+                            ['x' => $x_path, 'y' => $y_path],
+                        ],
+                        [
+                            ['x' => 0, 'y' => 0],
+                            ['x' => $next_x_pt, 'y' => $next_y_pt],
+                        ]
+                    );
 
-                // Check for intersection on path
-                $x_path = 0;
-                $y_path = 0;
-                $intersection_point = true;
-
-                if (false) {
-                    foreach (array_reverse($coords) as $j => $coord) {
-                        if (!isset($coords[$j - 1])) {
-                            continue;
-                        }
-                        $x_path_old = array_reverse($coords)[$j - 1]['x'];
-                        $y_path_old = array_reverse($coords)[$j - 1]['y'];
-
-                        $x_path = $coord['x'];
-                        $y_path = $coord['y'];
-
-                        $intersection_point = $this->intersectLine(
-                            [
-                                ['x' => $x_path_old, 'y' => $y_path_old],
-                                ['x' => $x_path, 'y' => $y_path],
-                            ],
-                            [
-                                ['x' => 0, 'y' => 0],
-                                ['x' => $next_x_pt, 'y' => $next_y_pt],
-                            ]
-                        );
-
-                        // Plot the spiral path from saved coords
-                        /*
+                    // Plot the spiral path from saved coords
+                    /*
                 imageline(
                     $this->image,
                     $center_x + $x_path_old,
@@ -620,7 +546,7 @@ class Spiral extends Agent
                 );
 */
 
-                        /*
+                    /*
                 imageline(
                     $this->image,
                     $center_x + 0,
@@ -631,16 +557,18 @@ class Spiral extends Agent
                 );
 */
 
-                        if ($intersection_point !== true) {
-                            break;
-                        }
+                    if ($intersection_point !== true) {
+                        break;
                     }
                 }
-                //$inner_x_pt = 0;
-                //$inner_y_pt = 0;
+            }
+            //$inner_x_pt = 0;
+            //$inner_y_pt = 0;
 
-                $coords[] = ["x" => $next_x_pt, "y" => $next_y_pt];
-if ($i != $size_start) {
+            $coords[] = ["x" => $next_x_pt, "y" => $next_y_pt];
+            //if ($i != $size_start) {
+
+            if ($first_point === false) {
                 imageline(
                     $this->image,
                     $center_x + $next_x_pt,
@@ -649,9 +577,11 @@ if ($i != $size_start) {
                     $center_y + $y_pt,
                     $this->black
                 );
-}
-  
-              /*
+            }
+            $first_point = false;
+            //}
+
+            /*
                 if ($intersection_point !== true) {
                     imageline(
                         $this->image,
@@ -672,7 +602,7 @@ if ($i != $size_start) {
                     );
                 }
 */
-            }
+            //          }
         }
         return $this->image;
     }
