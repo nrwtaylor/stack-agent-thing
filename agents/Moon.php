@@ -1,6 +1,6 @@
 <?php
 /**
- * Sun.php
+ * Moon.php
  *
  * @package default
  */
@@ -15,7 +15,7 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Sun extends Agent
+class Moon extends Agent
 {
     public $var = 'hello';
 
@@ -26,18 +26,23 @@ class Sun extends Agent
      */
     function init()
     {
-        $this->agent_name = "sun";
+        $this->agent_name = "moon";
         $this->test = "Development code";
 
         $this->thing_report["info"] =
-            "This provides awareness of sun position and solar time.";
-        $this->thing_report["help"] = "Try SUN. Then WEB.";
+            "This provides awareness of moon position.";
+        $this->thing_report["help"] = "Try MOON. Then WEB.";
 
-        $this->initSun();
+        $this->initMoon();
     }
 
-    function initSun()
+    function initMoon()
     {
+        //        $datum = new \DateTime();
+        //        $datum->setTimestamp(strtotime($this->current_time));
+
+        //$sc = new \AurorasLive\SunCalc($datum, 48.85, 2.35);
+
         // Solar observations are dependant on where you are.
         // Get the time.
         $this->time_agent = new Time($this->thing, "time");
@@ -48,17 +53,30 @@ class Sun extends Agent
         $this->longitude_agent = new Longitude($this->thing, "longitude");
         $this->latitude_agent = new Latitude($this->thing, "latitude");
 
-        $this->sun_resource = 'sun/sun.php';
-        if (isset($this->thing->container['api']['sun']['sun_resource'])) {
-            $this->sun_resource =
-                $this->thing->container['api']['sun']['sun_resource'];
+        $this->moon_resource = 'moon/moon.php';
+        if (isset($this->thing->container['api']['moon']['moon_resource'])) {
+            $this->moon_resource =
+                $this->thing->container['api']['moon']['moon_resource'];
         }
 
-        if (file_exists($this->resource_path . $this->sun_resource)) {
-            $sun_resource = require $this->resource_path . $this->sun_resource;
+        //        $datum = new \DateTime();
+        //        $datum->setTimestamp(strtotime($this->current_time));
+        //$t = $sc->getMoonPosition($datum);
+        //var_dump($t);
+
+        //$s = $sc->getMoonIllumination();
+        //var_dump($s);
+
+        //$m = $sc->getMoonTimes();
+        //var_dump($m);
+
+        $moon_resource = null;
+        if (file_exists($this->resource_path . $this->moon_resource)) {
+            $moon_resource = require $this->resource_path .
+                $this->moon_resource;
         }
 
-        $this->sun_resource = $sun_resource;
+        $this->moon_resource = $moon_resource;
     }
 
     function makePNG()
@@ -72,7 +90,10 @@ class Sun extends Agent
 
         $agent = new Png($this->thing, "png");
 
-        $jpgs = $this->sun_resource['jpgs'];
+        $jpgs = [];
+        if (isset($this->moon_resource['jpgs'])) {
+            $jpgs = $this->moon_resource['jpgs'];
+        }
 
         foreach ($jpgs as $jpg_link => $jpg_meta) {
             $image = imagecreatefromstring(file_get_contents($jpg_link));
@@ -98,7 +119,7 @@ class Sun extends Agent
         //return;
         $agent = new Png($this->thing, "png");
 
-        $jpgs = $this->sun_resource['jpgs'];
+        $jpgs = $this->moon_resource['jpgs'];
 
         foreach ($this->result as $index => $die_array) {
             reset($die_array);
@@ -139,8 +160,10 @@ class Sun extends Agent
             $day_time_text = "Below the horizon. ";
         }
 
-        $this->linksSun();
-        $this->node_list = ["sun" => ["sun", "moon", "venus"]];
+      
+
+        $this->linksMoon();
+        $this->node_list = ["moon" => ["earth", "sun", "venus"]];
         $m =
             strtoupper($this->agent_name) .
             " | " .
@@ -186,7 +209,7 @@ class Sun extends Agent
      * @param unknown $text (optional)
      * @return unknown
      */
-    public function textSun($text)
+    public function textMoon($text)
     {
         return "The Sun will rise tomorrow";
     }
@@ -198,7 +221,7 @@ class Sun extends Agent
         return $t;
     }
 
-    function doSun($text = null)
+    function doMoon($text = null)
     {
         // dev
         // TODO
@@ -238,9 +261,18 @@ to the solstices and the equinoxes.
         foreach (range(-500, 500, 1) as $n) {
             $epoch_time = strtotime($t) + $n * $day_seconds;
 
-            $arr = $this->predictSun($epoch_time);
+            $arr = $this->predictMoon($epoch_time);
+            //            $day_lengths[$n] = $arr['moonset'] - $arr['moonrise'];
 
-            $day_lengths[$n] = $arr['sunset'] - $arr['sunrise'];
+            //            $d = $arr['moonset']->diff($arr['moonrise']);
+            if ($arr['moonrise'] == null or $arr['moonset'] == null) {
+                continue;
+            }
+            $diffInSeconds =
+                $arr['moonset']->getTimestamp() -
+                $arr['moonrise']->getTimestamp();
+
+            $day_lengths[$n] = $diffInSeconds;
 
             if (isset($day_lengths[$n - 2]) and isset($day_lengths[$n - 1])) {
                 if (
@@ -253,7 +285,7 @@ to the solstices and the equinoxes.
                     $maximums[] = [
                         'description' => 'longest day',
                         'day' => $n - 1,
-                        'transit' => $this->dateEpoch($arr['transit']),
+                        //'transit' => $this->dateEpoch($arr['transit']),
                         'day_length' => $day_lengths[$n - 1],
                         'timestamp' => $this->dateEpoch(
                             strtotime($t) + ($n - 1) * $day_seconds
@@ -271,7 +303,7 @@ to the solstices and the equinoxes.
                     $minimums[] = [
                         'description' => 'shortest day',
                         'day' => $n - 1,
-                        'transit' => $this->dateEpoch($arr['transit']),
+                        //'transit' => $this->dateEpoch($arr['transit']),
                         'day_length' => $day_lengths[$n - 1],
                         'timestamp' => $this->dateEpoch(
                             strtotime($t) + ($n - 1) * $day_seconds
@@ -320,7 +352,7 @@ to the solstices and the equinoxes.
         $this->equal_night_days = $equal_night_days;
 
         //        $this->equinoxes = $equinoxes;
-        $this->sun_message = $this->response;
+        $this->moon_message = $this->response;
         $events = [];
         $events = array_merge($events, $this->longest_days);
         $events = array_merge($events, $this->shortest_days);
@@ -344,7 +376,7 @@ to the solstices and the equinoxes.
 
     // TODO: Refactor lmtTime
     // Consider
-    public function predictSun($text = null)
+    public function predictMoon($text = null)
     {
         // So. This function exists.
         // https://www.php.net/manual/en/function.date-sun-info.php
@@ -377,24 +409,34 @@ to the solstices and the equinoxes.
             }
         }
 
-        $solar_array = date_sun_info($timestamp_epoch, $latitude, $longitude);
+        ////
 
-        $transit_epoch = $solar_array['transit'];
+        $datum = new \DateTime();
+        //        $datum->setTimestamp(strtotime($this->current_time));
 
-        $offset = $timestamp_epoch - $transit_epoch; // seconds
+        $datum->setTimestamp($timestamp_epoch);
 
-        // So at the specific provided epoch time.
-        // Which was now.
-        // Noon offset in decimal hours.
-        $x = 12 * 60 * 60 + $offset;
+        $sc = new \AurorasLive\SunCalc($datum, $latitude, $longitude);
 
-        // Use gmdate to get an hour minute seconds text stamp.
-        $t = gmdate("H:i:s", $x); // How many H:i:s solar noon was ago.
-        $solar_array['solar_clock_time'] = $t;
-        return $solar_array;
+        // Solar observations are dependant on where you are.
+        // Get the time.
+        $t = $sc->getMoonPosition($datum);
+        //var_dump($t);
+
+        $moon_phase = $sc->getMoonIllumination();
+        //var_dump($s);
+
+        $moon_rises = $sc->getMoonTimes();
+        //var_dump($m);
+
+        $moon_array['moonrise'] = $moon_rises['moonrise'];
+        $moon_array['moonset'] = $moon_rises['moonset'];
+        $moon_array['phase'] = $moon_phase['phase'];
+
+        return $moon_array;
     }
 
-    public function linksSun()
+    public function linksMoon()
     {
     }
 
@@ -418,36 +460,41 @@ to the solstices and the equinoxes.
                 "<br>";
         }
 
-        $this->sun_resource['jpgs'][0]['alt_text'] = 'test';
-        $alt_text = $this->sun_resource['jpgs'][0]['alt_text'];
+        $this->moon_resource['jpgs'][0]['alt_text'] = 'test';
+        $alt_text = $this->moon_resource['jpgs'][0]['alt_text'];
         $width = 100;
         $html_width = 'width=' . $width . ' ';
         $html_width = "";
 
-        $image_string = $this->thing_report['png'];
-        $html =
-            '<img src="data:image/png;base64,' .
-            $image_string .
-            '" ' .
-            $html_width .
-            '
+        if (isset($this->thing_report['png'])) {
+            $image_string = $this->thing_report['png'];
+            $html =
+                '<img src="data:image/png;base64,' .
+                $image_string .
+                '" ' .
+                $html_width .
+                '
                 alt="' .
-            $alt_text .
-            '" longdesc="' .
-            $this->web_prefix .
-            'thing/' .
-            $this->uuid .
-            '/' .
-            $this->agent_name .
-            '.txt" >';
+                $alt_text .
+                '" longdesc="' .
+                $this->web_prefix .
+                'thing/' .
+                $this->uuid .
+                '/' .
+                $this->agent_name .
+                '.txt" >';
 
-        $web .= $html;
+            $web .= $html;
+        }
         //$link_agent = new Link($this->thing, "link");
-        foreach ($this->sun_resource['urls'] as $key => $value) {
-            $link = '<a href="' . $key . '">';
-            $link .= $value['text'];
-            $link .= "</a>";
-            $web .= $link . "<br>";
+
+        if (isset($this->moon_resource['urls'])) {
+            foreach ($this->moon_resource['urls'] as $key => $value) {
+                $link = '<a href="' . $key . '">';
+                $link .= $value['text'];
+                $link .= "</a>";
+                $web .= $link . "<br>";
+            }
         }
 
         $this->thing_report['web'] = $web;
@@ -459,12 +506,12 @@ to the solstices and the equinoxes.
      */
     public function readSubject()
     {
-        if ($this->agent_input == "sun") {
+        if ($this->agent_input == "moon") {
             return;
         }
-        $this->filtered_input = $this->assert($this->input, "sun");
+        $this->filtered_input = $this->assert($this->input, "moon");
 
-        $this->doSun();
+        $this->doMoon();
         return false;
     }
 }

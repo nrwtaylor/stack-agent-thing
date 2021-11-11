@@ -2954,6 +2954,7 @@ if ($pid == -1) {
 
         $input = trim($input);
         $this->input = $input;
+
         // Check if it is a command (starts with s slash)
         if (strtolower(substr($input, 0, 2)) != "s/") {
             // Okay here check for input

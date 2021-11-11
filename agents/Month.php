@@ -316,7 +316,7 @@ class Month extends Agent
         $link = $this->web_prefix . "thing/" . $this->uuid . "/month.pdf";
         $this->node_list = ["month" => ["month"]];
         $web = "";
-
+$web .= $this->input;
         $web .= $this->formatMonth($this->datestringMonth($this->dateline));
         $web .= '<a href="' . $link . '">';
         $web .= $this->html_image;
@@ -1106,6 +1106,7 @@ class Month extends Agent
         $this->type = "wedge";
 
         $input = $this->assert($this->input, "month", false);
+
         if ($input == "") {
             return;
         }
