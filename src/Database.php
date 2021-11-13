@@ -101,11 +101,13 @@ class Database
         $this->stacks = [
             "mysql" => ["infrastructure" => "mysql"],
             "mongo" => ["infrastructure" => "mongo"],
+            "memcached" => ["infrastructure" => "memcached"],
             "memory" => ["infrastructure" => "memory"],
         ];
         if (isset($settings["settings"]["stacks"])) {
             $this->stacks = $settings["settings"]["stacks"];
         }
+
         $this->web_prefix = $settings["settings"]["stack"]["web_prefix"];
         $this->state = $settings["settings"]["stack"]["state"];
 
@@ -389,6 +391,13 @@ class Database
                     $string_text
                 );
             }
+        if ($active_service_name == "memcached") {
+
+            $key = $this->stack_handlers["memcached"]->writeField($field_text, $string_text);
+            //if ($key === true) {return true;}
+        }
+
+
             /*
         if ($active_service == "mongo") {
             $key = $this->stack_handlers["mongo"]->setMongo($key, $value);

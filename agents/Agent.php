@@ -1097,31 +1097,9 @@ public function __set($name, $value) {
         }
     }
 
-    public function getMemcached()
-    {
-        if (isset($this->mem_cached)) {
-            return;
-        }
-
-        // Null?
-        // $this->mem_cached = null;
-
-        try {
-            $this->mem_cached = new \Memcached(); //point 2.
-            $this->mem_cached->addServer("127.0.0.1", 11211);
-        } catch (\Throwable $t) {
-            // Failto
-            $this->mem_cached = new Memory($this->thing, "memory");
-            //restore_error_handler();
-            $this->thing->log(
-                "caught memcached throwable. made memory",
-                "WARNING"
-            );
-            return;
-        } catch (\Error $ex) {
-            $this->thing->log("caught memcached error.", "WARNING");
-            return true;
-        }
+    public function memcachedAgent() {
+       $t = new Memcached($this->thing, "memcached");
+       $this->mem_cached = $t->mem_cached;
     }
 
     /**

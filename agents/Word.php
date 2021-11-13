@@ -32,7 +32,7 @@ class Word extends Agent
 
         $this->thing_report["help"] =
             "Screens against a list of over four hundred thousand words.";
-        $this->getMemcached();
+        $this->memcachedAgent();
         $this->initWords();
     }
 
