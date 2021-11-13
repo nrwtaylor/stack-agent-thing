@@ -478,13 +478,12 @@ class Database
         }
 
         foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
-            if ($stack_descriptor["response"] === true) {
+            if ( (isset($stack_descriptor['response'])) and ($stack_descriptor["response"] === true)) {
                 return true;
             }
         }
 
         return false;
-        //return $response;
     }
 
     /**
