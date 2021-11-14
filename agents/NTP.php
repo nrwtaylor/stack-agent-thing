@@ -31,15 +31,15 @@ class NTP extends Agent
      * @return unknown
      */
 
-    public function respond()
+    public function respondResponse()
     {
-        $this->thing->flagGreen();
+       // $this->thing->flagGreen();
 
-        $to = $this->thing->from;
-        $from = "ntp";
+       // $to = $this->thing->from;
+       // $from = "ntp";
 
-        $this->makeSMS();
-        $this->makeChoices();
+       // $this->makeSMS();
+       // $this->makeChoices();
 
         //$this->thing_report["info"] = "This is a ntp in a park.";
         //$this->thing_report["help"] = "This is finding picnics. And getting your friends to join you. Text RANGER.";

@@ -82,9 +82,6 @@ class Month extends Agent
         $date = date_create_from_format("m", $text);
         $d = strtoupper(date_format($date, "F"));
 
-        //$t = $this->current_time;
-        //$d = strtoupper(date('Y M d D H:i', $t))
-
         return $d;
     }
 
@@ -93,8 +90,14 @@ class Month extends Agent
         $date = date_create_from_format("m", $text);
         $d = strtoupper(date_format($date, "t"));
 
-        //$t = $this->current_time;
-        //$d = strtoupper(date('Y M d D H:i', $t))
+        return $d;
+    }
+
+    public function firstdayMonth($text = null)
+    {
+        $text = "01-" . $text;
+        $date = date_create_from_format("d-m-Y", $text);
+        $d = strtoupper(date_format($date, "l"));
 
         return $d;
     }
@@ -316,7 +319,7 @@ class Month extends Agent
         $link = $this->web_prefix . "thing/" . $this->uuid . "/month.pdf";
         $this->node_list = ["month" => ["month"]];
         $web = "";
-$web .= $this->input;
+        //$web .= $this->input;
         $web .= $this->formatMonth($this->datestringMonth($this->dateline));
         $web .= '<a href="' . $link . '">';
         $web .= $this->html_image;
@@ -617,10 +620,29 @@ $web .= $this->input;
             $this->datestringMonth($this->dateline)
         );
 
+        $year = $this->dateline['year'];
+
+        if ($year === false) {
+            $oldDateUnix = strtotime($this->current_time);
+            $year = date("Y", $oldDateUnix);
+        }
+        $first_day = $this->firstdayMonth(
+            $this->datestringMonth($this->dateline) . "-" . $year
+        );
+
+        $first_day_of_week_number = date('N', strtotime($first_day));
+
+        // How many spirals to ignore before starting.
+        // Creates hole in middle.
         $start_loops = 6;
 
-        $init = $start_loops * 360;
-        $init = $start_loops * 360 - 90;
+        // Where in the spiral to start.
+        //        $init = $start_loops * 360;
+        $init =
+            $start_loops * 360 -
+            90 +
+            (($first_day_of_week_number - 1) / 7) * 360;
+        //      $init = $start_loops * 360 - 90;
 
         $image = $spiral_agent->drawSpiral(
             10,
@@ -1107,6 +1129,18 @@ $web .= $this->input;
 
         $input = $this->assert($this->input, "month", false);
 
+        // Default dateline
+        $timestamp = $this->zuluStamp($this->current_time);
+
+        $dateline = $this->extractDateline($timestamp);
+
+        $this->dateline = $dateline;
+
+        $this->project_time = strtotime($this->current_time);
+        $this->working_datum = $this->time_agent->datumTime(
+            $this->current_time
+        );
+
         if ($input == "") {
             return;
         }
@@ -1131,6 +1165,7 @@ $web .= $this->input;
 
             $this->working_datum = $this->time_agent->datumTime($date_string);
             $this->dateline = $dateline;
+            /*
         } else {
             $timestamp = $this->zuluStamp($this->current_time);
 
@@ -1142,6 +1177,7 @@ $web .= $this->input;
             $this->working_datum = $this->time_agent->datumTime(
                 $this->current_time
             );
+*/
         }
 
         $this->months = $this->extractMonths($input);

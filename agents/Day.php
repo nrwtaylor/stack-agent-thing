@@ -1062,75 +1062,14 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
             $canvas_size_x = 164;
             $canvas_size_y = 164;
         }
+
+
         $this->image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
-        //$this->image = imagecreatetruecolor(164, 164);
 
-        $this->white = imagecolorallocate($this->image, 255, 255, 255);
-        $this->black = imagecolorallocate($this->image, 0, 0, 0);
-        $this->red = imagecolorallocate($this->image, 255, 0, 0);
-        $this->green = imagecolorallocate($this->image, 0, 255, 0);
-        $this->grey = imagecolorallocate($this->image, 128, 128, 128);
-
-        // For Vancouver Pride 2018
-
-        // https://en.wikipedia.org/wiki/Rainbow_flag
-        // https://en.wikipedia.org/wiki/Rainbow_flag_(LGBT_movement)
-        // https://www.schemecolor.com/lgbt-flag-colors.php
-
-        $this->electric_red = imagecolorallocate($this->image, 231, 0, 0);
-        $this->dark_orange = imagecolorallocate($this->image, 255, 140, 0);
-        $this->canary_yellow = imagecolorallocate($this->image, 255, 239, 0);
-        $this->la_salle_green = imagecolorallocate($this->image, 0, 129, 31);
-        $this->blue = imagecolorallocate($this->image, 0, 68, 255);
-        $this->patriarch = imagecolorallocate($this->image, 118, 0, 137);
-
-        $this->flag_red = imagecolorallocate($this->image, 231, 0, 0);
-        $this->flag_orange = imagecolorallocate($this->image, 255, 140, 0);
-        $this->flag_yellow = imagecolorallocate($this->image, 255, 239, 0);
-        $this->flag_green = imagecolorallocate($this->image, 0, 129, 31);
-        $this->flag_blue = imagecolorallocate($this->image, 0, 68, 255);
-        // Indigo https://www.rapidtables.com/web/color/purple-color.html
-        $this->flag_indigo = imagecolorallocate($this->image, 75, 0, 130);
-        $this->flag_violet = imagecolorallocate($this->image, 118, 0, 137);
-        $this->flag_grey = $this->grey;
-
-        $this->indigo = imagecolorallocate($this->image, 75, 0, 130);
-
-        $this->ice_green = imagecolorallocate($this->image, 126, 217, 195);
-        $this->blue_ice = imagecolorallocate($this->image, 111, 122, 159);
-        $this->artic_ice = imagecolorallocate($this->image, 195, 203, 217);
-        $this->ice_cold = imagecolorallocate($this->image, 165, 242, 243);
-        $this->white_ice = imagecolorallocate($this->image, 225, 231, 228);
-
-        $this->ice_color_palette = [
-            $this->ice_green,
-            $this->blue_ice,
-            $this->artic_ice,
-            $this->ice_cold,
-            $this->white_ice,
-        ];
-
-        // Patriarch as a color name.
-        // https://www.schemecolor.com/lgbt-flag-colors.php
-        $this->color_palette = [
-            $this->electric_red,
-            $this->dark_orange,
-            $this->canary_yellow,
-            $this->la_salle_green,
-            $this->blue,
-            $this->patriarch,
-        ];
-
-        $this->flag_color_palette = [
-            $this->flag_red,
-            $this->flag_orange,
-            $this->flag_yellow,
-            $this->flag_green,
-            $this->flag_blue,
-            $this->flag_indigo,
-            $this->flag_violet,
-            $this->flag_grey,
-        ];
+// dev
+$this->colours_agent = new Colours($this->thing, "colours");
+$this->colours_agent->image = $this->image;
+$this->colours_agent->getColours();
 
         imagefilledrectangle(
             $this->image,
@@ -1138,7 +1077,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
             0,
             $canvas_size_x,
             $canvas_size_y,
-            $this->white
+            $this->colours_agent->white
         );
 
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
@@ -1267,7 +1206,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
                 0,
                 $width_slice * $i,
                 $canvas_size_y,
-                $this->black
+                $this->colours_agent->black
             );
         }
     }
@@ -1282,7 +1221,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         $colour = null
     ) {
         if ($colour == null) {
-            $colour = $this->black;
+            $colour = $this->colours_agent->black;
         }
         // angle in degrees
         //imagesetthickness($this->image, 5);
@@ -1554,19 +1493,19 @@ Now draw the twilight.
 
             if (strpos($period_name, "sunrise") !== false) {
                 $arc_day[] = $angle;
-                $colour = $this->blue;
+                $colour = $this->colours_agent->blue;
                 imagesetthickness($this->image, 7);
             }
 
             if (strpos($period_name, "sunset") !== false) {
                 $arc_day[] = $angle;
-                $colour = $this->blue;
+                $colour = $this->colours_agent->blue;
                 imagesetthickness($this->image, 7);
             }
 
             $offset = 0;
             $this->drawTick($text, $angle, $radius, $length, $offset, $colour);
-            $colour = $this->black;
+            $colour = $this->colours_agent->black;
         }
 
         imagesetthickness($this->image, 3);
@@ -1579,7 +1518,7 @@ Now draw the twilight.
             2 * $size,
             0,
             360,
-            $this->black
+            $this->colours_agent->black
         );
 
         imagesetthickness($this->image, 7);
@@ -1593,7 +1532,7 @@ Now draw the twilight.
                 2 * $size,
                 $arc[1] + ($this->init_angle * 180) / pi(),
                 $arc[0] + ($this->init_angle * 180) / pi(),
-                $this->black
+                $this->colours_agent->black
             );
         }
         imagearc(
@@ -1604,7 +1543,7 @@ Now draw the twilight.
             2 * $size,
             $arc_day[0] + ($this->init_angle * 180) / pi(),
             $arc_day[1] + ($this->init_angle * 180) / pi(),
-            $this->blue
+            $this->colours_agent->blue
         );
     }
 
@@ -1629,7 +1568,7 @@ Now draw the twilight.
         $colour = null
     ) {
         if ($colour == null) {
-            $colour = $this->black;
+            $colour = $this->colours_agent->black;
         }
         // angle in degrees
         //imagesetthickness($this->image, 5);

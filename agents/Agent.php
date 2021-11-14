@@ -821,6 +821,8 @@ public function __set($name, $value) {
             }
         }
 
+$this->makeThingreport();
+
         if (
             strtolower($this->agent_name) == "agent" and
             isset($this->thing_report)
