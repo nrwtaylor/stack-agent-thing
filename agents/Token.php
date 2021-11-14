@@ -461,12 +461,17 @@ class Token extends Agent
         $this->thing_report["sms"] = $sms;
     }
 
+    /*
+        Build an array with the different subsets of tokens within the token
+        string.
+    */
+
     public function subsetsTokens($tokens)
     {
         $number_of_tokens = count($tokens);
         $subsets = [];
-        foreach (range(0, $number_of_tokens) as $start => $values) {
-            foreach (range(0, $number_of_tokens) as $end => $valuee) {
+        foreach (range(0, $number_of_tokens - 1) as $start => $values) {
+            foreach (range(0, $number_of_tokens - 1) as $end => $valuee) {
                 if ($start > $end) {
                     continue;
                 }
@@ -494,7 +499,6 @@ class Token extends Agent
         });
         // Sort so longest string to shortest string
         $subsets = array_reverse($subsets);
-
         return $subsets;
     }
 
