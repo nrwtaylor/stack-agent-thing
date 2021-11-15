@@ -34,7 +34,6 @@ class Database
     //public function init()
     function __construct($thing = null, $agent_input = null)
     {
-
         $uuid = $agent_input["uuid"];
         $nom_from = $agent_input["from"];
         $to = isset($agent_input["to"]) ? $agent_input["to"] : null;
@@ -248,6 +247,7 @@ class Database
             "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
 
         try {
+            //$handler = new $agent_namespace_name($this->thing, $this->agent_input);
             $handler = new $agent_namespace_name(null, $this->agent_input);
 
             $handler->uuid = $this->uuid;
@@ -391,12 +391,13 @@ class Database
                     $string_text
                 );
             }
-        if ($active_service_name == "memcached") {
-
-            $key = $this->stack_handlers["memcached"]->writeField($field_text, $string_text);
-            //if ($key === true) {return true;}
-        }
-
+            if ($active_service_name == "memcached") {
+                $key = $this->stack_handlers["memcached"]->writeField(
+                    $field_text,
+                    $string_text
+                );
+                //if ($key === true) {return true;}
+            }
 
             /*
         if ($active_service == "mongo") {
@@ -478,7 +479,10 @@ class Database
         }
 
         foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
-            if ( (isset($stack_descriptor['response'])) and ($stack_descriptor["response"] === true)) {
+            if (
+                isset($stack_descriptor['response']) and
+                $stack_descriptor["response"] === true
+            ) {
                 return true;
             }
         }
@@ -503,14 +507,24 @@ class Database
         foreach ($this->available_stacks as $stack_name => $stack) {
             switch ($stack["infrastructure"]) {
                 case "mysql":
-                    $thing = $this->stack_handlers[
+                    $thing['mysql'] = $this->stack_handlers[
                         $stack["infrastructure"]
                     ]->getMysql();
 
-                    if ($thing !== false and $thing !== true) {
-                        break 2;
-                    }
+                    //          if ($thing['mysql'] !== false and $thing['mysql'] !== true) {
+                    //              break 2;
+                    //          }
+                    break;
+                case "memcached":
+                    $thing['memcached'] = $this->stack_handlers[
+                        $stack["infrastructure"]
+                    ]->getMemcached($this->uuid);
+                    break;
+                //                    if ($thing !== false and $thing !== true) {
+                //                        break 2;
+                //                   }
 
+                /*
                 case "mongo":
                     break;
                 case "memory":
@@ -521,7 +535,7 @@ class Database
                     if ($thing !== false and $thing !== true) {
                         break 2;
                     }
-
+*/
                 /*
                     if ($thing !== false) {
                         //$thing = new Thing(null);
@@ -538,6 +552,10 @@ class Database
                 //break 2;
             }
         }
+
+        // dev decide which thing is most authorative.
+        // merge?
+        $thing = $thing['mysql'];
 
         $thingreport = [
             "thing" => $thing,
@@ -638,13 +656,15 @@ class Database
         return $thing_report;
     }
 
-function isValidMd5($md5 ='') {
-  return strlen($md5) == 32 && ctype_xdigit($md5);
-}
+    function isValidMd5($md5 = '')
+    {
+        return strlen($md5) == 32 && ctype_xdigit($md5);
+    }
 
-function isValidSha256($sha256 ='') {
-  return strlen($sha256) == 64 && ctype_xdigit($sha256);
-}
+    function isValidSha256($sha256 = '')
+    {
+        return strlen($sha256) == 64 && ctype_xdigit($sha256);
+    }
 
     /**
      *
@@ -658,7 +678,6 @@ function isValidSha256($sha256 ='') {
         $max = null,
         $string_in_string = false
     ) {
-
         //        $thing = false;
         /*
         $thing_report = [];
@@ -690,10 +709,10 @@ return $thing_report;
         $max = (int) $max;
         $user_search = $this->from;
 
-$hash_user_search = $user_search;
-if (!($this->isValidSha256($user_search))) {
-        $hash_user_search = hash($this->hash_algorithm, $user_search);
-}
+        $hash_user_search = $user_search;
+        if (!$this->isValidSha256($user_search)) {
+            $hash_user_search = hash($this->hash_algorithm, $user_search);
+        }
         // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
         if ($string_in_string === true) {
             $value = "%$value%"; // Value to search for in Variables
@@ -705,7 +724,7 @@ if (!($this->isValidSha256($user_search))) {
             //                "SELECT * FROM stack FORCE INDEX (created_at_nom_from) WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
             //            $query =
-              //              "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+            //              "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
             if ($this->hash_state == "off") {
                 $query =

@@ -172,12 +172,16 @@ class Json
         $this->write();
     }
 
+    public function jsontoarrayJson($json_data = null) {
+       return $this->jsontoArray($json_data);
+    }
+
     /**
      *
      * @param unknown $json_data (optional)
      * @return unknown
      */
-    function jsontoArray($json_data = null)
+    public function jsontoArray($json_data = null)
     {
         if ($json_data == null) {
             $json_data = $this->json_data;

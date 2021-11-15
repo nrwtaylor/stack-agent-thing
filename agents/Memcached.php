@@ -27,15 +27,59 @@ class Memcached extends Agent
         $this->thing_report["sms"] = $this->response;
     }
 
-// dev
-    public function writeField($field_text, $string_text) {
-      // $this->mem_cached->get($this->uuid);
-      // $this->mem_cached->set($this->uuid, "merp");
+    // dev
+    public function writeField($field_text, $string_json)
+    {
+        // Hmmm
+        // Ugly but do this for now.
+        $j = new Json($this->uuid);
+        $j->jsontoarrayJson($string_json);
+        $data = $j->jsontoarrayJson($string_json);
+
+        $data = ['variables' => $data];
+
+        // dev develop associations.
+        //$associations = null;
+        if (isset($this->associations)) {
+            $data['associations'] = $this->associations;
+        }
+
+        if (isset($this->uuid)) {
+            $data['uuid'] = $this->uuid;
+        }
+
+        if (isset($this->from)) {
+            $data['nom_from'] = $this->from;
+        }
+
+        if (isset($this->to)) {
+            $data['nom_to'] = $this->to;
+        }
+
+        if (isset($this->subject)) {
+            $data['task'] = $this->subject;
+        }
+
+        $existing = $this->mem_cached->get($this->uuid);
+        $d = $data;
+        if (is_array($existing)) {
+            $d = array_replace_recursive($existing, $data);
+        }
+
+        // In development
+
+        $this->mem_cached->set($this->uuid, $d);
+    }
+
+    public function getMemcached($uuid)
+    {
+        $t = $this->mem_cached->get($uuid);
+        //var_dump($t);
+        return $t;
     }
 
     public function initMemcached()
     {
-
         if (isset($this->mem_cached)) {
             return;
         }

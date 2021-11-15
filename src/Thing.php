@@ -901,6 +901,7 @@ if (isset($this->db)) {
             $this->to = $thing->nom_to;
             $this->from = $thing->nom_from;
             $this->subject = $thing->task;
+            $this->associations = $thing->associations;
         }
 
         $this->thing = $thing;
