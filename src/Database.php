@@ -399,12 +399,12 @@ class Database
                 //if ($key === true) {return true;}
             }
 
-            /*
+            
         if ($active_service == "mongo") {
-            $key = $this->stack_handlers["mongo"]->setMongo($key, $value);
-            if ($key === true) {return true;}
+            $key = $this->stack_handlers["mongo"]->writeMongo($field_text, $string_text);
+            //if ($key === true) {return true;}
         }
-
+/*
         if ($active_service == "memory") {
             $memory = $this->stack_handlers["memory"]->set($key, $value);
 
@@ -476,6 +476,13 @@ class Database
                 $response = $this->stack_handler->createMemory($subject, $to);
                 $this->available_stacks["memory"]["response"] = $response;
             }
+
+            if ($stack_infrastructure == "mongo") {
+                $response = $this->stack_handler->createMongo($subject, $to);
+                $this->available_stacks["memory"]["response"] = $response;
+            }
+
+
         }
 
         foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
@@ -520,6 +527,14 @@ class Database
                         $stack["infrastructure"]
                     ]->getMemcached($this->uuid);
                     break;
+
+                case "mongo":
+                    $thing['mongo'] = $this->stack_handlers[
+                        $stack["infrastructure"]
+                    ]->getMongo($this->uuid);
+                    break;
+
+
                 //                    if ($thing !== false and $thing !== true) {
                 //                        break 2;
                 //                   }
@@ -1272,8 +1287,6 @@ return $thing_report;
         // This will need to be a public Stack variable.
 
         // Double-UU intentionally.
-
-        return;
     }
 
     /**

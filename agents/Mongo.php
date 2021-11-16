@@ -9,12 +9,51 @@ class Mongo extends Agent
 
     function init()
     {
+        $this->initMongo();
+    }
+
+    public function initMongo()
+    {
+        $this->mongo_test_flag = 'off';
         $path =
             "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
-        $client = new \MongoDB\Client($path);
 
-        $db = $client->test;
-        $this->collection = $client->stack_db->things;
+        try {
+            $client = new \MongoDB\Client($path);
+            $this->db = $client;
+            $this->collection = $this->db->stack_db->things;
+        } catch (\Throwable $t) {
+            $this->error = 'Could not connect to MySQL database';
+            $this->errorMongo($t->getMessage());
+            $this->collection = true;
+        } catch (\Error $ex) {
+            $this->errorMongo($ex->getMessage());
+
+            $this->error = 'Could not connect to MySQL database';
+            $this->collection = true;
+        }
+    }
+
+    public function errorMongo($text = null)
+    {
+        if ($text == null) {
+            return;
+        }
+        if (!isset($this->response)) {
+            $this->response = "";
+        }
+        $this->response .= $text . " ";
+    }
+
+    public function testMongo()
+    {
+        if ($this->mongo_test_flag != 'on') {
+            return;
+        }
+        if ($this->db === true) {
+            $this->response .= "Mongo not available. No test performed. ";
+            return;
+        }
 
         $uuid = "5282cdc9-8252-4bd6-9d03-e1e0c0cec927";
 
@@ -26,10 +65,11 @@ class Mongo extends Agent
             "settings" => null,
             "variables" => null,
         ];
-
         $result = $this->collection->insertOne($thing);
 
-if (!isset($this->response)) {$this->response = "";}
+        if (!isset($this->response)) {
+            $this->response = "";
+        }
         $this->response .= "Inserted with Object ID '{$result->getInsertedId()}'. ";
 
         $value = $this->getMongo($uuid);
@@ -39,7 +79,6 @@ if (!isset($this->response)) {$this->response = "";}
         $condition = ["_id" => $uuid];
 
         // Dev review how this works.
-
         $result = $this->setMongo($uuid, [$thing]);
 
         $result = $this->setMongo(null, [$thing]);
@@ -56,6 +95,51 @@ if (!isset($this->response)) {$this->response = "";}
         $this->forgetMongo("609b5994088b47714d648172");
     }
 
+    // dev
+    public function writeMongo($field_text, $string_json)
+    {
+        // Hmmm
+        // Ugly but do this for now.
+        $j = new Json($this->uuid);
+        $j->jsontoarrayJson($string_json);
+        $data = $j->jsontoarrayJson($string_json);
+
+        $data = ['variables' => $data];
+
+        // dev develop associations.
+        //$associations = null;
+        if (isset($this->associations)) {
+            $data['associations'] = $this->associations;
+        }
+
+        if (isset($this->uuid)) {
+            $data['uuid'] = $this->uuid;
+        }
+
+        if (isset($this->from)) {
+            $data['nom_from'] = $this->from;
+        }
+
+        if (isset($this->to)) {
+            $data['nom_to'] = $this->to;
+        }
+
+        if (isset($this->subject)) {
+            $data['task'] = $this->subject;
+        }
+
+        $existing = $this->db->get($this->uuid);
+        $d = $data;
+        if (is_array($existing)) {
+            $d = array_replace_recursive($existing, $data);
+        }
+
+        // In development
+
+        //$this->db->set($this->uuid, $d);
+        $this->setMongo($this->uuid, $d);
+    }
+
     function run()
     {
     }
@@ -68,10 +152,26 @@ if (!isset($this->response)) {$this->response = "";}
     public function getMongo($text = null)
     {
         $result = $this->collection->findOne(["_id" => $text]);
+
+        //        $result = $this->collection->findOne(["_id" => $text]);
         if ($result == null) {
             return false;
         }
         return iterator_to_array($result);
+    }
+
+    public function createMongo($subject, $to)
+    {
+        if (!isset($this->response)) {
+            $this->response = "";
+        }
+        $this->response .= "Created a Mongo Thing. ";
+
+        return $this->setMemory(null, [
+            'from' => $to,
+            'to' => 'memory',
+            'task' => $subject,
+        ]);
     }
 
     // use memcache model for set.
@@ -175,5 +275,10 @@ if (!isset($this->response)) {$this->response = "";}
 
     public function readSubject()
     {
+        $input = $this->assert($this->input);
+        if ($input == 'test') {
+            $this->mongo_test_flag = 'on';
+            $this->testMongo();
+        }
     }
 }
