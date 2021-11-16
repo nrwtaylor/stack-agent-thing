@@ -99,26 +99,6 @@ class Json
 
     /**
      *
-     * @param unknown $time (optional)
-     * @return unknown
-     */
-    function deprecate_microtime($time = null)
-    {
-        if ($time == null) {
-            $time = time();
-        }
-        //$this->time = gmdate("Y-m-d\TH:i:s.u\Z", $time);
-
-        list($usec, $sec) = explode(' ', microtime());
-        //print date('Y-m-d H:i:s', $sec) . $usec;
-
-        $this->microtime = date('Y-m-d H:i:s', $sec) . " " . $usec;
-
-        return $this->microtime;
-    }
-
-    /**
-     *
      * @return unknown
      */
     function isUsed()

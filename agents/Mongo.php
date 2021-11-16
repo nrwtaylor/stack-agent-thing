@@ -9,6 +9,19 @@ class Mongo extends Agent
 
     function init()
     {
+
+        $this->hash_state = "off";
+        if (isset($settings["settings"]["stack"]["hash"])) {
+            $this->hash_state = $settings["settings"]["stack"]["hash"];
+        }
+
+        $this->hash_algorithm = "sha256";
+        if (isset($settings["settings"]["stack"]["hash"])) {
+            $this->hash_algorithm =
+                $settings["settings"]["stack"]["hash_algorithm"];
+        }
+
+
         $this->initMongo();
     }
 
@@ -45,6 +58,20 @@ class Mongo extends Agent
         $this->response .= $text . " ";
     }
 
+// Useful later for matching in variables
+// https://groups.google.com/g/mongodb-user/c/lv8XbtAkS4w?pli=1
+
+    public function priorMongo() {
+$nom_from = $this->from;
+// $this->hash_algorithm = 'sha256';
+//            $hash_nom_from = hash($this->hash_algorithm, $nom_from);
+//var_dump($hash_nom_from);
+$things = $this->collection->find(['from' => $nom_from]);
+foreach($things as $object_key=>$thing) {
+echo $thing['uuid'] . " " . ((isset($thing['created_at'])) ? $thing['created_at'] : "No created stamp") . " " .$thing['from'] . " " . $thing['subject'] . "\n";
+}
+    }
+
     public function testMongo()
     {
         if ($this->mongo_test_flag != 'on') {
@@ -54,6 +81,12 @@ class Mongo extends Agent
             $this->response .= "Mongo not available. No test performed. ";
             return;
         }
+
+$this->createMongo("test create mongo", "mongo");
+
+
+$this->priorMongo();
+
 
         $uuid = "5282cdc9-8252-4bd6-9d03-e1e0c0cec927";
 
@@ -80,8 +113,8 @@ class Mongo extends Agent
 
         // Dev review how this works.
         $result = $this->setMongo($uuid, [$thing]);
-
         $result = $this->setMongo(null, [$thing]);
+
 
         $result = $this->findMongo(["subject" => "mongo"]);
 
@@ -96,13 +129,23 @@ class Mongo extends Agent
     }
 
     // dev
+
+// START HERE
     public function writeMongo($field_text, $string_json)
     {
+        $existing = $this->getMongo($this->uuid);
+        //$variables = $existing['variables'];
         // Hmmm
         // Ugly but do this for now.
         $j = new Json($this->uuid);
         $j->jsontoarrayJson($string_json);
         $data = $j->jsontoarrayJson($string_json);
+//        $this->setValueFromPath($this->array_data, $var_path, $value);
+//        $this->arraytoJson();
+//        $t = $this->write();
+
+
+//         $this->setValueFromPath($this->array_data, $var_path, $value);
 
         $data = ['variables' => $data];
 
@@ -128,7 +171,7 @@ class Mongo extends Agent
             $data['task'] = $this->subject;
         }
 
-        $existing = $this->db->get($this->uuid);
+        $existing = $this->getMongo($this->uuid);
         $d = $data;
         if (is_array($existing)) {
             $d = array_replace_recursive($existing, $data);
@@ -151,6 +194,7 @@ class Mongo extends Agent
     // use memcache model for get.
     public function getMongo($text = null)
     {
+//var_dump("getMongo");
         $result = $this->collection->findOne(["_id" => $text]);
 
         //        $result = $this->collection->findOne(["_id" => $text]);
@@ -160,29 +204,79 @@ class Mongo extends Agent
         return iterator_to_array($result);
     }
 
+// BETTER TO START here.
+
     public function createMongo($subject, $to)
     {
+// Cannot create a thing on the stack with a specific uuid.
+// That's the rule.
+
         if (!isset($this->response)) {
             $this->response = "";
         }
-        $this->response .= "Created a Mongo Thing. ";
 
-        return $this->setMemory(null, [
-            'from' => $to,
-            'to' => 'memory',
-            'task' => $subject,
+            $task = $subject;
+            $nom_from = $this->from;
+
+// dev test
+//$this->hash_algorithm = 'sha256';
+            $hash_nom_from = hash($this->hash_algorithm, $nom_from);
+
+            if ($this->hash_state == "off") {
+                $hash_nom_from = $nom_from;
+            }
+            $nom_to = $to;
+
+$stamp = new Stamp(null, "stamp");
+$created_at =  $stamp->zuluStamp();
+
+$sha256 = new SHA256(null, "sha256");
+$o = $sha256->isSHA256($nom_from);
+if (($o == true) and ($this->hash_state == 'on')) {
+$from = $nom_from;
+
+} else {
+$from = $hash_nom_from;
+}
+
+
+        //$this->response .= "Created a Mongo Thing. ";
+
+        $thing = [
+//            "uuid" => $this->uuid,
+            "subject" => $subject,
+            "from" => $from,
+            "to" => $this->to,
+            "created_at"=>$created_at,
+            "variables" => null,
+        ];
+
+/*
+        $a= $this->setMongo($this->uuid, [
+            'from' => $from,
+            'to' => $nom_to,
+            'task' => $task,
+            'created_at'=>$created_at
         ]);
+*/
+        $a= $this->setMongo(null, $thing); // null creates a new uuid
+
+
+return $a;
     }
 
     // use memcache model for set.
     public function setMongo($key = null, $variable = null)
     {
+//var_dump("setMongo");
         // Stack rule.
         // You can not create a specific uuid on the stack.
 
         // If a uuid key is provided, check if it exists.
 
-        if ($this->isUuid($key)) {
+
+
+        if (($this->isUuid($key)) and ($key !== null)) {
             $m = $this->getMongo($key);
             if ($m === false) {
                 return true;
@@ -191,7 +285,14 @@ class Mongo extends Agent
 
         // Create random uuid key if none provided.
         if ($key == null) {
-            $key = $this->thing->getUUid();
+
+// Because thing is the only plae uuids are made.
+$t = new Thing(null);
+$key = $t->uuid;
+
+//$key = $uuid->randomUuid();
+//            $key = $this->thing->getUUid();
+
             /*
             $uuid = $this->uuid;
             $task = $this->subject;
@@ -205,12 +306,14 @@ class Mongo extends Agent
             $nom_to = $this->to;
             $variable = ['task'=>$task, 'nom_from'=>$from, 'nom_to'=>$to, 'variables'=>$variable];
 */
+
+
         }
 
         $condition = ["_id" => $key];
 
         $value = $variable;
-        if (is_array($variable)) {
+        if ((is_array($variable)) and (isset($variable[0]))) {
             $value = $variable[0];
         }
 
@@ -280,5 +383,11 @@ class Mongo extends Agent
             $this->mongo_test_flag = 'on';
             $this->testMongo();
         }
+
+        if ($input == 'prior') {
+            $this->priorMongo();
+        }
+
+
     }
 }

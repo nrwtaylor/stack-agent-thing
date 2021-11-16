@@ -400,7 +400,7 @@ class Database
             }
 
             
-        if ($active_service == "mongo") {
+        if ($active_service_name == "mongo") {
             $key = $this->stack_handlers["mongo"]->writeMongo($field_text, $string_text);
             //if ($key === true) {return true;}
         }
@@ -466,19 +466,18 @@ class Database
     {
         foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
             $stack_infrastructure = $stack_descriptor["infrastructure"];
-
             if ($stack_infrastructure == "mysql") {
-                $response = $this->stack_handler->createMysql($subject, $to);
+                $response = $this->stack_handlers['mysql']->createMysql($subject, $to);
                 $this->available_stacks["mysql"]["response"] = $response;
             }
 
             if ($stack_infrastructure == "memory") {
-                $response = $this->stack_handler->createMemory($subject, $to);
+                $response = $this->stack_handlers['memory']->createMemory($subject, $to);
                 $this->available_stacks["memory"]["response"] = $response;
             }
 
             if ($stack_infrastructure == "mongo") {
-                $response = $this->stack_handler->createMongo($subject, $to);
+                $response = $this->stack_handlers['mongo']->createMongo($subject, $to);
                 $this->available_stacks["memory"]["response"] = $response;
             }
 
