@@ -25,9 +25,14 @@ class Ping extends Agent
         // I think.
         // Instead.
 
-        $this->url = $this->settingsAgent(["ping", "url"], 'localhost');
+        $this->url = $this->settingsAgent(["ping", "url"], "localhost");
 
         $this->node_list = ["ping" => ["pong"]];
+    }
+
+    public function get()
+    {
+        $this->getPing();
     }
 
     /**
@@ -35,7 +40,7 @@ class Ping extends Agent
      */
     public function run()
     {
-        $this->getPing();
+        //        $this->getPing();
     }
     /*
     public function set() {
@@ -97,6 +102,35 @@ class Ping extends Agent
         return $latency;
     }
 
+    public function getPings()
+    {
+        $jobs = [];
+        $agent_name = "ping";
+        $things = $this->getThings("ping");
+
+        if ($things == []) {
+            $this->pings = $jobs;
+            return $this->pings;
+        }
+
+        foreach (array_reverse($things) as $thing) {
+            $subject = $thing->subject;
+            $variables = $thing->variables;
+            $created_at = $thing->created_at;
+
+            if (isset($variables[$agent_name])) {
+                $job = ["subject" => $subject, "created_at" => $created_at];
+
+                $job = array_merge($job, $variables[$agent_name]);
+
+                $jobs = $job;
+            }
+        }
+
+        $this->pings = array_merge($jobs, $this->pings);
+        return $this->pings;
+    }
+
     private function checksumPing($data)
     {
         if (strlen($data) % 2) {
@@ -135,11 +169,12 @@ class Ping extends Agent
      */
     public function makeSMS()
     {
-        $sms = "PING | A message from this Identity pinged us.";
-        $sms .=
-            " | Received " .
-            $this->thing->human_time($this->ping_text) .
-            " ago. ";
+        $sms = strtoupper($this->agent_name) . " | ";
+        //$sms = "PING | A message from this Identity pinged us.";
+        if (!isset($this->ping) or $this->ping == null) {
+            $sms .= $this->message . " ";
+        }
+
         $sms .= $this->response;
         $this->sms_message = $sms;
         $this->thing_report["sms"] = $sms;
@@ -151,13 +186,7 @@ class Ping extends Agent
     public function getPing()
     {
         $received_at = $this->created_at;
-        $this->ping_time = time() - $received_at;
-
-        if ($this->ping_time < 1) {
-            $this->ping_text = "<1 second";
-        } else {
-            $this->ping_text = $this->ping_time;
-        }
+        $this->ping_time = strtotime($this->current_time) - $received_at;
     }
 
     /**
@@ -165,11 +194,17 @@ class Ping extends Agent
      */
     public function makeMessage()
     {
-        $message = "A message from this Identity pinged us.";
-        $message .=
-            " Received " . $this->thing->human_time($this->ping_text) . " ago.";
+        if ($this->ping_time < 1) {
+            $this->ping_text = "<1 second";
+        } else {
+            $this->ping_text = $this->thing->human_time($this->ping_time);
+        }
 
-        $this->sms_message = $message;
+        $message = "";
+        //$message = "A message from this Identity pinged us.";
+        $message .= "Received " . $this->ping_text . " ago.";
+
+        $this->message = $message;
         $this->thing_report["message"] = $message;
     }
     // https://stackoverflow.com/questions/8030789/pinging-an-ip-address-using-php-and-echoing-the-result
@@ -215,10 +250,36 @@ class Ping extends Agent
         if (is_array($thing_object)) {
             if (count($thing_object) == 1 and $this->isUrl($thing_object[0])) {
                 $text = $thing_object[0];
-                $this->response .= "Pinging " . $text .". ";
+                $this->response .= "Pinging " . $text . ". ";
                 $this->addressPing($text);
             }
         }
+    }
+
+    public function extractPing($text = null)
+    {
+        $parts = explode("=", $text);
+
+        $data = "";
+        $address = "";
+        if (count($parts) == 2) {
+            $data = trim($parts[1]);
+
+            $address = trim($this->extractUrl($parts[0]));
+
+            // dev parse ping
+
+            $ping = [
+                "text" => $address . " " . $data,
+                "minimum" => null,
+                "average" => null,
+                "maximum" => null,
+                "standard_deviation" => null,
+            ];
+            return $ping;
+        }
+
+        return null;
     }
 
     /**
@@ -228,31 +289,42 @@ class Ping extends Agent
     {
         $urls = $this->extractUrls($this->input);
 
-// dev
-/*
+if (strtolower($this->input) == 'pings') {
+
+            $this->getPings();
+$this->response .= "Saw pings. ";
+return;
+
+}
+
+        $input = $this->assert($this->input);
+
+        $urls = $this->extractUrls($input);
+
+        // dev
+        /*
         if ($urls) {
             $this->hostPing($urls);
         }
 */
 
-        $this->response .= 'Heard, "' . $this->input . '". ';
 
-
-
-        // Test
-/*
-        try {
-            $ping_socket_latency = $this->socketPing();
-            if ($ping_socket_latency !== false) {
-                $this->response .=
-                    "Socket latency is " . $ping_socket_latency . ". ";
+        if ($this->hasText(strtolower($this->input), "digest")) {
+            $this->getPings();
+            if ($this->pings == true) {
+                $this->response .= "Did not see pings. ";
+                return;
             }
-        } catch (\OverflowException $t) {
-            $this->response .= "Foo";
-        } catch (\Throwable $t) {
-            $this->response .= "Bar";
+            $this->response .= count($this->pings) . " pings seen. ";
+            return;
         }
-*/
 
+        $ping = $this->extractPing($input);
+
+        if ($ping != null) {
+            $this->ping = $ping;
+
+            $this->response .= $ping["text"];
+        }
     }
 }

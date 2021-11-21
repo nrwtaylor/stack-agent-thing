@@ -41,7 +41,7 @@ class Ant extends Agent
         $this->stack_uuid = $this->thing->container['stack']['uuid'];
 
         // For the Ant
-        $this->created_at = $this->thing->thing->created_at;
+        $this->created_at = $this->thing->created_at;
 
         //		$this->sqlresponse = null;
 
@@ -146,12 +146,14 @@ class Ant extends Agent
         // Read the subject as passed to this class.
         // No charge to read the subject line.  By machine.
 
-        $this->state = $this->thing->choice->load('hive');
+        $this->default_state = 'inside nest';
+        $this->stateAnt();
 
         // Err ... making sure the state is saved.
         $this->thing->choice->Choose($this->state);
-
-        $this->state = $this->thing->choice->load('hive');
+        if ($this->stateAnt() === true) {
+            $this->response .= "Could not save state. ";
+        }
 
         $this->thing->log(
             $this->agent_prefix . 'state is "' . $this->state . '".'
@@ -179,25 +181,24 @@ class Ant extends Agent
         }
     }
 
-    //	function createAccount(String $account_name, $amount) {
+    public function stateAnt()
+    {
+        $state = $this->thing->choice->load('hive');
 
-    //		$scalar_account = new Account($this->uuid, 'scalar', $amount, "happiness", "Things forgotten"); // Yup.
-    //		$this->thing->scalar = $scalar_account;
-    //		return;
-    //	}
+        if ($state != false) {
+            $this->state = $state;
+        }
 
-    // -----------------------
+        if ($state === false) {
+            $this->state = $this->default_state;
+            return true;
+        }
+    }
 
     function set()
     {
-        $this->thing->Write(
-            ["ant", "left_count"],
-            $this->left_count
-        );
-        $this->thing->Write(
-            ["ant", "right_count"],
-            $this->right_count
-        );
+        $this->thing->Write(["ant", "left_count"], $this->left_count);
+        $this->thing->Write(["ant", "right_count"], $this->right_count);
 
         $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE");
     }
@@ -207,10 +208,7 @@ class Ant extends Agent
         $this->current_time = $this->thing->time();
 
         // Borrow this from iching
-        $this->time_string = $this->thing->Read([
-            "ant",
-            "refreshed_at",
-        ]);
+        $this->time_string = $this->thing->Read(["ant", "refreshed_at"]);
 
         // This is a request to get the Place from the Thing
         // and if that doesn't work then from the Stack.
@@ -220,30 +218,18 @@ class Ant extends Agent
 
         if ($this->time_string == false) {
             $this->time_string = $this->thing->time();
-            $this->thing->Write(
-                ["ant", "refreshed_at"],
-                $this->time_string
-            );
+            $this->thing->Write(["ant", "refreshed_at"], $this->time_string);
         }
 
         $this->refreshed_at = strtotime($this->time_string);
 
-        $this->left_count = $this->thing->Read([
-            "ant",
-            "left_count",
-        ]);
-        $this->right_count = $this->thing->Read([
-            "ant",
-            "right_count",
-        ]);
+        $this->left_count = $this->thing->Read(["ant", "left_count"]);
+        $this->right_count = $this->thing->Read(["ant", "right_count"]);
     }
 
     public function respondResponse()
     {
         // Thing actions
-
-        //$this->thing->flagGreen();
-        //$this->thing->flagRed();
 
         $this->whatisthis = [
             'inside nest' =>
@@ -480,11 +466,12 @@ class Ant extends Agent
                     $this->thing->log("spawn Thing default");
                     $this->spawn();
                     $this->thing->log("spawned Thing");
-
             }
         }
 
-        $this->state = $this->thing->choice->load('hive');
+        //$this->state = $this->thing->choice->load('hive');
+
+        $this->stateAnt();
 
         // Will need to develop this to only only valid state changes.
 

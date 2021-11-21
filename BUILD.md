@@ -888,3 +888,18 @@ PHP-FPM
 sudo apt-get update
 sudo apt-get install php-fpm
 ```
+
+## Notes
+
+https://stackoverflow.com/questions/62524355/unable-to-start-mysql-server-control-process-exited-with-error-code
+
+sudo chmod -R u+rwx /etc/mysql/
+sudo chown -R mysql.mysql /etc/mysql/
+
+$ sudo apt-get purge mongodb-*
+$ sudo apt-get install -y mongodb-org
+$ composer require mongodb/mongodb
+
+$ sudo pecl install mongodb
+extension=mongodb.so > php.ini
+$ https://docs.mongodb.com/drivers/php/

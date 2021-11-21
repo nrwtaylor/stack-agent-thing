@@ -149,7 +149,7 @@ class Place extends Agent
 
         $alpha_agent = new A4($this->thing, "a4");
         //        $place_code_candidate = $this->thing->nuuid;
-        $place_code_candidate = $alpha_agent->alpha;
+        $place_code_candidate = $alpha_agent->a4;
 
         foreach ($this->places as $place) {
             $existing_place_code = strtolower($place['code']);
@@ -161,7 +161,7 @@ class Place extends Agent
 
                 $alpha_agent = new A4($this->thing, "a4");
                 //       $place_code_candidate = $this->thing->nuuid;
-                $place_code_candidate = $alpha_agent->alpha;
+                $place_code_candidate = $alpha_agent->a4;
 
                 //                $place_code_candidate = $this->thing->nuuid;
             }

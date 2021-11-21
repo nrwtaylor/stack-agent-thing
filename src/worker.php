@@ -15,7 +15,10 @@ echo "Worker whitefox 14 October 2021\n";
 echo "Gearman Worker started\n";
 $worker = new \GearmanWorker();
 
-$worker->addServer();
+//$worker->addServer("127.0.0.1",4730);
+//$worker->addServer();
+$worker->addServer("localhost",4730);
+
 $uuid = null;
 $name = "call_agent";
 $task = "Nrwtaylor\StackAgentThing\call_agent_function";

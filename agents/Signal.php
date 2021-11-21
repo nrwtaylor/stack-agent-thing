@@ -562,7 +562,6 @@ return true;}
         $this->signals = [];
 
         $things = $this->getThings('signal');
-
         if ($things === null) {
             return;
         }

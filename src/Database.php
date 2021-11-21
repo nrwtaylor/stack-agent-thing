@@ -34,7 +34,6 @@ class Database
     //public function init()
     function __construct($thing = null, $agent_input = null)
     {
-
         //$agent_input = $this->agent_input;
         $uuid = $agent_input["uuid"];
         $nom_from = $agent_input["from"];
@@ -135,13 +134,11 @@ class Database
             $this->candidate_stacks
             as $candidate_service_name => $candidate_service
         ) {
-
-try {
-            $handler = $this->connectDatabase($candidate_service);
-        } catch (\Throwable $t) {
-        } catch (\Error $ex) {
-        }
-
+            try {
+                $handler = $this->connectDatabase($candidate_service);
+            } catch (\Throwable $t) {
+            } catch (\Error $ex) {
+            }
 
             if ($handler !== true) {
                 $this->available_stacks[
@@ -152,17 +149,15 @@ try {
         }
         $this->active_stacks = $this->available_stacks;
 
+        $this->stack = false;
+        $this->stack_handler = false;
+        if (count($this->available_stacks) > 0) {
+            $primary_stack = reset($this->available_stacks);
+            $primary_stack_name = key($this->available_stacks);
 
-$this->stack = false;
-$this->stack_handler = false;
-if (count($this->available_stacks) > 0) {
-
-        $primary_stack = reset($this->available_stacks);
-        $primary_stack_name = key($this->available_stacks);
-
-        $this->stack = $this->available_stacks[$primary_stack_name];
-        $this->stack_handler = $this->stack_handlers[$primary_stack_name];
-}
+            $this->stack = $this->available_stacks[$primary_stack_name];
+            $this->stack_handler = $this->stack_handlers[$primary_stack_name];
+        }
 
         $this->container = new \Slim\Container($settings);
 
@@ -245,7 +240,6 @@ if (count($this->available_stacks) > 0) {
 
     function connectDatabase($stack)
     {
-
         $agent_name = $stack["infrastructure"];
         $agent_class_name = ucwords($agent_name);
         $agent_namespace_name =
@@ -278,7 +272,6 @@ if (count($this->available_stacks) > 0) {
         } catch (\Throwable $t) {
         } catch (\Error $ex) {
         }
-
 
         return true;
     }
@@ -441,6 +434,7 @@ if (count($this->available_stacks) > 0) {
     function readField($field)
     {
         $thingreport = $this->Get();
+
         $this->thing = $thingreport["thing"];
 
         if (isset($this->thing->$field)) {
@@ -460,12 +454,28 @@ if (count($this->available_stacks) > 0) {
      */
     function Create($subject, $to)
     {
+        foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
+            $stack_infrastructure = $stack_descriptor["infrastructure"];
 
-        $response = false;
-        if ((isset($this->stack['infrastructure'])) and ($this->stack["infrastructure"] == "mysql")) {
-            $response = $this->stack_handler->createMysql($subject, $to);
+            if ($stack_infrastructure == "mysql") {
+                $response = $this->stack_handler->createMysql($subject, $to);
+                $this->available_stacks["mysql"]["response"] = $response;
+            }
+
+            if ($stack_infrastructure == "memory") {
+                $response = $this->stack_handler->createMemory($subject, $to);
+                $this->available_stacks["memory"]["response"] = $response;
+            }
         }
-        return $response;
+
+        foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
+            if (isset($stack_descriptor['response']) and $stack_descriptor["response"] === true) {
+                return true;
+            }
+        }
+
+        return false;
+        //return $response;
     }
 
     /**
@@ -482,27 +492,42 @@ if (count($this->available_stacks) > 0) {
         // Get first available.
 
         $thing = false;
-
         foreach ($this->available_stacks as $stack_name => $stack) {
             switch ($stack["infrastructure"]) {
                 case "mysql":
-                    $thing = $this->stack_handler->getMysql();
-                    break 2;
-                case "mongo":
-                    break 2;
-                case "memory":
-                    $t = $this->stack_handler->getMemory($this->uuid);
-                    if ($t !== false) {
-                        $thing = new Thing(null);
-                        $thing->created_at = null;
-                        $thing->nom_to = null;
-                        $thing->nom_from = null;
-                        $thing->task = "empty task";
-                        $thing->variables = json_encode($t, true);
-                        $thing->settings = null;
+                    $thing = $this->stack_handlers[
+                        $stack["infrastructure"]
+                    ]->getMysql();
+
+                    if ($thing !== false and $thing !== true) {
+                        break 2;
                     }
 
-                    break 2;
+                case "mongo":
+                    break;
+                case "memory":
+                    $thing = $this->stack_handlers[
+                        $stack["infrastructure"]
+                    ]->getMemory($this->uuid);
+
+                    if ($thing !== false and $thing !== true) {
+                        break 2;
+                    }
+
+                /*
+                    if ($thing !== false) {
+                        //$thing = new Thing(null);
+                        //$thing->created_at = null;
+                        //$thing->nom_to = null;
+                        //$thing->nom_from = null;
+                        //$thing->task = "empty task";
+                        //$thing->variables = json_encode($t, true);
+                        //$thing->settings = null;
+                        break;
+                    }
+*/
+
+                //break 2;
             }
         }
 
@@ -605,6 +630,14 @@ if (count($this->available_stacks) > 0) {
         return $thing_report;
     }
 
+function isValidMd5($md5 ='') {
+  return strlen($md5) == 32 && ctype_xdigit($md5);
+}
+
+function isValidSha256($sha256 ='') {
+  return strlen($sha256) == 64 && ctype_xdigit($sha256);
+}
+
     /**
      *
      * @param unknown $path
@@ -612,8 +645,12 @@ if (count($this->available_stacks) > 0) {
      * @param unknown $max   (optional)
      * @return unknown
      */
-    public function variableSearch($path, $value, $max = null, $string_in_string = false)
-    {
+    public function variableSearch(
+        $value,
+        $max = null,
+        $string_in_string = false
+    ) {
+
         //        $thing = false;
         /*
         $thing_report = [];
@@ -643,48 +680,49 @@ return $thing_report;
             $max = 3;
         }
         $max = (int) $max;
-
         $user_search = $this->from;
+
+//$hash_user_search = $user_search;
+//} else {
         $hash_user_search = hash($this->hash_algorithm, $user_search);
 
         // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
-if ($string_in_string === true) {
-        $value = "%$value%"; // Value to search for in Variables
-}
+        if ($string_in_string === true) {
+            $value = "%$value%"; // Value to search for in Variables
+        }
         $thingreport["things"] = [];
 
         try {
             //            $query =
             //                "SELECT * FROM stack FORCE INDEX (created_at_nom_from) WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
+            //            $query =
+              //              "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
-/*
-            $query =
-                "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
-*/
-/*
-if ($this->hash_state == "off") {
-            $query =
-                "SELECT * FROM stack WHERE nom_from=:user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
-}
+            if ($this->hash_state == "off") {
+                $query =
+                    "SELECT * FROM stack WHERE nom_from=:user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+            }
 
-if ($this->hash_state == "on") {
-            $query =
-                "SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
-}
-*/
-           $query =
-                "(SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) UNION ALL (SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) ORDER BY created_at DESC LIMIT :max";
+            if ($this->hash_state == "on") {
+                $query =
+                    "SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+            }
+
+            //           $query =
+            //                "(SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) UNION ALL (SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) ORDER BY created_at DESC LIMIT :max";
             //$value = "+$value"; // Value to search for in Variables
 
             //    $query =
             //        'SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND MATCH(variables) AGAINST (:value IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max';
 
             $sth = $this->container->db->prepare($query);
-
-            $sth->bindParam(":user_search", $user_search);
-            $sth->bindParam(":hash_user_search", $hash_user_search);
-
+            if ($this->hash_state == "off") {
+                $sth->bindParam(":user_search", $user_search);
+            }
+            if ($this->hash_state == "on") {
+                $sth->bindParam(":hash_user_search", $hash_user_search);
+            }
             $sth->bindParam(":value", $value);
             $sth->bindParam(":max", $max, PDO::PARAM_INT);
             $sth->execute();
@@ -694,6 +732,7 @@ if ($this->hash_state == "on") {
                 'So here are Things with the variable you provided in \$variables. That\'s what you want';
             $thingreport["things"] = $things;
         } catch (\PDOException $e) {
+            //var_dump($e->getMessage());
             // echo "Error in PDO: ".$e->getMessage()."<br>";
             $thingreport["info"] = $e->getMessage();
             $thingreport["things"] = [];
@@ -817,7 +856,7 @@ if ($this->hash_state == "on") {
             //            $t = new Thing(null);
             //            $t->Create("stack", "error", 'subjectSearch ' .$e->getMessage());
             //            echo 'Caught exception: ', $e->getMessage(), "\n";
-        } 
+        }
 
         $things = $sth->fetchAll();
 
@@ -881,8 +920,7 @@ if ($this->hash_state == "on") {
             //            $t->Create("stack", "error", 'subjectSearch ' .$e->getMessage());
 
             //            echo 'Caught exception: ', $e->getMessage(), "\n";
-        } 
-
+        }
 
         $sth = null;
 
@@ -1055,7 +1093,7 @@ if ($this->hash_state == "on") {
 
             //            echo 'Caught error: ', $e->getMessage(), "\n";
             $things = false;
-        } 
+        }
 
         $sth = null;
 
@@ -1105,7 +1143,6 @@ if ($this->hash_state == "on") {
             //            echo 'Caught error: ', $e->getMessage(), "\n";
             $things = false;
         }
-
 
         $sth = null;
 

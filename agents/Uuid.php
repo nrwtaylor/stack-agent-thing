@@ -233,7 +233,7 @@ $uuids = $this->extractUuids($text);
         $web .= "<br>";
         $web .= $this->readUuid() . "<br>";
             "CREATED AT " .
-            strtoupper(date('Y M d D H:m', $this->created_at)) .
+            strtoupper(date('Y M d D H:m', strtotime($this->created_at))) .
             "<br>";
 
         $this->thing_report['web'] = $web;

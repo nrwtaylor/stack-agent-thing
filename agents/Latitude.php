@@ -17,26 +17,25 @@ class Latitude extends Agent
 
     function get()
     {
-// Can we get the latitude from Kplex?
-//$this->kplex_agent = new Kplex($this->thing, "kplex");
-//var_dump($this->kplex_agent);
-//exit();
-//$this->listenKplex();
-//var_dump($this->snapshot);
-//exit();
-//if (!isset($this->snapshot)) {
+        // Can we get the latitude from Kplex?
+        //$this->kplex_agent = new Kplex($this->thing, "kplex");
+        //var_dump($this->kplex_agent);
+        //exit();
+        //$this->listenKplex();
+        //var_dump($this->snapshot);
+        //exit();
+        //if (!isset($this->snapshot)) {
 
-//$this->listenKplex();
+        //$this->listenKplex();
 
-//}
-//var_dump($this->snapshot);
+        //}
+        //var_dump($this->snapshot);
         $this->latitude_agent = new Variables(
             $this->thing,
             "variables latitude " . $this->from
         );
 
         $latitude = $this->latitude_agent->getVariable("latitude");
-
         if (is_numeric($latitude)) {
             $this->latitude = $latitude;
         } else {
@@ -48,18 +47,25 @@ class Latitude extends Agent
         );
     }
 
-    public function formatLatitude($text = null, $pattern = null) {
+    public function formatLatitude($text = null, $pattern = null)
+    {
+        if ($text == null) {
+            return null;
+        }
 
-        if ($text == null) {return null;}
+        $sign = "N";
+        if ($text > 0) {
+            $sign = "N";
+        } else {
+            $sign = "S";
+            $text = abs($text);
+        }
+        //$arr = $this->dmsDegree($text);
+        if (is_numeric($text)) {
+            return $text . $sign;
+        }
 
-$sign = "N";
-if ($text > 0) {$sign = "N";} else {$sign = "S";
-$text = abs($text);}
-//$arr = $this->dmsDegree($text);
-if (is_numeric($text)) {return $text . $sign;}
-
-return $text;
-
+        return $text;
     }
 
     function set()
@@ -76,17 +82,12 @@ return $text;
     public function doLatitude()
     {
         if ($this->agent_input == null) {
-            $array = ["observation", "polaris", "sun"];
-            $k = array_rand($array);
-            $v = $array[$k];
+
+            $response = "Got longitude. ";
 
             if (!is_numeric($this->latitude)) {
                 $response = "No latitude available. ";
             }
-
-            //            if ($this->latitude !== false) {
-            //                $response = "Latitude is " . $this->latitude .". ";
-            //            }
 
             $this->message = $response; // mewsage?
         } else {
@@ -154,7 +155,7 @@ return $text;
 
         foreach ($tokens as $i => $token) {
             $sign = +1;
-            $last_character = strtolower(substr(trim($text), -1));
+            $last_character = strtolower(substr(trim($token), -1));
             $text_token = $token;
             if ($last_character == "n" or $last_character == "s") {
                 if ($last_character == "n") {
@@ -164,10 +165,11 @@ return $text;
                     $sign = -1;
                 }
                 $text_token = mb_substr($token, 0, -1);
-            }
+           // }
 
             if (is_numeric($text_token)) {
                 $latitudes[] = $sign * $text_token;
+            }
             }
         }
 
@@ -206,7 +208,6 @@ return $text;
             $latitude = $nmea_response["latitude"] * $sign;
             $latitudes[] = $latitude;
         }
-
         if (count($latitudes) == 1) {
             $latitude = $latitudes[0];
         }
@@ -217,7 +218,10 @@ return $text;
     public function readSubject()
     {
         $input = $this->input;
-        $this->extractLatitude($input);
+        $latitude = $this->extractLatitude($input);
+        if ($latitude !== false) {
+            $this->latitude = $latitude;
+        }
         return false;
     }
 }

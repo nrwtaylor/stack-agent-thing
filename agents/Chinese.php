@@ -22,7 +22,7 @@ class Chinese extends Agent
 
         // devstack
 
-        $this->getMemcached();
+        $this->initMemcached();
 
         $this->words = [];
     }

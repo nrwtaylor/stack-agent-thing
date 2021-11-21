@@ -67,6 +67,7 @@ class Findagent extends Agent
             "DEBUG"
         );
         $ref_time = $this->thing->elapsed_runtime();
+
         // Search for a reference within the variables field to the agent.
 
         $things = [];
@@ -77,11 +78,9 @@ class Findagent extends Agent
                 $this->horizon,
                 true
             );
-
             $things = isset($thing_report["things"])
                 ? $thing_report["things"]
                 : [];
-
 
             foreach ($things as $i => $thing) {
             }

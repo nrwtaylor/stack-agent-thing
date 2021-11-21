@@ -169,7 +169,13 @@ $this->response = "Gearman snowflake worker started.";
     public function set()
     {
         $this->current_time = $this->thing->time();
-
+/*
+        $time_string = $this->thing->time();
+        $this->thing->Write(
+            ["manager", "refreshed_at"],
+            $time_string
+        );
+*/
         $this->thing->Write(
             ["manager", "queued_jobs"],
             $this->queued_jobs

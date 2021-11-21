@@ -14,7 +14,7 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Tokenlimiter {
+class Tokenlimiter extends Agent {
 
 
     public $var = 'hello';
@@ -25,11 +25,11 @@ class Tokenlimiter {
      * @param Thing   $thing
      * @param unknown $agent_input (optional)
      */
-    function __construct(Thing $thing, $agent_input = null) {
-
-        if ($agent_input == null) {$agent_input = "";}
-        $this->agent_input = $agent_input;
-        $this->thing = $thing;
+//    function __construct(Thing $thing, $agent_input = null) {
+public function init() {
+  //      if ($agent_input == null) {$agent_input = "";}
+    //    $this->agent_input = $agent_input;
+      //  $this->thing = $thing;
 
 
         // Call the TokenLimiter which will then 'on-call' the service you are requesting.
@@ -40,7 +40,7 @@ class Tokenlimiter {
         $this->token_window = 30;
 
 
-
+        $this->node_list = ['token'];
 
         $time_string = $this->thing->Read( array("tokenlimiter", "refreshed_at") );
 
@@ -91,8 +91,13 @@ class Tokenlimiter {
                 $this->thing->Write( array("tokenlimiter", "tokens"), $this->tokens );
 
                 //callAgent($this->thing->uuid, $token);
-                $c = new Callagent($this->thing);
-                $c->callAgent($this->thing->uuid, $token);
+
+// Test replaced very slow call agent.
+// And deprecated callagent.
+
+$this->getAgent($token);
+//                $c = new Callagent($this->thing);
+//                $c->callAgent($this->thing->uuid, $token);
 
                 $message = 'Agent "Token Limiter" issued a ' . ucfirst($token) . " Token to Thing " . $this->thing->nuuid . ".";
                 $this->thing->log( '<pre> ' . $message . '</pre>' );
@@ -218,7 +223,7 @@ class Tokenlimiter {
     /**
      *
      */
-    private function respond() {
+    private function deprecate_respond() {
 
         // Thing actions
 
@@ -249,7 +254,7 @@ class Tokenlimiter {
     public function readSubject() {
 
         $this->response = null;
-
+$this->state = null;
         if ($this->state == null) {
 
 
@@ -284,23 +289,6 @@ class Tokenlimiter {
             break;
         case "token use":
             //$this->thing->choice->Choose("foraging");
-
-            break;
-        case "inside nest":
-            //$this->thing->choice->Choose("in nest");
-            break;
-        case "nest maintenance":
-            //$this->thing->choice->Choose("nest maintenance");
-            break;
-        case "patrolling":
-            //$this->thing->choice->Choose("patrolling");
-            break;
-        case "midden work":
-            //$this->thing->choice->Choose("midden work");
-            $this->middenwork();
-
-            // Need to figure out how to set flag to red given that respond will then reflag it as green.
-            // Can green reflag red?  Think about reset conditions.
 
             break;
         default:
@@ -339,31 +327,8 @@ class Tokenlimiter {
 
         $this->thing->flagGreen();
 
-        return;
     }
 
 
-    /**
-     *
-     * @return unknown
-     */
-    function kill() {
-        // No messing about.
-        return $this->thing->Forget();
-    }
-
-
-
-    //function arrayFlatten($array) {
-    //        $flattern = array();
-    //        foreach ($array as $key => $value){
-    //            $new_key = array_keys($value);
-    //            $flattern[] = $value[$new_key[0]];
-    //        }
-    //        return $flattern;
-    //}
 
 }
-
-
-?>

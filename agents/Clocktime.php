@@ -98,9 +98,6 @@ class Clocktime extends Agent
 
     function set()
     {
-        //$this->head_code = "0Z15";
-        //$headcode = new Variables($this->thing, "variables headcode " . $this->from);
-
         $this->clocktime->setVariable("refreshed_at", $this->current_time);
         $this->clocktime->setVariable("hour", $this->hour);
         $this->clocktime->setVariable("minute", $this->minute);
@@ -227,7 +224,7 @@ class Clocktime extends Agent
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);
         $sms_message .= " | hour " . $this->hour . " minute " . $this->minute;
 
-        if (isset($this->response)) {
+        if ((isset($this->response)) and ($this->response != "")) {
             $sms_message .= " | " . $this->response;
         }
 

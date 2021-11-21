@@ -255,7 +255,21 @@ class Flag extends Agent
 
     public function get()
     {
+
+// dev ef22 not bringing in flag headcode.
+
+//var_dump($this->thing->thing);
+//exit();
         $this->head_code = $this->thing->Read(["headcode", "head_code"]);
+
+
+//        $headcode = new Headcode($this->thing, "extract");
+//$this->head_code = $headcode->head_code;
+//var_dump($this->head_code);
+//$this->head_code = "merp";
+//$headcode_agent = new Headcode($this->thing, "headcode");
+//var_dump($headcode_agent->head_code);
+
 
         $flag_variable_name = "_" . $this->head_code;
 

@@ -56,29 +56,6 @@ class Time extends Agent
         $this->thing->Write(["time", "refreshed_at"], $this->current_time);
     }
 
-    public function respondResponse()
-    {
-        // Thing actions
-//        $this->thing->flagGreen();
-
-//        $this->thing->choice->Create($this->agent_name, $this->node_list, "start");
-//        $choices = $this->thing->choice->makeLinks('start');
-//        $this->thing_report['choices'] = $choices;
-
-//        $this->sms_message = "HEY | " . $this->sms_message . "";
-//        $this->thing_report['sms'] = $this->sms_message;
-
-        $this->thing_report['email'] = $this->message;
-        $this->thing_report['message'] = $this->message;
-
-        if ($this->agent_input == null) {
-            $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-        }
-
-    }
-
-
     /**
      *
      */
@@ -130,9 +107,10 @@ class Time extends Agent
      * @param unknown $text (optional)
      * @return unknown
      */
-    public function textTime($text)
+    public function textTime($text = null)
     {
         $timestamp = strtotime($text);
+
         $new_date_format = date("m/d H:i", $timestamp);
         return $new_date_format;
     }
@@ -171,11 +149,13 @@ class Time extends Agent
         if ($text == null) {
             $text = $this->getTime();
         }
+
         $m = "Could not get a time.";
         if ($this->isDateValid($text)) {
             $m = "Time check from stack server " . $this->web_prefix . ". ";
 
             $datum = $this->datumTime($text);
+            $this->datum = $datum;
             if ($datum !== false) {
                 $this->text = $datum->format("H:i");
                 $m .=
@@ -198,7 +178,26 @@ class Time extends Agent
             $datum = true;
         }
 
+        /*
+Is there a time provided in the query?
+*/
+
+        if (isset($this->projected_datum)) {
+            $d = $this->projected_datum;
+            $d->setTimezone(new \DateTimeZone($this->default_time_zone));
+            $this->text = $d->format("H:i");
+            $m =
+                "In the timezone " .
+                $this->default_time_zone .
+                ", it will be " .
+                $d->format("l") .
+                " " .
+                $d->format("d/m/Y, H:i:s") .
+                ". ";
+        }
+
         $this->response .= $m;
+
         $this->time_message = $this->response;
 
         return $datum;
@@ -211,6 +210,8 @@ class Time extends Agent
         }
         if ($this->isDateValid($text)) {
             $datum = $this->datumTime($text);
+            $this->datum = $datum;
+
             if ($datum !== false) {
                 //$this->text = $datum->format('H:i');
                 $text =
@@ -344,8 +345,10 @@ class Time extends Agent
         if (strtolower($time_zone) == "lmt") {
             $this->lmtTime($text);
 
-            $this->datum = false; // Signal no external datum found.
-            return $this->datum;
+            //           $this->datum = false; // Signal no external datum found.
+            //           return $this->datum;
+            $datum = false;
+            return $datum;
         }
 
         if ($text == null) {
@@ -364,8 +367,10 @@ class Time extends Agent
         }
 
         if ($this->time_zone == "lmt") {
-            $this->datum = false;
-            return $this->datum;
+            //  $this->datum = false;
+            // return $this->datum;
+            $datum = false;
+            return $datum;
         }
 
         $datum = null;
@@ -377,7 +382,7 @@ class Time extends Agent
             $datum->setTimezone(new \DateTimeZone($this->time_zone));
         }
 
-        $this->datum = $datum;
+        //        $this->datum = $datum;
         return $datum;
     }
 
@@ -419,7 +424,23 @@ class Time extends Agent
             $this->time_zone = $timezone;
         }
 
+        /*
+
+Is there a clocktime in the string?
+If so compute the time in the stack timezne.
+
+*/
+
+        $t = $this->extractClocktime($this->filtered_input);
+        if ($t !== null) {
+            $this->projected_datum = $this->datumTime(
+                implode(":", $t),
+                $this->time_zone
+            );
+        }
+
         $this->doTime();
+
         return false;
     }
 }

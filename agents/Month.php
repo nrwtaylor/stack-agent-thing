@@ -34,7 +34,7 @@ class Month extends Agent
         $this->test = "Development code";
 
         $this->thing_report["info"] =
-            "A MONTH is the period of about 28 to 31 days.";
+            "A MONTH is about the length of the MOONS orbital period.";
         $this->thing_report["help"] = "Click on the image for a PDF.";
 
         $this->resource_path = $GLOBALS["stack_path"] . "resources/";
@@ -75,8 +75,57 @@ class Month extends Agent
         $this->initMonth();
     }
 
+    public function formatMonth($text = null)
+    {
+        // Placeholder.
+        // Make more general.
+        $date = date_create_from_format("m", $text);
+        $d = strtoupper(date_format($date, "F"));
+
+        return $d;
+    }
+
+    public function daysMonth($text = null)
+    {
+        $date = date_create_from_format("m", $text);
+        $d = strtoupper(date_format($date, "t"));
+
+        return $d;
+    }
+
+    public function firstdayMonth($text = null)
+    {
+        $text = "01-" . $text;
+        $date = date_create_from_format("d-m-Y", $text);
+        $d = strtoupper(date_format($date, "l"));
+
+        return $d;
+    }
+
+    public function datestringMonth($datum)
+    {
+        /*
+        $date_string =
+            $datum["year"] .
+            "-" .
+            str_pad($datum["month"], 2, "0", STR_PAD_LEFT) .
+            "-" .
+            str_pad($datum["day_number"], 2, "0", STR_PAD_LEFT);
+*/
+        $month_string = str_pad($datum["month"], 2, "0", STR_PAD_LEFT);
+
+        return $month_string;
+    }
+
     public function initMonth()
     {
+        $this->projected_time = $this->current_time;
+
+        $this->time_agent = new Time($this->thing, "time");
+        $this->working_datum = $this->time_agent->datumTime(
+            $this->projected_time
+        );
+
         $this->haab_months = [
             "Pop" => ["mat"],
             "Wo'" => ["black conjunction"],
@@ -201,7 +250,9 @@ class Month extends Agent
      */
     public function makeSMS()
     {
-        $sms = "MONTH";
+        $sms = "MONTH | ";
+
+        $sms .= $this->web_prefix . "thing/" . $this->uuid . "/month";
 
         $months = [];
         if (isset($this->months)) {
@@ -213,6 +264,7 @@ class Month extends Agent
             $month_text = $this->month;
             $sms .= " | " . $month_text;
         }
+
         $sms .= " " . $this->response;
         //$sms .= " | " . $this->message . " " . $this->response;
         $this->sms_message = $sms;
@@ -267,6 +319,8 @@ class Month extends Agent
         $link = $this->web_prefix . "thing/" . $this->uuid . "/month.pdf";
         $this->node_list = ["month" => ["month"]];
         $web = "";
+        //$web .= $this->input;
+        $web .= $this->formatMonth($this->datestringMonth($this->dateline));
         $web .= '<a href="' . $link . '">';
         $web .= $this->html_image;
         $web .= "</a>";
@@ -467,11 +521,17 @@ class Month extends Agent
 
     public function drawMonth($type = null)
     {
+        $type = "spiral";
         if ($type == null) {
             $type = $this->type;
         }
         if ($type == "wedge") {
             $this->wedgeMonth();
+            return;
+        }
+
+        if ($type == "spiral") {
+            $this->spiralMonth();
             return;
         }
 
@@ -516,6 +576,117 @@ class Month extends Agent
                 $this->black
             );
         }
+    }
+
+    public function spiralMonth()
+    {
+        $size = null;
+        if ($size == null) {
+            $size = $this->size;
+        }
+        $border = 100;
+        $size = 1000 - $border;
+
+        if (isset($this->canvas_size_x)) {
+            $canvas_size_x = $this->canvas_size_x;
+            $canvas_size_y = $this->canvas_size_y;
+        } else {
+            $canvas_size_x = $this->default_canvas_size_x;
+            $canvas_size_y = $this->default_canvas_size_y;
+        }
+
+        // Draw out the state
+        $center_x = $canvas_size_x / 2;
+        $center_y = $canvas_size_y / 2;
+
+        $spiral_agent = new Spiral($this->thing, 'spiral');
+        $spiral_agent->image = imagecreatetruecolor(
+            $canvas_size_x,
+            $canvas_size_y
+        );
+
+        imagefilledrectangle(
+            $spiral_agent->image,
+            0,
+            0,
+            $canvas_size_x,
+            $canvas_size_y,
+            $this->white
+        );
+
+        // Calculate number of days.
+
+        $number_of_days = $this->daysMonth(
+            $this->datestringMonth($this->dateline)
+        );
+
+        $year = $this->dateline['year'];
+
+        if ($year === false) {
+            $oldDateUnix = strtotime($this->current_time);
+            $year = date("Y", $oldDateUnix);
+        }
+        $first_day = $this->firstdayMonth(
+            $this->datestringMonth($this->dateline) . "-" . $year
+        );
+
+        $first_day_of_week_number = date('N', strtotime($first_day));
+
+        // How many spirals to ignore before starting.
+        // Creates hole in middle.
+        $start_loops = 6;
+
+        // Where in the spiral to start.
+        //        $init = $start_loops * 360;
+        $init =
+            $start_loops * 360 -
+            90 +
+            (($first_day_of_week_number - 1) / 7) * 360;
+        //      $init = $start_loops * 360 - 90;
+
+        $image = $spiral_agent->drawSpiral(
+            10,
+            15.5,
+            0 + $init,
+            ($number_of_days / 7) * (2 * 180) + $init
+        );
+
+        $number = 7;
+        $round_agent = new Spokes($this->thing, "spokes " . $number);
+        $image_spokes = $round_agent->image;
+
+        $width = imagesx($this->image);
+        $height = imagesy($this->image);
+
+        //$dest = @imagecreatefrompng('image1.png');
+        //$src = @imagecreatefrompng('image2.png');
+
+        // Copy and merge
+        imagecopymerge(
+            $this->image,
+            $round_agent->image,
+            0,
+            0,
+            0,
+            0,
+            $width,
+            $height,
+            75
+        );
+
+        imagecopymerge(
+            $this->image,
+            $spiral_agent->image,
+            0,
+            0,
+            0,
+            0,
+            $width,
+            $height,
+            70
+        );
+
+        //$this->image = $spiral_agent->image;
     }
 
     public function wedgeMonth()
@@ -586,17 +757,11 @@ class Month extends Agent
 
     public function get()
     {
-        $time_string = $this->thing->Read([
-            "month",
-            "refreshed_at",
-        ]);
+        $time_string = $this->thing->Read(["month", "refreshed_at"]);
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->Write(
-                ["month", "refreshed_at"],
-                $time_string
-            );
+            $this->thing->Write(["month", "refreshed_at"], $time_string);
         }
     }
 
@@ -932,8 +1097,21 @@ class Month extends Agent
             return false;
         }
 
+        //        if (count($scores) == 1) {
+        //            return array_key_first($scores);
+        //        }
+
         if (count($scores) == 1) {
-            return array_key_first($scores);
+            if (!function_exists("array_key_first")) {
+                // function array_key_first(array $scores) {
+                foreach ($scores as $key => $unused) {
+                    return $key;
+                }
+                return null;
+                //}
+            }
+
+            //            return array_key_first($scores);
         }
 
         // Leave it here for now.
@@ -950,8 +1128,56 @@ class Month extends Agent
         $this->type = "wedge";
 
         $input = $this->assert($this->input, "month", false);
+
+        // Default dateline
+        $timestamp = $this->zuluStamp($this->current_time);
+
+        $dateline = $this->extractDateline($timestamp);
+
+        $this->dateline = $dateline;
+
+        $this->project_time = strtotime($this->current_time);
+        $this->working_datum = $this->time_agent->datumTime(
+            $this->current_time
+        );
+
         if ($input == "") {
             return;
+        }
+
+        $dateline = $this->extractDateline($input);
+
+        if (
+            !(
+                $dateline["year"] === false and
+                $dateline["month"] === false and
+                $dateline["day_number"] === false
+            )
+        ) {
+            $date_string =
+                $dateline["year"] .
+                "-" .
+                str_pad($dateline["month"], 2, "0", STR_PAD_LEFT) .
+                "-" .
+                str_pad($dateline["day_number"], 2, "0", STR_PAD_LEFT);
+
+            $this->projected_time = strtotime($date_string);
+
+            $this->working_datum = $this->time_agent->datumTime($date_string);
+            $this->dateline = $dateline;
+            /*
+        } else {
+            $timestamp = $this->zuluStamp($this->current_time);
+
+            $dateline = $this->extractDateline($timestamp);
+
+            $this->dateline = $dateline;
+
+            $this->project_time = strtotime($this->current_time);
+            $this->working_datum = $this->time_agent->datumTime(
+                $this->current_time
+            );
+*/
         }
 
         $this->months = $this->extractMonths($input);

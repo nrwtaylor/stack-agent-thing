@@ -59,14 +59,11 @@ class Agent
             $this->agent_input = $input;
         }
 
-//        $this->getName();
-
         $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
         // Given a "thing".  Instantiate a class to identify
         // and create the most appropriate agent to respond to it.
 
         $this->thing = $thing;
-
         $this->thing->agent_class_name_current = $this->agent_class_name;
 
         $this->thing_report["thing"] = $this->thing;
@@ -199,6 +196,7 @@ class Agent
 
 }
 */
+
         $this->init();
 
         // read the current agent.
@@ -206,6 +204,7 @@ class Agent
             $this->{"init" . $this->agent_class_name}();
         }
         $this->get();
+
         try {
             $this->read();
             $this->run();
@@ -213,6 +212,7 @@ class Agent
 
             $this->set();
         } catch (\OverflowException $t) {
+
             $this->response =
                 "Stack variable store is full. Variables not saved. Text FORGET ALL.";
             $web_thing = new Thing(null);
@@ -230,7 +230,7 @@ class Agent
             $web_thing->Create(
                 $this->from,
                 "error",
-                "Throwable: Set failed." .
+                "Throwable: Set failed. " .
                     $t->getMessage() .
                     " " .
                     $t->getTraceAsString()
@@ -248,7 +248,7 @@ class Agent
             $web_thing->Create(
                 $this->from,
                 "error",
-                "Exception: Set failed." .
+                "Exception: Set failed. " .
                     $e->getMessage() .
                     " " .
                     $t->getTraceAsString()
@@ -258,9 +258,12 @@ class Agent
             // Executed only in PHP 5, will not be reached in PHP 7
         }
 
+
         if ($this->agent_input == null or $this->agent_input == "") {
             $this->respond();
         }
+
+
         if (!isset($this->response)) {
             $this->response = "No response found.";
         }
@@ -278,7 +281,12 @@ class Agent
             $this->test();
         }
         $this->thing->log("__construct complete");
+
     }
+
+function __destruct() {
+
+}
 
     public function initAgent()
     {
@@ -300,7 +308,8 @@ class Agent
     // TODO DEV?
     public function __call($agent_function, $args)
     {
-if (!isset($this->thing)) {return true;}
+if (!isset($this->thing)) {
+return true;}
 //        $this->thing->log("__call start");
         /*
         Generalize this pattern from agents.
@@ -353,7 +362,6 @@ if (!isset($this->thing)) {return true;}
         // Call it if we find it.
 
         $agent_namespace_names[] = $agent_namespace_name;
-
         $agent_namespace_names[] =
             "\\Nrwtaylor\\StackAgentThing\\" . strtoupper($agent_class_name);
 
@@ -385,7 +393,6 @@ if (!isset($this->thing)) {return true;}
                 );
                 $response = $agent_handler->{$function_name}(...$args);
 */
-
                 // Test optimize by only initiating once.
                 if (!isset($this->thing->{$agent_name . "_handler"})) {
                     $this->thing->{$agent_name .
@@ -466,7 +473,8 @@ public function __set($name, $value) {
      */
     public function set()
     {
-       if (!isset($this->ping)) {return true;}
+       if ($this->agent_name == 'agent') {return;}
+       if (!isset($this->{$this->agent_name})) {return true;}
        $this->thing->Write([$this->agent_name], $this->{$this->agent_name});
     }
 
@@ -481,11 +489,12 @@ public function __set($name, $value) {
 
         $this->rules_list = [];
         $this->unique_count = 0;
-
         $findagent_thing = new Findagent($this->thing, $agent_name);
+
         if (!is_array($findagent_thing->thing_report["things"])) {
             return;
         }
+
         $count = count($findagent_thing->thing_report["things"]);
 
         //$rule_agent = new Rule($this->thing, "rule");
@@ -495,7 +504,7 @@ public function __set($name, $value) {
                 array_reverse($findagent_thing->thing_report["things"])
                 as $thing_object
             ) {
-                $uuid = $thing_object["uuid"];
+              $uuid = $thing_object["uuid"];
                 $variables_json = $thing_object["variables"];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
@@ -512,6 +521,7 @@ public function __set($name, $value) {
                 $thing->nom_from = $thing_object["nom_from"];
 
                 $thing->variables = $variables;
+
                 $thing->created_at = $thing_object["created_at"];
 
                 $thing->associations = $associations;
@@ -524,7 +534,6 @@ public function __set($name, $value) {
                 $response = $this->readAgent($thing_object["task"]);
             }
         }
-
         return $things;
     }
 
@@ -577,7 +586,7 @@ public function __set($name, $value) {
         foreach ($indicators as $flag_name => $flag_indicators) {
             foreach ($flag_indicators as $flag_indicator) {
                 $f = $this->agent_name . "_" . $flag_name . "_flag";
-                if (stripos($input, $flag_indicator) !== false) {
+          if (stripos($input, $flag_indicator) !== false) {
                     $this->{$f} = "on";
                 }
 
@@ -679,6 +688,14 @@ public function __set($name, $value) {
         $this->makeJPEGs();
 
         $this->makeSMS();
+
+        //var_dump($this->error);
+
+        if (isset($this->error) and $this->error != "" and $this->error != null) {
+           $sms = $this->thing_report['sms'];
+           $this->sms_message = $sms . " " . $this->error;
+           $this->thing_report['sms'] = $sms . " " . $this->error;
+        } 
 
         // Snippet might be used by web.
         // So run it first.
@@ -803,6 +820,8 @@ public function __set($name, $value) {
                 }
             }
         }
+
+$this->makeThingreport();
 
         if (
             strtolower($this->agent_name) == "agent" and
@@ -1080,31 +1099,9 @@ public function __set($name, $value) {
         }
     }
 
-    public function getMemcached()
-    {
-        if (isset($this->mem_cached)) {
-            return;
-        }
-
-        // Null?
-        // $this->mem_cached = null;
-
-        try {
-            $this->mem_cached = new \Memcached(); //point 2.
-            $this->mem_cached->addServer("127.0.0.1", 11211);
-        } catch (\Throwable $t) {
-            // Failto
-            $this->mem_cached = new Memory($this->thing, "memory");
-            //restore_error_handler();
-            $this->thing->log(
-                "caught memcached throwable. made memory",
-                "WARNING"
-            );
-            return;
-        } catch (\Error $ex) {
-            $this->thing->log("caught memcached error.", "WARNING");
-            return true;
-        }
+    public function memcachedAgent() {
+       $t = new Memcached($this->thing, "memcached");
+       $this->mem_cached = $t->mem_cached;
     }
 
     /**
@@ -1407,46 +1404,11 @@ public function __set($name, $value) {
      */
     public function respond()
     {
+//if ($this->agent_name !== 'agent') {return;}
+//var_dump($this->agent_name);
+        // Call the response agent
         $this->respondResponse();
     }
-
-    /**
-     *
-     */
-/*
-    public function respondResponse()
-    {
-        $agent_flag = true;
-        if ($this->agent_name == "agent") {
-            return;
-        }
-
-        if ($agent_flag == true) {
-            if (!isset($this->thing_report["sms"])) {
-                $this->thing_report["sms"] = "AGENT | Standby.";
-            }
-
-            $this->thing_report["message"] = $this->thing_report["sms"];
-            if ($this->agent_input == null or $this->agent_input == "") {
-                $message_thing = new Message($this->thing, $this->thing_report);
-                $this->thing_report["info"] =
-                    $message_thing->thing_report["info"];
-            }
-        }
-    }
-*/
-   public function respondResponse()
-    {
-        $this->thing_report['email'] = $this->message;
-        $this->thing_report['message'] = $this->message;
-
-        if ($this->agent_input == null) {
-            $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-        }
-
-    }
-
 
     public function makeInput()
     {
@@ -1866,6 +1828,14 @@ public function __set($name, $value) {
 
         $this->thing->log('read "' . $this->subject . '".');
 
+// dev here?
+
+$indicators = [
+'link' => ['web','link'],
+];
+
+$this->flagAgent($indicators, $this->subject);
+
         $this->readFrom();
         $this->readSubject();
         // read the current agent.
@@ -1953,13 +1923,14 @@ $this->shutdownHandler();
 */
 
         //if ($agent_class_name == 'Test') {return false;}
-        set_error_handler([$this, "warning_handler"], E_WARNING | E_NOTICE);
+          set_error_handler([$this, "warning_handler"], E_WARNING | E_NOTICE);
 
         //set_error_handler("warning_handler", E_WARNING);
 
         try {
             $agent_namespace_name =
                 "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
+
             $this->thing->log(
                 'trying Agent "' . $agent_class_name . '".',
                 "INFORMATION"
@@ -1984,7 +1955,6 @@ $this->shutdownHandler();
             if (!isset($thing->subject)) {
                 $thing->subject = $this->input;
             }
-
             $agent = new $agent_namespace_name($thing, $agent_input);
             //$shouldExit = false;
 
@@ -2031,10 +2001,23 @@ if ($pid == -1) {
             //$agent = false;
             //}
         } catch (\Throwable $t) {
+
             restore_error_handler();
             $this->thing->log("caught throwable.", "WARNING");
+
+            $message = $t->getMessage();
+
+            // $code = $ex->getCode();
+            $file = $t->getFile();
+            $line = $t->getLine();
+
+            $input = $message . "  " . $file . " line:" . $line;
+            $this->thing->log($input, "WARNING");
+
+
             return false;
         } catch (\Error $ex) {
+
             restore_error_handler();
             // Error is the base class for all internal PHP error exceptions.
             $this->thing->log(
@@ -2191,9 +2174,11 @@ if ($pid == -1) {
         $this->responsive_agents = $responsive_agents;
 
         foreach ($this->responsive_agents as $i => $j) {
-            $this->thing->log($j["agent_name"] . " " . $j["score"] . "\n");
+            $this->thing->log($j["agent_name"] . " " . $j["score"] . "\n", "INFORMATION");
 
         }
+
+
     }
 
     public function scoreAgent($text, $matched_characters = null)
@@ -2455,13 +2440,16 @@ if ($pid == -1) {
             }
         }
 
-//        if (substr($this->subject, 0, 7) == "THING |") {
-//if ($this->from == '17787923915') {
+        // Recognize incoming things.
+        // Develop channel forwarding.
+        if (substr($this->subject, 0, 7) == "THING |") {
 
-//$this->sendDiscord($this->subject, 'kokopelli:#general@kaiju.discord');
+            $to_repeat = $this->addressKaiju($this->from);
+            if ($to_repeat !== null) {
+                $this->sendDiscord($this->subject, $to_repeat);
+            }
+        }
 
-//}
-  //      }
 
         // Dev test for robots
         $this->thing->log("created a Robot agent.", "INFORMATION");
@@ -2946,6 +2934,7 @@ if ($pid == -1) {
 
         $input = trim($input);
         $this->input = $input;
+
         // Check if it is a command (starts with s slash)
         if (strtolower(substr($input, 0, 2)) != "s/") {
             // Okay here check for input
@@ -3128,20 +3117,23 @@ echo "TRUE";
         $input_agent = new Input($this->thing, "input");
         $input_state = $input_agent->stateInput();
         if ($input_agent->stateInput() == "anticipate") {
-            $this->response .= "Input anticipated. ";
+            $this->response .= "Input anticipated ";
 
             $agent_class_name = $input_agent->agentInput();
+if (!is_string($agent_class_name)) {$agent_class_name = $this->agent_name;}
 
-            $this->response .= "Saw " . $agent_class_name . ". ";
+            $this->response .= "by " . $agent_class_name . ". ";
 
             $agent = $this->getAgent($agent_class_name, "input");
 
-            if ($agent !== false) {
+            if (!($agent == false or $agent == true)) {
                 $this->thing_report = $agent->thing_report;
                 $input_agent->dropInput();
 
                 return $this->thing_report;
             }
+
+
         }
 
         $headcode = new Headcode($this->thing, "extract");
@@ -3171,7 +3163,10 @@ echo "TRUE";
                 }
                 // Otherwise check in as last resort...
             }
+$this->head_code = $headcode->head_code;
+
         }
+
 
         // Temporarily alias robots
         if (strpos($input, "robots") !== false) {

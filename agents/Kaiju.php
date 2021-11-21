@@ -865,11 +865,14 @@ class Kaiju extends Agent
         return null;
     }
 
+    public function getAddress($searchfor = null) {
+       $this->addressKaiju($searchfor);
+    }
     /**
      *
      * @param unknown $searchfor (optional)
      */
-    function getAddress($searchfor = null)
+    public function addressKaiju($searchfor = null)
     {
         $librex = "kaiju.txt";
         $this->getLibrex($librex);
@@ -892,11 +895,13 @@ class Kaiju extends Agent
             }
         }
 
-
+        $address = null;
         $this->kaiju_address = null;
         if (count($kaiju_list) == 1) {
             $this->kaiju_address = $kaiju_list[0];
+            $address = $this->kaiju_address;
         }
+        return $address;
     }
 
     /**

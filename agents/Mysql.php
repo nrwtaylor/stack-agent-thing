@@ -88,7 +88,6 @@ echo "fopo";
         // create ontainer and configure it
 
         $settings = require $GLOBALS["stack_path"] . "private/settings.php";
-
         $this->web_prefix = $settings["settings"]["stack"]["web_prefix"];
         $this->state = $settings["settings"]["stack"]["state"];
 
@@ -140,45 +139,46 @@ echo "fopo";
             $this->user = $db["user"];
             $this->pass = $db["pass"];
         }
-
+        // https://stackoverflow.com/questions/6263443/pdo-connection-test/6263868#6263868
+        /*
+try {
+    $this->pdo = new PDO($cfg['DB'], $cfg['DB_USER'], $cfg['DB_PASS'],
+        array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+} catch {
+    echo("Can't open the database.");
+}
+*/
+        $this->error = null;
         try {
             $pdo = new PDO(
                 "mysql:host=" . $this->host . ";dbname=" . $this->dbname,
                 $this->user,
                 $this->pass
             );
-//echo "bar";
-//exit();
+
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-
             $this->pdo = $pdo;
         } catch (\Throwable $t) {
-            throw new \Exception("Could not connect to MySQL database.");
+            $this->error = 'Could not connect to MySQL database';
+            $this->errorMysql($t->getMessage());
         } catch (\Error $ex) {
-            throw new \Exception("Could not connect to MySQL database.");
+            $this->errorMysql($ex->getMessage());
+
+            $this->error = 'Could not connect to MySQL database';
         }
-
-        // NRW Taylor 12 June 2018
-        // devstack Database for to disk persistent memory calls, redis for in ram persistent calls
-
-        //   $this->char_max = $this->thing->container["stack"]["char_max"];
-
-        //   $this->uuid = $uuid;
-
-        //        $this->test("Database set-up ");
-
-        // Which means at this point, we have a UUID
-        // whether or not the record exists is another question.
-
-        // But we don't need to find, it because the UUID is randomly created.
-        // Chance of collision super-super-small.
-
-        // So just return the contents of thing.  false if it doesn't exist.
-
-        //        $this->split_time = microtime(true);
     }
 
+    public function errorMysql($text = null)
+    {
+        if ($text == null) {
+            return;
+        }
+        if (!isset($this->response)) {
+            $this->response = "";
+        }
+        $this->response .= $text . " ";
+    }
     function get()
     {
     }
@@ -188,18 +188,15 @@ echo "fopo";
 
     public function respondResponse()
     {
-        /*
-        $this->thing->flagGreen();
-
-        $this->thing_report["message"] = $this->sms_message;
-        $this->thing_report["txt"] = $this->sms_message;
-        $this->thing_report["email"] = $this->sms_message;
-
-        if ($this->agent_input == null) {
+        $this->thing_report["message"] = $this->thing_report["sms"];
+        if (
+            $this->agent_input == null or
+            $this->agent_input == "" or
+            $this->agent_input == 'response'
+        ) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
-*/
     }
 
     function readSubject()
@@ -210,9 +207,21 @@ echo "fopo";
     {
     }
 
+    public function makeMessage()
+    {
+        $m = "MySQL stack available.";
+        if (!isset($this->pdo) or $this->pdo == null) {
+            $m = "MySQL stack not available.";
+        }
+
+        $this->message = $m;
+        $this->thing_report['message'] = $m;
+    }
+
     public function makeSMS()
     {
-        $sms = "MYSQL";
+        $sms = "MYSQL | " . $this->message;
+
         $this->sms_message = $sms;
         $this->thing_report["sms"] = $sms;
     }
@@ -224,7 +233,11 @@ echo "fopo";
      */
     function priorMysql($created_at = null)
     {
-        if ($this->get_prior === false) {
+        if (
+            !isset($this->pdo) or
+            $this->pdo == null or
+            $this->get_prior === false
+        ) {
             $thingreport = [
                 "thing" => false,
                 "info" => "Prior get is off for this stack.",
@@ -311,19 +324,24 @@ echo "fopo";
      */
     function writeField($field_text, $string_text)
     {
-        //        $this->split_time = microtime(true);
-        //        $this->log = [$field_text, $string_text];
-        //$this->test( $this->get_calling_function() );
+        // merp
+        if (strlen($string_text) > 100000) {
+            var_dump($string_text);
 
-        // sqlinjection commentary
-        // user provided string_text
-        // stack provided field_text
+            $string_text = json_encode(['mysql' => ['field length exceed']]);
+        }
+
+        if (!isset($this->pdo)) {
+            return true;
+        }
+
+        $uuid = $this->uuid;
 
         try {
             $query = "UPDATE stack SET $field_text=:string_text WHERE uuid=:uuid";
             $sth = $this->pdo->prepare($query);
+            $sth->bindParam(":uuid", $uuid);
 
-            $sth->bindParam(":uuid", $this->uuid);
             $sth->bindParam(":string_text", $string_text);
 
             // This is not allowed by PHP.
@@ -331,31 +349,24 @@ echo "fopo";
             //$sth->bindParam(":field_text", $field_text);
 
             $sth->execute();
-            //            $sth = null;
-            //$sth->close();
+
+            if (!$sth) {
+                $this->error .= $sth->errorInfo();
+            }
+
             $this->last_update = false;
+        } catch (\PDOException $e) {
+            $this->error .= $e->getMessage();
+        } catch (\Throwable $e) {
+            $this->error .= $e->getMessage();
         } catch (\Exception $e) {
-            // Devstack - decide how to handle thing full
-            // Do this for now.
+            $this->error .= $e->getMessage();
 
-            //            $t = new Thing(null);
-            //            $t->Create('stack', "error", 'writeField ' . $e->getMessage());
-
-            // Commented out 24 November 2019.
-            // Prevents a SQLSTATE[22001] error from looping.
-            //$t = new Bork($t);
-
-            //echo "BORK | Thing is full.";
-            //echo 'Caught error: ',  $e->getMessage(), "\n";
             $thing = false;
             $this->last_update = true;
         }
 
         $sth = null;
-
-        //        $this->operations_time += microtime(true) - $this->split_time;
-        //        $this->operations += 1;
-        //$this->test("writeField");
     }
 
     /**
@@ -408,20 +419,15 @@ echo "fopo";
      */
     function createMysql($subject, $to)
     {
+        if (!isset($this->pdo) or $this->pdo == null) {
+            return false;
+        }
         try {
             // Create a new record in the db for the Thing.
-            //            $this->split_time = microtime(true);
-
-            //$this->test("Create");
 
             $query = $this->pdo->prepare("INSERT INTO stack
-			(uuid,task,nom_from,nom_to)
-			VALUES (:uuid, :task, :hash_nom_from, :nom_to)");
-
-            $query->bindParam(":uuid", $uuid);
-            $query->bindParam(":task", $task);
-            $query->bindParam(":hash_nom_from", $hash_nom_from);
-            $query->bindParam(":nom_to", $nom_to);
+                        (uuid,task,nom_from,nom_to)
+                        VALUES (:uuid, :task, :nom_from, :nom_to)");
 
             $uuid = $this->uuid;
             $task = $subject;
@@ -434,11 +440,28 @@ echo "fopo";
             }
             $nom_to = $to;
 
+            $query->bindParam(":uuid", $uuid);
+            $query->bindParam(":task", $task);
+            $query->bindParam(":nom_from", $nom_from);
+            //  $query->bindParam(":hash_nom_from", $hash_nom_from);
+            $query->bindParam(":nom_to", $nom_to);
+
             $query->execute();
             $query = null;
+
+            //           $this->thing->log(
+            //                'made MYSQL record.',
+            //                "INFORMATION"
+            //            );
+
             return true;
             return $query;
         } catch (\Exception $e) {
+            //           $this->thing->log(
+            //                'could not create MySQL record.',
+            //                "INFORMATION"
+            //            );
+
             // Devstack - decide how to handle thing full
             // Do this for now.
 
@@ -468,25 +491,29 @@ echo "fopo";
     {
         // But we don't need to find, it because the UUID is randomly created.
         // Chance of collision super-super-small.
-
         // So just return the contents of thing.  false if it doesn't exist.
-
+        if (!isset($this->pdo) or $this->pdo == null) {
+            return false;
+        }
         try {
             // Trying long form.  Doesn't seme to have performance advantage.
-//            $sth = $this->pdo->prepare(
-//                "SELECT uuid, task, nom_from, nom_to, created_at, associations, message0, message1, message2, message3, message4, message5, message6, message7, settings, variables FROM stack WHERE uuid=:uuid"
-//            );
-
-            $sth = $this->pdo->prepare(
-                "SELECT uuid, task, nom_from, nom_to, created_at, associations, message0, settings, variables FROM stack WHERE uuid=:uuid"
-            );
-
+            //            $sth = $this->pdo->prepare(
+            //                "SELECT uuid, task, nom_from, nom_to, created_at, associations, message0, message1, message2, message3, message4, message5, message6, message7, settings, variables FROM stack WHERE uuid=:uuid"
+            //            );
+            $query =
+                "SELECT uuid, task, nom_from, nom_to, created_at, associations, message0, settings, variables FROM stack WHERE uuid=:uuid";
+            $sth = $this->pdo->prepare($query);
 
             //$sth = $this->container->db->prepare("SELECT * FROM stack WHERE uuid=:uuid");
             $sth->bindParam("uuid", $this->uuid);
-            $sth->execute();
-            $thing = $sth->fetchObject();
 
+            $sth->execute();
+
+            $thing = $sth->fetchObject();
+            //    } catch ( \PDOException $e ) {
+            //        echo 'ERROR!';
+            //exit();
+            //        print_r( $e )
         } catch (\Exception $e) {
             // devstack look get the error code.
             // SQLSTATE[HY000] [2002] Connection refused
@@ -500,6 +527,7 @@ echo "fopo";
             $thing = false;
         }
         $sth = null;
+
         return $thing;
     }
 
@@ -670,7 +698,6 @@ echo "fopo";
                 'So here are Things with the variable you provided in \$variables. That\'s what you want';
             $thingreport["things"] = $things;
         } catch (\PDOException $e) {
-
             // echo "Error in PDO: ".$e->getMessage()."<br>";
             $thingreport["info"] = $e->getMessage();
             $thingreport["things"] = [];
@@ -1624,6 +1651,10 @@ echo "fopo";
         $task_exclusions = null,
         $nom_to_exclusions = null
     ) {
+        if (!isset($this->pdo)) {
+            return true;
+        }
+
         // Example:
         // SELECT * FROM stack WHERE nom_from='test@test.test' and ((task not like '%?%') or (nom_from not like '%transit%') or (nom_from not like '%test%')) ORDER BY RAND() LIMIT 3;
 
@@ -1667,7 +1698,7 @@ echo "fopo";
             ") ORDER BY RAND() LIMIT 3";
 
         $sth = $this->pdo->prepare($query);
-        $sth->bindParam("nom_from", $nom_from);
+        //        $sth->bindParam("nom_from", $nom_from);
         $sth->execute();
         $things = $sth->fetchAll();
 

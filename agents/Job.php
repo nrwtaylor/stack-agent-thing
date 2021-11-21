@@ -92,11 +92,12 @@ class Job extends Agent
 
     public function runJob($datagram)
     {
-        $to = $datagram["to"];
+        $to = $datagram["from"];
         $subject = $datagram["subject"];
-        $from = $datagram["from"];
+        $from = $datagram["to"];
 
-        if ($datagram["agent_input"] == "gearman") {
+
+        if ((isset($datagram['agent_input'])) and $datagram["agent_input"] == "gearman") {
             $arr = json_encode([
                 "to" => $to,
                 "from" => $from,
@@ -113,7 +114,8 @@ class Job extends Agent
         $this->thing->console($subject . "\n");
 
         $thing = new Thing(null);
-        $thing->Create($from, $to, $subject);
+        $thing->Create($to, $from, $subject);
+        //$thing->Create($from, $to, $subject);
         $agent_handler = new Agent($thing, null);
         $this->thing->console($agent_handler->thing_report["sms"] . "\n");
         $this->response .= "Ran job. ";
@@ -355,6 +357,10 @@ class Job extends Agent
             $this->txt_message .= "\n\n";
             $this->txt_message .= $this->sms_message;
         }
+$created_at_text = "just now";
+if ($this->thing->thing !== false) {
+$created_at_text = $this->thing->thing->created_at;
+}
 
         if ($this->verbosity >= 1) {
             $this->txt_message .= "\n";
@@ -363,7 +369,7 @@ class Job extends Agent
                 "thing to do " .
                 $this->thing->nuuid .
                 " made up at " .
-                $this->thing->thing->created_at .
+                $created_at_text .
                 "\n";
             $this->txt_message .=
                 "This template job is hosted by the " .
@@ -652,8 +658,10 @@ class Job extends Agent
     public function get()
     {
         $contents = $this->load("job/jobs.txt");
-        $this->jobs_list = require $this->resource_path . "job/jobs.php";
-
+$jobs_filename =  $this->resource_path . "job/jobs.php";
+if (file_exists($jobs_filename)) {
+        $this->jobs_list = require $jobs_filename;
+}
         $this->getJobs();
     }
 

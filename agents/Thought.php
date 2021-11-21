@@ -107,6 +107,12 @@ class Thought extends Agent
             ['s/', 'stack record'],
             ['ant', 'email', 'transit', 'translink']
         );
+if ($thingreport=== true) {
+
+$this->thought = "Did not think anything.";
+return;
+
+}
         $things = $thingreport['thing'];
 
         $thing = $things[array_rand($things)];
