@@ -1961,6 +1961,7 @@ Now draw the twilight.
      */
     public function readSubject()
     {
+
         $i = str_replace("-", " ", $this->input);
 
 $tokens = explode(" ", $i);
@@ -1978,7 +1979,7 @@ $this->timezone = $timezones[0];
         $dateline = $this->extractDateline($i);
         if (
             !(
-                $dateline["year"] === false and
+//                $dateline["year"] === false and // comes through as 2021
                 $dateline["month"] === false and
                 $dateline["day_number"] === false
             )
@@ -1989,7 +1990,6 @@ $this->timezone = $timezones[0];
                 str_pad($dateline["month"], 2, "0", STR_PAD_LEFT) .
                 "-" .
                 str_pad($dateline["day_number"], 2, "0", STR_PAD_LEFT);
-
             $this->projected_time = strtotime($date_string);
 
             $this->working_datum = $this->time_agent->datumTime($date_string);
