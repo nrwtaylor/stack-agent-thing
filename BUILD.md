@@ -903,3 +903,30 @@ $ composer require mongodb/mongodb
 $ sudo pecl install mongodb
 extension=mongodb.so > php.ini
 $ https://docs.mongodb.com/drivers/php/
+
+http://gearman.org/getting-started/
+$ tar xzf gearmand-X.Y.tar.gz
+$ cd gearmand-X.Y
+$ ./configure
+$ make
+$ make install
+
+
+http://pecl.php.net/get/gearman-2.1.0.tgz
+
+tar xzf gearman-X.Y.tgz
+cd gearman-X.Y
+phpize
+./configure
+make
+make install
+
+The following line will need to be added to all php.ini files, usually located in /etc/php.
+
+extension="gearman.so"
+
+The module should now be usable by all PHP interfaces. To test using the PHP command line interface, create gearman_version.php with the following contents:
+
+<?php
+print gearman_version() . "\n";
+?>

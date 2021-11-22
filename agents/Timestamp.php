@@ -61,13 +61,31 @@ class Timestamp extends Agent
         }
     }
 
-    function set()
+    public function get()
     {
+        $time_string = $this->thing->Read(["timestamp", "refreshed_at"]);
+
+        if ($time_string == false) {
+            $time_string = $this->thing->time();
+            $this->thing->Write(
+                ["timestamp", "refreshed_at"],
+                $time_string
+            );
+        }
+
+        $this->refreshed_at = strtotime($time_string);
+
+        $this->timestamp = $this->thing->Read(["timestamp", "timestamp"]);
     }
 
-    function get($run_at = null)
+    public function set()
     {
+        if ($this->timestamp != false) {
+            $this->thing->Write(["timestamp", "timestamp"], $this->timestamp);
+        }
     }
+
+
 
     function validTimestamp(string $date, string $format = 'Y-m-d'): bool
     {
@@ -200,6 +218,41 @@ return false;
     {
     }
 
+
+    function makeWeb()
+    {
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/timestamp";
+
+        $this->node_list = [
+            "timestamp" => ["timestamp"],
+        ];
+
+        $this->makeChoices();
+
+        $web = "";
+        $web .= "<p>";
+        $web .= "<p>";
+
+//$web .= $this->timestamp;
+//$web .= $this->sms_message;
+
+        $web .= "<br>";
+        $web .= "<p>";
+
+        $this->thing_report["web"] = $web;
+    }
+
+  public function makeChoices()
+    {
+        $this->thing->choice->Create(
+            $this->agent_name,
+            $this->node_list,
+            "timestamp"
+        );
+        $choices = $this->thing->choice->makeLinks("timestamp");
+        $this->thing_report["choices"] = $choices;
+    }
+
     // Devstack
     // ?
     public function respondResponse()
@@ -210,8 +263,8 @@ return false;
 
         // Generate email response.
 
-        $choices = false;
-        $this->thing_report['choices'] = $choices;
+//        $choices = false;
+//        $this->thing_report['choices'] = $choices;
 
         //$this->thing_report['email'] = $this->sms_message;
         //$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
@@ -244,6 +297,7 @@ return false;
 
     public function findTimestamp($text = null)
     {
+if ($this->timestamp != false) {return;}
         //        if (strtotime($text) == false) {return true;}
 
         // Apparently strtotime reads "zulu" as 1605193914;
@@ -256,9 +310,7 @@ return false;
         if (isset($this->thing_report['sms'])) {
             return;
         }
-
         $sms = "TIMESTAMP | " . $this->timestamp;
-
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }

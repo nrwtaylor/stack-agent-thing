@@ -30,7 +30,6 @@ class Agent
         //$this->thing = false;
         //return;
         //        }
-
         $this->getName();
 
 
@@ -211,6 +210,7 @@ class Agent
             $this->make();
 
             $this->set();
+
         } catch (\OverflowException $t) {
 
             $this->response =
@@ -276,16 +276,15 @@ class Agent
             $this->thing->elapsed_runtime()
         );
         $this->thing_report["log"] = $this->thing->log;
+
         if (isset($this->test) and $this->test) {
             $this->thing->log("start test");
             $this->test();
         }
         $this->thing->log("__construct complete");
-
     }
 
 function __destruct() {
-
 }
 
     public function initAgent()
@@ -1838,6 +1837,7 @@ $this->flagAgent($indicators, $this->subject);
 
         $this->readFrom();
         $this->readSubject();
+
         // read the current agent.
         if (
             $this->agent_class_name !== "Agent" and
@@ -1862,6 +1862,8 @@ $this->flagAgent($indicators, $this->subject);
         }
 
         if ($this->thing->deny_agent->isDeny() === true) {
+echo 'merp';
+exit();
             $this->do_not_respond = true;
             throw new \Exception("Address not allowed.");
         }
