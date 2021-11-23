@@ -446,7 +446,7 @@ class Message extends Agent
         if (isset($this->do_not_send) and $this->do_not_send == true) {
             $this->thing->log($this->agent_prefix . " do not send.", "WARNING");
             $this->thing_report["info"] =
-                'Agent "Message" saw, "Do not send this thing.".';
+                'Agent "Message" saw, "Do not send this thing."';
             return;
         }
 
