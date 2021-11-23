@@ -19,7 +19,6 @@ class Card extends Agent
         // Instead.
 
         $this->node_list = ["card" => ["card", "roll", "trivia"]];
-
     }
 
     public function get()
@@ -31,24 +30,16 @@ class Card extends Agent
         $this->current_time = $this->thing->time();
 
         // Borrow this from iching
-        $time_string = $this->thing->Read([
-            "card",
-            "refreshed_at",
-        ]);
+        $time_string = $this->thing->Read(["card", "refreshed_at"]);
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->Write(
-                ["card", "refreshed_at"],
-                $time_string
-            );
+            $this->thing->Write(["card", "refreshed_at"], $time_string);
         }
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->nom = strtolower(
-            $this->thing->Read(["card", "nom"])
-        );
+        $this->nom = strtolower($this->thing->Read(["card", "nom"]));
         $this->suit = $this->thing->Read(["card", "suit"]);
         if ($this->nom == false or $this->suit == false) {
             $this->getCard();
@@ -170,6 +161,46 @@ class Card extends Agent
         $filename = strtoupper($card['nom']) . $suit . ".svg";
 
         return $filename;
+    }
+
+    public function makePNG()
+    {
+// https://developpaper.com/analysis-on-the-method-of-transforming-svg-into-png-format-with-php/
+        // dev not working
+
+        $card = ["nom" => $this->nom, "suit" => $this->suit];
+
+        $filename = $this->svgCard($card);
+        $svg = file_get_contents($this->resource_path . 'card/' . $filename);
+
+        $im = new \Imagick();
+        $im->setBackgroundColor(new \ImagickPixel("transparent"));
+        $im->readImageBlob($svg);
+
+        $im->setImageFormat("png24");
+        //$im->setImageFormat("png32");
+
+        // Works with and without.
+        $imagedata = $im->getImageBlob();
+        //$imagedata = $im;
+
+        $this->thing_report["png"] = $imagedata;
+
+        $response =
+            '<img src="data:image/png;base64,' .
+            base64_encode($imagedata) .
+            '"alt="day"/>';
+
+        $this->html_image =
+            '<img src="data:image/png;base64,' .
+            base64_encode($imagedata) .
+            '"alt="day"/>';
+
+        $this->PNG_embed = "data:image/png;base64," . base64_encode($imagedata);
+
+        $this->PNG = $imagedata;
+
+        return $response;
     }
 
     public function makeWeb()

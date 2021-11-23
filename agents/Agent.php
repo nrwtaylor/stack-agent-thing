@@ -30,6 +30,7 @@ class Agent
         //$this->thing = false;
         //return;
         //        }
+
         $this->getName();
 
 
@@ -210,7 +211,6 @@ class Agent
             $this->make();
 
             $this->set();
-
         } catch (\OverflowException $t) {
 
             $this->response =
@@ -276,15 +276,16 @@ class Agent
             $this->thing->elapsed_runtime()
         );
         $this->thing_report["log"] = $this->thing->log;
-
         if (isset($this->test) and $this->test) {
             $this->thing->log("start test");
             $this->test();
         }
         $this->thing->log("__construct complete");
+
     }
 
 function __destruct() {
+
 }
 
     public function initAgent()
@@ -785,6 +786,16 @@ public function __set($name, $value) {
 
         $this->makeKeyword();
         $this->makeLink();
+
+if ((isset($this->thing_report['png'])) and isset($this->link)) {
+
+//if (!(($this->thing_report['png'] == false) or ($this->thing_report['png'] == null) or ($this->thing_report['png'] == true))) {
+
+$this->image_url = $this->link .'.png';
+$this->thing_report['image_url'] = $this->image_url;
+//}
+
+}
 
         $this->makeHelp();
         $this->makeInfo();
@@ -1837,7 +1848,6 @@ $this->flagAgent($indicators, $this->subject);
 
         $this->readFrom();
         $this->readSubject();
-
         // read the current agent.
         if (
             $this->agent_class_name !== "Agent" and
@@ -1862,8 +1872,6 @@ $this->flagAgent($indicators, $this->subject);
         }
 
         if ($this->thing->deny_agent->isDeny() === true) {
-echo 'merp';
-exit();
             $this->do_not_respond = true;
             throw new \Exception("Address not allowed.");
         }
@@ -3085,6 +3093,10 @@ if ($pid == -1) {
 $chatbots = $this->extractChatbots($input);
 
         $input = $this->filterChatbots($input);
+
+
+        //$input = preg_replace("/\<[^)]+\>/","",$input); // 'ABC '
+
         // Remove reference to thing.
         //$input = str_replace("thing","",$input);
 
