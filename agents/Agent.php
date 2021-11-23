@@ -787,6 +787,16 @@ public function __set($name, $value) {
         $this->makeKeyword();
         $this->makeLink();
 
+if ((isset($this->thing_report['png'])) and isset($this->link)) {
+
+//if (!(($this->thing_report['png'] == false) or ($this->thing_report['png'] == null) or ($this->thing_report['png'] == true))) {
+
+$this->image_url = $this->link .'.png';
+$this->thing_report['image_url'] = $this->image_url;
+//}
+
+}
+
         $this->makeHelp();
         $this->makeInfo();
 
@@ -3083,6 +3093,10 @@ if ($pid == -1) {
 $chatbots = $this->extractChatbots($input);
 
         $input = $this->filterChatbots($input);
+
+
+        //$input = preg_replace("/\<[^)]+\>/","",$input); // 'ABC '
+
         // Remove reference to thing.
         //$input = str_replace("thing","",$input);
 

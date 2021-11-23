@@ -370,10 +370,17 @@ if (isset($t->thing_report['info'])) {
         $t->thing_report["png"] = base64_encode($t->thing_report["png"]);
     }
 
-    $t->thing_report["jpeg"] = null;
+    if (isset($t->thing_report["pdf"])) {
+        $t->thing_report["pdf"] = base64_encode($t->thing_report["pdf"]);
+    }
 
-    $t->thing_report["png"] = null;
-    $t->thing_report["pdf"] = null;
+    if (isset($t->thing_report["jpeg"])) {
+        $t->thing_report["jpeg"] = base64_encode($t->thing_report["jpeg"]);
+    }
+
+//    $t->thing_report["jpeg"] = null;
+//    $t->thing_report["png"] = null;
+//    $t->thing_report["pdf"] = null;
 
     // Not needed either.
     $t->thing_report["thing"] = null;
