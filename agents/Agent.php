@@ -1965,6 +1965,9 @@ $this->shutdownHandler();
             if (!isset($thing->subject)) {
                 $thing->subject = $this->input;
             }
+
+$thing->subject = $this->stripAgent($thing->subject);
+
             $agent = new $agent_namespace_name($thing, $agent_input);
             //$shouldExit = false;
 
@@ -2270,7 +2273,6 @@ if ($pid == -1) {
             $arr = $this->ngramsText($agent_input_text);
         }
 
-
         // Does this agent have code.
         $this->validateAgents($arr);
 
@@ -2321,7 +2323,6 @@ if ($pid == -1) {
 
         // Does this agent provide a text response.
         $this->responsiveAgents($this->agents);
-
         foreach ($this->responsive_agents as $i => $responsive_agent) {
         }
 
@@ -2344,7 +2345,6 @@ if ($pid == -1) {
         $filtered_text = preg_replace("/\<\@.*?\>/", "", $filtered_text);
 
         $filtered_text = ltrim($filtered_text);
-
         return $filtered_text;
     }
 
@@ -3202,7 +3202,8 @@ $this->head_code = $headcode->head_code;
             "OPTIMIZE"
         );
 
-
+//$i = $this->stripAgent($input);
+//var_dump($input);
         $arr = $this->extractAgents($input);
         $this->input = $input;
 // Sort and pick best scoring agent response.
@@ -3214,7 +3215,6 @@ usort($this->responsive_agents, function ($a, $b) {
 //foreach($this->responsive_agents as $i=>$r) {
 //$r['thing_report'] = null;
 //}
-
 
 
         if (count($this->responsive_agents) > 0) {
