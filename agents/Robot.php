@@ -150,8 +150,8 @@ class Robot extends Agent
         // Has a string of text in the Robot headers list matched?
         // Robot is self-identifying. 
         // Hello. Welcome. Thanks for the declaration.
-
-        if (count($this->hits) >= 1) {
+         
+        if ( (is_array($this->hits)) and (count($this->hits) >= 1)) {
             return true;
         }
         return false;
@@ -266,7 +266,7 @@ class Robot extends Agent
                     "privacy";
         }
 
-        if (count($this->hits) > 0) {
+        if ( is_array($this->hits) and (count($this->hits) > 0) ) {
             $this->response .= count($this->hits);
         }
 

@@ -779,7 +779,7 @@ class Charley extends Agent
         $this->PNG = $imagedata;
 
         $this->html_image = $response;
-
+        $this->thing_report['png'] = $imagedata;
         return $response;
     }
 

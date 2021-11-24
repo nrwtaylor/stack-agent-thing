@@ -591,6 +591,34 @@ class Flag extends Agent
         $this->image = $agent->image;
         $this->PNG = $agent->PNG;
         $this->PNG_embed = $agent->PNG_embed;
+
+        $this->thing_report["png"] = $agent->PNG;
+
+
+/*
+        if ($image = null) {
+            $image = $this->image;
+        }
+        if ($image == true) {
+            return true;
+        }
+
+        $agent = new Png($this->thing, "png");
+        $image = $this->makeImage();
+
+        if ($image === true) {
+            return true;
+        }
+
+        $agent->makePNG($image);
+
+        $this->html_image = $agent->html_image;
+        $this->image = $agent->image;
+        $this->PNG = $agent->PNG;
+
+        $this->thing_report["png"] = $agent->image_string;
+*/
+
     }
 
     public function assertFlag($text = null)
