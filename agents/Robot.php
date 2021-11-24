@@ -135,7 +135,12 @@ class Robot extends Agent
         $this->hits = $this->librex_agent->getHits($text);
 
         $this->header_text = $text;
-        $this->hits_count = count($this->hits);
+
+        $hits_count = 0;
+        if (is_array($this->hits)) {
+           $hits_count = count($this->hits);
+        }
+        $this->hits_count = $hits_count;
     }
 
     public function isRobot()
