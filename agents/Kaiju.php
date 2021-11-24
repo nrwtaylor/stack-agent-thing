@@ -1225,7 +1225,7 @@ class Kaiju extends Agent
 
         $web .= "<p>";
 
-        if (isset($this->kaiju_thing)) {
+        if ((isset($this->kaiju_thing)) and (is_array($this->kaiju_thing))) {
             $web .= "NUUID " . $this->kaiju_thing["nuuid"] . "<br>";
 
             $web .= "kaiju voltage " . $this->kaiju_thing["kaiju_voltage"];
