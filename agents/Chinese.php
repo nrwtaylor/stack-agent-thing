@@ -48,9 +48,9 @@ class Chinese extends Agent
             }
             // Return dictionary entry.
             $text = $this->findChinese("list", $value);
-            $words = $this->getConcept($text);
+            $words = $this->conceptChinese($text);
             if ($words != false) {
-                $this->words = array_merge($this->getConcept($text));
+                $this->words = array_merge($this->conceptChinese($text));
 
                 if (isset($this->words[0])) {
                     $this->word = $this->words[0];
@@ -66,10 +66,10 @@ class Chinese extends Agent
                 continue;
             }
 
-            $words = $this->getConcept($text);
+            $words = $this->conceptChinese($text);
 
             if ($words != false) {
-                $this->keywords = array_merge($this->getConcept($text));
+                $this->keywords = array_merge($this->conceptChinese($text));
                 if (isset($this->keywords[0])) {
                     $this->keyword = $this->keywords[0];
                 }
@@ -82,24 +82,15 @@ class Chinese extends Agent
      */
     function get()
     {
-        $time_string = $this->thing->Read([
-            "chinese",
-            "refreshed_at",
-        ]);
+        $time_string = $this->thing->Read(["chinese", "refreshed_at"]);
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->Write(
-                ["chinese", "refreshed_at"],
-                $time_string
-            );
+            $this->thing->Write(["chinese", "refreshed_at"], $time_string);
         }
 
         // If it has already been processed ...
-        $this->reading = $this->thing->Read([
-            "chinese",
-            "reading",
-        ]);
+        $this->reading = $this->thing->Read(["chinese", "reading"]);
     }
 
     /**
@@ -113,10 +104,7 @@ class Chinese extends Agent
 
         $this->reading = $this->chinese;
 
-        $this->thing->Write(
-            ["chinese", "reading"],
-            $this->reading
-        );
+        $this->thing->Write(["chinese", "reading"], $this->reading);
     }
 
     /**
@@ -153,7 +141,7 @@ class Chinese extends Agent
         while ($line !== false) {
             // do something with $line
 
-            $word = $this->getConcept($line);
+            $word = $this->conceptChinese($line);
 
             // Look for the shortest matching logogram sequences
             // Or for an exact match.
@@ -249,7 +237,7 @@ class Chinese extends Agent
     /**
      *
      */
-    function makeDictionary()
+    function dictionaryChinese()
     {
         // Makes a one character dictionary
 
@@ -264,7 +252,7 @@ class Chinese extends Agent
         $line = strtok($contents, $separator);
 
         while ($line !== false) {
-            $word = $this->getConcept($line);
+            $word = $this->conceptChinese($line);
 
             if (mb_strlen($word["traditional"]) == 1) {
                 //$dictionary_entry = $word['traditional'] . " " . $word['simplified'] . " " . $word['pin_yin'] . implode("/",$word['english']) . "\n";
@@ -288,7 +276,7 @@ class Chinese extends Agent
      * @param unknown $test
      * @return unknown
      */
-    function getConcept($test)
+    function conceptChinese($test)
     {
         // Take a CE-CCEDICT line and de-parse it
         // Traditional Simplified [pin1 yin1] /English equivalent 1/equivalent 2/
@@ -487,7 +475,6 @@ class Chinese extends Agent
                 $text_temp = $this->findChinese("list", $test_character_string);
 
                 if ($text_temp == false) {
-
                     $pointer += $value;
                     break;
                 }
@@ -660,7 +647,7 @@ class Chinese extends Agent
      * @param unknown $searchfor
      * @return unknown
      */
-    public function getContents($librex = null)
+    public function contentsChinese($librex = null)
     {
         // Look up the meaning in the dictionary.
         if ($librex == "" or $librex == " " or $librex == null) {
@@ -749,13 +736,12 @@ class Chinese extends Agent
             "agent-chinese-contents-" . strtolower($librex),
             $this->contents[$librex]
         );
-
     }
 
     public function findChinese($librex, $searchfor)
     {
         if (!isset($this->contents[$librex])) {
-            $this->getContents($librex);
+            $this->contentsChinese($librex);
         }
 
         // factor out
@@ -919,7 +905,15 @@ class Chinese extends Agent
 
                 // Assume this means a word was found.
                 $this->sms_message = "CHINESE ";
-                $this->sms_message .= count($this->words) . " phrases found.";
+
+                if (count($this->words) == 1) {
+                    $this->sms_message .= "One dictionary phrase found.";
+                }
+                if (count($this->words) > 1) {
+                    $this->sms_message .=
+                        count($this->words) . " dictionary phrases found.";
+                }
+
                 if (count($this->words) != 0) {
                     $this->sms_message .= " | ";
                 }
@@ -969,7 +963,7 @@ class Chinese extends Agent
 
                         $this->sms_message .= " | word is " . $word_string;
                     } else {
-                        $s = $this->chineseString($this->words[0]);
+                        $s = $this->textChinese($this->words[0]);
                         $this->sms_message .= " | words are " . $s;
                     }
                 } else {
@@ -986,10 +980,14 @@ class Chinese extends Agent
 
                 break;
             default:
-                $this->sms_message = "CHINESE | no match found.";
+                if (isset($this->translated_input)) {
+                    $this->sms_message = "CHINESE | " . $this->translated_input;
+                } else {
+                    $this->sms_message = "CHINESE | no match found.";
+                }
         }
 
-        $this->thing_report["sms"] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message . " " . $this->response;
     }
 
     /**
@@ -997,7 +995,7 @@ class Chinese extends Agent
      * @param unknown $word
      * @return unknown
      */
-    function chineseString($word)
+    function textChinese($word)
     {
         $traditional = $word["traditional"];
         $simplified = $word["simplified"];
@@ -1019,8 +1017,8 @@ class Chinese extends Agent
         if ($logogram_sequence == null) {
             return;
         }
-
         $translated_logogram_sequence = $this->wordsChinese($logogram_sequence);
+
         return $translated_logogram_sequence;
     }
 
@@ -1029,7 +1027,6 @@ class Chinese extends Agent
      */
     function makeEmail()
     {
-        //$this->email_message = "CHINESE | ";
         $this->email_message = $this->sms_message;
         $this->thing_report["email"] = $this->sms_message;
     }
@@ -1066,8 +1063,6 @@ class Chinese extends Agent
             //$has_chinese_characters = false;
             return false;
         }
-
-        //$this->has_chinese_characters = $has_chinese_characters;
     }
 
     /**
@@ -1078,10 +1073,8 @@ class Chinese extends Agent
     {
         $input = strtolower($this->input);
 
-        $this->thing->log($input);
-
         if (strtolower($input) == "chinese") {
-            $this->response = "Retrieved a message with Chinese in it.";
+            $this->response .= "Retrieved a message with Chinese in it. ";
             return;
         }
 
@@ -1118,19 +1111,18 @@ class Chinese extends Agent
         if ($has_chinese_characters) {
             $t = $this->readChinese($filtered_input);
             $this->translated_input = $t;
-
             $text = $this->findChinese("list", $filtered_input);
             $separator = "\r\n";
             $line = strtok($text, $separator);
             $this->words = [];
             while ($line !== false) {
-                $word = $this->getConcept($line);
+                $word = $this->conceptChinese($line);
                 $this->words[] = $word;
                 // do something with $line
                 $line = strtok($separator);
             }
             if (count($this->words) == 0) {
-                $this->response = "No Chinese translation found.";
+                $this->response .= "No Chinese translation found. ";
             }
 
             // Sort by length of phrase. Shortest first.
@@ -1142,7 +1134,7 @@ class Chinese extends Agent
 
             if (!isset($this->words[0])) {
                 $this->word = null;
-                $this->response = "Did not find a Chinese translation";
+                $this->response .= "Did not find a Chinese translation. ";
             } else {
                 $this->word = $this->words[0];
                 foreach ($this->words as $word) {
@@ -1154,7 +1146,7 @@ class Chinese extends Agent
                         break;
                     }
                 }
-                $this->response = "Found a Chinese translation.";
+                $this->response .= "Found a Chinese translation. ";
             }
             $this->filtered_input = $filtered_input;
             return;
@@ -1171,14 +1163,14 @@ class Chinese extends Agent
 
         $this->words = [];
         while ($line !== false) {
-            $word = $this->getConcept($line);
+            $word = $this->conceptChinese($line);
             $this->words[] = $word;
             // do something with $line
             $line = strtok($separator);
         }
 
         if (count($this->words) == 0) {
-            $this->response = "No English translation found.";
+            $this->response .= "No English translation found. ";
         }
 
         if (!isset($this->words[0])) {
@@ -1187,7 +1179,7 @@ class Chinese extends Agent
             $this->word = $this->words[0];
         }
 
-        $this->response = "No response.";
+        //$this->response .= "No response. ";
         $this->filtered_input = $filtered_input;
         return;
 
@@ -1197,7 +1189,7 @@ class Chinese extends Agent
         $t = $this->findChinese("english-chinese", $filtered_input);
 
         $this->filtered_input = $filtered_input;
-        $this->response = "Provided chinese words for english.";
+        $this->response .= "Provided chinese words for english. ";
         return;
 
         test:
