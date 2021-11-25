@@ -25,6 +25,8 @@ class Impressum extends Agent
     {
         $this->mail_regulatory =
             $this->thing->container["stack"]["mail_regulatory"];
+
+
         $this->node_list = ["start" => ["start", "opt-in"]];
         $this->impressum();
     }
@@ -60,8 +62,12 @@ class Impressum extends Agent
         if (isset($this->thing_report["sms"])) {
             $text = $this->thing_report["sms"];
         }
-        $shortcode_agent = new Shortcode($this->thing, "shortcode");
-        $text = $shortcode_agent->filterShortcode($text);
+
+$text = $this->mail_regulatory;
+$text = str_replace('\r',' ',$text);
+$text = str_replace('\n',' ',$text);
+$text = preg_replace('/\s+/', " ", $text);
+$text = trim($text);
 
         $sms = "IMPRESSUM | " . $text;
 
