@@ -1680,8 +1680,9 @@ $this->makeThingreport();
      * @param unknown $n     (optional)
      * @return unknown
      */
-    public function getNgrams($input, $n = 3)
+    public function getNgrams($input, $n = 3, $delimiter = null)
     {
+        if ($delimiter == null) {$delimiter = "";}
         $words = explode(" ", $input);
         $ngrams = [];
 
@@ -1689,9 +1690,9 @@ $this->makeThingreport();
             if ($key < count($words) - ($n - 1)) {
                 $ngram = "";
                 for ($i = 0; $i < $n; $i++) {
-                    $ngram .= $words[$key + $i];
+                    $ngram .= $words[$key + $i] . $delimiter;
                 }
-                $ngrams[] = $ngram;
+                $ngrams[] = trim($ngram);
             }
         }
         return $ngrams;
@@ -2239,20 +2240,23 @@ if ($pid == -1) {
         }
     }
 
-    public function ngramsText($text = null)
+    public function ngramsText($text = null, $gram_limit = 4, $delimiter = null)
     {
+        if ($delimiter == null) {$delimiter = "";}
         // See if there is an agent with the first workd
         $arr = explode(" ", trim($text));
         $agents = [];
 
-        $bigrams = $this->getNgrams($text, 2);
-        $trigrams = $this->getNgrams($text, 3);
-        $quadgrams = $this->getNgrams($text, 4);
+foreach( range(2, $gram_limit,1) as $number) {
+        $bigrams = $this->getNgrams($text, $number, $delimiter);
+//        $trigrams = $this->getNgrams($text, 3, $delimiter);
+//        $quadgrams = $this->getNgrams($text, 4, $delimiter);
 
 
         $arr = array_merge($arr, $bigrams);
-        $arr = array_merge($arr, $trigrams);
-        $arr = array_merge($arr, $quadgrams);
+//        $arr = array_merge($arr, $trigrams);
+//        $arr = array_merge($arr, $quadgrams);
+}
 
         return $arr;
     }

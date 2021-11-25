@@ -738,7 +738,7 @@ class Chinese extends Agent
         );
     }
 
-    public function findChinese($librex, $searchfor)
+    public function findChinese($librex, $searchfor, $return_array_flag = false)
     {
         if (!isset($this->contents[$librex])) {
             $this->contentsChinese($librex);
@@ -779,6 +779,10 @@ class Chinese extends Agent
         if (true) {
             if (preg_match_all($pattern, $contents, $matches)) {
                 $m = implode("\n", $matches[0]);
+                if ($return_array_flag === true) {
+                    $m = $matches[0];
+                }
+
                 $this->matches = $matches;
             }
         } else {
@@ -803,6 +807,9 @@ class Chinese extends Agent
             }
 
             $m = implode("\n", $matches[0]);
+            if ($return_array_flag === true) {
+                $m = $matches[0];
+            }
             $this->matches = $matches;
         }
 
@@ -878,6 +885,12 @@ class Chinese extends Agent
     function makeSMS()
     {
         switch (true) {
+            case isset($this->english_chinese_translation):
+                $sms =
+                    "CHINESE | " .
+                    $this->english_chinese_translation;
+                $this->sms_message = $sms;
+                break;
             case isset($this->word):
                 if (
                     isset($this->has_chinese_characters) and
@@ -1170,21 +1183,20 @@ class Chinese extends Agent
         }
 
         if (count($this->words) == 0) {
-            $this->response .= "No English translation found. ";
+            $this->response .= "No direct English translation found. ";
         }
 
         if (!isset($this->words[0])) {
+            $t = $this->englishChinese($filtered_input);
+            $this->english_chinese_translation = $t;
+            $this->response .= "Did a rough translation. ";
             $this->word = null;
         } else {
             $this->word = $this->words[0];
         }
 
-        //$this->response .= "No response. ";
         $this->filtered_input = $filtered_input;
         return;
-
-        // devstack code below here.
-        // Including a test read of a long passage.
 
         $t = $this->findChinese("english-chinese", $filtered_input);
 
@@ -1276,6 +1288,162 @@ class Chinese extends Agent
         $status = true;
 
         return $status;
+    }
+
+    public function bestChinese(
+        $dictionary_entries = null,
+        $english_text = null
+    ) {
+        // dev Lots more work needed here.
+
+        // Remove words like restrain when we want train
+
+        if ($english_text != null) {
+            $english_text = strtolower($english_text);
+            foreach ($dictionary_entries as $i => $dictionary_entry) {
+                //$tokens = explode(" " ,$dictionary_entry);
+
+                $tokens = preg_split(
+                    "/[\s,-,\/]+/",
+                    strtolower($dictionary_entry)
+                );
+
+                $match = false;
+                foreach ($tokens as $j => $token) {
+                    if ($token == $english_text) {
+                        $match = true;
+                    }
+                }
+                if ($match === false) {
+                    unset($dictionary_entries[$i]);
+                }
+            }
+        }
+
+        $besties = [];
+        foreach ($dictionary_entries as $i => $dictionary_entry) {
+            $tokens = explode(" ", $dictionary_entry);
+            $length = mb_strlen($tokens[0]);
+            if (!isset($besties[$length])) {
+                $besties[$length] = [];
+            }
+            $besties[$length][] = $dictionary_entry;
+
+            if (!isset($min_length)) {
+                $min_length = $length;
+            }
+            if ($length < $min_length) {
+                $min_length = $length;
+            }
+        }
+
+        // Having got the shortest logogram.
+        // Now take the longest dictionary entry.
+        // This encapsulates the most complicated concept with the short number of logograms.
+
+        foreach ($besties[$min_length] as $i => $bestie) {
+            $bestie_length = mb_strlen($bestie);
+
+            if (!isset($min_bestie_length)) {
+                $min_bestie_length = $bestie_length;
+                $best_bestie = $bestie;
+            }
+
+            if ($bestie_length < $min_bestie_length) {
+                $best_bestie = $bestie;
+                $min_bestie_length = $bestie_length;
+            }
+        }
+
+        return $best_bestie;
+    }
+
+    public function makeNgramStack($text)
+    {
+        $tokens = explode(" ", $text);
+        $count = count($tokens);
+
+        $input_stack = array_reverse($this->ngramsText($text, $count, ' '));
+        array_unique($input_stack);
+        usort($input_stack, function ($a, $b) {
+            return strlen($b) <=> strlen($a);
+        });
+
+        return $input_stack;
+    }
+
+    public function englishChinese($text = null)
+    {
+        // Process largest anglo concept that returns a dictionary result.
+        // Do this by working from left and removing a word until a result comes back.
+        $undigested_text = $text;
+
+        $input_stack = $this->makeNgramStack($undigested_text);
+        $output_text = $text;
+
+        $logograms = "";
+        $unmatched_stack = [];
+
+        while (count($input_stack) != 0) {
+            $input_text = array_pop($input_stack);
+            $input_text = preg_replace('/\s+/', " ", $input_text);
+            if ($input_text == "") {
+                continue;
+            }
+            $tokens = explode(" ", $input_text);
+            $t = $this->logogramChinese($input_text);
+
+            if ($t == false) {
+                $unmatched_stack[] = $input_text;
+                array_unique($unmatched_stack);
+                if (count($input_stack) == 0) {
+                    break;
+                }
+                continue;
+            }
+
+            $undigested_text = trim(
+                str_replace($t['english'], "", $undigested_text)
+            );
+
+            $input_stack = $this->makeNgramStack($undigested_text);
+            if ($t['chinese'] == null) {
+                continue;
+            }
+
+            $m = $t['chinese'];
+            $logogram = explode(" ", $m)[0];
+
+            $output_text = trim(
+                str_replace($t['english'], $logogram, $output_text)
+            );
+        }
+
+        return $output_text;
+    }
+
+    public function logogramChinese($text)
+    {
+        $tokens = explode(" ", $text);
+        foreach ($tokens as $index => $token) {
+            $token_string = "";
+            foreach (range(0, count($tokens) - 1 - $index, 1) as $number) {
+                $token_string .= $tokens[$number] . " ";
+            }
+            $token_string = trim($token_string);
+            $t = $this->findChinese("list", $token_string, true);
+
+            // No matches.
+            if ($t === false) {
+                continue;
+            }
+            // Then return shortest matching
+            $x = $this->bestChinese($t, $token_string);
+            //if ($x == false) {return false;}
+            return ['english' => $token_string, 'chinese' => $x];
+        }
+
+        return false;
     }
 
     /**

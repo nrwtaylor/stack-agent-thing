@@ -16,8 +16,9 @@ class Text extends Agent
 {
     public $var = "hello";
 
-    public function getNgrams($input, $n = 3)
+    public function getNgrams($input, $n = 3, $delimiter = null)
     {
+        if ($delimiter == null) {$delimiter = "";}
         if (!isset($this->ngrams)) {
             $this->ngrams = [];
         }
@@ -28,7 +29,7 @@ class Text extends Agent
             if ($key < count($words) - ($n - 1)) {
                 $ngram = "";
                 for ($i = 0; $i < $n; $i++) {
-                    $ngram .= " " . $words[$key + $i];
+                    $ngram .= " " . $words[$key + $i] . $delimiter;
                 }
                 $ngrams[] = trim($this->trimAlpha($ngram));
             }
