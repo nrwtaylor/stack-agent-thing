@@ -437,13 +437,14 @@ class Headcode extends Agent
         $this->node_list = ["headcode web" => ["headcode", "headcode 0Z99"]];
 
         // Make buttons
+/*
         $this->thing->choice->Create(
             $this->agent_name,
             $this->node_list,
             "headcode web"
         );
         $choices = $this->thing->choice->makeLinks("headcode web");
-
+*/
         if (!isset($this->html_image)) {
             $this->makePNG();
         }
@@ -469,7 +470,10 @@ class Headcode extends Agent
 
         $web .= "<br>";
 
-        $web .= $this->makeSMS();
+if (!isset($this->sms_message)) {
+$this->makeSMS();
+}
+        $web .= $this->sms_message;
 
         $this->thing_report["web"] = $web;
     }

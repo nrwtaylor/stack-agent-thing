@@ -25,12 +25,7 @@ class Tokenlimiter extends Agent {
      * @param Thing   $thing
      * @param unknown $agent_input (optional)
      */
-//    function __construct(Thing $thing, $agent_input = null) {
 public function init() {
-  //      if ($agent_input == null) {$agent_input = "";}
-    //    $this->agent_input = $agent_input;
-      //  $this->thing = $thing;
-
 
         // Call the TokenLimiter which will then 'on-call' the service you are requesting.
 
@@ -68,6 +63,7 @@ public function init() {
 
         if ($elapsed_time > $this->token_window) {
             $this->refreshTokens();
+            $this->thing->log("refreshed tokens.");
         }
 
 
@@ -110,7 +106,7 @@ $this->getAgent($token);
         $this->thing_report['token'] = false;
 
 
-        $this->thing->log( 'Agent "Token Limiter" did not provide a Token.' );
+        $this->thing->log( 'did not provide a Token.' );
 
         //Agenthandler::callAgent($uuid, $to = null);
         //callAgent($thing->uuid, $agent_input);

@@ -38,21 +38,6 @@ class Png extends Agent
 
         // This should be the code to handle non-matching responses.
 
- //       $to = $this->thing->from;
-
- //       $from = "png";
-
-        // So maybe not choices, but the message needs to be passed.
-/* 
-       $this->makeSMS();
-        $this->makeMessage();
-        $this->makePNG();
-
-        $this->makeChoices();
-        $this->makeWeb();
-
-        $this->makeEmail();
-*/
         $this->thing_report["info"] = "This makes a PNG.";
 
         if (!isset($this->thing_report["help"])) {
@@ -64,9 +49,6 @@ class Png extends Agent
             $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
 
-//        $this->makeTXT();
-
-//        return $this->thing_report;
     }
 
     function makeTXT()
@@ -131,13 +113,14 @@ return;
 
         $this->node_list = ["web" => ["png"]];
         // Make buttons
+/*
         $this->thing->choice->Create(
             $this->agent_name,
             $this->node_list,
             "web"
         );
         $this->choices = $this->thing->choice->makeLinks("web");
-
+*/
         $web = '<a href="' . $link . '">' . $this->html_image . "</a>";
         $web .= "<br>";
         $web .= "<br>";

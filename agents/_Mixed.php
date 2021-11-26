@@ -130,18 +130,29 @@ $this->thing_report['sms'] = "MIXED";
     {
 }
 
+    public function get()
+    {
+        $time_string = $this->thing->Read(["mixed", "refreshed_at"]);
+
+        if ($time_string == false) {
+            $time_string = $this->thing->time();
+            $this->thing->Write(["mixed", "refreshed_at"], $time_string);
+        }
+
+    }
+
 
     public function set()
     {
         // Log which agent was requested ie Ebay.
         // And note the time.
-
+/*
         $time_string = $this->thing->time();
         $this->thing->Write(
             array("mixed", "refreshed_at"),
             $time_string
         );
-
+*/
 
 /// ?
 //$place_agent thing = new Place($this->thing, $ngram);

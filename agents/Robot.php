@@ -115,7 +115,7 @@ class Robot extends Agent
             try {
                 $headers = apache_request_headers();
             } catch (\Throwable $t) {
-                $this->thing->log("caught throwable.");
+                $this->thing->log("caught throwable. " . $t->getMessage() . $t->getFile() . $t->getLine());
                 // Executed only in PHP 7, will not match in PHP 5
                 return true;
             } catch (\Exception $e) {

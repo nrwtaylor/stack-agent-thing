@@ -227,7 +227,7 @@ return false;
             "timestamp" => ["timestamp"],
         ];
 
-        $this->makeChoices();
+        //$this->makeChoices();
 
         $web = "";
         $web .= "<p>";

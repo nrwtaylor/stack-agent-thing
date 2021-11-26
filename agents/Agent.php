@@ -64,6 +64,7 @@ class Agent
         // and create the most appropriate agent to respond to it.
 
         $this->thing = $thing;
+
         $this->thing->agent_class_name_current = $this->agent_class_name;
 
         $this->thing_report["thing"] = $this->thing;
@@ -73,6 +74,8 @@ class Agent
         if (!isset($this->thing->run_count)) {
             $this->thing->run_count = 0;
         }
+
+        $this->thing->log("Saw thing run count is ". $this->thing->run_count . ".");
 
         $this->thing->log("Got thing.");
         // So I could call
@@ -203,14 +206,24 @@ class Agent
         if (method_exists($this, "init" . $this->agent_class_name)) {
             $this->{"init" . $this->agent_class_name}();
         }
+        $this->thing->log("completed init.");
+
         $this->get();
+        $this->thing->log("completed get.");
 
         try {
             $this->read();
+        $this->thing->log("completed read.");
+
             $this->run();
+        $this->thing->log("completed run.");
+
             $this->make();
+        $this->thing->log("completed make.");
 
             $this->set();
+        $this->thing->log("completed set.");
+
         } catch (\OverflowException $t) {
 
             $this->response =
@@ -225,6 +238,9 @@ class Agent
             $this->thing->log("caught overflow exception.");
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Throwable $t) {
+$this->thing_report['sms'] = $this->textError($t);
+$this->thingError($t);
+/*
             $this->thing_report["sms"] = $t->getMessage();
             $web_thing = new Thing(null);
             $web_thing->Create(
@@ -235,8 +251,10 @@ class Agent
                     " " .
                     $t->getTraceAsString()
             );
-            $error_text =
-                $t->getLine() . "---" . $t->getFile() . $t->getMessage();
+*/
+            //$error_text =
+            //    $t->getLine() . "---" . $t->getFile() . $t->getMessage();
+            $error_text = $this->textError($t);
             $this->thing->console($error_text . "\n");
             $this->thing->log($error_text, "ERROR");
             // Executed only in PHP 7, will not match in PHP 5
@@ -310,6 +328,10 @@ function __destruct() {
     {
 if (!isset($this->thing)) {
 return true;}
+
+$this->thing->log("__call started.");
+
+
 //        $this->thing->log("__call start");
         /*
         Generalize this pattern from agents.
@@ -341,6 +363,8 @@ return true;}
     //        "Check if " . $agent_name . " == " . $this->agent_name
     //    );
         if ($agent_name == $this->agent_name) {
+$this->thing->log("__call saw agent name is the same.");
+
             return false;
         }
 
@@ -404,6 +428,8 @@ return true;}
                 $response = $this->thing->{$agent_name .
                     "_handler"}->{$function_name}(...$args);
   //              $this->thing->log("__call response complete");
+$this->thing->log("__call got method response.");
+
                 return $response;
             }
         }
@@ -679,13 +705,15 @@ public function __set($name, $value) {
         $this->makeInput();
         //$this->makeChoices();
         $this->makeMessage();
-        $this->makeChart();
 
+        $this->makeChart();
         $this->makeImage();
         $this->makePNG();
         $this->makePNGs();
         $this->makeJPEG();
         $this->makeJPEGs();
+
+        $this->thing->log("completed make of image channels.");
 
         $this->makeSMS();
 
@@ -696,11 +724,17 @@ public function __set($name, $value) {
            $this->sms_message = $sms . " " . $this->error;
            $this->thing_report['sms'] = $sms . " " . $this->error;
         } 
+        $this->thing->log("completed make of sms channel.");
 
         // Snippet might be used by web.
         // So run it first.
         $this->makeSnippet();
+
+        $this->thing->log("completed make of snippet channel.");
+
         $this->makeWeb();
+$this->thing->log( "got class name " . explode("\\", strtolower(get_class($this)))[2] );
+        $this->thing->log("completed make of web channel.");
 
         $this->makeJson();
 
@@ -831,7 +865,7 @@ $this->thing_report['image_url'] = $this->image_url;
             }
         }
 
-$this->makeThingreport();
+        $this->makeThingreport();
 
         if (
             strtolower($this->agent_name) == "agent" and
@@ -865,7 +899,6 @@ $this->makeThingreport();
             $this->setMemory($variable_name, $thing_report);
         }
 
-        $this->thing->log("completed make.");
     }
 
     /**
@@ -1857,6 +1890,7 @@ $this->flagAgent($indicators, $this->subject);
             $this->{"read" . $this->agent_class_name}($text);
         }
 
+        $this->thing->log("read input ". $this->input . ".");
         $this->thing->log("read completed.");
     }
 

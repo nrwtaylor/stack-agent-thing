@@ -309,7 +309,6 @@ class Stamp extends Agent
                 $stamp .= $this->stamp;
             }
         }
-
         if (
             isset($this->time_zone) and
             $this->default_time_zone != $this->time_zone
@@ -358,8 +357,8 @@ class Stamp extends Agent
 
         // Generate email response.
 
-        $choices = false;
-        $this->thing_report['choices'] = $choices;
+//        $choices = false;
+//        $this->thing_report['choices'] = $choices;
 
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message;

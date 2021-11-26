@@ -37,13 +37,14 @@ class Orac extends Agent {
     /**
      *
      */
-    function run() {
+    public function run() {
+    }
+
+    public function runOrac() {
         $this->text = "";
         $this->findOrac("orac", "orac");
         $this->startOrac();
-
     }
-
 
     /**
      *
@@ -113,9 +114,9 @@ class Orac extends Agent {
         // Thing actions
         $this->thing->flagGreen();
 
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "start");
-        $choices = $this->thing->choice->makeLinks('start');
-        $this->thing_report['choices'] = $choices;
+//        $this->thing->choice->Create($this->agent_name, $this->node_list, "start");
+//        $choices = $this->thing->choice->makeLinks('start');
+//        $this->thing_report['choices'] = $choices;
 
 
         $this->sms_message = "ORAC | " . $this->sms_message . " | REPLY HELP";

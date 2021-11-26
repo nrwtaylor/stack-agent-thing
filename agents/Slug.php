@@ -45,10 +45,10 @@ class Slug extends Agent
      */
     function get()
     {
-        $this->alphanumeric_agent = new Alphanumeric(
-            $this->thing,
-            "alphanumeric"
-        );
+       // $this->alphanumeric_agent = new Alphanumeric(
+       //     $this->thing,
+      //      "alphanumeric"
+      //  );
         $this->getSlugs();
     }
 
@@ -71,6 +71,7 @@ class Slug extends Agent
         $slug = $this->extractSlug($text);
         $this->slug = $slug;
         return $slug;
+/*
 
         $slug = $this->alphanumeric_agent->filterAlphanumeric($text);
 
@@ -82,7 +83,8 @@ class Slug extends Agent
 
         $this->slug = $slug;
         return $slug;
-    }
+*/ 
+   }
 
     public function extractSlug($text = null)
     {
