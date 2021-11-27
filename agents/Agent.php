@@ -222,6 +222,8 @@ class Agent
         $this->thing->log("completed make.");
 
             $this->set();
+        $a = explode("\\", get_class($this))[2];
+$this->thing->log($a);
         $this->thing->log("completed set.");
 
         } catch (\OverflowException $t) {
