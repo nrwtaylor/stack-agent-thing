@@ -75,6 +75,8 @@ class Agent
             $this->thing->run_count = 0;
         }
 
+        $a = explode("\\", get_class($this))[2];
+        $this->thing->log($a);
         $this->thing->log("Saw thing run count is ". $this->thing->run_count . ".");
 
         $this->thing->log("Got thing.");
@@ -300,6 +302,7 @@ $this->thingError($t);
             $this->thing->log("start test");
             $this->test();
         }
+        $this->thing->log($a);
         $this->thing->log("__construct complete");
 
     }
@@ -397,6 +400,7 @@ $this->thing->log("__call saw agent name is the same.");
                 rtrim($agent_namespace_name, "ies") . "y";
         } elseif (substr($agent_namespace_name, -2) == "es") {
             $agent_namespace_names[] = rtrim($agent_namespace_name, "es");
+            $agent_namespace_names[] = rtrim($agent_namespace_name, "es") . "e";
         } elseif (substr($agent_namespace_name, -1) == "s") {
             $agent_namespace_names[] = rtrim($agent_namespace_name, "s");
         } elseif (substr($agent_namespace_name, -1) == "y") {
