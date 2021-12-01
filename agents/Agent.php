@@ -309,6 +309,11 @@ $this->thingError($t);
 
 function __destruct() {
 
+if (!isset($this->thing)) {return;}
+
+$this->thing->log($this->agent_prefix . 'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
+
+
 }
 
     public function initAgent()
