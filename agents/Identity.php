@@ -64,9 +64,12 @@ class Identity extends Agent
             $this->current_time
         );
 
-        $this->thing->choice->Choose($requested_state);
 
-        $this->thing->choice->save($this->keyword, $requested_state);
+//        $this->thing->choice->Choose($requested_state);
+        $this->chooseChoice($requested_state);
+
+        $this->saveChoice($this->keyword, $requested_state);
+        //$this->thing->choice->save($this->keyword, $requested_state);
 
         $this->state = $requested_state;
         $this->refreshed_at = $this->current_time;
@@ -83,13 +86,14 @@ class Identity extends Agent
             "refreshed_at"
         );
 
-        $this->thing->choice->Create(
+        $this->createChoice(
             $this->keyword,
             $this->node_list,
             $this->previous_state
         );
 
-        $this->state = $this->thing->choice->current_node;
+//        $this->state = $this->thing->choice->current_node;
+$this->state = $this->nodeChoice();
 
         $this->state = $this->previous_state;
         $this->requested_state = $this->state;
@@ -122,7 +126,7 @@ class Identity extends Agent
      */
     function makeChoices()
     {
-        $choices = $this->variables_thing->thing->choice->makeLinks(
+        $choices = $this->linksChoice(
             $this->state
         );
         $this->thing_report["choices"] = $choices;

@@ -71,8 +71,12 @@ class Hey extends Agent
 		// Thing actions
 		$this->thing->flagGreen();
 
-		$this->thing->choice->Create($this->agent_name, $this->node_list, "start");
-		$choices = $this->thing->choice->makeLinks('start');
+		//$this->thing->choice->Create($this->agent_name, $this->node_list, "start");
+        $this->createChoice($this->agent_name, $this->node_list, "start");
+
+//		$choices = $this->thing->choice->makeLinks('start');
+        $choices = $this->linksChoice('start');
+
         $this->thing_report['choices'] = $choices;
 
 		$this->sms_message = "HEY | " . $this->sms_message . "";

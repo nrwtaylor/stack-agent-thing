@@ -74,12 +74,12 @@ class Group extends Agent
 
     public function makeChoices()
     {
-        $this->thing->choice->Create(
+        $this->createChoice(
             $this->agent_name,
             $this->node_list,
             "start"
         );
-        $this->choices = $this->thing->choice->makeLinks('start');
+        $this->choices = $this->linksChoice('start');
     }
 
     public function isGroup($text = null)
@@ -168,12 +168,12 @@ class Group extends Agent
         $time_string = $this->thing->time();
         $this->thing->Write(["group", "refreshed_at"], $time_string);
 
-        $this->thing->choice->Create(
+        $this->createChoice(
             $this->agent_name,
             $this->node_list,
             "new group"
         );
-        $this->choices = $this->thing->choice->makeLinks('new group');
+        $this->choices = $this->linksChoice('new group');
     }
 
     public function findGroup($name = null)
@@ -215,12 +215,12 @@ class Group extends Agent
             $this->thing_report['groups'] = $groups;
         }
 
-        $this->thing->choice->Create(
+        $this->createChoice(
             $this->agent_name,
             $this->node_list,
             "start"
         );
-        $this->choices = $this->thing->choice->makeLinks("listen");
+        $this->choices = $this->linksChoice("listen");
         $this->groups = $groups;
         return $this->thing_report['groups'];
     }
@@ -288,12 +288,12 @@ class Group extends Agent
                 ' ago. ';
         }
 
-        $this->thing->choice->Create(
+        $this->createChoice(
             $this->agent_name,
             $this->node_list,
             "listen"
         );
-        $this->choices = $this->thing->choice->makeLinks("listen");
+        $this->choices = $this->linksChoice("listen");
 
         $this->members = $this->thing_report['things'];
 

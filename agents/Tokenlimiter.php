@@ -136,10 +136,13 @@ $this->getAgent($token);
         $this->thing->log( '<pre> Agent "Tokenlimiter" running on Thing ' .  $this->thing->nuuid . '.</pre>');
         $this->thing->log( '<pre> Agent "Tokenlimiter" received this Thing "' .  $this->subject . '".</pre>');
 
-        $this->state = $thing->choice->load('token'); //this might cause problems
+
+$this->state = $this->loadChoice('token');
+        // $this->state = $thing->choice->load('token'); //this might cause problems
 
         $balance = array('amount'=>0, 'attribute'=>'transferable', 'unit'=>'tokens');
-        $t = $this->thing->newAccount($this->uuid, 'token', $balance); //This might be a problem
+//        $t = $this->thing->newAccount($this->uuid, 'token', $balance); //This might be a problem
+        $t = $this->newAccount($this->uuid, 'token', $balance); //This might be a problem
 
         $this->thing->account['token']->Credit(1);
 
@@ -151,7 +154,9 @@ $this->getAgent($token);
 
 
         // Err ... making sure the state is saved.
-        $this->thing->choice->Choose($this->state);
+        $this->chooseChoice($this->state);
+
+//        $this->thing->choice->Choose($this->state);
 
         // Which means at this point, we have a UUID
         // whether or not the record exists is another question.
@@ -161,7 +166,8 @@ $this->getAgent($token);
 
         // So just return the contents of thing.  false if it doesn't exist.
 
-        $this->state = $thing->choice->load('token');
+        $this->state = $this->loadChoice('token');
+        //$this->state = $thing->choice->load('token');
 
         return;
 
@@ -231,7 +237,8 @@ $this->getAgent($token);
         $to = $this->thing->from;
         $from = "token";
 
-        $choices = $this->thing->choice->makeLinks($this->state);
+$choices = $this->linksChoice($this->state);
+      //  $choices = $this->thing->choice->makeLinks($this->state);
 
         $test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
         $test_message .= '<br>Hive state: ' . $this->state . '<br>';
@@ -262,7 +269,8 @@ $this->state = null;
             case "token store":
                 break;
             case "token use":
-                $this->thing->choice->Choose("token use");
+$this->chooseChoice('token use');
+                //$this->thing->choice->Choose("token use");
 
                 break;
             default:
@@ -272,8 +280,8 @@ $this->state = null;
 
         }
 
-
-        $this->state = $this->thing->choice->load('token');
+        $this->state = $this->loadChoice('token');
+        //$this->state = $this->thing->choice->load('token');
 
         // Will need to develop this to only only valid state changes.
 
@@ -291,7 +299,8 @@ $this->state = null;
 
         }
 
-        $this->thing->choice->Create('token', $this->node_list, $this->state);
+        $this->createChoice('token', $this->node_list, $this->state);
+        // $this->thing->choice->Create('token', $this->node_list, $this->state);
 
 
 
@@ -316,9 +325,11 @@ $this->state = null;
         $ant_pheromone['stack'] = 4;
 
         if ((rand(0, 5) + 1) <= $ant_pheromone['stack']) {
-            $this->thing->choice->Create('token', $this->node_list, "inside nest");
+            $this->createChoice('token', $this->node_list, "inside nest");
+            // $this->thing->choice->Create('token', $this->node_list, "inside nest");
         } else {
-            $this->thing->choice->Create('token', $this->node_list, "midden work");
+            $this->createChoice('token', $this->node_list, "midden work");
+            // $this->thing->choice->Create('token', $this->node_list, "midden work");
         }
 
         $this->thing->flagGreen();

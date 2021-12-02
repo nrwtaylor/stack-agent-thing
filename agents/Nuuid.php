@@ -55,7 +55,7 @@ class Nuuid extends Agent
     {
         $this->thing->flagGreen();
 
-        $this->makeChoices();
+        //$this->makeChoices();
 
         $this->thing_report["info"] =
             "This creates a not UUID.  Rememberable. Machine guessable. Short.";
@@ -121,8 +121,10 @@ class Nuuid extends Agent
     /**
      *
      */
+/*
     function makeChoices()
     {
+
         $this->thing->choice->Create(
             $this->agent_name,
             $this->node_list,
@@ -132,7 +134,7 @@ class Nuuid extends Agent
 
         $this->thing_report['choices'] = $this->choices;
     }
-
+*/
     /**
      *
      */

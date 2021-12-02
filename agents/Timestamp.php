@@ -242,7 +242,7 @@ return false;
         $this->thing_report["web"] = $web;
     }
 
-  public function makeChoices()
+    public function makeChoices()
     {
         $this->thing->choice->Create(
             $this->agent_name,

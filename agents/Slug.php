@@ -106,6 +106,17 @@ class Slug extends Agent
         return $slug;
     }
 
+    public function deSlug($text = null)
+    {
+        if ($text == null) {
+            return true;
+        }
+
+        $deslug = str_replace('-', " ", $text);
+        return $deslug;
+    }
+
+
     /**
      *
      */

@@ -33,7 +33,6 @@ class Agent
 
         $this->getName();
 
-
         if (($thing == null) and (isset($input['uuid']))) {
 
            // If the stack was able to pull a thing,
@@ -70,6 +69,7 @@ class Agent
         $this->thing_report["thing"] = $this->thing;
 
         $this->thing->agent_name = $this->agent_class_name;
+
 
         if (!isset($this->thing->run_count)) {
             $this->thing->run_count = 0;
@@ -177,6 +177,7 @@ class Agent
         $this->warning = "";
         $this->response = "";
 
+
         if (isset($thing->container["api"]["agent"])) {
             if ($thing->container["api"]["agent"] == "off") {
                 return;
@@ -201,6 +202,21 @@ class Agent
 
 }
 */
+
+//
+//$this->getAccounts(); 
+/*
+        $this->getAccounts();
+        if (!$this->isAccount('thing')) {
+           $this->newAccount(['name'=>'thing', 'amount'=>0]);
+        }
+
+        if (!$this->isAccount('stack')) {
+           $this->newAccount(['name'=>'stack', 'amount'=>0]);
+        }
+*/
+
+
 
         $this->init();
 
@@ -503,6 +519,21 @@ public function __set($name, $value) {
      */
     public function get()
     {
+$this->refreshedatAgent();
+
+    }
+
+    public function refreshedatAgent() {
+
+$agent_name = strtolower($this->agent_name);
+        $time_string = $this->thing->Read([$agent_name, "refreshed_at"]);
+
+        if ($time_string == false) {
+            $time_string = $this->thing->time();
+            $this->thing->Write([$agent_name, "refreshed_at"], $time_string);
+        }
+
+
     }
 
     /**

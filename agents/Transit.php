@@ -38,7 +38,7 @@ class Transit extends Agent  {
             "start" => array("stop 1" => array("stop 2", "stop 1"), "stop 3"),
             "stop 3"
         );
-        $this->thing->choice->load('train');
+        $this->loadChoice('train');
 
         $this->keywords = array(
             'run',
@@ -155,10 +155,6 @@ class Transit extends Agent  {
             $this->refreshed_at
         );
 
-        //        $this->thing->choice->save('train', $this->state);
-        //        $this->state = $requested_state;
-
-//        $this->refreshed_at = $this->current_time;
 
     }
 
@@ -281,8 +277,8 @@ class Transit extends Agent  {
 
         $test_message .= '<br>' . $this->sms_message;
 
-        $test_message .=
-            '<br>Current node: ' . $this->thing->choice->current_node;
+//        $test_message .=
+//            '<br>Current node: ' . $this->thing->choice->current_node;
         $this->thing_report['snippet'] = $test_message;
 
     }
@@ -292,8 +288,8 @@ class Transit extends Agent  {
         $this->node_list = array("transit"=>null);
 
 
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "transit");
-        $this->choices = $this->thing->choice->makeLinks('transit');
+        $this->createChoice($this->agent_name, $this->node_list, "transit");
+        $this->choices = $this->linksChoice('transit');
 
         $this->thing_report['choices'] = $this->choices;
 

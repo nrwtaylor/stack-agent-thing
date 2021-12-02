@@ -154,8 +154,12 @@ v     */
 
         $this->thing->flagGreen();
 
-        $this->thing->account['thing']->Credit(25);
-        $this->thing->account['stack']->Debit(25);
+        // $this->thing->account['thing']->Credit(25);
+        // $this->thing->account['stack']->Debit(25);
+
+
+        $this->creditAccount(25, 'thing');
+        $this->debitAccount(25, 'stack');
 
         $choices = false;
         $this->thing_report['choices'] = $choices;
@@ -166,9 +170,10 @@ v     */
 
         $this->thing->log(
             'credited 25 to the Thing account.  Balance is now ' .
-                $this->thing->account['thing']->balance['amount'] .
-                ''
+                $this->balanceAccount('thing') .
+                '. '
         );
+
 if ($this->agent_input == null) {
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];

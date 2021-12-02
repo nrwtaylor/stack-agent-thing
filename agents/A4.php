@@ -109,9 +109,9 @@ class A4 extends Agent
      */
     function makeChoices()
     {
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "a4");
+        $this->createChoice($this->agent_name, $this->node_list, "a4");
 
-        $choices = $this->thing->choice->makeLinks('a4');
+        $choices = $this->linksChoice('a4');
         $this->thing_report['choices'] = $choices;
     }
 
@@ -124,8 +124,8 @@ class A4 extends Agent
 
         $this->node_list = ["a4" => ["a4"]];
         // Make buttons
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "a4");
-        $choices = $this->thing->choice->makeLinks('a4');
+        $this->createChoice($this->agent_name, $this->node_list, "a4");
+        $choices = $this->linksChoice('a4');
 
         $web = '<a href="' . $link . '">';
         //        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/roll.png" jpg"
@@ -159,12 +159,12 @@ class A4 extends Agent
 
         $this->node_list = ["a4" => ["a4"]];
         // Make buttons
-        $this->thing->choice->Create(
+        $this->createChoice(
             $this->agent_name,
             $this->node_list,
             "web"
         );
-        $choices = $this->thing->choice->makeLinks('web');
+        $choices = $this->linksChoice('web');
 
         $web = "";
         $web .= "Four letter alpha (A4) is " . strtoupper($this->a4) . ".";

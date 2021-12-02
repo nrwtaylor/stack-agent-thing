@@ -82,7 +82,7 @@ return;
 
         $this->node_list = ["email" => ["png"]];
         // Make buttons
-        $this->thing->choice->Create(
+        $this->createChoice(
             $this->agent_name,
             $this->node_list,
             "email"
