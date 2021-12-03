@@ -449,6 +449,7 @@ if (!isset($this->accounts)) {return true;}
 
     function newAccount($account)
     {
+return;
         $this->response .= "Called for a new account. ";
 
         $thing = new Thing(null);

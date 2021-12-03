@@ -585,7 +585,7 @@ $g = $this->Get();
 
         $account_handler = new Account(null, ['uuid'=>$this->uuid, 'from'=>$this->from]);
 
-        $account_hander->newAccount(['state'=>'open','text'=>'dev','name'=>$account_name]);
+        $account_handler->newAccount(['state'=>'open','text'=>'dev','name'=>$account_name]);
 
 //        $this->account[$account_name] = new Account(
 //            $this->uuid,

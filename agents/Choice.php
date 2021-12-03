@@ -24,7 +24,7 @@ class Choice extends Agent
  //   function __construct($uuid, $nom_from = null)
  //   {
         $this->json = new Json($this->uuid);
-echo "choice init called";
+$this->thing->console("Choice init called.". "\n");
 //        $this->uuid = $uuid;
 
 //        $this->from = $nom_from;

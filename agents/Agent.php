@@ -332,6 +332,38 @@ $this->thing->log($this->agent_prefix . 'ran for ' . number_format($this->thing-
 
 }
 
+
+public function variantsAgent($agent_class_name , $_namespace = "\\Nrwtaylor\\StackAgentThing\\") {
+
+        $agent_namespace_name =
+            $_namespace . $agent_class_name;
+
+        // See if the method exists within the function.
+        // Call it if we find it.
+
+        $agent_namespace_names[] = $agent_namespace_name;
+        $agent_namespace_names[] =
+            $_namespace . strtoupper($agent_class_name);
+
+        // Try plural and singular variants of agent name.
+        if (substr($agent_namespace_name, -3) == "ies") {
+            $agent_namespace_names[] =
+                rtrim($agent_namespace_name, "ies") . "y";
+        } elseif (substr($agent_namespace_name, -2) == "es") {
+            $agent_namespace_names[] = rtrim($agent_namespace_name, "es");
+            $agent_namespace_names[] = rtrim($agent_namespace_name, "es") . "e";
+        } elseif (substr($agent_namespace_name, -1) == "s") {
+            $agent_namespace_names[] = rtrim($agent_namespace_name, "s");
+        } elseif (substr($agent_namespace_name, -1) == "y") {
+            $agent_namespace_names[] =
+                rtrim($agent_namespace_name, "y") . "ies";
+        } else {
+            $agent_namespace_names[] = $agent_namespace_name . "s";
+            $agent_namespace_names[] = $agent_namespace_name . "es";
+        }
+return $agent_namespace_names;
+}
+
     public function initAgent()
     {
     }
@@ -408,9 +440,11 @@ $this->thing->log("__call saw agent name is the same.");
         $agent_namespace_name =
             "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
 
+$agent_namespace_names = $this->variantsAgent($agent_class_name, "\\Nrwtaylor\\StackAgentThing\\");
+
         // See if the method exists within the function.
         // Call it if we find it.
-
+/*
         $agent_namespace_names[] = $agent_namespace_name;
         $agent_namespace_names[] =
             "\\Nrwtaylor\\StackAgentThing\\" . strtoupper($agent_class_name);
@@ -431,6 +465,9 @@ $this->thing->log("__call saw agent name is the same.");
             $agent_namespace_names[] = $agent_namespace_name . "s";
             $agent_namespace_names[] = $agent_namespace_name . "es";
         }
+*/
+
+
 
         foreach (
             $agent_namespace_names
@@ -554,7 +591,6 @@ $agent_name = strtolower($this->agent_name);
         }
         $agent_name = strtolower($agent_name);
         $rules_list = [];
-
         $this->rules_list = [];
         $this->unique_count = 0;
         $findagent_thing = new Findagent($this->thing, $agent_name);
@@ -758,8 +794,6 @@ $agent_name = strtolower($this->agent_name);
         $this->thing->log("completed make of image channels.");
 
         $this->makeSMS();
-
-        //var_dump($this->error);
 
         if (isset($this->error) and $this->error != "" and $this->error != null) {
            $sms = $this->thing_report['sms'];
@@ -1490,7 +1524,6 @@ $this->thing_report['image_url'] = $this->image_url;
     public function respond()
     {
 //if ($this->agent_name !== 'agent') {return;}
-//var_dump($this->agent_name);
         // Call the response agent
         $this->respondResponse();
     }
@@ -2141,21 +2174,34 @@ if ($pid == -1) {
             "INFORMATION"
         );
         $agents_tested = [];
-        foreach (["", "s", "es"] as $postfix_variant) {
-            foreach ($arr as $keyword) {
+
+// Build list to be tested.
+$agent_names = [];
+foreach($arr as $keyword) {
+                if (strtolower($keyword) == "agent") {
+                    continue;
+                }
+
+$agent_names = array_merge($agent_names, $this->variantsAgent($keyword, ""));
+
+}
+
+//        foreach (["", "s", "es"] as $postfix_variant) {
+            foreach ($agent_names as $keyword) {
                 // Don't allow agent to be recognized
                 if (strtolower($keyword) == "agent") {
                     continue;
                 }
 
                 $agent_class_name = ucfirst(strtolower($keyword));
-
+/*
                 $agent_class_name = substr_replace(
                     $agent_class_name,
                     "",
                     -1,
                     strlen($postfix_variant)
                 );
+*/
                 if (isset($agents_tested[$agent_class_name])) {
                     continue;
                 }
@@ -2168,7 +2214,7 @@ if ($pid == -1) {
                 if (file_exists($filename)) {
                     $agent_package = [$agent_class_name => null];
                     //                    $agents[] = $agent_class_name;
-                    $agents[] = $agent_package;
+                    $agents[$agent_class_name] = $agent_package;
                 }
 
                 // 2nd way
@@ -2180,7 +2226,7 @@ if ($pid == -1) {
                 if (file_exists($filename)) {
                     $agent_package = [$agent_class_name => null];
                     //                    $agents[] = $agent_class_name;
-                    $agents[] = $agent_package;
+                    $agents[$agent_class_name] = $agent_package;
                 }
 
                 $agents_tested[$agent_class_name] = true;
@@ -2194,10 +2240,10 @@ if ($pid == -1) {
                 if (file_exists($filename)) {
                     $agent_package = [$agent_class_name => null];
                     //                    $agents[] = $agent_class_name;
-                    $agents[] = $agent_package;
+                    $agents[$agent_class_name] = $agent_package;
                 }
             }
-        }
+      //  }
         restore_error_handler();
         $this->agents = $agents;
     }
@@ -2215,7 +2261,6 @@ if ($pid == -1) {
             // see where that consistency takes this.
 
             $agent_class_name = key($agent_package);
-
             $agent_input = null;
             if (isset($agent_package[$agent_class_name]["agent_input"])) {
                 $agent_input = $agent_package[$agent_class_name]["agent_input"];
@@ -2265,6 +2310,7 @@ if ($pid == -1) {
 
         foreach ($this->responsive_agents as $i => $j) {
             $this->thing->log($j["agent_name"] . " " . $j["score"] . "\n", "INFORMATION");
+            $this->thing->console($j["agent_name"] . " " . $j["score"] . "\n");
 
         }
 
@@ -2352,10 +2398,8 @@ foreach( range(2, $gram_limit,1) as $number) {
         } else {
             $arr = $this->ngramsText($agent_input_text);
         }
-
         // Does this agent have code.
         $this->validateAgents($arr);
-
 
 
         $uuid_agent = new Uuid($this->thing, "uuid");
@@ -2405,7 +2449,6 @@ foreach( range(2, $gram_limit,1) as $number) {
         $this->responsiveAgents($this->agents);
         foreach ($this->responsive_agents as $i => $responsive_agent) {
         }
-
 
         return $this->responsive_agents;
     }
@@ -3282,8 +3325,6 @@ $this->head_code = $headcode->head_code;
             "OPTIMIZE"
         );
 
-//$i = $this->stripAgent($input);
-//var_dump($input);
         $arr = $this->extractAgents($input);
         $this->input = $input;
 // Sort and pick best scoring agent response.
@@ -3295,7 +3336,12 @@ usort($this->responsive_agents, function ($a, $b) {
 //foreach($this->responsive_agents as $i=>$r) {
 //$r['thing_report'] = null;
 //}
+foreach($this->responsive_agents as $i=>$responsive_agent) {
 
+//echo $responsive_agent['agent_name'] . " " . $responsive_agent['score'];
+//echo "\n";
+
+}
 
         if (count($this->responsive_agents) > 0) {
             $this->thing_report = $this->responsive_agents[0]["thing_report"];
