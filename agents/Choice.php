@@ -290,7 +290,6 @@ if (!isset($this->json)) {return true;}
         $this->json->writeVariable([$this->uuid, $variable], $value);
 
 
-
 //$this->thing->Write( [$this->uuid, $variable], $value);
 
 

@@ -38,6 +38,23 @@ class Text extends Agent
         return $ngrams;
     }
 
+public function ngramsText($text = null, $min_gram_limit = 2, $max_gram_limit = 4, $delimiter = null)
+    {
+        if ($delimiter == null) {$delimiter = "";}
+        // See if there is an agent with the first workd
+//        $arr = explode(" ", trim($text));
+        $agents = [];
+$arr = [];
+foreach( range($min_gram_limit, $max_gram_limit,1) as $number) {
+        $bigrams = $this->getNgrams($text, $number, $delimiter);
+
+        $arr = array_merge($arr, $bigrams);
+}
+
+        return $arr;
+    }
+
+
     public function trimAlpha($text)
     {
         $letters = [];
