@@ -935,6 +935,7 @@ if (isset($this->db)) {
         $things = $thingreport['things'];
 
         $states = [];
+if ($things != false) {
         foreach ($things as $thing) {
             $uuid = $thing['uuid'];
 
@@ -949,7 +950,7 @@ if (isset($this->db)) {
             }
             $states[] = $t;
         }
-
+}
         if ($states == []) {
             return $this->current_state = null;
         }

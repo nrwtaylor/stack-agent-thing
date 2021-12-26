@@ -74,6 +74,7 @@ class Wake extends Agent
 
     public function wake()
     {
+        return;
         $thingreport = $this->thing->db->reminder(
             $this->from,
             ['s/', 'stack record'],
@@ -149,7 +150,7 @@ class Wake extends Agent
 
     public function run()
     {
-        $this->wake();
+        // $this->wake();
     }
 
     public function makeSMS()
@@ -158,13 +159,15 @@ class Wake extends Agent
 
         $length_budgets = [];
         $total_chars = 0;
+/*
         foreach ($this->subjects as $subject) {
             $chars = strlen($subject) + 1;
             $total_chars += $chars;
         }
-
-        $sms = "WAKE | ";
-
+*/
+//        $sms = "WAKE | ";
+        $sms = "WAKE";
+/*
         foreach ($this->subjects as $subject) {
             $char_budget = intval(
                 ((strlen($subject) + 1) / $total_chars) * $max_sms_length
@@ -172,7 +175,7 @@ class Wake extends Agent
 
             $sms .= substr($subject, 0, $char_budget) . ' / ';
         }
-
+*/
         $sms .= " | REPLY ?";
 
         $this->sms_message = $sms;
@@ -231,5 +234,6 @@ class Wake extends Agent
 
     public function readSubject()
     {
+        $this->wake();
     }
 }

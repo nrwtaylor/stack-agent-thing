@@ -941,7 +941,7 @@ $when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
         $errstr,
         $errfile,
         $errline,
-        $errContext
+        $errContext = null
     ) {
         //throw new \Exception('Class not found.');
         //trigger_error("Fatal error", E_USER_ERROR);

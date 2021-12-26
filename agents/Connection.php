@@ -24,8 +24,19 @@ class Connection extends Agent
      */
     function init()
     {
-        $this->test_connections = require $this->resource_path .
+        $file = $this->resource_path .
             "connection/connections.php";
+
+
+        $test_connections = false;
+
+        if (file_exists($file)) {
+
+        $test_connections = require $this->resource_path .
+            "connection/connections.php";
+
+        }
+        $this->test_connections = $test_connections;
 
         $this->keyword = "connection";
         $this->test = "Development code"; // Always
