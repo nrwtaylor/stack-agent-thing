@@ -188,7 +188,7 @@ class Roll extends Agent
             "web"
         );
         $choices = $this->thing->choice->makeLinks("web");
-
+//$choices = false;
         $text = "off";
         if ($text == "on") {
             if (isset($this->thing_report["pngs"])) {

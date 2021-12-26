@@ -207,9 +207,9 @@ class Thing
                 return $db;
             };
 
-//            $this->stack_account = $this->container['thing']['stack_account'];
+            $this->stack_account = $this->container['thing']['stack_account'];
             // The settings file can make Thing set up a specific Thing account.
-//            $this->thing_account = $this->container['thing']['thing_account'];
+            $this->thing_account = $this->container['thing']['thing_account'];
 
             // I'm still working on what the difference between the two really
             // is.  Settings determine the functioning of the Thing.
@@ -220,18 +220,18 @@ class Thing
 
             // Can't call db here, can only call it when $from is known.
 
-            $this->json = new Json($this->uuid);
+            $this->json = new ThingJson($this->uuid);
 
             $this->log("JSON connector made.");
             $this->log("Made a thing from null.");
 
             // Testing this as of 15 June 2018.  Not used by framework yet.
-            $this->variables = new Json($this->uuid);
+            $this->variables = new ThingJson($this->uuid);
 
             $this->variables->setField("variables");
 
-            //$this->choice = new Choice($this->uuid, $this->from);
-            $this->choice = new Choice(null, ['uuid'=>$this->uuid, 'from'=>$this->from]);
+            $this->choice = new ThingChoice($this->uuid, $this->from);
+
             $this->log("Choice connector made.");
 
             // Sigh.  Hold this Thing to account.  Unless it is a forager.
@@ -263,21 +263,17 @@ class Thing
 
             $this->log("Thing made a db connector.");
             // Provide handler for Json translation from/to MySQL.
-            $this->json = new Json($this->uuid);
+            $this->json = new ThingJson($this->uuid);
 
             // This is a placeholder for refactoring the Thing variables
-            $this->variables = new Json($this->uuid);
+            $this->variables = new ThingJson($this->uuid);
             $this->variables->setField("variables");
             $this->log("Thing made a json connector.");
 
             // Provide handler to support state maps and navigation.
             // And state persistence through de-instantiation/instantiation.
-            //$this->choice = new Choice($this->uuid, $this->from);
-            //$this->log("Thing made a choice connector.");
-            $this->choice = new Choice(null, ['uuid'=>$this->uuid, 'from'=>$this->from]);
+            $this->choice = new ThingChoice($this->uuid, $this->from);
             $this->log("Thing made a choice connector.");
-
-//x///
 
             // Cost of connecting to a Thing is 100 <units>.
             // That is set by the stack variable.  No need to do anything here
@@ -520,25 +516,25 @@ if (!isset($this->db)) {
         // information with newly presented information.
 
         // Which means the stack can reset a Things balance.  Handy.
-//        $this->account = [];
+        $this->account = [];
 
         // Kind of ugly.  But I guess this isn't Python.  And null
         // accounts can't be allowed.
-//        if ($this->stack_account != null) {
-//            $this->newAccount(
-//                $this->stack_uuid,
-//                $this->stack_account['account_name'],
-//                $this->stack_account['balance']
- //           );
- //       }
+        if ($this->stack_account != null) {
+            $this->newAccount(
+                $this->stack_uuid,
+                $this->stack_account['account_name'],
+                $this->stack_account['balance']
+            );
+        }
 
- //       if ($this->thing_account != null) {
-  //          $this->newAccount(
-  //              $this->uuid,
-  //              $this->thing_account['account_name'],
-  //              $this->thing_account['balance']
-  //          );
-  //      }
+        if ($this->thing_account != null) {
+            $this->newAccount(
+                $this->uuid,
+                $this->thing_account['account_name'],
+                $this->thing_account['balance']
+            );
+        }
 
         // No need to save accounts here, as all we have done
         // is load them into this Thing
@@ -583,18 +579,14 @@ $g = $this->Get();
             $this->account = [];
         }
 
-        $account_handler = new Account(null, ['uuid'=>$this->uuid, 'from'=>$this->from]);
+        $this->account[$account_name] = new ThingAccount(
+            $this->uuid,
+            $account_uuid,
+            $account_name
+        );
+        $this->account[$account_name]->Create($balance);
 
-        $account_handler->newAccount(['state'=>'open','text'=>'dev','name'=>$account_name]);
-
-//        $this->account[$account_name] = new Account(
-//            $this->uuid,
-//            $account_uuid,
-//            $account_name
-//        );
-//        $this->account[$account_name]->Create($balance);
-
-//        return false;
+        return false;
     }
 
 /*
@@ -615,7 +607,8 @@ And review Agent variables.
 
     public function loadAccounts()
     {
-//        $this->json->setField("variables");
+        $this->json->setField("variables");
+
         $accounts = $this->Read(["account"]);
 
         // At this point we have a PHP array of all accounts on
@@ -702,11 +695,11 @@ And review Agent variables.
 
     public function getVariable($variable_set, $variable)
     {
-        if (!isset($this->account->accounts['stack'])) {
+        if (!isset($this->account['stack'])) {
             return true;
         }
 
-        $variables = $this->account->accounts['stack']->json->array_data;
+        $variables = $this->account['stack']->json->array_data;
 
         if (isset($variables[$variable_set])) {
             $this->$variable_set = (object) [$variables[$variable_set]][0];
@@ -921,12 +914,12 @@ if (isset($this->db)) {
         return is_numeric($str) && $str > 0 && $str == round($str);
     }
 
-    public function deprecate_readSubject()
+    public function readSubject()
     {
         return false;
     }
 
-    function deprecate_getState($agent = null)
+    function getState($agent = null)
     {
         if ($agent == null) {
             $agent = 'thing';
@@ -992,7 +985,7 @@ if (isset($this->db)) {
             // record if true.  Previous record updated to point to new record.
 
             if ($this->associate_posterior === true) {
-                $posterior_thing->json = new Json($posterior_thing->uuid);
+                $posterior_thing->json = new ThingJson($posterior_thing->uuid);
                 $posterior_thing->json->setField("associations");
                 $posterior_thing->json->pushStream($this->uuid);
                 //Tested with unset and commented out

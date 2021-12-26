@@ -17,6 +17,7 @@ class Nuuids extends Agent
 
     public function init()
     {
+$this->choice_handler = new Choice($this->thing, "choice");
         $this->node_list = ["nuuids" => ["index", "uuid"]];
 
         if (!isset($this->min)) {
@@ -88,12 +89,21 @@ class Nuuids extends Agent
                 "ms.",
             "OPTIMIZE"
         );
-
+/*
         $this->thing->choice->Create(
             $this->agent_name,
             $this->node_list,
             "nuuids"
         );
+*/
+//$this->choice_handler = new Choice($this->thing, "choice");
+        $this->choice_handler->Create(
+            $this->agent_name,
+            $this->node_list,
+            "nuuids"
+        );
+
+
         $this->thing->log(
             $this->agent_prefix .
                 "completed create choice. Timestamp = " .
@@ -102,7 +112,9 @@ class Nuuids extends Agent
             "OPTIMIZE"
         );
 
-        $this->choices = $this->thing->choice->makeLinks("nuuids");
+        $this->choices = $this->choice_handler->makeLinks("nuuids");
+
+//        $this->choices = $this->thing->choice->makeLinks("nuuids");
         $this->thing->log(
             $this->agent_prefix .
                 "completed makeLinks. Timestamp = " .

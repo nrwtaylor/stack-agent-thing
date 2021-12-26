@@ -135,7 +135,7 @@ $this->priorMongo();
         //$variables = $existing['variables'];
         // Hmmm
         // Ugly but do this for now.
-        $j = new Json($this->uuid);
+        $j = new ThingJson($this->uuid);
         $j->jsontoarrayJson($string_json);
         $data = $j->jsontoarrayJson($string_json);
 //        $this->setValueFromPath($this->array_data, $var_path, $value);

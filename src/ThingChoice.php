@@ -11,7 +11,7 @@ use RecursiveArrayIterator;
 
 ini_set("allow_url_fopen", 1);
 
-class Choice extends Agent
+class ThingChoice
 {
     public $var = "hello";
 
@@ -20,14 +20,13 @@ class Choice extends Agent
      * @param unknown $uuid
      * @return unknown
      */
-    function init() {
- //   function __construct($uuid, $nom_from = null)
- //   {
-        $this->json = new Json($this->uuid);
-//$this->thing->console("Choice init called.". "\n");
-//        $this->uuid = $uuid;
+    function __construct($uuid, $nom_from = null)
+    {
+        $this->json = new ThingJson($uuid);
 
-//        $this->from = $nom_from;
+        $this->uuid = $uuid;
+
+        $this->from = $nom_from;
 
         // Access state settings as required.
         $settings = require $GLOBALS["stack_path"] . "private/settings.php";
@@ -65,17 +64,6 @@ class Choice extends Agent
         // Overwritten when a choice is created.
         $this->name = "hive";
     }
-
-    public function createChoice(
-        $choice_name = null,
-        $node_list = null,
-        $current_node = null
-    ) {
-     $this->Create(
-        $choice_name, $node_list, $current_node);
-
-    }
-
 
     /**
      *
@@ -124,7 +112,7 @@ class Choice extends Agent
         // Place the Thing [uuid] at default position in tree.
         if ($current_node == null) {
             // Load the last known Markov information about this state.
-            $this->current_node = $this->loadChoice($this->name);
+            $this->current_node = $this->load($this->name);
 
             // Really?  It still is not found?
             if ($this->current_node == null) {
@@ -158,17 +146,11 @@ class Choice extends Agent
 
         $this->saveStateMap($this->node_list);
 
-        $this->saveChoice($this->current_node, $this->name);
+        $this->save($this->current_node, $this->name);
         //        echo "Choice->Create." . number_format(round( (microtime(true) - $this->split_time)*1000 )) . "ms"; echo "<br>";
 
         // format:
         // {"<34 chars>":{"choices":["Red Team", "Blue Team"], "decision":null}
-    }
-
-    public function nodeChoice() {
-
-       return $this->current_node;
-
     }
 
     // Functions follow to manage the state map and naming and
@@ -222,19 +204,11 @@ class Choice extends Agent
             $state_map = $this->node_list;
         }
 
-// ?
-if (!isset($this->json)) {return true;}
-
         $this->json->setField("settings");
         $this->json->writeVariable(["choice", $this->name], [$state_map]);
         $this->node_list = $state_map;
 
         return true;
-    }
-
-    public function loadChoice($variable = null) {
-         return $this->load($variable);
-
     }
 
     /**
@@ -276,7 +250,7 @@ if (!isset($this->json)) {return true;}
      * @param unknown $value
      * @param unknown $variable (optional)
      */
-    function saveChoice($value, $variable = null)
+    function save($value, $variable = null)
     {
         // Save is a generic function to save a particular value to a variable
 
@@ -288,11 +262,6 @@ if (!isset($this->json)) {return true;}
 
         $this->json->setField("variables");
         $this->json->writeVariable([$this->uuid, $variable], $value);
-
-
-//$this->thing->Write( [$this->uuid, $variable], $value);
-
-
     }
 
     /**
@@ -302,7 +271,7 @@ if (!isset($this->json)) {return true;}
     function loadDecision()
     {
         // Legacy.  To factor out.
-        return $this->loadChoice("decision");
+        return $this->load("decision");
     }
 
     /**
@@ -313,7 +282,7 @@ if (!isset($this->json)) {return true;}
     function saveDecision($decision)
     {
         // Legacy.  To factor out.
-        return $this->saveChoice($decision, "decision");
+        return $this->save($decision, "decision");
     }
 
     /**
@@ -336,12 +305,7 @@ if (!isset($this->json)) {return true;}
             $choice_list = $this->getChoices($choice);
         }
 
-        $this->saveChoice($choice_list, "choice_list");
-    }
-
-    public function chooseChoice($choice) {
-        return $this->Choose($choice);
-
+        $this->save($choice_list, "choice_list");
     }
 
     /**
@@ -361,7 +325,7 @@ if (!isset($this->json)) {return true;}
 
         // Both are descriptive fields ie save('this one','list of choices')
 
-        $message = $this->saveChoice($choice, $this->name);
+        $message = $this->save($choice, $this->name);
 
         // Watch for this being an issue in test.
         //$choice_thing->flagGreen();
@@ -417,25 +381,18 @@ if (!isset($this->json)) {return true;}
             }
         }
 
-//        $choice_thing->Create($from, "choice", "s/ is " . $choice . " button");
-        $this->createChoice($from, "choice", "s/ is " . $choice . " button");
-
+        $choice_thing->Create($from, "choice", "s/ is " . $choice . " button");
         // Timing at 199, 173, 368, 201ms
         //echo number_format(round( (microtime(true) - $this->split_time)*1000 )) . "ms"; echo "<br>";
 
-//        $choice_thing->choice->Create($this->name, $this->node_list, $choice);
-        $this->createChoice($this->name, $this->node_list, $choice);
-
+        $choice_thing->choice->Create($this->name, $this->node_list, $choice);
 
         // Write state forward to newly created Thing.
         // [I think 'choice_list' can safely be re-named ant.]
 
-        //$choice_thing->choice->saveStateMap($this->node_list);
-        $this->saveStateMap($this->node_list);
+        $choice_thing->choice->saveStateMap($this->node_list);
 
-//        $choice_thing->choice->save($choice, "choice_list");
-        $this->saveChoice($choice, "choice_list");
-
+        $choice_thing->choice->save($choice, "choice_list");
 
         // Then flag the Thing green (which I think is the default state
         // out of Thing).
@@ -521,12 +478,6 @@ if (!isset($this->json)) {return true;}
         return true;
     }
 
-
-public function linksChoice($state = null) {
-
-return $this->makeLinks($state);
-
-}
     /**
      *
      * @param unknown $state (optional)
@@ -543,10 +494,10 @@ return $this->makeLinks($state);
             //   $state=$this->validStates()[$k];
         }
 
-        $this->loadChoice($this->name);
+        $this->load($this->name);
 
         // Not sure why I am saving the decision here
-        $this->saveChoice($state, $this->name);
+        $this->save($state, $this->name);
 
         $words = null;
         $urls = null;
@@ -726,7 +677,7 @@ return $this->makeLinks($state);
         // remove this db call.
         if ($query_node == null) {
             //   $query_node = $this->current_node;
-            $query_node = $this->loadChoice($this->name);
+            $query_node = $this->load($this->name);
         }
 
         // If $query_node is still null then the state is undefined.

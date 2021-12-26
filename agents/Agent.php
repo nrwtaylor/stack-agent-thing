@@ -2319,14 +2319,23 @@ $agent_names = array_merge($agent_names, $this->variantsAgent($keyword, ""));
 
     public function scoreAgent($text, $matched_characters = null)
     {
+
+        // dev this function needs improvement to handle closeness of multi-gram strings
+
         if ($matched_characters === null) {
-            $matched_characters = strlen($text);
+            $matched_characters_count = strlen($text) - strlen(str_replace(strtolower($this->input), "", strtolower($text)));
+            $unmatched_characters_count = strlen($text) - $matched_characters_count;
         }
 
         $pieces = explode(" ", $text);
         $num_pieces = count($pieces);
 
-        $score = $matched_characters * pow(10, $num_pieces);
+        $s = 0;
+        if ($matched_characters_count != 0){
+            $s = ($matched_characters_count - $unmatched_characters_count) / $matched_characters_count;
+        }
+
+        $score = $s * pow(10, $num_pieces);
 
         return $score;
     }
