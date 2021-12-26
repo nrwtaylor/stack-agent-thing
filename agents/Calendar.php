@@ -766,7 +766,7 @@ $when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
         // Sort events list by start time.
         // https://stackoverflow.com/questions/4282413/sort-array-of-objects-by-object-fields
         usort($this->calendar->events, function ($first, $second) {
-            return strtotime($first->start_at) > strtotime($second->end_at);
+            return (strtotime($first->start_at) - strtotime($second->end_at));
         });
 
         //$time_agent = new Time($this->thing, "time");
