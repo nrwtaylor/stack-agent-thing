@@ -2499,7 +2499,6 @@ foreach( range(2, $gram_limit,1) as $number) {
         // to specific Identities.
 
         $agent_input_text = $this->agent_input;
-
         if (is_array($this->agent_input)) {
             $agent_input_text = "";
         }
@@ -2591,6 +2590,19 @@ foreach( range(2, $gram_limit,1) as $number) {
                 $this->sendDiscord($this->subject, $to_repeat);
             }
         }
+
+// recognize when command
+// with piped input
+
+if (strtolower($this->subject) == 'when') {
+    if ($this->input != null or 
+        $this->input != "" or 
+        (strtolower($this->input) != "when")) {
+        $this->when_agent = new When($this->thing, $this->input);
+            $this->thing_report = $this->when_agent->thing_report;
+            return;
+    }
+}
 
 
         // Dev test for robots
