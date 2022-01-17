@@ -512,7 +512,9 @@ var_dump("key",$key);
         // So just return the contents of thing.  false if it doesn't exist.
 
         // Get first available.
-        $thing = false;
+
+        $thing = [];
+
         foreach ($this->available_stacks as $stack_name => $stack) {
             switch ($stack["infrastructure"]) {
                 case "mysql":
@@ -523,6 +525,8 @@ var_dump("key",$key);
                     //          if ($thing['mysql'] !== false and $thing['mysql'] !== true) {
                     //              break 2;
                     //          }
+
+//if ($thing === false) {$thing = $thing['mysql'];}
                     break;
                 case "memcached":
                     $thing['memcached'] = $this->stack_handlers[
@@ -568,7 +572,7 @@ var_dump($this->uuid);
                         //$thing->created_at = null;
                         //$thing->nom_to = null;
                         //$thing->nom_from = null;
-                        //$thing->task = "empty task";
+              c          //$thing->task = "empty task";
                         //$thing->variables = json_encode($t, true);
                         //$thing->settings = null;
                         break;
@@ -587,6 +591,20 @@ var_dump($this->uuid);
 
 //$thing = $thing ['mongo'];
 
+/*
+if (is_array($thing)) {
+
+if (count($thing) == 0) {
+$thing = false;
+}
+
+if (count($thing) >= 1) {
+$thcing = $thing[array_key_first($thing)];
+}
+
+
+}
+*/
         $thingreport = [
             "thing" => $thing,
             "info" =>

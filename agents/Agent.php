@@ -2793,7 +2793,7 @@ if (strtolower($this->subject) == 'when') {
         // Basically if the agent input directly matches an agent name
         // Then run it.
         // So look hear to generalize that.
-        $text = urldecode($agent_input_text);
+        $text = $agent_input_text != null ? urldecode($agent_input_text) : "";
         //$text = urldecode($input);
         $text = strtolower($text);
         //$arr = explode(' ', trim($text));
@@ -2969,10 +2969,13 @@ if (strtolower($this->subject) == 'when') {
 
             $burst_age_limit = 900; //s
             $similiarness_limit = 90;
-
+//var_dump ($this->current_time);
+$burst_age = 0;
+if ($this->thing->burst_handler->burst_time != null) {
             $burst_age =
                 strtotime($this->current_time) -
                 strtotime($this->thing->burst_handler->burst_time);
+}
             if ($burst_age < 0) {
                 $burst_age = 0;
             }
