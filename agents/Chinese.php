@@ -410,8 +410,10 @@ class Chinese extends Agent
         // https://stackoverflow.com/questions/4601032/php-iterate-on-string-characters
         //$characters = mb_str_split($input);
 
-        $characters = preg_split("//u", $input, null, PREG_SPLIT_NO_EMPTY);
-
+$characters = [];
+if ($input != null) {
+        $characters = preg_split("//u", $input, -1, PREG_SPLIT_NO_EMPTY);
+}
         $logogram_sequence_length = mb_strlen(implode("", $characters));
         $end_flag = false;
         while ($pointer !== $string_length) {

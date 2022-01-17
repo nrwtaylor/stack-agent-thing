@@ -509,7 +509,7 @@ class Database
 
         // Get first available.
 
-        $thing = false;
+        $thing = [];
         foreach ($this->available_stacks as $stack_name => $stack) {
             switch ($stack["infrastructure"]) {
                 case "mysql":
@@ -520,6 +520,8 @@ class Database
                     //          if ($thing['mysql'] !== false and $thing['mysql'] !== true) {
                     //              break 2;
                     //          }
+
+//if ($thing === false) {$thing = $thing['mysql'];}
                     break;
                 case "memcached":
                     $thing['memcached'] = $this->stack_handlers[
@@ -556,7 +558,7 @@ class Database
                         //$thing->created_at = null;
                         //$thing->nom_to = null;
                         //$thing->nom_from = null;
-                        //$thing->task = "empty task";
+              c          //$thing->task = "empty task";
                         //$thing->variables = json_encode($t, true);
                         //$thing->settings = null;
                         break;
@@ -571,6 +573,20 @@ class Database
         // merge?
         $thing = $thing['mysql'];
 
+/*
+if (is_array($thing)) {
+
+if (count($thing) == 0) {
+$thing = false;
+}
+
+if (count($thing) >= 1) {
+$thcing = $thing[array_key_first($thing)];
+}
+
+
+}
+*/
         $thingreport = [
             "thing" => $thing,
             "info" =>

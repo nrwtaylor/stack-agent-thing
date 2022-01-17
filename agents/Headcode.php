@@ -637,8 +637,10 @@ $this->makeSMS();
 
         $pattern = "|[A-Za-z]|";
 
+if ($input != null) {
         preg_match_all($pattern, $input, $m);
         $this->consists = $m[0];
+}
 
         return $this->consists;
     }
@@ -795,8 +797,8 @@ if (file_exists($font)) {
             $image,
             $size,
             $angle,
-            $width / 2 - $bb_width / 2,
-            $height / 2 + $bb_height / 2,
+            intval($width / 2 - $bb_width / 2),
+            intval($height / 2 + $bb_height / 2),
             $grey,
             $font,
             $text
