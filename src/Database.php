@@ -583,6 +583,8 @@ var_dump($this->uuid);
         // merge?
       //  $thing = $thing['mysql'];
 // dev
+
+
 //$thing = $thing ['mongo'];
 
         $thingreport = [

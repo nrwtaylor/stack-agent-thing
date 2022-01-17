@@ -35,12 +35,12 @@ if (isset($this->db)) {return;}
             $this->db = $client;
             $this->collection = $this->db->stack_db->things;
         } catch (\Throwable $t) {
-
+var_dump($t);
             $this->error = 'Could not connect to Mongo database';
             $this->errorMongo($t->getMessage());
             $this->collection = true;
         } catch (\Error $ex) {
-
+var_dump($ex);
             $this->errorMongo($ex->getMessage());
 
             $this->error = 'Could not connect to Mongo database';
