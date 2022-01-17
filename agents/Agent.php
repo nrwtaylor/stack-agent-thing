@@ -44,7 +44,21 @@ class Agent
         }
 
         if ($thing == null) {
-            $thing = new Thing(null);
+$uuid = null;
+if ($input !== null and is_array($input) ) {
+
+        $uuid = $input["uuid"];
+        $nom_from = $input["from"];
+        $to = isset($input["to"]) ? $input["to"] : null;
+        $subject = isset($input["subject"])
+            ? $input["subject"]
+            : null;
+
+
+}
+
+$thing = new Thing($uuid);
+ //           $thing = new Thing(null);
         }
 
         // Start the thing timer.
@@ -215,7 +229,6 @@ class Agent
            $this->newAccount(['name'=>'stack', 'amount'=>0]);
         }
 */
-
 
 
         $this->init();

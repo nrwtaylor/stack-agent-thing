@@ -7,13 +7,9 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-//ini_set('display_startup_errors', 1);
-//ini_set('display_errors', 1);
-//error_reporting(-1);
-
 ini_set("allow_url_fopen", 1);
 
-class Json
+class Json extends Agent
 {
     public $var = 'hello';
 
@@ -22,24 +18,29 @@ class Json
      * @param unknown $uuid
      * @return unknown
      */
-    function __construct($uuid)
+public function init()
+//    function __construct($uuid)
     {
         $this->start_time = microtime(true);
         //        $settings = require 'settings.php';
-        $settings = require($GLOBALS['stack_path'] . "private/settings.php");
-        $this->container = new \Slim\Container($settings);
+     //   $settings = require($GLOBALS['stack_path'] . "private/settings.php");
+   //     $this->container = new \Slim\Container($settings);
 
-        $this->mail_postfix = $settings['settings']['stack']['mail_postfix'];
+//        $this->mail_postfix = $settings['settings']['stack']['mail_postfix'];
 
-        $this->container['stack'] = function ($c) {
-            $db = $c['settings']['stack'];
-            return $db;
-        };
+  //      $this->container['stack'] = function ($c) {
+    //        $db = $c['settings']['stack'];
+      //      return $db;
+//        };
 
         $this->size_overflow = false;
         $this->write_fail_count = 0;
 
-        $this->char_max = $this->container['stack']['char_max'];
+        //$this->char_max = $this->container['stack']['char_max'];
+        $char_max_default = 4000;
+        $this->char_max = $this->settingsAgent(["stack", "char_max"], $char_max_default);
+
+
 
         $this->write_on_destruct = false;
 
@@ -55,7 +56,11 @@ class Json
         // $this->db = new Database(null, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
 
         // new Database(false, ...) creates a read-only thing.
+var_dump("tis->db");
+var_dump($this->db);
+//if (!isset($this->db)) {
         $this->db = new Database(null, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
+//}
         $this->array_data = array();
         $this->json_data = '{}';
 
@@ -164,7 +169,9 @@ class Json
     public function jsontoArray($json_data = null)
     {
         if ($json_data == null) {
+            if ( (isset($this->json_data)) and (is_array($this->json_data)) ) {
             $json_data = $this->json_data;
+            }
         }
 
         $array_data = json_decode($json_data, true);
@@ -520,7 +527,6 @@ return true;
         if ($this->field == null) {
             return;
         }
-
         if (strlen($this->json_data) > $this->char_max) {
 
             // devstack what do you do here?
@@ -570,14 +576,19 @@ return true;
      *
      * @return unknown
      */
-    function read()
+    function read($variable = null)
     {
+$array = null;
+//var_dump($this->db);
+//exit();
+if ((isset($this->db)) and ($this->db != null)) {
+var_dump("Json read", $this->db);
         $this->json_data = $this->db->readField($this->field);
         //        if ($this->json_data == null) {$this->initField();}
 
         $array = $this->jsontoArray();
         $array = $this->array_data;
-
+}
         return $array;
     }
 }

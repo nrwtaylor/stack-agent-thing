@@ -29,22 +29,25 @@ class Mongo extends Agent
         $this->mongo_test_flag = 'off';
         $path =
             "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
-
+if (isset($this->db)) {return;}
         try {
             $client = new \MongoDB\Client($path);
             $this->db = $client;
             $this->collection = $this->db->stack_db->things;
         } catch (\Throwable $t) {
-            $this->error = 'Could not connect to MySQL database';
+
+            $this->error = 'Could not connect to Mongo database';
             $this->errorMongo($t->getMessage());
             $this->collection = true;
         } catch (\Error $ex) {
+
             $this->errorMongo($ex->getMessage());
 
-            $this->error = 'Could not connect to MySQL database';
+            $this->error = 'Could not connect to Mongo database';
             $this->collection = true;
         }
-
+var_dump(isset($this->error) ? $this->error : "No error seen.");
+var_dump("initMongo");
     }
 
     public function errorMongo($text = null)
@@ -72,6 +75,8 @@ echo $thing['uuid'] . " " . ((isset($thing['created_at'])) ? $thing['created_at'
 
     public function testMongo()
     {
+var_dump("testMongo");
+
         if ($this->mongo_test_flag != 'on') {
             return;
         }
@@ -132,10 +137,12 @@ $this->priorMongo();
     public function writeMongo($field_text, $string_json)
     {
         $existing = $this->getMongo($this->uuid);
+var_dump("existing", $existing);
         //$variables = $existing['variables'];
         // Hmmm
         // Ugly but do this for now.
         $j = new ThingJson($this->uuid);
+var_dump("string_json", $string_json);
         $j->jsontoarrayJson($string_json);
         $data = $j->jsontoarrayJson($string_json);
 //        $this->setValueFromPath($this->array_data, $var_path, $value);
@@ -169,12 +176,12 @@ $this->priorMongo();
             $data['task'] = $this->subject;
         }
 
-        $existing = $this->getMongo($this->uuid);
+ //       $existing = $this->getMongo($this->uuid);
         $d = $data;
         if (is_array($existing)) {
             $d = array_replace_recursive($existing, $data);
         }
-
+var_dump("d", $d);
         // In development
 
         //$this->db->set($this->uuid, $d);
@@ -192,31 +199,38 @@ $this->priorMongo();
     // use memcache model for get.
     public function getMongo($text = null)
     {
+var_dump("getMongo start");
+
 //if ($this->collection === true) {return true;}
 
 //var_dump("getMongo");
 $result = null;
 //$this->collection = true;
 try {
+var_dump("getMongo call");
         $result = $this->collection->findOne(["_id" => $text]);
+var_dump("getMongo result");
+var_dump($result);
         } catch (\Throwable $t) {
-//var_dump($t->getMessage());
+var_dump($t->getMessage());
 //exit();
-           $this->error = 'Could not connect to MySQL database';
+           $this->error = 'Could not connect to Mongo database';
             $this->errorMongo($t->getMessage());
-            $this->collection = true;
+//            $this->collection = true;
         } catch (\Error $ex) {
-//var_dump($ex->getMessage());
+var_dump($ex->getMessage());
 //exit();
 
             $this->errorMongo($ex->getMessage());
 
-            $this->error = 'Could not connect to MySQL database';
-            $this->collection = true;
+            $this->error = 'Could not connect to Mongo database';
+//            $this->collection = true;
         }
-
+var_dump("getMongo before return");
+var_dump($result);
         //        $result = $this->collection->findOne(["_id" => $text]);
         if ($result == null) {
+var_dump("true");
             return true;
         }
         return iterator_to_array($result);
@@ -285,10 +299,16 @@ return $a;
     // use memcache model for set.
     public function setMongo($key = null, $variable = null)
     {
+var_dump("setMongo start");
         // Stack rule.
         // You can not create a specific uuid on the stack.
 
         // If a uuid key is provided, check if it exists.
+
+        $value = $variable;
+        if ((is_array($variable)) and (isset($variable[0]))) {
+            $value = $variable[0];
+        }
 
 
         if (($this->isUuid($key)) and ($key !== null)) {
@@ -304,6 +324,13 @@ return $a;
 // Because thing is the only plae uuids are made.
 $t = new Thing(null);
 $key = $t->uuid;
+
+       $result = $this->collection->insertOne(["_id"=>$key, "test"=>$value]);
+
+var_dump("write result");
+var_dump($result);
+
+return $key;
 
 //$key = $uuid->randomUuid();
 //            $key = $this->thing->getUUid();
@@ -327,26 +354,31 @@ $key = $t->uuid;
 
         $condition = ["_id" => $key];
 
-        $value = $variable;
-        if ((is_array($variable)) and (isset($variable[0]))) {
-            $value = $variable[0];
-        }
+ //       $value = $variable;
+ //       if ((is_array($variable)) and (isset($variable[0]))) {
+ //           $value = $variable[0];
+ //       }
 
 
         try {
+var_dump("condition", $condition);
+var_dump("set", $value);
         $result = $this->collection->updateOne($condition, [
             '$set' => $value,
         ]);
 
         } catch (\Throwable $t) {
-            $this->error = 'Could not connect to MySQL database';
+var_dump("setMongo error", $t);
+            $this->error = 'Could not connect to Mongo database';
             $this->errorMongo($t->getMessage());
-            $this->collection = true;
+            //$this->collection = true;
         } catch (\Error $ex) {
+var_dump("setMongo error", $ex);
+
             $this->errorMongo($ex->getMessage());
 
-            $this->error = 'Could not connect to MySQL database';
-            $this->collection = true;
+            $this->error = 'Could not connect to Mongo database';
+            //$this->collection = true;
 
         }
 
@@ -360,7 +392,7 @@ $key = $t->uuid;
     // Delete by key.
     public function forgetMongo($key = null)
     {
-if ($this->collection === true) {return true;}
+//if ($this->collection === true) {return true;}
         if ($key == null) {
             return true;
         }
@@ -388,6 +420,8 @@ if ($this->collection === true) {return true;}
 
     public function respondResponse()
     {
+var_dump("respondResponse Mongo");
+
         $this->thing->flagGreen();
 
         $this->thing_report["info"] =
@@ -413,6 +447,7 @@ if ($this->collection === true) {return true;}
 
     public function readSubject()
     {
+var_dump("readSubject Mongo");
         $input = $this->assert($this->input);
         if ($input == 'test') {
             $this->mongo_test_flag = 'on';

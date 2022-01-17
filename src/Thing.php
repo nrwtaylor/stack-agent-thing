@@ -220,13 +220,16 @@ class Thing
 
             // Can't call db here, can only call it when $from is known.
 
-            $this->json = new ThingJson($this->uuid);
+//            $this->json = new ThingJson($this->uuid);
+            $this->json = new Json(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
 
             $this->log("JSON connector made.");
             $this->log("Made a thing from null.");
 
             // Testing this as of 15 June 2018.  Not used by framework yet.
-            $this->variables = new ThingJson($this->uuid);
+//            $this->variables = new ThingJson($this->uuid);
+            $this->variables = new Json(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
+
 
             $this->variables->setField("variables");
 
@@ -263,10 +266,14 @@ class Thing
 
             $this->log("Thing made a db connector.");
             // Provide handler for Json translation from/to MySQL.
-            $this->json = new ThingJson($this->uuid);
+            //$this->json = new ThingJson($this->uuid);
+            $this->json = new Json(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
+
 
             // This is a placeholder for refactoring the Thing variables
-            $this->variables = new ThingJson($this->uuid);
+            //$this->variables = new ThingJson($this->uuid);
+            $this->variables = new Json(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
+
             $this->variables->setField("variables");
             $this->log("Thing made a json connector.");
 
@@ -410,9 +417,7 @@ $function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedenc
 if (!isset($this->db)) {
         $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>$from] );
 }
-
         $this->log("Create. Database connector made.");
-
         // All records are associated with a posterior record.  Ideally
         // one of the two latest records matching the newly created
         // records created_at.
@@ -603,6 +608,7 @@ And review Agent variables.
 
         $this->json->setField("variables");
         $this->json->writeVariable($path, $value);
+
     }
 
     public function loadAccounts()
@@ -894,14 +900,52 @@ if (isset($this->db)) {
             $this->from = null;
             $this->subject = null;
 */
+
         } else {
             // This just makes sure these four variables
             // are consistently available
             // as top level Thing objects.
-            $this->to = $thing->nom_to;
-            $this->from = $thing->nom_from;
-            $this->subject = $thing->task;
-            $this->associations = $thing->associations;
+
+$to = null;
+if (isset($thing->nom_to)) {
+            $to = $thing->nom_to;
+}
+$this->to = $to;
+
+
+$from = null;
+if (isset($thing->nom_from)) {
+            $from = $thing->nom_from;
+}
+
+
+            $this->from = $from;
+
+$subject = null;
+if (isset($thing->task)) {
+            $subject = $thing->task;
+}
+
+
+      //      $this->from = $from;
+
+
+
+            $this->subject = $subject;
+
+//            $this->associations = $thing->associations;
+
+            $this->from = $from;
+
+$associations = null;
+if (isset($thing->associations)) {
+            $associations = $thing->associations;
+}
+
+
+            $this->associations = $associations;
+
+
         }
 
         $this->thing = $thing;
@@ -986,7 +1030,10 @@ if ($things != false) {
             // record if true.  Previous record updated to point to new record.
 
             if ($this->associate_posterior === true) {
-                $posterior_thing->json = new ThingJson($posterior_thing->uuid);
+                // $posterior_thing->json = new ThingJson($posterior_thing->uuid);
+                 $posterior_thing->json = new Json(null, ['uuid'=>$posterior_thing->uuid, 'from'=>'null' . $this->mail_postfix]);
+
+
                 $posterior_thing->json->setField("associations");
                 $posterior_thing->json->pushStream($this->uuid);
                 //Tested with unset and commented out

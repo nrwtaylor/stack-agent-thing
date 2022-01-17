@@ -400,8 +400,12 @@ class Database
             }
 
             
+
         if ($active_service_name == "mongo") {
+var_dump("write Mongo");
             $key = $this->stack_handlers["mongo"]->writeMongo($field_text, $string_text);
+
+var_dump("key",$key);
             //if ($key === true) {return true;}
         }
 /*
@@ -478,7 +482,7 @@ class Database
 
             if ($stack_infrastructure == "mongo") {
                 $response = $this->stack_handlers['mongo']->createMongo($subject, $to);
-                $this->available_stacks["memory"]["response"] = $response;
+                $this->available_stacks["mongo"]["response"] = $response;
             }
 
 
@@ -508,7 +512,6 @@ class Database
         // So just return the contents of thing.  false if it doesn't exist.
 
         // Get first available.
-
         $thing = false;
         foreach ($this->available_stacks as $stack_name => $stack) {
             switch ($stack["infrastructure"]) {
@@ -528,9 +531,18 @@ class Database
                     break;
 
                 case "mongo":
+
+                    $thing['mongo'] = $this->stack_handlers[
+                        $stack["infrastructure"]
+                    ]->initMongo();
+
+
                     $thing['mongo'] = $this->stack_handlers[
                         $stack["infrastructure"]
                     ]->getMongo($this->uuid);
+var_dump("Database Get()");
+var_dump($thing['mongo']);
+var_dump($this->uuid);
                     break;
 
 
@@ -569,7 +581,9 @@ class Database
 
         // dev decide which thing is most authorative.
         // merge?
-        $thing = $thing['mysql'];
+      //  $thing = $thing['mysql'];
+// dev
+//$thing = $thing ['mongo'];
 
         $thingreport = [
             "thing" => $thing,

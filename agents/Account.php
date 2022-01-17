@@ -12,7 +12,8 @@ class Account extends Agent
 echo "account init called";
         //    function __construct($uuid, $account_uuid, $account_name)
         //    {
-        $this->json = new Json($this->uuid);
+        $this->json = new Json(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
+        //$this->json = new Json($this->uuid);
 
         $settings = require $GLOBALS["stack_path"] . "private/settings.php";
 
