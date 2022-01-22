@@ -49,7 +49,7 @@ class Qr extends Agent
         $this->refreshed_at = strtotime($time_string);
     }
 
-    function extractQuickresponse($input)
+    function extractQr($input)
     {
         if (!isset($this->quick_responses)) {
             $this->quick_responses = [];
@@ -122,9 +122,9 @@ class Qr extends Agent
         $this->thing->log('looking for QR in address.');
         //    $uuid_thing = new Uuid($this->thing, 'uuid');
 
-        $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
+        //$pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
 
-        if (preg_match($pattern, $this->to)) {
+        if ($this->hasUuid($this->to)) {
             $this->response .= "Saw and ignored a UUID in the message. ";
             $this->thing->log('found a QR in address.');
         }
@@ -199,3 +199,4 @@ class Qr extends Agent
         return $this->thing_report['png'];
     }
 }
+v
