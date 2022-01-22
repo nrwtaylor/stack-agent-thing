@@ -172,6 +172,61 @@ class Card extends Agent
         return $filename;
     }
 
+    public function makePNG() {
+//        if (isset($this->canvas_size_x)) {
+//            $canvas_size_x = $this->canvas_size_x;
+//            $canvas_size_y = $this->canvas_size_x;
+//        } else {
+
+            $canvas_size_x = 400;
+            $canvas_size_y = 400;
+//        }
+
+
+        $this->image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
+
+
+
+        $card = ["nom" => $this->nom, "suit" => $this->suit];
+
+        $filename = $this->svgCard($card);
+        $svg = file_get_contents($this->resource_path . 'card/' . $filename);
+
+return;
+    $imagick = new \Imagick();
+$this->image = $imagick->readImageBlob($svg);
+
+
+        if (ob_get_contents()) {
+            ob_clean();
+        }
+
+        ob_start();
+        imagepng($this->image);
+        $imagedata = ob_get_contents();
+
+        ob_end_clean();
+
+        $this->thing_report["png"] = $imagedata;
+
+        $response =
+            '<img src="data:image/png;base64,' .
+            base64_encode($imagedata) .
+            '"alt="day"/>';
+
+        $this->html_image =
+            '<img src="data:image/png;base64,' .
+            base64_encode($imagedata) .
+            '"alt="day"/>';
+
+        $this->PNG_embed = "data:image/png;base64," . base64_encode($imagedata);
+
+        $this->PNG = $imagedata;
+
+        return $response;
+    }
+
+
     public function makeWeb()
     {
         $card = ["nom" => $this->nom, "suit" => $this->suit];

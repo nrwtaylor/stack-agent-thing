@@ -26,7 +26,6 @@ class Thing
 
     public function __construct($uuid, $test_message = null)
     {
-
         //declare(ticks=1);
 
         //$resource_path = "/var/www/stackr.test/resources/debug";
@@ -214,23 +213,22 @@ class Thing
 
             // Can't call db here, can only call it when $from is known.
 
-            $this->json = new Json($this->uuid);
+            $this->json = new ThingJson($this->uuid);
 
             $this->log("JSON connector made.");
             $this->log("Made a thing from null.");
 
             // Testing this as of 15 June 2018.  Not used by framework yet.
-            $this->variables = new Json($this->uuid);
+            $this->variables = new ThingJson($this->uuid);
 
             $this->variables->setField("variables");
 
-            $this->choice = new Choice($this->uuid, $this->from);
+            $this->choice = new ThingChoice($this->uuid, $this->from);
 
             $this->log("Choice connector made.");
 
             // Sigh.  Hold this Thing to account.  Unless it is a forager.
             $this->state = 'foraging'; // Add code link later.
-
             // Don't create accounts here because that is done on ->Create()
             // The instatiation function needs to return a minimum clean false
             // Thing.
@@ -257,16 +255,16 @@ class Thing
 
             $this->log("Thing made a db connector.");
             // Provide handler for Json translation from/to MySQL.
-            $this->json = new Json($this->uuid);
+            $this->json = new ThingJson($this->uuid);
 
             // This is a placeholder for refactoring the Thing variables
-            $this->variables = new Json($this->uuid);
+            $this->variables = new ThingJson($this->uuid);
             $this->variables->setField("variables");
             $this->log("Thing made a json connector.");
 
             // Provide handler to support state maps and navigation.
             // And state persistence through de-instantiation/instantiation.
-            $this->choice = new Choice($this->uuid, $this->from);
+            $this->choice = new ThingChoice($this->uuid, $this->from);
             $this->log("Thing made a choice connector.");
 
             // Cost of connecting to a Thing is 100 <units>.
@@ -305,6 +303,7 @@ class Thing
 
     function spawn($datagram = null)
     {
+
         if (strtolower($this->queue_handler) != "gearman") {
 
             $this->log("No queue handler recognized");
@@ -313,7 +312,18 @@ class Thing
 
         // "Failed to set exception option."
         // Try to catch.
+        //set_error_handler(array($this, "exception_error_handler"));
+        try {
         $client = new \GearmanClient();
+        } catch (\Throwable $e) {
+            $this->error = $e->getMessage();
+            $this->log('Caught throwable: ',  $e->getMessage(), "\n", 'INFORMATION');
+            return true;
+        } catch (\Exception $e) {
+            $this->error = $e->getMessage();
+            $this->log('Caught exception: ',  $e->getMessage(), "\n", 'INFORMATION');
+            return true;
+        }
 
         $arr = (array) $client;
 
@@ -527,7 +537,6 @@ if (!isset($this->db)) {
 
         $this->log("Create completed.");
 $g = $this->Get();
-
         $this->log("Finished create.");
 
         return $g;
@@ -547,7 +556,7 @@ $g = $this->Get();
             $this->account = [];
         }
 
-        $this->account[$account_name] = new Account(
+        $this->account[$account_name] = new ThingAccount(
             $this->uuid,
             $account_uuid,
             $account_name
@@ -568,6 +577,7 @@ And review Agent variables.
     }
 
     public function Write($path, $value) {
+
         $this->json->setField("variables");
         $this->json->writeVariable($path, $value);
     }
@@ -868,10 +878,10 @@ if (isset($this->db)) {
             $this->to = $thing->nom_to;
             $this->from = $thing->nom_from;
             $this->subject = $thing->task;
+            $this->associations = $thing->associations;
         }
 
         $this->thing = $thing;
-
         return $thing;
     }
 
@@ -901,6 +911,7 @@ if (isset($this->db)) {
         $things = $thingreport['things'];
 
         $states = [];
+if ($things != false) {
         foreach ($things as $thing) {
             $uuid = $thing['uuid'];
 
@@ -915,7 +926,7 @@ if (isset($this->db)) {
             }
             $states[] = $t;
         }
-
+}
         if ($states == []) {
             return $this->current_state = null;
         }
@@ -951,7 +962,7 @@ if (isset($this->db)) {
             // record if true.  Previous record updated to point to new record.
 
             if ($this->associate_posterior === true) {
-                $posterior_thing->json = new Json($posterior_thing->uuid);
+                $posterior_thing->json = new ThingJson($posterior_thing->uuid);
                 $posterior_thing->json->setField("associations");
                 $posterior_thing->json->pushStream($this->uuid);
                 //Tested with unset and commented out
@@ -1251,6 +1262,13 @@ $class_name = $this->agent_class_name_current;
                 return $r . ' ' . ($r > 1 ? $a_plural[$str] : $str) . '';
             }
         }
+    }
+
+    public function isThing($thing) {
+
+//var_dump(get_class($thing));
+//echo 'isThing?';
+
     }
     //}
 

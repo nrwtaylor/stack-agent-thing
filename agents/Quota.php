@@ -93,7 +93,7 @@ class Quota extends Agent
     {
         $sms = "QUOTA | ";
 
-        $sms .= "flag " . strtoupper($this->flag_thing->state) . " ";
+//        $sms .= "flag " . strtoupper($this->flag_thing->state) . " ";
         $sms .=
             $this->quota_name .
             " " .

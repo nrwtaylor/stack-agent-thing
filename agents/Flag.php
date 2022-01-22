@@ -255,7 +255,18 @@ class Flag extends Agent
 
     public function get()
     {
+        // dev ef22 not bringing in flag headcode.
+
+        //var_dump($this->thing->thing);
+        //exit();
         $this->head_code = $this->thing->Read(["headcode", "head_code"]);
+
+        //        $headcode = new Headcode($this->thing, "extract");
+        //$this->head_code = $headcode->head_code;
+        //var_dump($this->head_code);
+        //$this->head_code = "merp";
+        //$headcode_agent = new Headcode($this->thing, "headcode");
+        //var_dump($headcode_agent->head_code);
 
         $flag_variable_name = "_" . $this->head_code;
 
@@ -311,13 +322,9 @@ class Flag extends Agent
 
     function makeChoices()
     {
-        $this->thing->choice->Create(
-            $this->keyword,
-            $this->node_list,
-            $this->state
-        );
+        $this->createChoice($this->keyword, $this->node_list, $this->state);
 
-        $choices = $this->flag->thing->choice->makeLinks($this->state);
+        $choices = $this->linksChoice($this->state);
         $this->thing_report["choices"] = $choices;
         $this->choices = $choices;
     }
@@ -577,6 +584,32 @@ class Flag extends Agent
         $this->image = $agent->image;
         $this->PNG = $agent->PNG;
         $this->PNG_embed = $agent->PNG_embed;
+
+        $this->thing_report["png"] = $agent->PNG;
+
+        /*
+        if ($image = null) {
+            $image = $this->image;
+        }
+        if ($image == true) {
+            return true;
+        }
+
+        $agent = new Png($this->thing, "png");
+        $image = $this->makeImage();
+
+        if ($image === true) {
+            return true;
+        }
+
+        $agent->makePNG($image);
+
+        $this->html_image = $agent->html_image;
+        $this->image = $agent->image;
+        $this->PNG = $agent->PNG;
+
+        $this->thing_report["png"] = $agent->image_string;
+*/
     }
 
     public function assertFlag($text = null)

@@ -76,6 +76,8 @@ Show 1 minute.
 
         $this->runtime->setVariable("seconds", $this->seconds);
         $this->runtime->setVariable("units", $this->units);
+
+
         $this->runtime->setVariable("refreshed_at", $this->current_time);
     }
 
@@ -83,19 +85,11 @@ Show 1 minute.
      *
      * @return unknown
      */
-    function getRuntime()
-    {
-        if (!isset($this->run_time)) {
-            if (isset($run_time)) {
-                $this->run_time = $run_time;
-            } else {
-                return true;
-            }
-        }
-        return $this->run_time;
+function get() {
+$this->getRuntime();
     }
 
-    public function get()
+    public function getRuntime()
     {
         // Get headcode.
         // Runtime is a train variable.
@@ -136,6 +130,7 @@ Show 1 minute.
         } else {
             $this->units = $this->default_units;
         }
+
     }
 
     public function humanRuntime($seconds = null)
@@ -255,8 +250,14 @@ Show 1 minute.
         return $seconds;
     }
 
-    public function textRuntime($amount, $units)
+    public function textRuntime($amount = null, $units = null)
     {
+
+        if (($amount == null) and ($units == null)) {
+          $amount = $this->seconds;
+          $units = $this->units;
+        }
+
         foreach ($this->periods as $multiplier => $period_array) {
             if ($period_array[0] === $units) {
                 $text = $amount / $multiplier . " " . $units;
@@ -454,7 +455,6 @@ Show 1 minute.
             return;
         }
         $measurement = $this->extractMeasurement($filtered_input);
-
         if ($measurement !== false) {
             $amount = $measurement["amount"];
             $units = $measurement["units"];

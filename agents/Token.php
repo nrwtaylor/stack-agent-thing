@@ -342,6 +342,7 @@ class Token extends Agent
             $this->getToken($input);
         }
         // Get the recognized tokens.
+if ($this->tokens_resource != null) {
         foreach ($this->tokens_resource as $token_slug => $token) {
             $token_text = str_replace("-", " ", $token_slug);
             $token_name = str_replace("-token", "", $token_slug);
@@ -359,7 +360,7 @@ class Token extends Agent
             }
             //     return;
         }
-
+}
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
@@ -389,7 +390,7 @@ class Token extends Agent
         $web .= "<b>" . ucwords($this->agent_name) . " Agent</b><br>";
 
         //        $items = ['red', 'blue', 'yellow', 'green', 'channel'];
-
+if (isset($this->items_resource) and $this->items_resource != null) {
         foreach ($this->items_resource as $item_slug => $item) {
             $item_slug = str_replace("-token", "", $item_slug);
             //if ($this->subject == $item . '-token') {
@@ -411,7 +412,7 @@ class Token extends Agent
                 $web .= $this->web_token[$item_slug];
             }
         }
-
+}
         $web .= "<br>";
 
         $this->thing_report["web"] = $web;
@@ -461,12 +462,17 @@ class Token extends Agent
         $this->thing_report["sms"] = $sms;
     }
 
+    /*
+        Build an array with the different subsets of tokens within the token
+        string.
+    */
+
     public function subsetsTokens($tokens)
     {
         $number_of_tokens = count($tokens);
         $subsets = [];
-        foreach (range(0, $number_of_tokens) as $start => $values) {
-            foreach (range(0, $number_of_tokens) as $end => $valuee) {
+        foreach (range(0, $number_of_tokens - 1) as $start => $values) {
+            foreach (range(0, $number_of_tokens - 1) as $end => $valuee) {
                 if ($start > $end) {
                     continue;
                 }
@@ -494,7 +500,6 @@ class Token extends Agent
         });
         // Sort so longest string to shortest string
         $subsets = array_reverse($subsets);
-
         return $subsets;
     }
 

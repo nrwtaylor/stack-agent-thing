@@ -145,6 +145,41 @@ class Endat extends Agent
         return $this->end_at;
     }
 
+    public function textEndat() {
+
+        if (isset($this->day)) {
+            $day = $this->day;
+        }
+        if ($day == null) {
+            $day = "X";
+        }
+
+        $hour = "X";
+        if (isset($this->hour)) {
+            $hour = $this->hour;
+        }
+
+        $minute = "X";
+        if (isset($this->minute)) {
+            $minute = $this->minute;
+        }
+
+        $hour_text = str_pad($hour, 2, "0", STR_PAD_LEFT);
+        $minute_text = str_pad($minute, 2, "0", STR_PAD_LEFT);
+        $day_text = $day;
+
+        $text =
+            " day " .
+            $day_text .
+            " hour " .
+            $hour_text .
+            " minute " .
+            $minute_text;
+
+        return $text;
+    }
+
+
     /**
      *
      * @param unknown $text (optional)

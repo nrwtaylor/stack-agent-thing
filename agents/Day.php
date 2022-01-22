@@ -228,6 +228,10 @@ class Day extends Agent
 
                 $datum_projected = new \DateTime();
                 $datum_projected->setTimestamp($period_timestamp);
+if (isset($this->timezone)) {
+$timezone = new \DateTimeZone($this->timezone);
+$datum_projected->setTimezone($timezone);
+}
                 $datum = $this->twilightDay($period, $datum_projected);
 
                 if ($period_timestamp < $e) {
@@ -235,31 +239,36 @@ class Day extends Agent
                 }
 
                 if ($count == 0) {
+                 //   $message .=
+                 //       $period . " " . $datum->format("Y/m/d G:i:s") . " ";
                     $message .=
-                        $period . " " . $datum->format("Y/m/d G:i:s") . " ";
+                        $period . " " . $datum->format("Y/m/d G:i") . " ";
                 } else {
-                    $message .=
-                        $period . " " . $datum_projected->format("G:i:s") . " ";
+//                    $message .=
+//                        $period . " " . $datum_projected->format("G:i:s") . " ";
+//                }
+//                    $message .= $period . " " . $datum->format("G:i:s") . " ";
+                    $message .= $period . " " . $datum->format("G:i") . " ";
+
                 }
 
-                    if (!isset($this->twilights)) {
-                        $this->twilights = [];
-                    }
-                    $this->twilights[$period] = [
-                        "text" => ucwords(strtolower($period)),
-                        "time" => $datum->format("G:i:s"),
-                    ];
-
+                if (!isset($this->twilights)) {
+                    $this->twilights = [];
+                }
+                $this->twilights[$period] = [
+                    "text" => ucwords(strtolower($period)),
+                    "time" => $datum->format("G:i:s"),
+                ];
 
                 $count += 1;
 
                 $variable_text = str_replace(" ", "_", $period);
-//                if (
-//                    $match === false and
-//                    $this->solarDay($datum_projected)[$variable_text] <//
-//                        $timestamp_epoch
-//                ) {
-/*
+                if (
+                    $match === false and
+                    $this->solarDay($datum_projected)[$variable_text] <
+                        $timestamp_epoch
+                ) {
+                    /*
                     if (!isset($this->twilights)) {
                         $this->twilights = [];
                     }
@@ -747,6 +756,7 @@ class Day extends Agent
      */
     public function getDay()
     {
+        /*
         $longitude_agent = new Longitude($this->thing, "longitude");
 
         // Cannot calculate local time without knowing longitude.
@@ -756,12 +766,14 @@ class Day extends Agent
 
         $this->longitude = $longitude_agent->longitude;
 
+
         $latitude_agent = new Latitude($this->thing, "latitude");
         $this->latitude = $latitude_agent->latitude;
-
+*/
 //if ($this->latitude == 'Z') {$this->latitude = $latitude_agent->default_latitude;}
 //if ($this->longitude == 'Z') {$this->longitude = $longitude_agent->default_longitude;}
 //var_dump($this->latitude);
+
     }
 
     /**
@@ -774,7 +786,7 @@ class Day extends Agent
 
     public function run()
     {
-        $this->runDay();
+        //  $this->runDay();
     }
 
     /**
@@ -785,6 +797,88 @@ class Day extends Agent
         $link = $this->web_prefix . "thing/" . $this->uuid . "/day.pdf";
         $this->node_list = ["day" => ["day"]];
         $web = "";
+
+        $thing = new Thing(null);
+        $thing->Create("token", $this->from, "calendar-page-token");
+
+        $token_handler = new Token($thing, "calendar-page-token");
+        if (isset($token_handler->itemToken["calendar-page"])) {
+            $token_handler->itemToken["calendar-page"];
+            $web .= $token_handler->web_token["calendar-page"];
+            $web .= "<br>";
+        }
+
+        if (
+            isset($this->day_mesoamerican_flag) and
+            $this->day_mesoamerican_flag == "on"
+        ) {
+            $long_count_day = $this->longcountDay();
+
+            $calendar_round_day = $this->calendarroundDay();
+
+            $web .= "" . $long_count_day;
+            $web .= "<br>";
+            $web .= $calendar_round_day;
+            $web .= "<br>";
+        }
+
+        $web .= $this->formatDay($this->datestringDay($this->dateline));
+
+        $web .= "<br>";
+        $latitude_text = $this->formatLatitude($this->latitude);
+        $longitude_text = $this->formatLongitude($this->longitude);
+        $web .= $latitude_text . " " . $longitude_text;
+        $web .= "<br>";
+
+        if (
+            isset($this->day_authority_flag) and
+            $this->day_authority_flag == "on"
+        ) {
+            $web .= $this->authorityDay();
+            $web .= "<br>";
+        }
+
+        /*
+        if (
+            isset($this->day_twilight_flag) and
+            $this->day_twilight_flag == "on"
+        ) {
+
+        $web .= $this->message;
+            $web .="<br>";
+        } else {
+*/
+        if ($this->isToday($this->current_time)) {
+            $day_text = "X";
+            if (isset($this->day_time)) {
+                $day_time_text = $this->day_time;
+                $web .= strtoupper($day_time_text);
+            }
+        }
+
+        //}
+        $web .= "<p>";
+
+        /*
+                $this->itemToken($item_slug);
+                $web .= $this->web_token[$item_slug];
+
+*/
+        /*
+        $thing = new Thing(null);
+        $thing->Create("token", $this->from, "calendar-page-token");
+
+        $token_handler = new Token($thing, "calendar-page-token");
+
+        if (
+            isset($token_handler->itemToken) and
+            isset($token_handler->itemToken["calendar-page"])
+        ) {
+            $token_handler->itemToken["calendar-page"];
+            $web .= $token_handler->web_token["calendar-page"];
+        }
+*/
+
         $web .= '<a href="' . $link . '">';
         $web .= $this->html_image;
         $web .= "</a>";
@@ -863,75 +957,14 @@ class Day extends Agent
             $canvas_size_x = 164;
             $canvas_size_y = 164;
         }
+
+
         $this->image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
-        //$this->image = imagecreatetruecolor(164, 164);
 
-        $this->white = imagecolorallocate($this->image, 255, 255, 255);
-        $this->black = imagecolorallocate($this->image, 0, 0, 0);
-        $this->red = imagecolorallocate($this->image, 255, 0, 0);
-        $this->green = imagecolorallocate($this->image, 0, 255, 0);
-        $this->grey = imagecolorallocate($this->image, 128, 128, 128);
-
-        // For Vancouver Pride 2018
-
-        // https://en.wikipedia.org/wiki/Rainbow_flag
-        // https://en.wikipedia.org/wiki/Rainbow_flag_(LGBT_movement)
-        // https://www.schemecolor.com/lgbt-flag-colors.php
-
-        $this->electric_red = imagecolorallocate($this->image, 231, 0, 0);
-        $this->dark_orange = imagecolorallocate($this->image, 255, 140, 0);
-        $this->canary_yellow = imagecolorallocate($this->image, 255, 239, 0);
-        $this->la_salle_green = imagecolorallocate($this->image, 0, 129, 31);
-        $this->blue = imagecolorallocate($this->image, 0, 68, 255);
-        $this->patriarch = imagecolorallocate($this->image, 118, 0, 137);
-
-        $this->flag_red = imagecolorallocate($this->image, 231, 0, 0);
-        $this->flag_orange = imagecolorallocate($this->image, 255, 140, 0);
-        $this->flag_yellow = imagecolorallocate($this->image, 255, 239, 0);
-        $this->flag_green = imagecolorallocate($this->image, 0, 129, 31);
-        $this->flag_blue = imagecolorallocate($this->image, 0, 68, 255);
-        // Indigo https://www.rapidtables.com/web/color/purple-color.html
-        $this->flag_indigo = imagecolorallocate($this->image, 75, 0, 130);
-        $this->flag_violet = imagecolorallocate($this->image, 118, 0, 137);
-        $this->flag_grey = $this->grey;
-
-        $this->indigo = imagecolorallocate($this->image, 75, 0, 130);
-
-        $this->ice_green = imagecolorallocate($this->image, 126, 217, 195);
-        $this->blue_ice = imagecolorallocate($this->image, 111, 122, 159);
-        $this->artic_ice = imagecolorallocate($this->image, 195, 203, 217);
-        $this->ice_cold = imagecolorallocate($this->image, 165, 242, 243);
-        $this->white_ice = imagecolorallocate($this->image, 225, 231, 228);
-
-        $this->ice_color_palette = [
-            $this->ice_green,
-            $this->blue_ice,
-            $this->artic_ice,
-            $this->ice_cold,
-            $this->white_ice,
-        ];
-
-        // Patriarch as a color name.
-        // https://www.schemecolor.com/lgbt-flag-colors.php
-        $this->color_palette = [
-            $this->electric_red,
-            $this->dark_orange,
-            $this->canary_yellow,
-            $this->la_salle_green,
-            $this->blue,
-            $this->patriarch,
-        ];
-
-        $this->flag_color_palette = [
-            $this->flag_red,
-            $this->flag_orange,
-            $this->flag_yellow,
-            $this->flag_green,
-            $this->flag_blue,
-            $this->flag_indigo,
-            $this->flag_violet,
-            $this->flag_grey,
-        ];
+// dev
+$this->colours_agent = new Colours($this->thing, "colours");
+$this->colours_agent->image = $this->image;
+$this->colours_agent->getColours();
 
         imagefilledrectangle(
             $this->image,
@@ -939,7 +972,7 @@ class Day extends Agent
             0,
             $canvas_size_x,
             $canvas_size_y,
-            $this->white
+            $this->colours_agent->white
         );
 
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
@@ -1068,9 +1101,138 @@ class Day extends Agent
                 0,
                 $width_slice * $i,
                 $canvas_size_y,
-                $this->black
+                $this->colours_agent->black
             );
         }
+    }
+    // Not sure about this pattern.
+    // But I need a dot to represent a day.
+    public function drawDot(
+        $text,
+        $angle,
+        $radius,
+        $size,
+        $offset = 0,
+        $colour = null
+    ) {
+        if ($colour == null) {
+            $colour = $this->colours_agent->black;
+        }
+        // angle in degrees
+        //imagesetthickness($this->image, 5);
+        //$init_angle = (-1 * pi()) / 2;
+        //$angle = (2 * 3.14159) / 24;
+        //$x_pt =  230;
+        //$y_pt = 230;
+
+        $angle_radians = ($angle / 180) * pi();
+
+        //foreach (range(0, 24 - 1, 1) as $i) {
+        $x_dot = ($radius + $offset) * cos($angle_radians + $this->init_angle);
+        $y_dot = ($radius + $offset) * sin($angle_radians + $this->init_angle);
+
+        imagearc(
+            $this->image,
+            $this->center_x + $x_dot,
+            $this->center_y + $y_dot,
+            2 * $size,
+            2 * $size,
+            0,
+            360,
+            $colour
+        );
+    }
+    // And then to build Day agent
+    public function extractHour($text = null)
+    {
+        if ($text == null) {
+            $text = $this->current_time;
+        }
+
+        $datum = new \DateTime();
+        $datum->setTimestamp(strtotime($this->current_time));
+
+        $hour = $datum->format("H");
+        return $hour;
+    }
+
+    // And an Minute agent
+    public function extractMinute($text = null)
+    {
+        if ($text == null) {
+            $text = $this->current_time;
+        }
+        $datum = new \DateTime();
+        $datum->setTimestamp(strtotime($this->current_time));
+
+        $minute = $datum->format("i");
+        return $minute;
+    }
+
+    //And a Day Number agent
+
+    // And an Minute agent
+    public function extractDaynumber($text = null)
+    {
+        if ($text == null) {
+            $text = $this->current_time;
+        }
+        $datum = new \DateTime();
+        $datum->setTimestamp(strtotime($this->current_time));
+
+        $day_number = $datum->format("N");
+        return $day_number;
+    }
+
+    // And a new agent today...
+    public function isToday($timestamp_current_time = null)
+    {
+        $datum_current_time = new \DateTime();
+        //                $datum_current_time->setTimestamp(strtotime($this->current_time));
+
+        $timestamp_current_time = $this->timestampTime($datum_current_time);
+
+        $day_number = $this->extractDaynumber($timestamp_current_time);
+        //$day_number = $this->extractDaynumber($t);
+        $minute = $this->extractMinute($timestamp_current_time);
+        $hour = $this->extractHour($timestamp_current_time);
+
+        // An hour is 24 hours of 60 minutes.
+        $day_percent = ($minute + $hour * 60) / (24 * 60);
+
+        $day_degrees = (float) $day_percent * 360;
+        $day_radians = ((float) $day_degrees / 180) * pi();
+
+        $timestamp_working_time = $this->timestampTime($this->working_datum);
+        //$t = $timestamp_working_datum;
+
+        $epoch_working = strtotime($timestamp_working_time);
+        $epoch_current = strtotime($timestamp_current_time);
+        $epoch_start_of_today = $epoch_current - $day_percent * 24 * 60 * 60;
+        $epoch_end_of_today =
+            $epoch_current + (1 - $day_percent) * 24 * 60 * 60;
+
+        $sunFlag = false;
+
+        if (
+            $epoch_working > $epoch_start_of_today and
+            $epoch_working < $epoch_end_of_today
+        ) {
+            $sunFlag = true;
+        }
+        return $sunFlag;
+    }
+
+    public function datumText($text)
+    {
+        // text with a fully qualified time.
+
+        $datum = new \DateTime();
+        $datum->setTimestamp(strtotime($text));
+
+        $t = $this->timestampTime($datum);
+
+        return $t;
     }
 
     public function wedgeDay()
@@ -1169,7 +1331,23 @@ class Day extends Agent
                 imagesetthickness($this->image, 7);
             }
 
-            $this->drawTick($text, $angle, $radius, $length);
+//            $this->drawTick($text, $angle, $radius, $length);
+            if (strpos($period_name, "sunrise") !== false) {
+                $arc_day[] = $angle;
+                $colour = $this->colours_agent->blue;
+                imagesetthickness($this->image, 7);
+            }
+
+            if (strpos($period_name, "sunset") !== false) {
+                $arc_day[] = $angle;
+                $colour = $this->colours_agent->blue;
+                imagesetthickness($this->image, 7);
+            }
+
+            $offset = 0;
+            $this->drawTick($text, $angle, $radius, $length, $offset, $colour);
+            $colour = $this->colours_agent->black;
+
         }
 
         imagesetthickness($this->image, 3);
@@ -1182,20 +1360,36 @@ class Day extends Agent
             2 * $size,
             0,
             360,
-            $this->black
+            $this->colours_agent->black
         );
 
         imagesetthickness($this->image, 7);
 
+        if (isset($arc[0]) and isset($arc[1])) {
+            imagearc(
+                $this->image,
+                $center_x,
+                $center_y,
+                2 * $size,
+                2 * $size,
+                $arc[1] + ($this->init_angle * 180) / pi(),
+                $arc[0] + ($this->init_angle * 180) / pi(),
+                $this->colours_agent->black
+            );
+        }
         imagearc(
             $this->image,
             $center_x,
             $center_y,
             2 * $size,
             2 * $size,
-            $arc[1] + ($this->init_angle * 180) / pi(),
-            $arc[0] + ($this->init_angle * 180) / pi(),
-            $this->black
+
+//            $arc[1] + ($this->init_angle * 180) / pi(),
+//            $arc[0] + ($this->init_angle * 180) / pi(),
+//            $this->black
+            $arc_day[0] + ($this->init_angle * 180) / pi(),
+            $arc_day[1] + ($this->init_angle * 180) / pi(),
+            $this->colours_agent->blue
         );
     }
 
@@ -1211,8 +1405,17 @@ class Day extends Agent
         $this->getDay();
     }
 
-    public function drawTick($text, $angle, $radius, $length)
-    {
+    public function drawTick(
+        $text,
+        $angle,
+        $radius,
+        $length,
+        $offset = 0,
+        $colour = null
+    ) {
+        if ($colour == null) {
+            $colour = $this->colours_agent->black;
+        }
         // angle in degrees
         //imagesetthickness($this->image, 5);
         //$init_angle = (-1 * pi()) / 2;
@@ -1286,7 +1489,7 @@ class Day extends Agent
 
             $pdf->SetTextColor(0, 0, 0);
             $pdf->SetXY(1, 1);
-/*
+            /*
             $pdf->SetFont("Helvetica", "", 26);
             $this->txt = "" . $this->whatis . ""; // Pure uuid.
 
@@ -1593,6 +1796,80 @@ class Day extends Agent
      */
     public function readSubject()
     {
+
+        $i = str_replace("-", " ", $this->input);
+
+$tokens = explode(" ", $i);
+$timezones = [];
+foreach($tokens as $j=>$token) {
+        $timezone = $this->extractTimezone($token);
+        if ($timezone === true or $timezone === false) {continue;}
+        $timezones[] = $timezone;
+}
+
+if ( count($timezones) == 1 ) {
+$this->timezone = $timezones[0];
+}
+
+        $dateline = $this->extractDateline($i);
+        if (
+            !(
+//                $dateline["year"] === false and // comes through as 2021
+                $dateline["month"] === false and
+                $dateline["day_number"] === false
+            )
+        ) {
+            $date_string =
+                $dateline["year"] .
+                "-" .
+                str_pad($dateline["month"], 2, "0", STR_PAD_LEFT) .
+                "-" .
+                str_pad($dateline["day_number"], 2, "0", STR_PAD_LEFT);
+            $this->projected_time = strtotime($date_string);
+
+            $this->working_datum = $this->time_agent->datumTime($date_string);
+            $this->dateline = $dateline;
+        } else {
+            $timestamp = $this->zuluStamp($this->current_time);
+
+            $dateline = $this->extractDateline($timestamp);
+
+            $this->dateline = $dateline;
+
+            $this->project_time = strtotime($this->current_time);
+            $this->working_datum = $this->time_agent->datumTime(
+                $this->current_time
+            );
+        }
+        $longitude = $this->extractLongitude($i);
+        $latitude = $this->extractLatitude($i);
+
+        if ($longitude !== false) {
+            $this->longitude = $longitude;
+        } else {
+            $longitude_agent = new Longitude($this->thing, "longitude");
+
+            // Cannot calculate local time without knowing longitude.
+            if ($longitude_agent->longitude === false) {
+                $this->response .= "Longitude not known. ";
+            }
+
+            $this->longitude = $longitude_agent->longitude;
+        }
+
+        if ($latitude !== false) {
+            $this->latitude = $latitude;
+        } else {
+            $latitude_agent = new Latitude($this->thing, "latitude");
+            $this->latitude = $latitude_agent->latitude;
+        }
+
+        //var_dump($this->latitude);
+        //var_dump($this->longitude);
+        //exit();
+
+
+
         $this->type = "wedge";
         //$input = $this->agent_input;
         $input = $this->agent_input;
@@ -1601,6 +1878,7 @@ class Day extends Agent
         }
 
         if ($input == "day") {
+            $this->runDay();
             return;
         }
 
@@ -1628,6 +1906,7 @@ class Day extends Agent
                 $this->size = 4;
                 $this->lattice_size = 40;
                 $this->response .= "Made a day. ";
+                $this->runDay();
                 return;
             }
         }
@@ -1669,5 +1948,6 @@ class Day extends Agent
         }
 
         $this->getDay();
+        $this->runDay();
     }
 }

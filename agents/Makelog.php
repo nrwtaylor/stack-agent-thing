@@ -56,22 +56,29 @@ class Makelog
         // routes passes image_name to make png as $input
         $this->agent_thing = new Agent($thing, $input);
         $this->log_handler = new Log($thing, "log");
-
+/*
         $log_text = $this->log_handler->filterLog(
             $this->agent_thing->thing->log,
             null,
             ["make", '"Agent"']
         );
+*/
+        $log_text = $this->log_handler->filterLog(
+            $thing->log,
+            null,
+            ["make", '"Agent"']
+        );
+
 
         $text = $log_text;
 
         $this->text = $log_text;
 
-        $raw_log_text = $this->log_handler->filterLog(
-            $this->agent_thing->thing->log
+       $raw_log_text = $this->log_handler->filterLog(
+            $thing->log
         );
 
-        $this->runtimesLog($raw_log_text);
+$this->runtimesLog($thing->log);
 
         $t = "\nSelf-reported Agent runtimes\n";
         foreach (
@@ -95,7 +102,6 @@ class Makelog
                 if (!isset($prior_run_for)) {
                     $prior_run_for = 0;
                 }
-
                 if ($array["run_for"] != "X") {
                     $t .=
                         " (" .
@@ -108,7 +114,8 @@ class Makelog
                 }
             }
         }
-
+//echo $t;
+//exit();
         $t .= "\n";
 
         $file .= $t . "\n";
@@ -154,8 +161,12 @@ $this->thing_report['snippet'] = "Merp.";
             $text = $this->text;
         }
         $c = 0;
+$last_run_for = 0;
         $this->runtimes = [];
-        $lines = explode("\n", $text);
+
+        $text = str_replace('<br>','\n', $text);
+
+        $lines = explode('\n', $text);
         $time_stamp = 0;
         $run_time = 0;
         $previous_run_time = 0;
@@ -176,12 +187,12 @@ $this->thing_report['snippet'] = "Merp.";
             }
 
             $agent_name = $words[2];
-
+/*
             if (strpos($line, "ran for") !== false) {
                 $c += 1;
                 $this->agent_run_time = [];
 
-                $run_time = (int) str_replace(",", "", $numbers[0]);
+                $run_time = (int) str_replace(",", "", $numbers[1]);
                 $run_for = $run_time;
                 $previous_run_time = $run_time;
 
@@ -191,7 +202,7 @@ $this->thing_report['snippet'] = "Merp.";
                     "text" => $line,
                 ];
             }
-
+*/
             if (
                 !isset($previous_agent_name) or
                 $agent_name != $previous_agent_name
@@ -199,11 +210,16 @@ $this->thing_report['snippet'] = "Merp.";
                 if (!isset($run_for)) {
                     $run_for = "X";
                 }
+$current_run_for = (int) str_replace(",", "", $numbers[0]);
+
+$run_for = $current_run_for - $last_run_for;
+
                 $this->agent_sequence[] = [
                     "agent_name" => $agent_name,
                     "run_for" => $run_for,
                 ];
             }
+$last_run_for = $run_for;
             $previous_agent_name = $agent_name;
             $run_for = null;
         }

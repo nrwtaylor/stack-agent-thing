@@ -484,10 +484,10 @@ class Round extends Agent
 
                 imageline(
                     $this->image,
-                    $center_x + $next_x_pt,
-                    $center_y + $next_y_pt,
-                    $center_x + $x_pt,
-                    $center_y + $y_pt,
+                    intval($center_x + $next_x_pt),
+                    intval($center_y + $next_y_pt),
+                    intval($center_x + $x_pt),
+                    intval($center_y + $y_pt),
                     $this->black
                 );
             }

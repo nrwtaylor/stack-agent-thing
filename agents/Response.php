@@ -17,7 +17,7 @@ class Response extends Agent
     public function doResponse()
     {
         if ($this->agent_input == null) {
-            $array = array('Hmmmm.', 'Is that so.', 'Right.');
+            $array = ['Hmmmm.', 'Is that so.', 'Right.'];
             $k = array_rand($array);
             $v = $array[$k];
 
@@ -29,21 +29,21 @@ class Response extends Agent
         }
     }
 
-    public function limitResponse($thing_report = null) {
-if ($thing_report == null) {
-    $thing_report = $this->thing_report;
-}
+    public function limitResponse($thing_report = null)
+    {
+        if ($thing_report == null) {
+            $thing_report = $this->thing_report;
+        }
 
-// dev placeholder for calling shorten.
-// Needs to work through the whole thing_report.
+        // dev placeholder for calling shorten.
+        // Needs to work through the whole thing_report.
 
-$parts = explode('. ', $thing_report['sms']);
-$thing_report['sms'] = $parts[0] . ".";
+        $parts = explode('. ', $thing_report['sms']);
+        $thing_report['sms'] = $parts[0] . ".";
 
+        $thing_report['sms'] = "[dev apply limit] " . $thing_report['sms'];
 
-$thing_report['sms'] = "[dev apply limit] " . $thing_report['sms'];
-
-return $thing_report;
+        return $thing_report;
     }
 
     /**
@@ -51,36 +51,36 @@ return $thing_report;
      */
     public function respondResponse()
     {
-
-$t = $this->tokensLimit();
-if ($t != null and in_array('response', $t)) {
-
-$this->response .= "Saw limit response token. ";
-$this->thing_report = $this->limitResponse();
-
-}
+        $t = $this->tokensLimit();
+        if ($t != null and in_array('response', $t)) {
+            $this->response .= "Saw limit response token. ";
+            $this->thing_report = $this->limitResponse();
+        }
         $agent_flag = true;
         if ($this->agent_name == "agent") {
             return;
         }
-
         // Don't respond to responses.
         if ($this->agent_name == "response") {
             return;
         }
 
-// conditionResponse.
-//$this->response = $this->conditionResponse($this->response);
+        // conditionResponse.
+        //$this->response = $this->conditionResponse($this->response);
 
         if ($agent_flag == true) {
             if (!isset($this->thing_report["sms"])) {
                 $this->thing_report["sms"] = "AGENT | Standby.";
             }
-            $this->thing_report['sms'] .= " response added " . $this->agent_name;
+            $this->thing_report['sms'] .=
+                " response added " . $this->agent_name;
 
             $this->thing_report["message"] = $this->thing_report["sms"];
-
-            if ($this->agent_input == null or $this->agent_input == "" or $this->agent_input == 'response') {
+            if (
+                $this->agent_input == null or
+                $this->agent_input == "" or
+                $this->agent_input == 'response'
+            ) {
                 $message_thing = new Message($this->thing, $this->thing_report);
                 $this->thing_report["info"] =
                     $message_thing->thing_report["info"];
@@ -88,37 +88,52 @@ $this->thing_report = $this->limitResponse();
         }
     }
 
-    public function makeResponse($text = null) {
-       if ($text == null) {return true;}
-       if (isset($this->meta_string)) {$this->response = $this->meta_string . " - " . $this->response;} 
-       if (!isset($this->meta_string)) {$this->response = "no meta" . " - " . $this->response;}
+    public function makeResponse($text = null)
+    {
+        if ($text == null) {
+            return true;
+        }
+        if (isset($this->meta_string)) {
+            $this->response = $this->meta_string . " - " . $this->response;
+        }
+        if (!isset($this->meta_string)) {
+            $this->response = "no meta" . " - " . $this->response;
+        }
 
-       $this->thing_report['response'] = $this->response;
+        $this->thing_report['response'] = $this->response;
 
-       return $this->response;
+        return $this->response;
     }
 
-    public function metaResponse() {
-        $this->getMeta();
+    public function metaResponse()
+    {
+        $m = $this->getMeta();
+//var_dump($m);
         $t = "";
-        $t .= $this->meta;
-        $t .= " " . $this->meta_string;
+        $t .= $m['from'] ." ";
+        $t .= $m['to'] . " ";
+        $t .= $m['message'];
+        //$t .= " " . $this->meta_string;
         $t .= " " . $this->agent_name;
-       return $t;
+        return $t;
     }
 
     public function makeSMS()
     {
-        $this->sms_message = "RESPONSE | " . "" . $this->response_message . " " . $this->response;
+        $this->sms_message =
+            "RESPONSE | " .
+            "" .
+            $this->response_message .
+            " " .
+            $this->response;
         $this->thing_report['sms'] = $this->sms_message;
     }
 
     public function readSubject()
     {
-if ($this->hasText($this->input, "meta")) {
-
-$this->response .= $this->metaResponse() ." ";
-}
+        if ($this->hasText($this->input, "meta")) {
+            $this->response .= $this->metaResponse() . " ";
+        }
 
         return false;
     }

@@ -49,6 +49,11 @@ class Slug extends Agent
             $this->thing,
             "alphanumeric"
         );
+       // $this->alphanumeric_agent = new Alphanumeric(
+       //     $this->thing,
+      //      "alphanumeric"
+      //  );
+        $this->getSlugs();
     }
 
     /**
@@ -70,6 +75,7 @@ class Slug extends Agent
         $slug = $this->extractSlug($text);
         $this->slug = $slug;
         return $slug;
+/*
 
         $slug = $this->alphanumeric_agent->filterAlphanumeric($text);
 
@@ -81,7 +87,8 @@ class Slug extends Agent
 
         $this->slug = $slug;
         return $slug;
-    }
+*/ 
+   }
 
     public function extractSlug($text = null)
     {
@@ -102,6 +109,17 @@ class Slug extends Agent
         $slug = trim($slug, "-");
         return $slug;
     }
+
+    public function deSlug($text = null)
+    {
+        if ($text == null) {
+            return true;
+        }
+
+        $deslug = str_replace('-', " ", $text);
+        return $deslug;
+    }
+
 
     /**
      *

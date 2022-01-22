@@ -654,8 +654,10 @@ class Job extends Agent
     public function get()
     {
         $contents = $this->load("job/jobs.txt");
-        $this->jobs_list = require $this->resource_path . "job/jobs.php";
-
+$jobs_filename =  $this->resource_path . "job/jobs.php";
+if (file_exists($jobs_filename)) {
+        $this->jobs_list = require $jobs_filename;
+}
         $this->getJobs();
     }
 

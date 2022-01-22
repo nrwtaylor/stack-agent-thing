@@ -364,6 +364,10 @@ return $spread;
     }
 
     public function formatNumber($text) {
+        $this->textNumber($text);
+    }
+
+    public function textNumber($text) {
 
        $number = $text;
 

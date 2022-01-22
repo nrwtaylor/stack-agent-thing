@@ -61,69 +61,71 @@ class Sun extends Agent
         $this->sun_resource = $sun_resource;
     }
 
-    function makePNG() {
-
+    function makePNG()
+    {
         if ($image = null) {
             $image = $this->image;
         }
-        if ($image == true) {return true;}
+        if ($image == true) {
+            return true;
+        }
 
         $agent = new Png($this->thing, "png");
 
         $jpgs = $this->sun_resource['jpgs'];
 
-foreach($jpgs as $jpg_link=>$jpg_meta) {
+        foreach ($jpgs as $jpg_link => $jpg_meta) {
+            $image = imagecreatefromstring(file_get_contents($jpg_link));
 
-        $image = imagecreatefromstring(file_get_contents($jpg_link));
+            if ($image === true) {
+                return true;
+            }
 
-        if ($image === true) {return true;}
+            $agent->makePNG($image);
 
-        $agent->makePNG($image);
+            $this->html_image = $agent->html_image;
+            $this->image = $agent->image;
+            $this->PNG = $agent->PNG;
 
-        $this->html_image = $agent->html_image;
-        $this->image = $agent->image;
-        $this->PNG = $agent->PNG;
-
-        $this->thing_report['png'] = $agent->image_string;
-}
-
+            $this->thing_report['png'] = $agent->image_string;
+        }
     }
 
-
-    public function makePNGs() {
-return;
-        $this->thing_report['pngs'] = array();
+    public function makePNGs()
+    {
+        return;
+        $this->thing_report['pngs'] = [];
         //return;
         $agent = new Png($this->thing, "png");
 
         $jpgs = $this->sun_resource['jpgs'];
 
-
-        foreach ($this->result as $index=>$die_array) {
+        foreach ($this->result as $index => $die_array) {
             reset($die_array);
             $die = key($die_array);
             $number = current($die_array);
 
-            $image =      $this->makeImage($number, $die);
-            if ($image === true) {continue;}
+            $image = $this->makeImage($number, $die);
+            if ($image === true) {
+                continue;
+            }
 
             $agent->makePNG($image);
 
-            $alt_text = "Image of a " .$die . " die with a roll of " . $number . ".";
+            $alt_text =
+                "Image of a " . $die . " die with a roll of " . $number . ".";
 
+            $this->images[$this->agent_name . '-' . $index] = [
+                "image" => $agent->image,
+                "html_image" => $agent->html_image,
+                "image_string" => $agent->image_string,
+                "alt_text" => $alt_text,
+            ];
 
-            $this->images[$this->agent_name .'-'.$index] = array("image"=>$agent->image,
-                "html_image"=> $agent->html_image,
-                "image_string"=> $agent->image_string,
-                "alt_text" => $alt_text);
-
-
-            $this->thing_report['pngs'][$this->agent_name . '-'.$index] = $agent->image_string;
-
-
+            $this->thing_report['pngs'][$this->agent_name . '-' . $index] =
+                $agent->image_string;
         }
     }
-
 
     /**
      *
@@ -133,11 +135,18 @@ return;
         $day_agent = new Day($this->thing, "day");
 
         $day_time_text = "Above the horizon. ";
-        if ($day_agent->day_time != 'day') {$day_time_text = "Below the horizon. ";}
+        if ($day_agent->day_time != 'day') {
+            $day_time_text = "Below the horizon. ";
+        }
 
         $this->linksSun();
         $this->node_list = ["sun" => ["sun", "moon", "venus"]];
-        $m = strtoupper($this->agent_name) . " | " . $day_time_text . " " .$this->response;
+        $m =
+            strtoupper($this->agent_name) .
+            " | " .
+            $day_time_text .
+            " " .
+            $this->response;
         $this->sms_message = $m;
         $this->thing_report['sms'] = $m;
     }
@@ -151,11 +160,11 @@ return;
         $this->thing_report['choices'] = $choices;
     }
 
-    public function respondResponse() {
+    public function respondResponse()
+    {
         $this->thing->flagGreen();
 
         $this->makeChoices();
-
 
         $this->thing_report["info"] = "This rolls a dice.  See
                 https:\\codegolf.stackexchange.com/questions/25416/roll-dungeons-and-dragons-dice";
@@ -172,7 +181,6 @@ return;
         return $this->thing_report;
     }
 
-
     /**
      *
      * @param unknown $text (optional)
@@ -183,7 +191,8 @@ return;
         return "The Sun will rise tomorrow";
     }
 
-    function dateEpoch($epochtime) {
+    function dateEpoch($epochtime)
+    {
         // Time returned in GMT.
         $t = gmdate("Y-m-d\TH:i:s\Z", $epochtime); // How many H:i:s solar noon was ago.
         return $t;
@@ -191,13 +200,12 @@ return;
 
     function doSun($text = null)
     {
+        // dev
+        // TODO
 
-// dev
-// TODO
+        // Get definition of solstice
 
-// Get definition of solstice
-
-/*
+        /*
 https://en.wikipedia.org/wiki/Equinox
 An equinox is the instant of time when the plane of Earth's
 equator passes through the geometric center of the Sun's disk.[3][4]
@@ -213,7 +221,7 @@ to the solstices and the equinoxes.
 
 */
 
-// Calculate longest and shortest days at stack lat and long
+        // Calculate longest and shortest days at stack lat and long
 
         $day_seconds = 24 * 60 * 60;
 
@@ -224,7 +232,7 @@ to the solstices and the equinoxes.
         $minimums = [];
         $maximums = [];
         $equinoxes = [];
-$equal_night_days = [];
+        $equal_night_days = [];
 
         $day_lengths = [];
         foreach (range(-500, 500, 1) as $n) {
@@ -234,7 +242,7 @@ $equal_night_days = [];
 
             $day_lengths[$n] = $arr['sunset'] - $arr['sunrise'];
 
-            if ((isset($day_lengths[$n-2])) and (isset($day_lengths[$n-1]))) {
+            if (isset($day_lengths[$n - 2]) and isset($day_lengths[$n - 1])) {
                 if (
                     $day_lengths[$n - 2] <= $day_lengths[$n - 1] and
                         $day_lengths[$n - 1] > $day_lengths[$n - 0] or
@@ -243,12 +251,13 @@ $equal_night_days = [];
                 ) {
                     $this->thing->log("found maximum");
                     $maximums[] = [
-                        'description'=>'longest day',
+                        'description' => 'longest day',
                         'day' => $n - 1,
                         'transit' => $this->dateEpoch($arr['transit']),
                         'day_length' => $day_lengths[$n - 1],
-                        'timestamp' => $this->dateEpoch(strtotime($t) + ($n-1)*$day_seconds)
-
+                        'timestamp' => $this->dateEpoch(
+                            strtotime($t) + ($n - 1) * $day_seconds
+                        ),
                     ];
                 }
 
@@ -260,48 +269,46 @@ $equal_night_days = [];
                 ) {
                     $this->thing->log("found minimum");
                     $minimums[] = [
-                        'description'=>'shortest day',
+                        'description' => 'shortest day',
                         'day' => $n - 1,
                         'transit' => $this->dateEpoch($arr['transit']),
                         'day_length' => $day_lengths[$n - 1],
-                        'timestamp' => $this->dateEpoch(strtotime($t) + ($n-1)*$day_seconds)
-
+                        'timestamp' => $this->dateEpoch(
+                            strtotime($t) + ($n - 1) * $day_seconds
+                        ),
                     ];
                 }
             }
 
-            if (
-                abs($day_lengths[$n] - (12 * 60 * 60) ) < 200
-            ) {
-
+            if (abs($day_lengths[$n] - 12 * 60 * 60) < 200) {
                 $this->thing->log("found equinoxes");
                 $equinox = [
-                    'description'=>'12 hour day',
+                    'description' => '12 hour day',
                     'day' => $n,
                     'day_length' => $day_lengths[$n],
-                    'timestamp' => $this->dateEpoch(strtotime($t) + ($n)*$day_seconds)
+                    'timestamp' => $this->dateEpoch(
+                        strtotime($t) + $n * $day_seconds
+                    ),
                 ];
 
-
-
-                if ((isset($last_equinox['day'])) and  ( ($last_equinox['day']+1) == $equinox['day'] )) { 
-
+                if (
+                    isset($last_equinox['day']) and
+                    $last_equinox['day'] + 1 == $equinox['day']
+                ) {
                     if (
-                        ( abs($last_equinox['day_length'] - (12 * 60 * 60) )) >
-                        ( abs($equinox['day_length'] - (12 * 60 * 60))) 
+                        abs($last_equinox['day_length'] - 12 * 60 * 60) >
+                        abs($equinox['day_length'] - 12 * 60 * 60)
                     ) {
                         continue;
                     }
-
                 } else {
                     $equinoxes[] = $equinox;
                     $equal_night_days[] = $equinox;
                     $last_equinox = $equinox;
                 }
-            //$day_length_delta = $day_lengths[$n] - $day_lengths[$n-1];
+                //$day_length_delta = $day_lengths[$n] - $day_lengths[$n-1];
             }
         }
-
 
         // Minimum is winter solstice (northern hemisphere).
         // Maximum is summer solstice  (northern hemisphere).
@@ -312,31 +319,31 @@ $equal_night_days = [];
         $this->shortest_days = $minimums;
         $this->equal_night_days = $equal_night_days;
 
-//        $this->equinoxes = $equinoxes;
+        //        $this->equinoxes = $equinoxes;
         $this->sun_message = $this->response;
         $events = [];
         $events = array_merge($events, $this->longest_days);
         $events = array_merge($events, $this->shortest_days);
         $events = array_merge($events, $this->equal_night_days);
 
-
-//        $events = array_merge($events, $this->equinoxes);
+        //        $events = array_merge($events, $this->equinoxes);
 
         usort($events, function ($first, $second) {
-            return strtotime($first['timestamp']) > strtotime($second['timestamp']);
+            return strtotime($first['timestamp']) -
+                strtotime($second['timestamp']);
         });
 
-//PHP 7 Spaceship operator
-//usort($events, function($a, $b) {
-//  return new \DateTime($a['timestamp']) <=> new \DateTime($b['timestamp']);
-//});
+        //PHP 7 Spaceship operator
+        //usort($events, function($a, $b) {
+        //  return new \DateTime($a['timestamp']) <=> new \DateTime($b['timestamp']);
+        //});
         $this->events = $events;
 
         return $text;
     }
 
     // TODO: Refactor lmtTime
-    // Consider 
+    // Consider
     public function predictSun($text = null)
     {
         // So. This function exists.
@@ -391,47 +398,60 @@ $equal_night_days = [];
     {
     }
 
-    public function makeSnippet() {
-
-
+    public function makeSnippet()
+    {
     }
 
-    public function makeWeb() {
-
-
+    public function makeWeb()
+    {
         $web = "";
 
-        $web .="<b>EVENTS</b><br>";
-        foreach ($this->events as $key=>$value) {
-$day_length_text = intval($value['day_length'] / 60) . " minutes";
-            $web .= $value['timestamp']. " " .$value['description'] . " " . $day_length_text . "<br>"; 
-
+        $web .= "<b>EVENTS</b><br>";
+        foreach ($this->events as $key => $value) {
+            $day_length_text = intval($value['day_length'] / 60) . " minutes";
+            $web .=
+                $value['timestamp'] .
+                " " .
+                $value['description'] .
+                " " .
+                $day_length_text .
+                "<br>";
         }
 
-$this->sun_resource['jpgs'][0]['alt_text'] = 'test';
-            $alt_text = $this->sun_resource['jpgs'][0]['alt_text'];
-$width = 100;
-$html_width = 'width=' . $width . ' ';
-$html_width = "";
+        $this->sun_resource['jpgs'][0]['alt_text'] = 'test';
+        $alt_text = $this->sun_resource['jpgs'][0]['alt_text'];
+        $width = 100;
+        $html_width = 'width=' . $width . ' ';
+        $html_width = "";
 
-            $image_string = $this->thing_report['png'];
-            $html = '<img src="data:image/png;base64,'. $image_string . '" ' .
-                $html_width .'
-                alt="' . $alt_text . '" longdesc="' . $this->web_prefix . 'thing/' .$this->uuid . '/'. $this->agent_name .'.txt" >';
+        $image_string = $this->thing_report['png'];
+        $html =
+            '<img src="data:image/png;base64,' .
+            $image_string .
+            '" ' .
+            $html_width .
+            '
+                alt="' .
+            $alt_text .
+            '" longdesc="' .
+            $this->web_prefix .
+            'thing/' .
+            $this->uuid .
+            '/' .
+            $this->agent_name .
+            '.txt" >';
 
-            $web .= $html;
-//$link_agent = new Link($this->thing, "link");
-foreach($this->sun_resource['urls'] as $key=>$value) {
-        $link = '<a href="' . $key . '">';
-        $link .= $value['text'];
-        $link .= "</a>";
-$web .= $link . "<br>";
-}
+        $web .= $html;
+        //$link_agent = new Link($this->thing, "link");
+        foreach ($this->sun_resource['urls'] as $key => $value) {
+            $link = '<a href="' . $key . '">';
+            $link .= $value['text'];
+            $link .= "</a>";
+            $web .= $link . "<br>";
+        }
 
         $this->thing_report['web'] = $web;
-
     }
-
 
     /**
      *

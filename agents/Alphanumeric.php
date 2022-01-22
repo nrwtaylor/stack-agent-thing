@@ -24,15 +24,24 @@ class Alphanumeric extends Agent
 
         $this->aliases = ["learning" => ["good job"]];
         $this->recognize_french = true; // Flag error
-
-        $this->filterAlphanumeric("123414sdfas asdfsad 234234 *&*dfg");
     }
 
-    /**
-     *
-     */
-    function get()
+    public function test() {
+
+        $this->filterAlphanumeric("123414sdfas asdfsad 234234 *&*dfg");
+
+    }
+
+    public function get()
     {
+        $time_string = $this->thing->Read(["alphanumeric", "refreshed_at"]);
+
+        if ($time_string == false) {
+            $time_string = $this->thing->time();
+            $this->thing->Write(["alphanumeric", "refreshed_at"], $time_string);
+        }
+
+        //$this->getDay();
     }
 
     /**
@@ -40,10 +49,12 @@ class Alphanumeric extends Agent
      */
     function set()
     {
+/*
         $this->thing->Write(
             ["alphanumeric", "refreshed_at"],
             $this->thing->time()
         );
+*/
     }
 
     public function trimAlphanumeric($text)
@@ -186,25 +197,25 @@ class Alphanumeric extends Agent
     {
         $this->thing->flagGreen();
 
-        $from = $this->from;
-        $to = $this->to;
+//        $from = $this->from;
+//        $to = $this->to;
 
-        $subject = $this->subject;
+//        $subject = $this->subject;
 
         // Now passed by Thing object
-        $uuid = $this->uuid;
-        $sqlresponse = "yes";
+//        $uuid = $this->uuid;
+//        $sqlresponse = "yes";
 
 //        $this->makeSMS();
 
-        $this->makeChoices();
+//        $this->makeChoices();
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
-        $this->makeWeb();
+//        $this->makeWeb();
 
-        $this->thing_report['thing'] = $this->thing->thing;
+//        $this->thing_report['thing'] = $this->thing->thing;
 
         $this->thing_report['help'] =
             "This extracts alphanumerics from the datagram.";
@@ -295,13 +306,9 @@ class Alphanumeric extends Agent
     function makeSMS()
     {
         $sms = "ALPHANUMERIC | ";
-        //foreach ($this->numbers as $key=>$number) {
-        //    $this->sms_message .= $number . " | ";
-        //}
         if (isset($this->alphanumeric)) {
             $sms .= $this->alphanumeric;
         }
-        //$this->sms_message .= 'devstack';
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -317,25 +324,5 @@ class Alphanumeric extends Agent
         $this->choices = $choices;
     }
 
-    /**
-     *
-     * @return unknown
-     */
-    /*
-    public function makePNG() {
-        $text = "thing:".$this->alphas[0];
 
-        ob_clean();
-
-        ob_start();
-
-        QRcode::png($text, false, QR_ECLEVEL_Q, 4);
-
-        $image = ob_get_contents();
-        ob_clean();
-
-        $this->thing_report['png'] = $image;
-        return $this->thing_report['png'];
-    }
-*/
 }

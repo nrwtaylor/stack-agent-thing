@@ -180,6 +180,7 @@ class Year extends Agent
             $year_text .= $year["year"] . " " . $year["era"] . " ";
         }
         $sms .= $year_text;
+
         $sms .= $this->web_prefix . "thing/" . $this->uuid . "/year";
         $sms .= " | " . $this->response;
         $this->sms_message = $sms;
@@ -966,6 +967,10 @@ class Year extends Agent
             return false;
         }
 
+        if (isset($this->years)) {
+            $years = $this->years;
+        }
+
         if (!isset($this->years)) {
             $years = $this->extractYears($text);
         }
@@ -989,6 +994,8 @@ class Year extends Agent
         }
 
         if ($input == "year") {
+            $year = date("Y", strtotime($this->current_time));
+            $this->years[] = ['year'=>$year, 'era'=>'ce'];
             return;
         }
 

@@ -27,7 +27,8 @@ return false;
 
 }
 
-    public function getNgrams($input, $n = 3) {
+    public function getNgrams($input, $n = 3, $delimiter = null) {
+if ($delimiter == null) {$delimiter = "";}
 if (!isset($this->ngrams)) {$this->ngrams = array();}
         $words = explode(' ', $input);
         $ngrams = array();
@@ -37,7 +38,7 @@ if (!isset($this->ngrams)) {$this->ngrams = array();}
             if ($key < count($words) - ($n - 1)) {
                 $ngram = "";
                 for ($i = 0; $i < $n; $i++) {
-                    $ngram .= " " . $words[$key + $i];
+                    $ngram .= " " . $words[$key + $i]. $delimiter;
                 }
                 $ngrams[] = trim($this->trimAlpha($ngram));
             }
@@ -129,18 +130,29 @@ $this->thing_report['sms'] = "MIXED";
     {
 }
 
+    public function get()
+    {
+        $time_string = $this->thing->Read(["mixed", "refreshed_at"]);
+
+        if ($time_string == false) {
+            $time_string = $this->thing->time();
+            $this->thing->Write(["mixed", "refreshed_at"], $time_string);
+        }
+
+    }
+
 
     public function set()
     {
         // Log which agent was requested ie Ebay.
         // And note the time.
-
+/*
         $time_string = $this->thing->time();
         $this->thing->Write(
             array("mixed", "refreshed_at"),
             $time_string
         );
-
+*/
 
 /// ?
 //$place_agent thing = new Place($this->thing, $ngram);

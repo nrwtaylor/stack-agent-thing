@@ -22,7 +22,7 @@ class Qr extends Agent
 
         if ($this->agent_input == null) {
             $this->quick_response =
-                $this->web_prefix . "" . $this->uuid . "" . "/qr";
+                $this->web_prefix . "thing/" . $this->uuid . "" . "/qr";
         } else {
             $this->quick_response = $this->agent_input;
         }
@@ -34,7 +34,30 @@ class Qr extends Agent
             "Creates a scannable Quick Response (QR) code.";
     }
 
-    function extractQuickresponse($input)
+    public function get()
+    {
+        $time_string = $this->thing->Read(["qr", "refreshed_at"]);
+
+        if ($time_string == false) {
+            $time_string = $this->thing->time();
+            $this->thing->Write(
+                ["qr", "refreshed_at"],
+                $time_string
+            );
+        }
+
+        $this->refreshed_at = strtotime($time_string);
+    }
+
+    function getQr()
+    {
+        $this->qr_agent = new Qr($this->thing, $this->link);
+        $this->quick_response_png = $this->qr_agent->PNG_embed;
+        $this->html_image = $this->qr_agent->html_image;
+    }
+
+
+    function extractQr($input)
     {
         if (!isset($this->quick_responses)) {
             $this->quick_responses = [];
@@ -44,13 +67,16 @@ class Qr extends Agent
         return $this->quick_responses;
     }
 
+    function makeLink()
+    {
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/qr';
+
+        $this->link = $link;
+        $this->thing_report['link'] = $link;
+    }
+
     public function set()
     {
-        $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(
-            ["qr", "received_at"],
-            $this->thing->time()
-        );
     }
 
     function makeWeb()
@@ -74,8 +100,7 @@ class Qr extends Agent
 
         $web .= 'Code will scan as "' . $this->quick_response . '". ';
         $web .= '<p>';
-
-        $timestamp = $this->timestampAgent();
+        $timestamp = $this->timestampAgent($this->refreshed_at);
 
         $web .= "Thing created at " . $timestamp . ". ";
         $web .= "<br>";
@@ -86,30 +111,7 @@ class Qr extends Agent
 
     public function respondResponse()
     {
-        // Thing actions
         $this->thing->flagGreen();
-
-        $from = $this->from;
-        $to = $this->to;
-
-        $subject = $this->subject;
-
-        // Now passed by Thing object
-        $quick_response = $this->quick_response;
-        $sqlresponse = "yes";
-
-        $message =
-            "Thank you $from here is a QR (Quick Response).<p>" .
-            $this->web_prefix .
-            "thing/$quick_response\n$sqlresponse \n\n<br> ";
-        $message .=
-            '<img src="' .
-            $this->web_prefix .
-            'thing/' .
-            $quick_response .
-            '/receipt.png" alt="thing:' .
-            $quick_response .
-            '" height="92" width="92">';
 
         $this->thing_report['email'] = $this->thing_report['sms'];
 
@@ -128,9 +130,9 @@ class Qr extends Agent
         $this->thing->log('looking for QR in address.');
         //    $uuid_thing = new Uuid($this->thing, 'uuid');
 
-        $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
+        //$pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
 
-        if (preg_match($pattern, $this->to)) {
+        if ($this->hasUuid($this->to)) {
             $this->response .= "Saw and ignored a UUID in the message. ";
             $this->thing->log('found a QR in address.');
         }
@@ -140,7 +142,6 @@ class Qr extends Agent
     {
         $this->sms_message = "QR | ";
         $this->sms_message .= $this->quick_response;
-        //$this->sms_message .= ' | TEXT ?';
 
         $this->thing_report['sms'] = $this->sms_message;
     }

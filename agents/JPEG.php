@@ -91,7 +91,7 @@ class JPEG extends Agent
 
         $this->node_list = ["email" => ["jpeg"]];
         // Make buttons
-        $this->thing->choice->Create(
+        $this->createChoice(
             $this->agent_name,
             $this->node_list,
             "email"
@@ -122,12 +122,12 @@ class JPEG extends Agent
 
         $this->node_list = ["web" => ["jpeg", "jpg"]];
         // Make buttons
-        $this->thing->choice->Create(
+        $this->createChoice(
             $this->agent_name,
             $this->node_list,
             "web"
         );
-        $this->choices = $this->thing->choice->makeLinks("web");
+        $this->choices = $this->linksChoice("web");
 
         $web = '<a href="' . $link . '">' . $this->html_image . "</a>";
         $web .= "<br>";

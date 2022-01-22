@@ -50,6 +50,7 @@ class Stamp extends Agent
 
     function makeStamp()
     {
+        if (isset($this->stamp) and $this->stamp != false) {return;}
         $stamp_text = "";
         $stamps = ['juliett', 'zulu', 'nuuid', 'utc', 'time', 'uuid'];
 
@@ -226,7 +227,7 @@ class Stamp extends Agent
             $line . "<br>" . "stamp " . $this->stamp . "<br>" . "<br>";
         }
     }
-
+/*
     function set()
     {
     }
@@ -234,6 +235,33 @@ class Stamp extends Agent
     function get($run_at = null)
     {
     }
+*/
+    public function get()
+    {
+        $time_string = $this->thing->Read(["stamp", "refreshed_at"]);
+
+        if ($time_string == false) {
+            $time_string = $this->thing->time();
+            $this->thing->Write(
+                ["stamp", "refreshed_at"],
+                $time_string
+            );
+        }
+
+        $this->refreshed_at = strtotime($time_string);
+
+        $this->stamp = $this->thing->Read(["stamp", "stamp"]);
+    }
+
+    public function set()
+    {
+        if ($this->stamp != false) {
+            $this->thing->Write(["stamp", "stamp"], $this->stamp);
+        }
+    }
+
+
+
 
     function extractStamp($input = null)
     {
@@ -281,7 +309,6 @@ class Stamp extends Agent
                 $stamp .= $this->stamp;
             }
         }
-
         if (
             isset($this->time_zone) and
             $this->default_time_zone != $this->time_zone
@@ -290,7 +317,14 @@ class Stamp extends Agent
         }
         $stamp .= "<br>";
 
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/stamp";
+
+        $m .= '<a href="' . $link . '">';
+
         $m .= $stamp;
+
+        $m .= ' stamp link';
+        $m .= '</a>';
 
         $this->web_message = $m;
         $this->thing_report['web'] = $m;
@@ -323,8 +357,8 @@ class Stamp extends Agent
 
         // Generate email response.
 
-        $choices = false;
-        $this->thing_report['choices'] = $choices;
+//        $choices = false;
+//        $this->thing_report['choices'] = $choices;
 
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message;

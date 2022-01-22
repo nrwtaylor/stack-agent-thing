@@ -396,7 +396,7 @@ dev - Detect duplicates.
         // And to perform poorly if all we get is "Details for the call Thursday night".
 
         usort($datelines, function ($a, $b) {
-            return $a["score"] < $b["score"];
+            return $b["score"] - $a["score"];  // a < b. If a < b, true.  b-a = true
         });
 
         return $datelines;
@@ -449,7 +449,6 @@ dev - Detect duplicates.
             if (!file_exists($filename)) {
                 continue;
             }
-
             $contents = $this->loadClaws($filename);
 
             // Pass contents through MH routine to remove trailing =
@@ -465,9 +464,7 @@ dev - Detect duplicates.
 
             //if ($isEmail === true) {
             $meta = $this->metaEmail($contents);
-
             $parts = $this->attachmentsEmail($contents);
-
             $events = [];
 
             foreach ($parts as $i => $part) {

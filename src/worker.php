@@ -248,6 +248,41 @@ $thing->created_at = $thing->time();
 
 //        return true;
     }
+
+
+
+$manager_handler = new \Nrwtaylor\StackAgentThing\Manager($thing, "manager");
+echo "worker saw " . $manager_handler->queued_jobs . " queued jobs";
+if ($manager_handler->queued_jobs > 20) {
+
+echo "Saw " . $manager_handler->queued_jobs . " jobs. worker dropped this job " . $thing->uuid . ". ";
+
+
+    $thing->thing_report["jpeg"] = null;
+    $thing->thing_report["png"] = null;
+    $thing->thing_report["pdf"] = null;
+
+    // Not needed either.
+    $thing->thing_report["thing"] = $thing;
+
+    $thing->thing_report['sms'] = "WORKER | Too many jobs. Ignored a job.";
+
+
+
+
+    $json = json_encode(
+        $thing->thing_report,
+        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    );
+
+    return $json;
+
+}
+
+
+
+
+
     echo "worker nuuid " . $thing->nuuid . "\n";
     echo "worker uuid " . $thing->uuid . "\n";
     echo "worker timestamp " . $thing->microtime() . "\n";
@@ -354,10 +389,17 @@ $stack_total_jobs = $n;
         $t->thing_report["png"] = base64_encode($t->thing_report["png"]);
     }
 
-    $t->thing_report["jpeg"] = null;
+    if (isset($t->thing_report["pdf"])) {
+        $t->thing_report["pdf"] = base64_encode($t->thing_report["pdf"]);
+    }
 
-    $t->thing_report["png"] = null;
-    $t->thing_report["pdf"] = null;
+    if (isset($t->thing_report["jpeg"])) {
+        $t->thing_report["jpeg"] = base64_encode($t->thing_report["jpeg"]);
+    }
+
+//    $t->thing_report["jpeg"] = null;
+//    $t->thing_report["png"] = null;
+//    $t->thing_report["pdf"] = null;
 
     // Not needed either.
     $t->thing_report["thing"] = null;

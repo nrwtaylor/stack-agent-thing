@@ -23,6 +23,8 @@ class Kplex extends Agent
     {
         $this->node_list = ["kplex" => ["nmea", "opencpn"]];
         $this->colour_indicators = ["red", "green"];
+$this->kplex_terse_flag = "on";
+
     }
 
     public function listenKplex()
@@ -131,7 +133,16 @@ if ($this->snapshot != null) {
         $sms .= "latitude " . $this->snapshot->current_latitude_decimal . " ";
         $sms .= "longitude " . $this->snapshot->current_longitude_decimal . " ";
         $sms .= "speed " . $this->snapshot->speed_in_knots . " knots ";
-        $sms .= "course " . $this->snapshot->true_course . " degrees ";
+
+$true_course_text = "";
+if ($this->snapshot->true_course != null) {
+$true_course_text = $this->snapshot->true_course;
+        $sms .= "course " . $true_course_text . " degrees ";
+
+}
+
+//        $sms .= "course " . $true_course_text . " degrees ";
+
         if (isset($this->snapshot->destination_waypoint_id)) {
             $sms .=
                 "destination waypoint " .
@@ -161,7 +172,16 @@ if ($this->snapshot != null) {
         }
 }
 
-        $sms .= $this->response;
+        if (
+            isset($this->kplex_terse_flag) and
+            $this->kplex_terse_flag == "on"
+        ) {
+        } else {
+            $sms .= $this->response;
+        }
+
+
+//        $sms .= $this->response;
         $this->sms_message = $sms;
         $this->thing_report["sms"] = $sms;
     }
