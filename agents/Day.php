@@ -46,8 +46,6 @@ class Day extends Agent
 
         $this->node_list = ["day" => ["day", "year", "uuid"]];
 
-        //$this->current_time = $this->thing->time();
-
         $this->projected_time = $this->current_time;
 
         // Get some stuff from the stack which will be helpful.
@@ -186,19 +184,6 @@ class Day extends Agent
 
     public function runDay($text = null)
     {
-        /*
-        $longitude_agent = new Longitude($this->thing, "longitude");
-
-        // Cannot calculate local time without knowing longitude.
-        if ($longitude_agent->longitude === false) {
-            $this->response .= "Longitude not known. ";
-        }
-
-        $longitude = $longitude_agent->longitude;
-
-        $latitude_agent = new Latitude($this->thing, "latitude");
-        $latitude = $latitude_agent->latitude;
-*/
         if ($this->latitude === false or strtolower($this->latitude) == "z") {
             $this->response .= "Latitude not known. ";
         }
@@ -211,9 +196,19 @@ class Day extends Agent
         $longitude = (float) $this->latitude;
 
         $timestamp_epoch = (float) $this->timestampEpoch($text);
-        $solar_array = date_sun_info($timestamp_epoch, $latitude, $longitude);
-        $this->solar_array = $solar_array;
-        //$this->timestamp_epoch = $timestamp_epoch;
+
+// Make this call for each place in the list of places.
+
+
+
+        $milestones = $this->milestonesDay($timestamp_epoch, $latitude, $longitude);
+
+    }
+
+    public function milestonesDay($timestamp_epoch, $latitude, $longitude) {
+
+//        $solar_array = date_sun_info($timestamp_epoch, $latitude, $longitude);
+//        $this->solar_array = $solar_array;
 
         $arr = [
             //"night"=> "night",
@@ -247,11 +242,11 @@ class Day extends Agent
 
                 $datum_projected = new \DateTime();
                 $datum_projected->setTimestamp($period_timestamp);
-if (isset($this->timezone)) {
-$timezone = new \DateTimeZone($this->timezone);
-$datum_projected->setTimezone($timezone);
-}
-                $datum = $this->twilightDay($period, $datum_projected);
+                if (isset($this->timezone)) {
+                    $timezone = new \DateTimeZone($this->timezone);
+                    $datum_projected->setTimezone($timezone);
+                }
+                $datum = $this->twilightDay($period, $datum_projected, $latitude, $longitude);
                 if ($datum === false) {
                     continue;
                 }
@@ -260,14 +255,13 @@ $datum_projected->setTimezone($timezone);
                 }
 
                 if ($count == 0) {
-                 //   $message .=
-                 //       $period . " " . $datum->format("Y/m/d G:i:s") . " ";
+                    //   $message .=
+                    //       $period . " " . $datum->format("Y/m/d G:i:s") . " ";
                     $message .=
                         $period . " " . $datum->format("Y/m/d G:i") . " ";
                 } else {
-//                    $message .= $period . " " . $datum->format("G:i:s") . " ";
+                    //                    $message .= $period . " " . $datum->format("G:i:s") . " ";
                     $message .= $period . " " . $datum->format("G:i") . " ";
-
                 }
 
                 if (!isset($this->twilights)) {
@@ -323,6 +317,10 @@ $datum_projected->setTimezone($timezone);
         }
 
         $this->day_time = $day_time;
+        $message = $this->message;
+        $day_solar_milestones = $this->day_solar_milestones;
+        $response = ['day_time'=>$day_time, 'day_solar_milestones'=>$day_solar_milestones, 'message'=>$message];
+       return $response;
     }
 
     public function timestampEpoch($text = null)
@@ -391,28 +389,21 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         return $timestamp_epoch;
     }
 
-    public function solarDay($text = null)
+    public function solarDay($text = null, $latitude = null, $longitude = null)
     {
-        /*
-        $timestamp_epoch = time();
-
-        if ($text != null and is_string($text)) {
-            $timestamp_epoch = strtotime($text);
-        }
-
-        if (is_a($text, "DateTime")) {
-            $timestamp_epoch = $text->getTimestamp();
-        }
-*/
         $timestamp_epoch = (int) $this->timestampEpoch($text);
+if ($latitude == null) {
         $latitude = (float) $this->latitude;
+}
+if ($longitude == null) {
         $longitude = (float) $this->longitude;
+}
         $solar_array = date_sun_info($timestamp_epoch, $latitude, $longitude);
 
         return $solar_array;
     }
 
-    public function twilightDay($text, $datum = null)
+    public function twilightDay($text, $datum = null, $latitude = null, $longitude = null)
     {
         if ($text == "night") {
             $text = "astronomical twilight begin";
@@ -430,14 +421,14 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
             $working_datum = $datum;
         }
 
-        $s = $this->solarDay($working_datum)[$variable_text];
+        $s = $this->solarDay($working_datum, $latitude, $longitude)[$variable_text];
 
         if ($s === true) {
             return false;
         } // No event.
 
         $seconds_to_event =
-            $this->solarDay($working_datum)[$variable_text] -
+            $this->solarDay($working_datum, $latitude, $longitude)[$variable_text] -
             $this->timestamp_epoch;
 
         if ($seconds_to_event < 0) {
@@ -1063,13 +1054,12 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
             $canvas_size_y = 164;
         }
 
-
         $this->image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
 
-// dev
-$this->colours_agent = new Colours($this->thing, "colours");
-$this->colours_agent->image = $this->image;
-$this->colours_agent->getColours();
+        // dev
+        $this->colours_agent = new Colours($this->thing, "colours");
+        $this->colours_agent->image = $this->image;
+        $this->colours_agent->getColours();
 
         imagefilledrectangle(
             $this->image,
@@ -1961,28 +1951,26 @@ Now draw the twilight.
      */
     public function readSubject()
     {
-
         $i = str_replace("-", " ", $this->input);
 
-$tokens = explode(" ", $i);
-$timezones = [];
-foreach($tokens as $j=>$token) {
-        $timezone = $this->extractTimezone($token);
-        if ($timezone === true or $timezone === false) {continue;}
-        $timezones[] = $timezone;
-}
+        $tokens = explode(" ", $i);
+        $timezones = [];
+        foreach ($tokens as $j => $token) {
+            $timezone = $this->extractTimezone($token);
+            if ($timezone === true or $timezone === false) {
+                continue;
+            }
+            $timezones[] = $timezone;
+        }
 
-if ( count($timezones) == 1 ) {
-$this->timezone = $timezones[0];
-}
+        if (count($timezones) == 1) {
+            $this->timezone = $timezones[0];
+        }
 
         $dateline = $this->extractDateline($i);
         if (
-            !(
-//                $dateline["year"] === false and // comes through as 2021
-                $dateline["month"] === false and
-                $dateline["day_number"] === false
-            )
+            !//                $dateline["year"] === false and // comes through as 2021
+            ($dateline["month"] === false and $dateline["day_number"] === false)
         ) {
             $date_string =
                 $dateline["year"] .
