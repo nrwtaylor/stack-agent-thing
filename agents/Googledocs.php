@@ -3,7 +3,7 @@ namespace Nrwtaylor\StackAgentThing;
 
 class Googledocs extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
@@ -13,14 +13,14 @@ class Googledocs extends Agent
             $this->thing->at_agent = new At($this->thing, "at");
         }
         $this->test_url = null;
-        if (isset($this->thing->container['api']['googledocs']['test_url'])) {
+        if (isset($this->thing->container["api"]["googledocs"]["test_url"])) {
             $this->test_url =
-                $this->thing->container['api']['googledocs']['test_url'];
+                $this->thing->container["api"]["googledocs"]["test_url"];
         }
 
-// stack-agent-thing test
-$this->test_url = 'https://docs.google.com/document/d/1H-PTthPJqzGeEw9erFtVy22eOu1TF6RsYm5BQfhBJ0o/export?format=txt';
-
+        // stack-agent-thing test
+        $this->test_url =
+            "https://docs.google.com/document/d/1H-PTthPJqzGeEw9erFtVy22eOu1TF6RsYm5BQfhBJ0o/export?format=txt";
     }
 
     function run()
@@ -43,16 +43,35 @@ $this->test_url = 'https://docs.google.com/document/d/1H-PTthPJqzGeEw9erFtVy22eO
 
         $url = $this->test_url;
 
-        $contents = $this->urlGoogledocs($url);
+        //        $contents = $this->urlGoogledocs($url);
+
+        //$response = $this->urlRead($url);
+
+        $start_time = time();
+
+        $response = $this->urlRead($url);
+
+        $run_time = time() - $start_time;
+
+        $this->response .=
+            "Googledocs source took " . $run_time . " seconds to get. ";
+
+        if ($response === true) {
+            $this->response .= "Could not read. ";
+            return true;
+        }
+
+        $contents = $response["contents"];
+
         $this->contents = $contents;
 
         $paragraphs = $this->paragraphsGoogledocs($contents);
         $this->thing->console("Retrieved test contents.\n");
 
-        $arr = ['year', 'month', 'day', 'day_number', 'hour', 'minute'];
+        $arr = ["year", "month", "day", "day_number", "hour", "minute"];
 
         foreach ($paragraphs as $i => $paragraph) {
-//echo ".";
+            //echo ".";
             if (trim($paragraph) == "") {
                 continue;
             }
@@ -61,19 +80,21 @@ $this->test_url = 'https://docs.google.com/document/d/1H-PTthPJqzGeEw9erFtVy22eO
                 continue;
             }
             //$this->thing->log($googledocs['googledocs'] . "\n" . $googledocs['line']);
-            $this->thing->console($googledocs['googledocs'] . "\n");
-            $this->thing->console($googledocs['line'] . "\n");
-            $this->thing->console($this->timestampGoogledocs($googledocs) . "\n");
+            $this->thing->console($googledocs["googledocs"] . "\n");
+            $this->thing->console($googledocs["line"] . "\n");
+            $this->thing->console(
+                $this->timestampGoogledocs($googledocs) . "\n"
+            );
             $this->thing->console("\n");
-//echo $googledocs['line'] . "n";
+            //echo $googledocs['line'] . "n";
         }
-
         $this->response .= "Read " . $i . " paragraphs. ";
-$this->paragraphs = $paragraphs;
+        $this->paragraphs = $paragraphs;
+        $this->googledocs = $googledocs;
         $this->thing->console("Googledocs test completed.\n");
     }
 
-    public function urlGoogledocs($url)
+    public function deprecate_urlGoogledocs($url)
     {
         $this->thing->console("urlGoogledocs read start.\n");
 
@@ -83,7 +104,7 @@ $this->paragraphs = $paragraphs;
         $contents = $read_agent->contents;
 
         // dev refactor
-        //       $contents = $this->urlRead($url);
+        //       $response = $this->urlRead($url);
 
         $run_time = time() - $start_time;
 
@@ -119,17 +140,17 @@ $this->paragraphs = $paragraphs;
         }
         $start_time = time();
 
-        $arr = ['year', 'month', 'day', 'day_number', 'hour', 'minute'];
+        $arr = ["year", "month", "day", "day_number", "hour", "minute"];
 
         foreach ($this->paragraphs as $i => $paragraph) {
-//echo "line " . $i . "\n";
+            //echo "line " . $i . "\n";
             $googledocs = $this->extractGoogledocs($paragraph);
             if ($this->isGoogledocs($googledocs) === false) {
                 continue;
             }
 
             $this->thing->log(
-                $googledocs['googledocs'] . "\n" . $googledocs['line'] . "\n"
+                $googledocs["googledocs"] . "\n" . $googledocs["line"] . "\n"
             );
             break;
         }
@@ -137,7 +158,7 @@ $this->paragraphs = $paragraphs;
         $this->thing->log(" getGoogledocs " . $run_time);
         $this->response .= "Got a googledocs [" . $run_time . " seconds]. ";
 
-        $googledocs['retrieved_at'] = $this->current_time;
+        $googledocs["retrieved_at"] = $this->current_time;
 
         return $googledocs;
     }
@@ -148,11 +169,11 @@ $this->paragraphs = $paragraphs;
             return false;
         }
 
-        if (!isset($googledocs['line'])) {
+        if (!isset($googledocs["line"])) {
             return false;
         }
 
-        $text = $googledocs['line'];
+        $text = $googledocs["line"];
         if (ctype_space($text) === true) {
             return false;
         }
@@ -217,13 +238,13 @@ $this->paragraphs = $paragraphs;
         // Todo extract calendar.
 
         $arr = [
-            'year',
-            'month',
-            'day',
-            'day_number',
-            'hour',
-            'minute',
-            'timezone',
+            "year",
+            "month",
+            "day",
+            "day_number",
+            "hour",
+            "minute",
+            "timezone",
         ];
 
         if ($paragraph == "") {
@@ -247,8 +268,8 @@ $this->paragraphs = $paragraphs;
         }
 
         $googledocs = $this->textGoogledocs($date);
-        $date['line'] = $paragraph;
-        $date['googledocs'] = $googledocs;
+        $date["line"] = $paragraph;
+        $date["googledocs"] = $googledocs;
         return $date;
     }
 
@@ -261,13 +282,13 @@ $this->paragraphs = $paragraphs;
             return true;
         }
         $arr = [
-            'year' => 'XXXX',
-            'month' => 'XX',
-            'day_number' => 'XX',
-            'hour' => 'XX',
-            'minute' => 'XX',
-            'second' => 'XX',
-            'timezone' => 'X'
+            "year" => "XXXX",
+            "month" => "XX",
+            "day_number" => "XX",
+            "hour" => "XX",
+            "minute" => "XX",
+            "second" => "XX",
+            "timezone" => "X",
         ];
         foreach ($arr as $component => $default_text) {
             ${$component} = $default_text;
@@ -285,13 +306,13 @@ $this->paragraphs = $paragraphs;
             if ($googledocs[$component] === true) {
                 continue;
             }
-            if (strtolower($googledocs[$component]) === 'x') {
+            if (strtolower($googledocs[$component]) === "x") {
                 continue;
             }
-            if (strtolower($googledocs[$component]) === 'z') {
+            if (strtolower($googledocs[$component]) === "z") {
                 continue;
             }
-            if ($googledocs[$component] === '?') {
+            if ($googledocs[$component] === "?") {
                 continue;
             }
 
@@ -309,7 +330,7 @@ $this->paragraphs = $paragraphs;
         }
 
         $timezone = "X";
-        if (strtolower($googledocs['timezone']) == 'utc') {
+        if (strtolower($googledocs["timezone"]) == "utc") {
             $timezone = "Z";
         }
 
@@ -319,7 +340,7 @@ $this->paragraphs = $paragraphs;
             $month .
             "-" .
             $day_number .
-            'T' .
+            "T" .
             $hour .
             ":" .
             $minute .
@@ -346,12 +367,12 @@ $this->paragraphs = $paragraphs;
     public function doGoogledocs()
     {
         if ($this->agent_input == null) {
-            $array = ['where are you?'];
+            $array = ["where are you?"];
             $k = array_rand($array);
             $v = $array[$k];
 
-            if (isset($this->googledocs['googledocs'])) {
-                $v = $this->googledocs['googledocs'];
+            if (isset($this->googledocs["googledocs"])) {
+                $v = $this->googledocs["googledocs"];
             }
 
             //$response = "GOOGLEDOCS | " . strtolower($v) . ".";
@@ -367,30 +388,35 @@ $this->paragraphs = $paragraphs;
         $this->thing->flagGreen();
 
         $this->thing_report["info"] =
-            "This is a googledocs keeping an eye on how late this Thing is.";
-        $this->thing_report["help"] = "This is about being inscrutable.";
+            "This is an agent to read googledocs urls.";
+        $this->thing_report["help"] =
+            "Provide the agent with a googledocs url.";
 
         //$this->thing_report['sms'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['txt'] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
+        $this->thing_report["txt"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'];
+        $thing_report["info"] = $message_thing->thing_report["info"];
 
         // return $this->thing_report;
     }
 
-    public function makeWeb() {
-$web = '';
-foreach($this->paragraphs as $i => $paragraph) {
-$web .= '<p>';
-$web .= $paragraph;
-$web .= '</p>';
+    public function makeWeb()
+    {
+
+        $web = "";
+if (isset($this->paragraphs)) {
+        foreach ($this->paragraphs as $i => $paragraph) {
+            $web .= "<p>";
+            $web .= $paragraph;
+            $web .= "</p>";
+        }
 }
 
-$web .= "Hello";
-$this->thing_report['web'] = $web;
-}
+        $web .= "Hello";
+        $this->thing_report["web"] = $web;
+    }
 
     function makeSMS()
     {
@@ -400,7 +426,9 @@ $this->thing_report['web'] = $web;
         // . $this->googledocs_message;
 
         if (isset($this->googledocs)) {
-            $googledocs_timestamp = $this->timestampGoogledocs($this->googledocs);
+            $googledocs_timestamp = $this->timestampGoogledocs(
+                $this->googledocs
+            );
 
             $timestamp_text = "undated";
             if (is_string($googledocs_timestamp)) {
@@ -412,14 +440,14 @@ $this->thing_report['web'] = $web;
             // See if there is a googledocs with a UTC timestamp.
             if (
                 $this->googledocs !== false and
-                stripos($this->googledocs['line'], " utc ") !== false
+                stripos($this->googledocs["line"], " utc ") !== false
             ) {
-                $tokens = explode(" UTC ", $this->googledocs['line']);
+                $tokens = explode(" UTC ", $this->googledocs["line"]);
 
                 $text_token = $tokens[1];
                 $time_tokens = explode(" ", $tokens[0]);
 
-                if (strtolower($time_tokens[0]) === 'timestamp') {
+                if (strtolower($time_tokens[0]) === "timestamp") {
                     $sms .= "| " . $text_token . " ";
                 }
             }
@@ -427,14 +455,14 @@ $this->thing_report['web'] = $web;
         $sms .= $this->response;
 
         $this->sms_message = "" . $sms;
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     function makeChoices()
     {
-        $this->thing->choice->Create('channel', $this->node_list, "googledocs");
-        $choices = $this->thing->choice->makeLinks('googledocs');
-        $this->thing_report['choices'] = $choices;
+        $this->thing->choice->Create("channel", $this->node_list, "googledocs");
+        $choices = $this->thing->choice->makeLinks("googledocs");
+        $this->thing_report["choices"] = $choices;
     }
 
     public function questionGoogledocs($text = null)
@@ -469,7 +497,7 @@ $this->thing_report['web'] = $web;
 
             $age =
                 strtotime($this->current_time) -
-                strtotime($memory['retrieved_at']);
+                strtotime($memory["retrieved_at"]);
 
             // How old can the googledocs be before needing another check?
             if ($age <= $googledocs_horizon and $this->isGoogledocs($memory)) {
@@ -507,7 +535,8 @@ $this->thing_report['web'] = $web;
 
             $response = $this->thing->spawn($datagram);
             if ($response === true) {
-                $this->response .= "Request for googledocs update unsuccessful. ";
+                $this->response .=
+                    "Request for googledocs update unsuccessful. ";
                 $this->thing->log("Spawn request failed.");
             } else {
                 $this->response .= "Requested a googledocs update. ";
