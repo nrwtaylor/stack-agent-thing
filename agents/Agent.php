@@ -2314,15 +2314,17 @@ $agent_names = array_merge($agent_names, $this->variantsAgent($keyword, ""));
 
     }
 
-    public function scoreAgent($text, $matched_characters = null)
-    {
+// Take a piece of returned text,
+// And score it to see how close it is to the provided input.
 
+    public function scoreAgent($text, $provided_score = 0)
+    {
         // dev this function needs improvement to handle closeness of multi-gram strings
 
-        if ($matched_characters === null) {
+//        if ($provided_score === null) {
             $matched_characters_count = strlen($text) - strlen(str_replace(strtolower($this->input), "", strtolower($text)));
             $unmatched_characters_count = strlen($text) - $matched_characters_count;
-        }
+//        }
 
         $pieces = explode(" ", $text);
         $num_pieces = count($pieces);
@@ -2332,7 +2334,7 @@ $agent_names = array_merge($agent_names, $this->variantsAgent($keyword, ""));
             $s = ($matched_characters_count - $unmatched_characters_count) / $matched_characters_count;
         }
 
-        $score = $s * pow(10, $num_pieces);
+        $score = $s * pow(10, $num_pieces) + $provided_score;
 
         return $score;
     }

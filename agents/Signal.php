@@ -55,7 +55,10 @@ class Signal extends Agent
             $this->getSignals();
         }
 
+$uuid = null;
+if (isset($this->signals[0])) {
         $uuid = $this->signals[0]['uuid'];
+}
         $this->getSignalbyUuid($uuid);
     }
 
@@ -306,14 +309,12 @@ class Signal extends Agent
 
     function setSignal($text = null)
     {
-        if (!isset($this->signal_thing)) {
+        if ((!isset($this->signal_thing)) or ($this->signal_thing === false)) {
             return true;
         }
 
         $this->signal_thing->Write(["signal", "state"], $this->signal['state']);
-
         $this->signal_thing->Write(["signal", "text"], $this->signal['text']);
-
         $this->signal_thing->Write(
             ["signal", "refreshed_at"],
             $this->current_time

@@ -375,16 +375,34 @@ try {
      */
     function countMysql()
     {
+        if (!isset($this->pdo)) {
+            return true;
+        }
+$info = "Did not count things on stack.";
+$thing_count = null;
+try {
         $sth = $this->pdo->prepare("SELECT count(*) FROM stack");
         $sth->execute();
 
         $thing_count = $sth->fetchColumn();
+$info = "Counted " . $thing_count . "  records on stack.";
+        } catch (\PDOException $e) {
+            $this->error .= $e->getMessage();
+        } catch (\Throwable $e) {
+            $this->error .= $e->getMessage();
+        } catch (\Exception $e) {
+            $this->error .= $e->getMessage();
+
+//            $thing = false;
+//            $this->last_update = true;
+        }
+
 
         $sth = null;
 
         $thingreport = [
             "things" => false,
-            "info" => "Counted " . $thing_count . "  records on stack.",
+            "info" => $info,
             "help" => "This is how big the stack is.",
         ];
         $thingreport["number"] = $thing_count;
