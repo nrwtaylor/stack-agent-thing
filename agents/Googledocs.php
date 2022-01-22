@@ -18,8 +18,8 @@ class Googledocs extends Agent
                 $this->thing->container['api']['googledocs']['test_url'];
         }
 
-$this->test_url = 'https://docs.google.com/document/d/1H-PTthPJqzGeEw9erFtVy22eOu1TF6RsYm5BQfhBJ0o/edit?usp=sharing';
-$this->test_url = 'https://docs.google.com/document/d/1H-PTthPJqzGeEw9erFtVy22eOu1TF6RsYm5BQfhBJ0o';
+// stack-agent-thing test
+$this->test_url = 'https://docs.google.com/document/d/1H-PTthPJqzGeEw9erFtVy22eOu1TF6RsYm5BQfhBJ0o/export?format=txt';
 
     }
 
@@ -52,7 +52,7 @@ $this->test_url = 'https://docs.google.com/document/d/1H-PTthPJqzGeEw9erFtVy22eO
         $arr = ['year', 'month', 'day', 'day_number', 'hour', 'minute'];
 
         foreach ($paragraphs as $i => $paragraph) {
-echo ".";
+//echo ".";
             if (trim($paragraph) == "") {
                 continue;
             }
@@ -69,7 +69,7 @@ echo ".";
         }
 
         $this->response .= "Read " . $i . " paragraphs. ";
-
+$this->paragraphs = $paragraphs;
         $this->thing->console("Googledocs test completed.\n");
     }
 
@@ -122,7 +122,7 @@ echo ".";
         $arr = ['year', 'month', 'day', 'day_number', 'hour', 'minute'];
 
         foreach ($this->paragraphs as $i => $paragraph) {
-echo "line " . $i . "\n";
+//echo "line " . $i . "\n";
             $googledocs = $this->extractGoogledocs($paragraph);
             if ($this->isGoogledocs($googledocs) === false) {
                 continue;
@@ -381,9 +381,15 @@ echo "line " . $i . "\n";
     }
 
     public function makeWeb() {
+$web = '';
+foreach($this->paragraphs as $i => $paragraph) {
+$web .= '<p>';
+$web .= $paragraph;
+$web .= '</p>';
+}
 
-//var_dump($this->googledocs);
-
+$web .= "Hello";
+$this->thing_report['web'] = $web;
 }
 
     function makeSMS()
