@@ -85,11 +85,15 @@ class Day extends Agent
         $this->default_prime_meridian_offset = 0;
         $this->default_julian_correlation["mesoamerican"] = 584283; //GMT
 
+// dev factor up to agent
+if (!isset($this->day)) {
         $this->initDay();
+}
     }
 
     public function initDay()
     {
+        $this->day = false;
         $this->time_agent = new Time($this->thing, "time");
         $this->working_datum = $this->time_agent->datumTime(
             $this->projected_time
@@ -1210,7 +1214,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
     }
     // Not sure about this pattern.
     // But I need a dot to represent a day.
-    public function drawDot(
+    public function drawDot($image,
         $text,
         $angle,
         $radius,
@@ -1244,6 +1248,8 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
             360,
             $colour
         );
+
+return $this->image;
     }
     // And then to build Day agent
     public function extractHour($text = null)
@@ -1446,10 +1452,10 @@ Now for projected time
         $sunFlag = $this->isToday();
 
         if ($sunFlag) {
-            $dot_offset = -30;
+            $dot_offset = + 23.5;
             $dot_size = 20;
 
-            $this->drawDot(null, $day_degrees, $radius, $dot_size, $dot_offset);
+            $this->image = $this->drawDot($this->image, null, $day_degrees, $radius, $dot_size, $dot_offset);
         }
 
         /*

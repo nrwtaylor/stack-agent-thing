@@ -152,10 +152,10 @@ class Impressum extends Agent
             // Good until?
 
             $text = "dev";
-            /*
-This causes an infinite loop.
-            $text = $this->timestampDay();
-*/
+ 
+//This causes an infinite loop.
+//            $text = $this->timestampDay();
+
 
             $pdf->SetXY(175, 35);
             $pdf->MultiCell(30, $line_height, $text, 0, "L");
