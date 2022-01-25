@@ -1601,7 +1601,7 @@ Now draw the twilight.
 
             $count += 1;
         }
-/*
+        /*
         imagearc(
             $this->image,
             intval($center_x),
@@ -1669,6 +1669,31 @@ Now draw the twilight.
             $colour
         );
     }
+
+    public function pdfDay($pdf)
+    {
+        try {
+            $this->getNuuid();
+            $pdf->Image($this->PNG_embed, 7, 30, 200, 200, "PNG");
+
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetXY(1, 1);
+
+            $pdf->SetFont("Helvetica", "", 26);
+            $this->txt = "" . $this->whatis . ""; // Pure uuid.
+
+            $pdf->SetXY(140, 7);
+            $this->getWhatis($this->subject);
+
+            $text = $this->whatis;
+            $line_height = 20;
+            $pdf->MultiCell(150, $line_height, $text, 0);
+        } catch (Exception $e) {
+            $this->thing->console("Caught exception: ", $e->getMessage(), "\n");
+        }
+
+        return $pdf;
+    }
     /**
      *
      * @return unknown
@@ -1684,11 +1709,12 @@ Now draw the twilight.
             return $this->thing_report["pdf"];
         }
 
-        $this->getWhatis($this->subject);
+        //        $this->getWhatis($this->subject);
+        $pdf_handler = new Pdf($this->thing, "pdf");
+
         try {
             // initiate FPDI
-            $pdf = new Fpdi\Fpdi();
-
+            $pdf = $pdf_handler->pdf;
             $pdf->setSourceFile($this->default_pdf_page_template);
             $pdf->SetFont("Helvetica", "", 10);
 
@@ -1697,111 +1723,24 @@ Now draw the twilight.
 
             $pdf->addPage($s["orientation"], $s);
             $pdf->useTemplate($tplidx1);
-            /*
-            if (isset($this->hextile_PNG)) {
-                $top_x = -6;
-                $top_y = 11;
-
-                $pdf->Image(
-                    $this->hextile_PNG,
-                    $top_x,
-                    $top_y,
-                    -300,
-                    -300,
-                    'PNG'
-                );
-            }
-*/
-            $this->getNuuid();
-            //$pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
-            $pdf->Image($this->PNG_embed, 7, 30, 200, 200, "PNG");
-
-            $pdf->SetTextColor(0, 0, 0);
-            $pdf->SetXY(1, 1);
-            /*
-            $pdf->SetFont("Helvetica", "", 26);
-            $this->txt = "" . $this->whatis . ""; // Pure uuid.
-
-            $pdf->SetXY(140, 7);
-            $text = $this->whatis;
-            $line_height = 20;
-            $pdf->MultiCell(150, $line_height, $text, 0);
-*/
-            if (isset($this->hextile_PNG)) {
-                $top_x = -6;
-                $top_y = 11;
-
-                $pdf->Image(
-                    $this->hextile_PNG,
-                    $top_x,
-                    $top_y,
-                    -300,
-                    -300,
-                    "PNG"
-                );
-            }
+            $this->pdfDay($pdf);
 
             // Page 2
             $tplidx2 = $pdf->importPage(2);
-
             $pdf->addPage($s["orientation"], $s);
-
             $pdf->useTemplate($tplidx2, 0, 0);
+
             // Generate some content for page 2
+            $pdf = $this->pdfImpressum($pdf);
 
-            $pdf->SetFont("Helvetica", "", 10);
-            $this->txt = "" . $this->uuid . ""; // Pure uuid.
-
-            $link = $this->web_prefix . "thing/" . $this->uuid . "/day";
-
-            $qr_png_embed = $this->imageQr($link);
-
-            //      $pdf->Image($this->quick_response_png, 175, 5, 30, 30, "PNG");
-            $pdf->Image($qr_png_embed, 175, 5, 30, 30, "PNG");
-            //        throw new \Exception('Test.');
-
-            //$pdf->Link(175,5,30,30, $link);
-
-            $pdf->SetTextColor(0, 0, 0);
-
-            $pdf->SetXY(15, 7);
-
-            $line_height = 4;
-
-            $t = $this->thing_report["sms"];
-
-            $t = str_replace(" | ", "\n", $t);
-
-            $pdf->MultiCell(150, $line_height, $t, 0);
-
-            //$pdf->Link(15,7,150,10, $link);
-
-            $y = $pdf->GetY() + 0.95;
-            $pdf->SetXY(15, $y);
-            $text = "v0.0.1";
-            $pdf->MultiCell(
-                150,
-                $line_height,
-                $this->agent_name . " " . $text,
-                0,
-                "L"
-            );
-
-            $y = $pdf->GetY() + 0.95;
-
-            $pdf->SetXY(15, $y);
-            $text =
-                "Pre-printed text and graphics (c) 2020 " . $this->entity_name;
-            $pdf->MultiCell(150, $line_height, $text, 0, "L");
-
+            /*
             // Good until?
             $text = $this->timestampDay();
             $pdf->SetXY(175, 35);
             $pdf->MultiCell(30, $line_height, $text, 0, "L");
+*/
             // http://fpdf.org/en/doc/output.htm
             $image = $pdf->Output("S");
-            //$image = $pdf->Output("", "S");
-            //            $this->thing_report["pdf"] = $image;
         } catch (Exception $e) {
             $this->thing->console("Caught exception: ", $e->getMessage(), "\n");
         }
