@@ -3,7 +3,8 @@ namespace Nrwtaylor\StackAgentThing;
 
 //use QR_Code\QR_Code;
 use Endroid\QrCode\QrCode;
-
+use Endroid\QrCode\Writer\PngWriter;
+//use Endroid\QrCode\Writer\PngWriter;
 //QR_Code::png('Hello World');
 
 // Recognizes and handles UUIDS.  Does not generate.  That is a Thing function.
@@ -40,10 +41,7 @@ class Qr extends Agent
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->Write(
-                ["qr", "refreshed_at"],
-                $time_string
-            );
+            $this->thing->Write(["qr", "refreshed_at"], $time_string);
         }
 
         $this->refreshed_at = strtotime($time_string);
@@ -56,6 +54,15 @@ class Qr extends Agent
         $this->html_image = $this->qr_agent->html_image;
     }
 
+    /*
+    function imageQr()
+    {
+        return $this->quick_response_png;
+      //  $this->qr_agent = new Qr($this->thing, $this->link);
+      //  $this->quick_response_png = $this->qr_agent->PNG_embed;
+      //  $this->html_image = $this->qr_agent->html_image;
+    }
+*/
 
     function extractQr($input)
     {
@@ -85,8 +92,8 @@ class Qr extends Agent
 
         $this->node_list = ["qr" => ["qr", "uuid"]];
         // Make buttons
-//        $this->thing->choice->Create($this->agent_name, $this->node_list, "qr");
-//        $choices = $this->thing->choice->makeLinks('qr');
+        //        $this->thing->choice->Create($this->agent_name, $this->node_list, "qr");
+        //        $choices = $this->thing->choice->makeLinks('qr');
 
         $alt_text = "QR code with the uuid " . $this->uuid;
 
@@ -157,10 +164,6 @@ class Qr extends Agent
 
     public function makePNG()
     {
-        if (isset($this->PNG)) {
-            return;
-        }
-
         if ($this->agent_input == null) {
             $codeText = $this->quick_response;
             //$codeText = $this->web_prefix . "thing/".$this->uuid . "/qr";
@@ -168,10 +171,42 @@ class Qr extends Agent
             $codeText = $this->agent_input;
         }
 
+        $this->imageQr($codeText);
+    }
+
+    public function imageQr($codeText = null)
+    {
+        if (isset($this->PNG)) {
+            return;
+        }
+        if ($codeText == null) {
+            $codeText = $this->web_prefix;
+        }
+        /*
+        if ($this->agent_input == null) {
+            $codeText = $this->quick_response;
+            //$codeText = $this->web_prefix . "thing/".$this->uuid . "/qr";
+        } else {
+            $codeText = $this->agent_input;
+        }
+*/
         $this->thing->log("start qrcode");
-        $qrCode = new QrCode($codeText);
-        $image = $qrCode->writeString();
-        $this->thing->log("completed qrcode write string");
+
+        $qrCode = QrCode::create($codeText)
+            //          ->setEncoding(new Encoding('UTF-8'))
+            //          ->setErrorCorrectionLevel(new ErrorCorrectionLevelLow())
+            ->setSize(300)
+            ->setMargin(10);
+        //         ->setRoundBlockSizeMode(new RoundBlockSizeModeMargin())
+        //          ->setForegroundColor(new Color(0, 0, 0))
+        //          ->setBackgroundColor(new Color(255, 255, 255));
+
+        //    $svgWriter = new SvgWriter();
+        //    $result_svg = $svgWriter->write($qrCode, $logo);
+
+        $pngWriter = new PngWriter();
+        $image = $pngWriter->write($qrCode)->getString();
+
         $this->PNG_embed = "data:image/png;base64," . base64_encode($image);
 
         $this->PNG = $image;

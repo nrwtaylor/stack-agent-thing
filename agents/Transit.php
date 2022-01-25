@@ -53,20 +53,14 @@ class Transit extends Agent  {
             'green'
         );
 
-        //                'block' => array('default run_time'=>'105',
-        //                                'negative_time'=>'yes'),
-
         $this->current_time = $this->thing->time();
 
-        //$this->default_run_time = $this->thing->container['api']['train']['default run_time'];
-        //$this->negative_time = $this->thing->container['api']['train']['negative_time'];
         $this->default_run_time = $this->current_time;
         $this->negative_time = true;
 
         $this->default_agency = "translink";
         if (isset($this->thing->container['api']['transit']['agency'])) {
            $this->default_agency = $this->thing->container['api']['transit']['agency'];
-
         }
 
         $this->stop = "X";
@@ -75,15 +69,12 @@ class Transit extends Agent  {
 
         //        $this->variables_agent = new Variables($this->thing, "variables " . $default_train_name . " " . $this->from);
 
-
-
         $this->current_time = $this->thing->time();
 
         $this->thing_report['help'] = 'This is a bus with people on it.';
 
         $this->state = 'X';
         $this->requested_state = 'X';
-
 
         $this->thing->log(
             'running on Thing ' .
@@ -107,7 +98,6 @@ class Transit extends Agent  {
 
         $this->thing_report['log'] = $this->thing->log;
     }
-
 
     /**
      *
