@@ -1236,10 +1236,10 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
 
         imagearc(
             $this->image,
-            $this->center_x + $x_dot,
-            $this->center_y + $y_dot,
-            2 * $size,
-            2 * $size,
+            intval($this->center_x + $x_dot),
+            intval($this->center_y + $y_dot),
+            intval(2 * $size),
+            intval(2 * $size),
             0,
             360,
             $colour
@@ -1587,17 +1587,32 @@ Now draw the twilight.
 
             imagearc(
                 $this->image,
-                $center_x,
-                $center_y,
-                2 * $size + $count * ($step_width * 2),
-                2 * $size + $count * ($step_width * 2),
+                intval($center_x),
+                intval($center_y),
+                intval(2 * $size + $count * ($step_width * 2)),
+                intval(2 * $size + $count * ($step_width * 2)),
                 $arc_day[$i][0] + ($this->init_angle * 180) / pi(),
                 $arc_day[$i][1] + ($this->init_angle * 180) / pi(),
                 $this->colours_agent->blue
+                //$arc[1] + ($this->init_angle * 180) / pi(),
+                //$arc[0] + ($this->init_angle * 180) / pi(),
+                //$this->colours_agent->black
             );
 
             $count += 1;
         }
+/*
+        imagearc(
+            $this->image,
+            intval($center_x),
+            intval($center_y),
+            2 * $size,
+            2 * $size,
+            $arc_day[0] + ($this->init_angle * 180) / pi(),
+            $arc_day[1] + ($this->init_angle * 180) / pi(),
+            $this->colours_agent->blue
+        );
+*/
     }
 
     public function get()
@@ -1647,10 +1662,10 @@ Now draw the twilight.
 
         imageline(
             $this->image,
-            $this->center_x + $x_start,
-            $this->center_y + $y_start,
-            $this->center_x + $x_end,
-            $this->center_y + $y_end,
+            intval($this->center_x + $x_start),
+            intval($this->center_y + $y_start),
+            intval($this->center_x + $x_end),
+            intval($this->center_y + $y_end),
             $colour
         );
     }
@@ -1660,6 +1675,7 @@ Now draw the twilight.
      */
     public function makePDF()
     {
+        $image = null;
         if (
             $this->default_pdf_page_template === null or
             !file_exists($this->default_pdf_page_template)
@@ -1738,8 +1754,11 @@ Now draw the twilight.
 
             $link = $this->web_prefix . "thing/" . $this->uuid . "/day";
 
-            $this->getQuickresponse($link);
-            $pdf->Image($this->quick_response_png, 175, 5, 30, 30, "PNG");
+            $qr_png_embed = $this->imageQr($link);
+
+            //      $pdf->Image($this->quick_response_png, 175, 5, 30, 30, "PNG");
+            $pdf->Image($qr_png_embed, 175, 5, 30, 30, "PNG");
+            //        throw new \Exception('Test.');
 
             //$pdf->Link(175,5,30,30, $link);
 
@@ -1779,12 +1798,15 @@ Now draw the twilight.
             $text = $this->timestampDay();
             $pdf->SetXY(175, 35);
             $pdf->MultiCell(30, $line_height, $text, 0, "L");
-
-            $image = $pdf->Output("", "S");
-            $this->thing_report["pdf"] = $image;
+            // http://fpdf.org/en/doc/output.htm
+            $image = $pdf->Output("S");
+            //$image = $pdf->Output("", "S");
+            //            $this->thing_report["pdf"] = $image;
         } catch (Exception $e) {
             $this->thing->console("Caught exception: ", $e->getMessage(), "\n");
         }
+
+        $this->thing_report["pdf"] = $image;
 
         return $this->thing_report["pdf"];
     }
