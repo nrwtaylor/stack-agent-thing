@@ -577,7 +577,6 @@ And review Agent variables.
     }
 
     public function Write($path, $value) {
-
         $this->json->setField("variables");
         $this->json->writeVariable($path, $value);
     }
@@ -1021,7 +1020,9 @@ if ($things != false) {
 
     public function console($text = null)
     {
-if ($this->console_output == 'off') {return;}
+        // Console does a straight output of text.
+        // No processing.
+        if ($this->console_output == 'off') {return;}
 
         if (!isset($this->console_output)) {
 
@@ -1035,7 +1036,6 @@ if ($this->console_output == 'off') {return;}
         if ($this->console_output != 'on') {
             return;
         }
-
         echo $text;
     }
 

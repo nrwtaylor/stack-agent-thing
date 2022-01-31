@@ -399,7 +399,6 @@ class Database
                 //if ($key === true) {return true;}
             }
 
-            
         if ($active_service_name == "mongo") {
             $key = $this->stack_handlers["mongo"]->writeMongo($field_text, $string_text);
             //if ($key === true) {return true;}

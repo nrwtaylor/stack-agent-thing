@@ -160,12 +160,12 @@ try {
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             $this->pdo = $pdo;
         } catch (\Throwable $t) {
-            $this->error = 'Could not connect to MySQL database';
+            $this->error = "Could not connect to MySQL database";
             $this->errorMysql($t->getMessage());
         } catch (\Error $ex) {
             $this->errorMysql($ex->getMessage());
 
-            $this->error = 'Could not connect to MySQL database';
+            $this->error = "Could not connect to MySQL database";
         }
     }
 
@@ -192,7 +192,7 @@ try {
         if (
             $this->agent_input == null or
             $this->agent_input == "" or
-            $this->agent_input == 'response'
+            $this->agent_input == "response"
         ) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report["info"] = $message_thing->thing_report["info"];
@@ -215,7 +215,7 @@ try {
         }
 
         $this->message = $m;
-        $this->thing_report['message'] = $m;
+        $this->thing_report["message"] = $m;
     }
 
     public function makeSMS()
@@ -326,9 +326,13 @@ try {
     {
         // merp
         if (strlen($string_text) > 100000) {
-            var_dump($string_text);
-
-            $string_text = json_encode(['mysql' => ['field length exceed']]);
+            //var_dump($string_text);
+            $this->error .= "Field length exceeded.";
+            $string_text = json_encode(["mysql" => ["field length exceed"]]);
+            // Do not write field if too large.
+            //return;
+            $this->last_update = true;
+            return true;
         }
 
         if (!isset($this->pdo)) {
@@ -378,14 +382,14 @@ try {
         if (!isset($this->pdo)) {
             return true;
         }
-$info = "Did not count things on stack.";
-$thing_count = null;
-try {
-        $sth = $this->pdo->prepare("SELECT count(*) FROM stack");
-        $sth->execute();
+        $info = "Did not count things on stack.";
+        $thing_count = null;
+        try {
+            $sth = $this->pdo->prepare("SELECT count(*) FROM stack");
+            $sth->execute();
 
-        $thing_count = $sth->fetchColumn();
-$info = "Counted " . $thing_count . "  records on stack.";
+            $thing_count = $sth->fetchColumn();
+            $info = "Counted " . $thing_count . "  records on stack.";
         } catch (\PDOException $e) {
             $this->error .= $e->getMessage();
         } catch (\Throwable $e) {
@@ -393,10 +397,9 @@ $info = "Counted " . $thing_count . "  records on stack.";
         } catch (\Exception $e) {
             $this->error .= $e->getMessage();
 
-//            $thing = false;
-//            $this->last_update = true;
+            //            $thing = false;
+            //            $this->last_update = true;
         }
-
 
         $sth = null;
 

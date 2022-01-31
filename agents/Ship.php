@@ -602,6 +602,7 @@ class Ship extends Agent
 
     function setShip($text = null)
     {
+
         if (!isset($this->ship_thing)) {
             return true;
         }
@@ -1623,6 +1624,7 @@ class Ship extends Agent
 
     public function readShip($text = null)
     {
+$unrecognized_sentences = [];
         // Handle a NMEA string
         if ($text === null) {
             return null;
@@ -1651,11 +1653,25 @@ class Ship extends Agent
                         $nmea_response["sentence_identifier"];
                 }
             }
+            if ($nmea_response["sentence_identifier"] == "\$THXDR") {
 
-            if (substr($nmea_response["sentence_identifier"],2,3) == "XDR") {
+//            if (substr($nmea_response["sentence_identifier"],2,3) == "XDR") {
                 $transducer_id = substr($nmea_response["sentence_identifier"],1,2);
+
+foreach($nmea_response as $key=>$value) {
+if ($this->isUuid($key)) {
+//}
+
+//}
+//exit();
+//                $transducer_id = substr($nmea_response["sentence_identifier"],1,2);
+//$transducer_id = $key;
+$transducer_id = $this->thing->getUUid();
                 if (!isset($transducers)) {$transducers = [];}
-                $transducers[$transducer_id] = $nmea_response["transducers"];
+                //$transducers[$transducer_id] = $nmea_response["transducers"];
+                $transducers[$transducer_id] = $value["transducers"];
+}
+}
             }
 
 

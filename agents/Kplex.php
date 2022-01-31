@@ -196,10 +196,6 @@ $true_course_text = $this->snapshot->true_course;
         $input = $this->input;
         $filtered_input = $this->assert(strtolower($input));
         $kplex = false;
-        //if ($filtered_input == 'l') {
-        //if (isset($this->snapshot)) {
-        //var_dump($this->snapshot);
-        //return;}
         $this->listenKplex();
 
         if (isset($this->snapshot) and $this->snapshot !== false) {

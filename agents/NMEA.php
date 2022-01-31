@@ -287,7 +287,26 @@ class NMEA extends Agent
             "transducers" => $transducers,
             "checksum" => $checksum,
         ];
-        return $xdr;
+        $xdr_transducers = [];
+        // Assign a 'random' uuid to this transducer.
+        // Render latest seen set of uuid transducers.
+        // De-duplicate pre-render.
+
+            $sensor_id = strtolower(
+                trim(
+                    $transducer["talker_identifier"] .
+                        $id .
+                        $transducer["type"] .
+                        $transducer["name"]
+                )
+            );
+
+
+        $uuid = $this->thing->getUuid();
+        $xdr_transducers[$uuid] = $xdr;
+//        $xdr_transducers[$sensor_id] = $xdr; 
+ 
+        return $xdr_transducers;
     }
 
     public function longitudeNMEA($longitude, $longitude_east_west)
