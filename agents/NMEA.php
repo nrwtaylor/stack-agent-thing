@@ -99,7 +99,24 @@ class NMEA extends Agent
         $nmea_array["talker_id"] = $nmea_talker_id;
         $nmea_array["sentence"] = $nmea_sentence;
 
+        $nmea_array["parsedAt"] = $this->current_time;
+
         return $nmea_array;
+    }
+
+    public function sensorIdNMEA($transducer, $index) {
+
+                $sensor_id = strtolower(
+                    trim(
+                        $transducer["talker_identifier"] .
+                            $transducer["name"] .
+                            $transducer["type"] .
+                            $transducer["units"] .
+                            $index
+                    )
+                );
+return $sensor_id;
+
     }
 
     public function explodeNMEA($text)
@@ -281,17 +298,30 @@ class NMEA extends Agent
         }
 
         $checksum = $parts[5];
+        $uuid = $this->thing->getUuid();
+
+foreach($transducers as $i=>$transducer) {
+
+$sensor_id = $this->sensorIdNMEA($transducer, $i);
+$transducers[$i]['sensor_id'] = $sensor_id;
+
+
+}
 
         $xdr = [
+            "reading_id" => $uuid,
             "talker_identifier" => $talker_identifier,
             "transducers" => $transducers,
             "checksum" => $checksum,
         ];
-        $xdr_transducers = [];
+
+
+//        $xdr_transducers = [];
         // Assign a 'random' uuid to this transducer.
         // Render latest seen set of uuid transducers.
         // De-duplicate pre-render.
 
+/*
             $sensor_id = strtolower(
                 trim(
                     $transducer["talker_identifier"] .
@@ -300,13 +330,13 @@ class NMEA extends Agent
                         $transducer["name"]
                 )
             );
+*/
 
-
-        $uuid = $this->thing->getUuid();
-        $xdr_transducers[$uuid] = $xdr;
+//        $uuid = $this->thing->getUuid();
+//        $xdr_transducers[$uuid] = $xdr;
 //        $xdr_transducers[$sensor_id] = $xdr; 
- 
-        return $xdr_transducers;
+ return $xdr;
+ //       return $xdr_transducers;
     }
 
     public function longitudeNMEA($longitude, $longitude_east_west)

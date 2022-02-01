@@ -1608,9 +1608,25 @@ class Ship extends Agent
             $this->ship_thing->variables->snapshot = new \stdClass();
         }
 
+if (isset($variable_array['transducers'])) {
+foreach($variable_array['transducers'] as $i=>$transducer) {
+        if (!isset($this->ship_thing->variables->snapshot->transducers)) {
+            $this->ship_thing->variables->snapshot->transducers = new \stdClass();
+        }
+
+
+$this->ship_thing->variables->snapshot->transducers->{$transducer['sensor_id']} = $transducer;
+
+}
+return;
+}
+
+// Otherwise normal.
+
         foreach ($variable_array as $variable_name => $variable_value) {
             $this->ship_thing->variables->snapshot->{$variable_name} = $variable_value;
         }
+
     }
 
     public function snapshotShip($text = null)
