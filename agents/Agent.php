@@ -132,10 +132,13 @@ class Agent
 
         $this->stack_engine_state = $thing->container["stack"]["engine_state"];
 
+        $this->entity_name = $thing->container["stack"]["entity_name"];
+
         $this->default_font = null;
         if (isset($this->thing->container["stack"]["font"])) {
             $this->default_font = $this->thing->container["stack"]["font"];
         }
+
         $this->default_pdf_page_template = null;
         if (isset($this->thing->container["stack"]["pdf_page_template"])) {
             $this->default_pdf_page_template =

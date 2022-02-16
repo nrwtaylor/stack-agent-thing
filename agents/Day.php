@@ -1631,6 +1631,7 @@ Now draw the twilight.
         }
 
         $this->getDay();
+        $this->getWhatis($this->input);
     }
 
     public function drawTick(
