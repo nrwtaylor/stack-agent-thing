@@ -369,7 +369,6 @@ try {
             $thing = false;
             $this->last_update = true;
         }
-
         $sth = null;
     }
 
