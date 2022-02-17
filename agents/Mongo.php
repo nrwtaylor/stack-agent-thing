@@ -20,13 +20,12 @@ class Mongo extends Agent
                 $settings["settings"]["stack"]["hash_algorithm"];
         }
 
-
         $this->initMongo();
     }
 
     public function initMongo()
     {
-        $this->mongo_test_flag = 'off';
+        $this->mongo_test_flag = "off";
         $path =
             "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
 
@@ -35,16 +34,15 @@ class Mongo extends Agent
             $this->db = $client;
             $this->collection = $this->db->stack_db->things;
         } catch (\Throwable $t) {
-            $this->error = 'Could not connect to MySQL database';
+            $this->error = "Could not connect to MySQL database";
             $this->errorMongo($t->getMessage());
             $this->collection = true;
         } catch (\Error $ex) {
             $this->errorMongo($ex->getMessage());
 
-            $this->error = 'Could not connect to MySQL database';
+            $this->error = "Could not connect to MySQL database";
             $this->collection = true;
         }
-
     }
 
     public function errorMongo($text = null)
@@ -58,21 +56,31 @@ class Mongo extends Agent
         $this->response .= $text . " ";
     }
 
-// Useful later for matching in variables
-// https://groups.google.com/g/mongodb-user/c/lv8XbtAkS4w?pli=1
+    // Useful later for matching in variables
+    // https://groups.google.com/g/mongodb-user/c/lv8XbtAkS4w?pli=1
 
-    public function priorMongo() {
-$nom_from = $this->from;
+    public function priorMongo()
+    {
+        $nom_from = $this->from;
 
-$things = $this->collection->find(['from' => $nom_from]);
-foreach($things as $object_key=>$thing) {
-echo $thing['uuid'] . " " . ((isset($thing['created_at'])) ? $thing['created_at'] : "No created stamp") . " " .$thing['from'] . " " . $thing['subject'] . "\n";
-}
+        $things = $this->collection->find(["from" => $nom_from]);
+        foreach ($things as $object_key => $thing) {
+            echo $thing["uuid"] .
+                " " .
+                (isset($thing["created_at"])
+                    ? $thing["created_at"]
+                    : "No created stamp") .
+                " " .
+                $thing["from"] .
+                " " .
+                $thing["subject"] .
+                "\n";
+        }
     }
 
     public function testMongo()
     {
-        if ($this->mongo_test_flag != 'on') {
+        if ($this->mongo_test_flag != "on") {
             return;
         }
         if ($this->db === true) {
@@ -80,11 +88,9 @@ echo $thing['uuid'] . " " . ((isset($thing['created_at'])) ? $thing['created_at'
             return;
         }
 
-$this->createMongo("test create mongo", "mongo");
+        $this->createMongo("test create mongo", "mongo");
 
-
-$this->priorMongo();
-
+        $this->priorMongo();
 
         $uuid = "5282cdc9-8252-4bd6-9d03-e1e0c0cec927";
 
@@ -113,7 +119,6 @@ $this->priorMongo();
         $result = $this->setMongo($uuid, [$thing]);
         $result = $this->setMongo(null, [$thing]);
 
-
         $result = $this->findMongo(["subject" => "mongo"]);
 
         $this->response .= "Found " . count($result) . " things. ";
@@ -128,7 +133,7 @@ $this->priorMongo();
 
     // dev
 
-// START HERE
+    // START HERE
     public function writeMongo($field_text, $string_json)
     {
         $existing = $this->getMongo($this->uuid);
@@ -138,35 +143,34 @@ $this->priorMongo();
         $j = new ThingJson($this->uuid);
         $j->jsontoarrayJson($string_json);
         $data = $j->jsontoarrayJson($string_json);
-//        $this->setValueFromPath($this->array_data, $var_path, $value);
-//        $this->arraytoJson();
-//        $t = $this->write();
+        //        $this->setValueFromPath($this->array_data, $var_path, $value);
+        //        $this->arraytoJson();
+        //        $t = $this->write();
 
+        //         $this->setValueFromPath($this->array_data, $var_path, $value);
 
-//         $this->setValueFromPath($this->array_data, $var_path, $value);
-
-        $data = ['variables' => $data];
+        $data = ["variables" => $data];
 
         // dev develop associations.
         //$associations = null;
         if (isset($this->associations)) {
-            $data['associations'] = $this->associations;
+            $data["associations"] = $this->associations;
         }
 
         if (isset($this->uuid)) {
-            $data['uuid'] = $this->uuid;
+            $data["uuid"] = $this->uuid;
         }
 
         if (isset($this->from)) {
-            $data['nom_from'] = $this->from;
+            $data["nom_from"] = $this->from;
         }
 
         if (isset($this->to)) {
-            $data['nom_to'] = $this->to;
+            $data["nom_to"] = $this->to;
         }
 
         if (isset($this->subject)) {
-            $data['task'] = $this->subject;
+            $data["task"] = $this->subject;
         }
 
         $existing = $this->getMongo($this->uuid);
@@ -176,7 +180,6 @@ $this->priorMongo();
         }
 
         // In development
-
         //$this->db->set($this->uuid, $d);
         $this->setMongo($this->uuid, $d);
     }
@@ -192,26 +195,26 @@ $this->priorMongo();
     // use memcache model for get.
     public function getMongo($text = null)
     {
-//if ($this->collection === true) {return true;}
+        //if ($this->collection === true) {return true;}
 
-//var_dump("getMongo");
-$result = null;
-//$this->collection = true;
-try {
-        $result = $this->collection->findOne(["_id" => $text]);
+        //var_dump("getMongo");
+        $result = null;
+        //$this->collection = true;
+        try {
+            $result = $this->collection->findOne(["_id" => $text]);
         } catch (\Throwable $t) {
-//var_dump($t->getMessage());
-//exit();
-           $this->error = 'Could not connect to MySQL database';
+            //var_dump($t->getMessage());
+            //exit();
+            $this->error = "Could not connect to MySQL database";
             $this->errorMongo($t->getMessage());
             $this->collection = true;
         } catch (\Error $ex) {
-//var_dump($ex->getMessage());
-//exit();
+            //var_dump($ex->getMessage());
+            //exit();
 
             $this->errorMongo($ex->getMessage());
 
-            $this->error = 'Could not connect to MySQL database';
+            $this->error = "Could not connect to MySQL database";
             $this->collection = true;
         }
 
@@ -222,55 +225,52 @@ try {
         return iterator_to_array($result);
     }
 
-// BETTER TO START here.
+    // BETTER TO START here.
 
     public function createMongo($subject, $to)
     {
-
-// Cannot create a thing on the stack with a specific uuid.
-// That's the rule.
+        // Cannot create a thing on the stack with a specific uuid.
+        // That's the rule.
 
         if (!isset($this->response)) {
             $this->response = "";
         }
 
-            $task = $subject;
-            $nom_from = $this->from;
+        $task = $subject;
+        $nom_from = $this->from;
 
-// dev test
-//$this->hash_algorithm = 'sha256';
-            $hash_nom_from = hash($this->hash_algorithm, $nom_from);
+        // dev test
+        //$this->hash_algorithm = 'sha256';
+        $hash_nom_from = hash($this->hash_algorithm, $nom_from);
 
-            if ($this->hash_state == "off") {
-                $hash_nom_from = $nom_from;
-            }
-            $nom_to = $to;
+        if ($this->hash_state == "off") {
+            $hash_nom_from = $nom_from;
+        }
+        $nom_to = $to;
 
-$stamp = new Stamp(null, "stamp");
-$created_at =  $stamp->zuluStamp();
+        $stamp = new Stamp(null, "stamp");
+        $created_at = $stamp->zuluStamp();
 
-$sha256 = new SHA256(null, "sha256");
-$o = $sha256->isSHA256($nom_from);
-if (($o == true) and ($this->hash_state == 'on')) {
-$from = $nom_from;
-
-} else {
-$from = $hash_nom_from;
-}
-
+        $sha256 = new SHA256(null, "sha256");
+        $o = $sha256->isSHA256($nom_from);
+        if ($o == true and $this->hash_state == "on") {
+            $from = $nom_from;
+        } else {
+            $from = $hash_nom_from;
+        }
 
         //$this->response .= "Created a Mongo Thing. ";
 
         $thing = [
-//            "uuid" => $this->uuid,
+            //            "uuid" => $this->uuid,
             "subject" => $subject,
             "from" => $from,
             "to" => $this->to,
-            "created_at"=>$created_at,
+            "created_at" => $created_at,
             "variables" => null,
         ];
 
-/*
+        /*
         $a= $this->setMongo($this->uuid, [
             'from' => $from,
             'to' => $nom_to,
@@ -278,8 +278,8 @@ $from = $hash_nom_from;
             'created_at'=>$created_at
         ]);
 */
-        $a= $this->setMongo(null, $thing); // null creates a new uuid
-return $a;
+        $a = $this->setMongo(null, $thing); // null creates a new uuid
+        return $a;
     }
 
     // use memcache model for set.
@@ -290,23 +290,20 @@ return $a;
 
         // If a uuid key is provided, check if it exists.
 
-
-        if (($this->isUuid($key)) and ($key !== null)) {
-
+        if ($this->isUuid($key) and $key !== null) {
             $m = $this->getMongo($key);
             if ($m === true) {
-              return true;
+                return true;
             }
         }
         // Create random uuid key if none provided.
         if ($key == null) {
+            // Because thing is the only plae uuids are made.
+            $t = new Thing(null);
+            $key = $t->uuid;
 
-// Because thing is the only plae uuids are made.
-$t = new Thing(null);
-$key = $t->uuid;
-
-//$key = $uuid->randomUuid();
-//            $key = $this->thing->getUUid();
+            //$key = $uuid->randomUuid();
+            //            $key = $this->thing->getUUid();
 
             /*
             $uuid = $this->uuid;
@@ -321,38 +318,32 @@ $key = $t->uuid;
             $nom_to = $this->to;
             $variable = ['task'=>$task, 'nom_from'=>$from, 'nom_to'=>$to, 'variables'=>$variable];
 */
-
-
         }
+        //var_dump("uuid", $this->uuid);
+        //var_dump("key", $key);
+        $condition = ["uuid" => $key];
 
-        $condition = ["_id" => $key];
+        //$condition = ["_id" => $key];
 
         $value = $variable;
-        if ((is_array($variable)) and (isset($variable[0]))) {
+        if (is_array($variable) and isset($variable[0])) {
             $value = $variable[0];
         }
 
-
         try {
-        $result = $this->collection->updateOne($condition, [
-            '$set' => $value,
-        ]);
-
+            $result = $this->collection->updateOne($condition, [
+                '$set' => $value,
+            ]);
         } catch (\Throwable $t) {
-            $this->error = 'Could not connect to MySQL database';
+            $this->error = "Could not connect to Mongo database";
             $this->errorMongo($t->getMessage());
             $this->collection = true;
         } catch (\Error $ex) {
             $this->errorMongo($ex->getMessage());
 
-            $this->error = 'Could not connect to MySQL database';
+            $this->error = "Could not connect to Mongo database";
             $this->collection = true;
-
         }
-
-
-
-
 
         return $key;
     }
@@ -360,7 +351,9 @@ $key = $t->uuid;
     // Delete by key.
     public function forgetMongo($key = null)
     {
-if ($this->collection === true) {return true;}
+        if ($this->collection === true) {
+            return true;
+        }
         if ($key == null) {
             return true;
         }
@@ -414,15 +407,13 @@ if ($this->collection === true) {return true;}
     public function readSubject()
     {
         $input = $this->assert($this->input);
-        if ($input == 'test') {
-            $this->mongo_test_flag = 'on';
+        if ($input == "test") {
+            $this->mongo_test_flag = "on";
             $this->testMongo();
         }
 
-        if ($input == 'prior') {
+        if ($input == "prior") {
             $this->priorMongo();
         }
-
-
     }
 }

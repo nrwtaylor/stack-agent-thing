@@ -399,11 +399,14 @@ class Database
                 //if ($key === true) {return true;}
             }
 
-        if ($active_service_name == "mongo") {
-            $key = $this->stack_handlers["mongo"]->writeMongo($field_text, $string_text);
-            //if ($key === true) {return true;}
-        }
-/*
+            if ($active_service_name == "mongo") {
+                $key = $this->stack_handlers["mongo"]->writeMongo(
+                    $field_text,
+                    $string_text
+                );
+                //if ($key === true) {return true;}
+            }
+            /*
         if ($active_service == "memory") {
             $memory = $this->stack_handlers["memory"]->set($key, $value);
 
@@ -466,26 +469,33 @@ class Database
         foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
             $stack_infrastructure = $stack_descriptor["infrastructure"];
             if ($stack_infrastructure == "mysql") {
-                $response = $this->stack_handlers['mysql']->createMysql($subject, $to);
+                $response = $this->stack_handlers["mysql"]->createMysql(
+                    $subject,
+                    $to
+                );
                 $this->available_stacks["mysql"]["response"] = $response;
             }
 
             if ($stack_infrastructure == "memory") {
-                $response = $this->stack_handlers['memory']->createMemory($subject, $to);
+                $response = $this->stack_handlers["memory"]->createMemory(
+                    $subject,
+                    $to
+                );
                 $this->available_stacks["memory"]["response"] = $response;
             }
 
             if ($stack_infrastructure == "mongo") {
-                $response = $this->stack_handlers['mongo']->createMongo($subject, $to);
+                $response = $this->stack_handlers["mongo"]->createMongo(
+                    $subject,
+                    $to
+                );
                 $this->available_stacks["memory"]["response"] = $response;
             }
-
-
         }
 
         foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
             if (
-                isset($stack_descriptor['response']) and
+                isset($stack_descriptor["response"]) and
                 $stack_descriptor["response"] === true
             ) {
                 return true;
@@ -508,12 +518,12 @@ class Database
 
         // Get first available.
 
-//        $thing = false;
+        //        $thing = false;
         $thing = [];
         foreach ($this->available_stacks as $stack_name => $stack) {
             switch ($stack["infrastructure"]) {
                 case "mysql":
-                    $thing['mysql'] = $this->stack_handlers[
+                    $thing["mysql"] = $this->stack_handlers[
                         $stack["infrastructure"]
                     ]->getMysql();
 
@@ -521,20 +531,19 @@ class Database
                     //              break 2;
                     //          }
 
-//if ($thing === false) {$thing = $thing['mysql'];}
+                    //if ($thing === false) {$thing = $thing['mysql'];}
                     break;
                 case "memcached":
-                    $thing['memcached'] = $this->stack_handlers[
+                    $thing["memcached"] = $this->stack_handlers[
                         $stack["infrastructure"]
                     ]->getMemcached($this->uuid);
                     break;
 
                 case "mongo":
-                    $thing['mongo'] = $this->stack_handlers[
+                    $thing["mongo"] = $this->stack_handlers[
                         $stack["infrastructure"]
                     ]->getMongo($this->uuid);
                     break;
-
 
                 //                    if ($thing !== false and $thing !== true) {
                 //                        break 2;
@@ -571,9 +580,9 @@ class Database
 
         // dev decide which thing is most authorative.
         // merge?
-        $thing = $thing['mysql'];
+        $thing = $thing["mysql"];
 
-/*
+        /*
 if (is_array($thing)) {
 
 if (count($thing) == 0) {
@@ -686,12 +695,12 @@ $thcing = $thing[array_key_first($thing)];
         return $thing_report;
     }
 
-    function isValidMd5($md5 = '')
+    function isValidMd5($md5 = "")
     {
         return strlen($md5) == 32 && ctype_xdigit($md5);
     }
 
-    function isValidSha256($sha256 = '')
+    function isValidSha256($sha256 = "")
     {
         return strlen($sha256) == 64 && ctype_xdigit($sha256);
     }
