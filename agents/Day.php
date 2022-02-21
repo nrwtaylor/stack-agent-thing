@@ -394,6 +394,12 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         return $timestamp_epoch;
     }
 
+    public function makePollInterval() {
+
+      $this->thing_report['poll_interval'] = ['minimum'=>60];
+
+    }
+
     public function solarDay($text = null, $latitude = null, $longitude = null)
     {
         $timestamp_epoch = (int) $this->timestampEpoch($text);
@@ -536,7 +542,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         $this->thing->flagGreen();
 
         $this->makeChoices();
-
+        $this->makePollInterval();
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report["info"] = $message_thing->thing_report["info"];

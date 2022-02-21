@@ -72,6 +72,12 @@ Configure `my.cnf`
 ```
 innodb_buffer_pool_size=1G
 ```
+innodb_buffer_pool_size=1G
+```
+myisamchk --silent --force --fast --update-state \
+--key_buffer_size=512M --sort_buffer_size=512M \
+--read_buffer_size=4M --write_buffer_size=4M \
+/var/lib/mysql/stack_db/stack
 
 ## 3. Setup PHP
 3 cont. Install PHP extensions
