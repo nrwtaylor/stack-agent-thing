@@ -100,6 +100,7 @@ class Apology extends Agent
         $things = $this->getThings('apology');
 
         if ($things === false) {return;}
+        if ($things === null) {return;}
 
         foreach ($things as $uuid => $thing) {
 
