@@ -75,6 +75,7 @@ if (!isset($this->memory)) {return null;}
         // Null?
         // $this->mem_cached = null;
         // Fail to stack php memory code if Memcached is not availble.
+if ($text == null) {return false;} // false?
         $memory = $this->memory->get($text);
         return $memory;
     }

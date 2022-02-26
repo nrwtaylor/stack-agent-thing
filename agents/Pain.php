@@ -111,9 +111,10 @@ class Pain extends Agent
             "s/devstack here will be useful information on your pain";
 
         //$this->painReport($input);
+        $path = null;
 
         $this->thing->db->setUser($this->from);
-        $thing_report = $this->thing->db->variableSearch('pain', 10);
+        $thing_report = $this->thing->db->variableSearch($path, 'pain', 10);
 
         $priorDate = null;
         $t = "<br>";

@@ -37,13 +37,9 @@ $this->kplex_terse_flag = "on";
 
         if (!$fp) {
             echo "$errstr ($errno)<br />\n";
-            $this->snapshot = null;
-            return;
-         }
-
-
-        $this->thing->console("Connected to Kplex server."); 
-        //$this->response .= "Connected to Kplex server. ";
+            die();
+        }
+        echo "Connected to kplex server.\n";
 
         $ship_handler = new Ship($this->thing, "ship");
         $snapshot = null;
@@ -200,10 +196,6 @@ $true_course_text = $this->snapshot->true_course;
         $input = $this->input;
         $filtered_input = $this->assert(strtolower($input));
         $kplex = false;
-        //if ($filtered_input == 'l') {
-        //if (isset($this->snapshot)) {
-        //var_dump($this->snapshot);
-        //return;}
         $this->listenKplex();
 
         if (isset($this->snapshot) and $this->snapshot !== false) {

@@ -55,7 +55,7 @@ class Clocktime extends Agent
             $input_time = $input;
         }
 
-        if (strtoupper($input) == "X") {
+        if ($input == null or strtoupper($input) == "X") {
             $this->clock_time = "X";
             return $this->clock_time;
         }

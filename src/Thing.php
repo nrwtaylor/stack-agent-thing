@@ -26,7 +26,6 @@ class Thing
 
     public function __construct($uuid, $test_message = null)
     {
-
         //declare(ticks=1);
 
         //$resource_path = "/var/www/stackr.test/resources/debug";
@@ -145,12 +144,6 @@ class Thing
             $this->queue_handler = $this->container['stack']['queue_handler'];
         }
 
-
-        $this->hash = "off";
-        if (isset($this->container['stack']['hash'])) {
-            $this->hash = $this->container['stack']['hash'];
-        }
-
         $this->hash_algorithm = "sha256";
         if (isset($this->container['stack']['hash_algorithm'])) {
             $this->hash_algorithm = $this->container['stack']['hash_algorithm'];
@@ -236,7 +229,6 @@ class Thing
 
             // Sigh.  Hold this Thing to account.  Unless it is a forager.
             $this->state = 'foraging'; // Add code link later.
-
             // Don't create accounts here because that is done on ->Create()
             // The instatiation function needs to return a minimum clean false
             // Thing.
@@ -373,25 +365,11 @@ $function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedenc
         $this->Forget();
     }
 
-    function isValidSha256($sha256 ='') {
-        return strlen($sha256) == 64 && ctype_xdigit($sha256);
-    }
-
     function Create($from = null, $to = "", $subject = "", $agent_input = null)
     {
         if ($from == null) {
             $from = 'null' . $this->mail_postfix;
         }
-
-        /*
-            Check if this is a hash.
-            If it is don't re-hash.
-        */
-
-        if (($this->hash=='on') and (!$this->isValidSha256($from))) {
-            $from = hash($this->hash_algorithm, $from);
-        }
-
         $message0 = [];
         $message0['50 words'] = null;
         $message0['500 words'] = null;
@@ -559,7 +537,6 @@ if (!isset($this->db)) {
 
         $this->log("Create completed.");
 $g = $this->Get();
-
         $this->log("Finished create.");
 
         return $g;
@@ -600,7 +577,6 @@ And review Agent variables.
     }
 
     public function Write($path, $value) {
-
         $this->json->setField("variables");
         $this->json->writeVariable($path, $value);
     }
@@ -905,7 +881,6 @@ if (isset($this->db)) {
         }
 
         $this->thing = $thing;
-
         return $thing;
     }
 
@@ -1045,7 +1020,9 @@ if ($things != false) {
 
     public function console($text = null)
     {
-if ($this->console_output == 'off') {return;}
+        // Console does a straight output of text.
+        // No processing.
+        if ($this->console_output == 'off') {return;}
 
         if (!isset($this->console_output)) {
 
@@ -1059,7 +1036,6 @@ if ($this->console_output == 'off') {return;}
         if ($this->console_output != 'on') {
             return;
         }
-
         echo $text;
     }
 

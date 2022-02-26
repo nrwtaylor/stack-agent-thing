@@ -11,7 +11,7 @@ error_reporting(-1);
 
 //register_shutdown_function('shutdown');
 
-echo "Worker whitefox 22 October 2021\n";
+echo "Worker whitefox 29 October 2021\n";
 echo "Gearman Worker started\n";
 $worker = new \GearmanWorker();
 
@@ -19,6 +19,9 @@ $worker->addServer();
 $uuid = null;
 $name = "call_agent";
 $task = "Nrwtaylor\StackAgentThing\call_agent_function";
+
+$stack_total_jobs = null;
+
 //$worker->addFunction(
 //    $name,
 //    $task,
@@ -187,6 +190,8 @@ while ($worker->work() || $worker->returnCode() == GEARMAN_TIMEOUT) {
 
 function call_agent_function($job)
 {
+global $stack_total_jobs;
+
     echo "worker received job workload " . $job->workload() . "\n";
     $arr = json_decode($job->workload(), true);
 
@@ -194,6 +199,8 @@ function call_agent_function($job)
     if (isset($arr["agent_input"])) {
         $agent_input = $arr["agent_input"];
     }
+
+if ($stack_total_jobs > 10) {echo "Saw " . $stack_total_jobs . " jobs. worker dropped job"; return true;}
 
     if (isset($arr["uuid"])) {
         echo "worker found uuid - loading thing " . $arr["uuid"] . "\n";
@@ -234,10 +241,7 @@ function call_agent_function($job)
 $thing->to = $arr['from'];
 $thing->from = $arr['to'];
 $thing->subject = $arr['subject'];
-$agent_input = null;
-if (isset($arr['agent_input'])) {$agent_input = $arr['agent_input'];}
-$thing->agent_input = $agent_input;
-//$thing->agent_input = $arr['agent_input'];
+$thing->agent_input = $arr['agent_input'];
 
 //        $this->current_time = $this->thing->time();
 $thing->created_at = $thing->time();
@@ -320,7 +324,7 @@ echo "Saw " . $manager_handler->queued_jobs . " jobs. worker dropped this job " 
 
         echo "worker looking for message id " . $message_id . "\n";
 
-        $m = $thing->db->variableSearch($message_id, false);
+        $m = $thing->db->variableSearch(null, $message_id, false);
 
         echo "worker counted things with message idenfifier " .
             $message_id .
@@ -347,15 +351,30 @@ echo "Saw " . $manager_handler->queued_jobs . " jobs. worker dropped this job " 
         echo "worker call agent\n";
         $t = new Agent($thing);
     }
-if (isset($t->thing_report['info'])) {
     echo "thing report info " . $t->thing_report["info"] . "\n";
-}
     echo "worker complete\n";
+
+
+
+
+// Is this the manager.
+// Can we learn how many jobs are queued.
 
 
     if (!isset($t->thing_report["sms"])) {
         echo "WORKER | No SMS message found." . "\n";
     } else {
+
+// dev
+$text = $t->thing_report['sms'];
+$parts = explode("|", $text);
+$a = trim($parts[1]);
+$parts = explode(" ", $a);
+$n = $parts[2];
+
+$stack_total_jobs = $n;
+
+
         echo $t->thing_report["sms"] . "\n";
     }
 

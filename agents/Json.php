@@ -446,11 +446,13 @@ if ($this->array_data[$stream_id] == null) {return;}
     {
         // we need references as we will modify the first parameter
         $dest = &$arr;
+
 if ($dest == null) {
 $dest =[];
 }
 //var_dump($dest);
 //return null;}
+
         $finalKey = array_pop($path);
         foreach ($path as $key) {
             $dest = &$dest[$key];

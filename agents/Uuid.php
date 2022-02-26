@@ -224,9 +224,9 @@ $uuids = $this->extractUuids($text);
         $web = '<a href="' . $link . '">';
         //$web_prefix = "http://localhost:8080/";
         if (!isset($this->html_image)) {
-            $this->getQuickresponse();
+//            $this->getQuickresponse();
         }
-        $web .= $this->html_image;
+//        $web .= $this->html_image;
 
         $web .= "</a>";
 

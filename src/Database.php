@@ -386,7 +386,7 @@ class Database
             as $active_service_name => $active_service
         ) {
             if ($active_service_name == "mysql") {
-                $this->stack_handlers["mysql"]->writeField(
+                $r = $this->stack_handlers["mysql"]->writeField(
                     $field_text,
                     $string_text
                 );
@@ -399,12 +399,14 @@ class Database
                 //if ($key === true) {return true;}
             }
 
-            
-        if ($active_service_name == "mongo") {
-            $key = $this->stack_handlers["mongo"]->writeMongo($field_text, $string_text);
-            //if ($key === true) {return true;}
-        }
-/*
+            if ($active_service_name == "mongo") {
+                $key = $this->stack_handlers["mongo"]->writeMongo(
+                    $field_text,
+                    $string_text
+                );
+                //if ($key === true) {return true;}
+            }
+            /*
         if ($active_service == "memory") {
             $memory = $this->stack_handlers["memory"]->set($key, $value);
 
@@ -467,26 +469,33 @@ class Database
         foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
             $stack_infrastructure = $stack_descriptor["infrastructure"];
             if ($stack_infrastructure == "mysql") {
-                $response = $this->stack_handlers['mysql']->createMysql($subject, $to);
+                $response = $this->stack_handlers["mysql"]->createMysql(
+                    $subject,
+                    $to
+                );
                 $this->available_stacks["mysql"]["response"] = $response;
             }
 
             if ($stack_infrastructure == "memory") {
-                $response = $this->stack_handlers['memory']->createMemory($subject, $to);
+                $response = $this->stack_handlers["memory"]->createMemory(
+                    $subject,
+                    $to
+                );
                 $this->available_stacks["memory"]["response"] = $response;
             }
 
             if ($stack_infrastructure == "mongo") {
-                $response = $this->stack_handlers['mongo']->createMongo($subject, $to);
+                $response = $this->stack_handlers["mongo"]->createMongo(
+                    $subject,
+                    $to
+                );
                 $this->available_stacks["memory"]["response"] = $response;
             }
-
-
         }
 
         foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
             if (
-                isset($stack_descriptor['response']) and
+                isset($stack_descriptor["response"]) and
                 $stack_descriptor["response"] === true
             ) {
                 return true;
@@ -509,30 +518,32 @@ class Database
 
         // Get first available.
 
-        $thing = false;
+        //        $thing = false;
+        $thing = [];
         foreach ($this->available_stacks as $stack_name => $stack) {
             switch ($stack["infrastructure"]) {
                 case "mysql":
-                    $thing['mysql'] = $this->stack_handlers[
+                    $thing["mysql"] = $this->stack_handlers[
                         $stack["infrastructure"]
                     ]->getMysql();
 
                     //          if ($thing['mysql'] !== false and $thing['mysql'] !== true) {
                     //              break 2;
                     //          }
+
+                    //if ($thing === false) {$thing = $thing['mysql'];}
                     break;
                 case "memcached":
-                    $thing['memcached'] = $this->stack_handlers[
+                    $thing["memcached"] = $this->stack_handlers[
                         $stack["infrastructure"]
                     ]->getMemcached($this->uuid);
                     break;
 
                 case "mongo":
-                    $thing['mongo'] = $this->stack_handlers[
+                    $thing["mongo"] = $this->stack_handlers[
                         $stack["infrastructure"]
                     ]->getMongo($this->uuid);
                     break;
-
 
                 //                    if ($thing !== false and $thing !== true) {
                 //                        break 2;
@@ -556,7 +567,7 @@ class Database
                         //$thing->created_at = null;
                         //$thing->nom_to = null;
                         //$thing->nom_from = null;
-                        //$thing->task = "empty task";
+              c          //$thing->task = "empty task";
                         //$thing->variables = json_encode($t, true);
                         //$thing->settings = null;
                         break;
@@ -569,8 +580,22 @@ class Database
 
         // dev decide which thing is most authorative.
         // merge?
-        $thing = $thing['mysql'];
+        $thing = $thing["mysql"];
 
+        /*
+if (is_array($thing)) {
+
+if (count($thing) == 0) {
+$thing = false;
+}
+
+if (count($thing) >= 1) {
+$thcing = $thing[array_key_first($thing)];
+}
+
+
+}
+*/
         $thingreport = [
             "thing" => $thing,
             "info" =>
@@ -670,12 +695,12 @@ class Database
         return $thing_report;
     }
 
-    function isValidMd5($md5 = '')
+    function isValidMd5($md5 = "")
     {
         return strlen($md5) == 32 && ctype_xdigit($md5);
     }
 
-    function isValidSha256($sha256 = '')
+    function isValidSha256($sha256 = "")
     {
         return strlen($sha256) == 64 && ctype_xdigit($sha256);
     }
@@ -688,6 +713,7 @@ class Database
      * @return unknown
      */
     public function variableSearch(
+        $path,
         $value,
         $max = null,
         $string_in_string = false
@@ -721,7 +747,9 @@ return $thing_report;
             $max = 3;
         }
         $max = (int) $max;
+
         $user_search = $this->from;
+        $hash_user_search = hash($this->hash_algorithm, $user_search);
 
         $hash_user_search = $user_search;
         if (!$this->isValidSha256($user_search)) {
@@ -749,7 +777,6 @@ return $thing_report;
                 $query =
                     "SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
             }
-
             //           $query =
             //                "(SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) UNION ALL (SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) ORDER BY created_at DESC LIMIT :max";
             //$value = "+$value"; // Value to search for in Variables

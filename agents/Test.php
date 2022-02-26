@@ -41,7 +41,7 @@ class Test extends Agent
             $agent_name = $this->agents[strtolower($text)];
             $this->test_text = $agent_name;
 
-            $this->response .= 'Tested text, "' . $this->test_text . '". ';
+            $this->response .= "Test text is " . $this->test_text . ". ";
 
             set_time_limit(20);
 
@@ -61,6 +61,8 @@ class Test extends Agent
                 " response. " .
                 trim($agent->thing_report['response']) .
                 " ";
+
+            // Neither is providing a thing_report.
         } else {
             $this->response .=
                 "No response to '" . $this->test_text . "' test seen. ";

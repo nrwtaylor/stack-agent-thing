@@ -24,7 +24,6 @@ class Agent
      */
     function __construct(Thing $thing = null, $input = null)
     {
-        // dev test
         //        if ($thing == false) {
         //           $thing = new Thing(false);
         //$this->thing = false;
@@ -133,10 +132,13 @@ class Agent
 
         $this->stack_engine_state = $thing->container["stack"]["engine_state"];
 
+        $this->entity_name = $thing->container["stack"]["entity_name"];
+
         $this->default_font = null;
         if (isset($this->thing->container["stack"]["font"])) {
             $this->default_font = $this->thing->container["stack"]["font"];
         }
+
         $this->default_pdf_page_template = null;
         if (isset($this->thing->container["stack"]["pdf_page_template"])) {
             $this->default_pdf_page_template =
@@ -598,7 +600,6 @@ $agent_name = strtolower($this->agent_name);
         if (!is_array($findagent_thing->thing_report["things"])) {
             return;
         }
-
         $count = count($findagent_thing->thing_report["things"]);
 
         //$rule_agent = new Rule($this->thing, "rule");
@@ -608,7 +609,7 @@ $agent_name = strtolower($this->agent_name);
                 array_reverse($findagent_thing->thing_report["things"])
                 as $thing_object
             ) {
-              $uuid = $thing_object["uuid"];
+                $uuid = $thing_object["uuid"];
                 $variables_json = $thing_object["variables"];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
@@ -625,7 +626,6 @@ $agent_name = strtolower($this->agent_name);
                 $thing->nom_from = $thing_object["nom_from"];
 
                 $thing->variables = $variables;
-
                 $thing->created_at = $thing_object["created_at"];
 
                 $thing->associations = $associations;
@@ -638,6 +638,7 @@ $agent_name = strtolower($this->agent_name);
                 $response = $this->readAgent($thing_object["task"]);
             }
         }
+
         return $things;
     }
 
@@ -690,7 +691,7 @@ $agent_name = strtolower($this->agent_name);
         foreach ($indicators as $flag_name => $flag_indicators) {
             foreach ($flag_indicators as $flag_indicator) {
                 $f = $this->agent_name . "_" . $flag_name . "_flag";
-          if (stripos($input, $flag_indicator) !== false) {
+                if (stripos($input, $flag_indicator) !== false) {
                     $this->{$f} = "on";
                 }
 
@@ -1954,7 +1955,6 @@ $indicators = [
 ];
 
 $this->flagAgent($indicators, $this->subject);
-
         $this->readFrom();
         $this->readSubject();
         // read the current agent.
@@ -2317,15 +2317,17 @@ $agent_names = array_merge($agent_names, $this->variantsAgent($keyword, ""));
 
     }
 
-    public function scoreAgent($text, $matched_characters = null)
-    {
+// Take a piece of returned text,
+// And score it to see how close it is to the provided input.
 
+    public function scoreAgent($text, $provided_score = 0)
+    {
         // dev this function needs improvement to handle closeness of multi-gram strings
 
-        if ($matched_characters === null) {
+//        if ($provided_score === null) {
             $matched_characters_count = strlen($text) - strlen(str_replace(strtolower($this->input), "", strtolower($text)));
             $unmatched_characters_count = strlen($text) - $matched_characters_count;
-        }
+//        }
 
         $pieces = explode(" ", $text);
         $num_pieces = count($pieces);
@@ -2335,7 +2337,7 @@ $agent_names = array_merge($agent_names, $this->variantsAgent($keyword, ""));
             $s = ($matched_characters_count - $unmatched_characters_count) / $matched_characters_count;
         }
 
-        $score = $s * pow(10, $num_pieces);
+        $score = $s * pow(10, $num_pieces) + $provided_score;
 
         return $score;
     }
@@ -2780,7 +2782,7 @@ if (strtolower($this->subject) == 'when') {
         // Basically if the agent input directly matches an agent name
         // Then run it.
         // So look hear to generalize that.
-        $text = urldecode($agent_input_text);
+        $text = $agent_input_text != null ? urldecode($agent_input_text) : "";
         //$text = urldecode($input);
         $text = strtolower($text);
         //$arr = explode(' ', trim($text));
@@ -2956,10 +2958,13 @@ if (strtolower($this->subject) == 'when') {
 
             $burst_age_limit = 900; //s
             $similiarness_limit = 90;
-
+//var_dump ($this->current_time);
+$burst_age = 0;
+if ($this->thing->burst_handler->burst_time != null) {
             $burst_age =
                 strtotime($this->current_time) -
                 strtotime($this->thing->burst_handler->burst_time);
+}
             if ($burst_age < 0) {
                 $burst_age = 0;
             }
@@ -3324,7 +3329,6 @@ if (!is_string($agent_class_name)) {$agent_class_name = $this->agent_name;}
 $this->head_code = $headcode->head_code;
 
         }
-
 
         // Temporarily alias robots
         if (strpos($input, "robots") !== false) {

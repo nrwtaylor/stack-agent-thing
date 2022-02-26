@@ -56,7 +56,7 @@ class Shuffleall extends Agent
         $thingreport = $this->thing->db->userSearch(""); // Designed to accept null as $this->uuid.
 
         $things = $thingreport["thing"];
-
+if ($things === false) {return true;}
         $this->total_things = count($things);
 
         $start_time = time();
