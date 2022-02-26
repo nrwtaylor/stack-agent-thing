@@ -481,10 +481,6 @@ return;
                     STR_PAD_LEFT
                 );
 
-//            $txt .= " " . str_pad($cell['name'], 10, ' ', STR_PAD_LEFT);
-//            $txt .= " " . str_pad($cell['state'], 10, " ", STR_PAD_LEFT);
-//            $txt .= " " . str_pad($cell['value'], 10, " ", STR_PAD_RIGHT);
-
 if ($cell['name'] != null) {
             $txt .= " " . str_pad($cell['name'], 10, ' ', STR_PAD_LEFT);
 }
@@ -494,8 +490,6 @@ if ($cell['state'] != null) {
 if ($cell['value'] != null) {
             $txt .= " " . str_pad($cell['value'], 10, " ", STR_PAD_RIGHT);
 }
-
-
             //$txt .= " " . str_pad($cell['neighbours'], 10, ' ', STR_PAD_LEFT);
             //$txt .= " " . str_pad($cell['p_melt'], 10, " ", STR_PAD_LEFT);
             //$txt .= " " . str_pad($cell['p_freeze'], 10, " " , STR_PAD_RIGHT);

@@ -521,7 +521,7 @@ class Month extends Agent
 
     public function drawMonth($type = null)
     {
-        $type = "spiral";
+//        $type = "spiral";
         if ($type == null) {
             $type = $this->type;
         }
@@ -529,11 +529,18 @@ class Month extends Agent
             $this->wedgeMonth();
             return;
         }
-
         if ($type == "spiral") {
             $this->spiralMonth();
             return;
         }
+
+        if ($type == "nautilus") {
+
+            $this->nautilusMonth();
+            return;
+        }
+
+
 
         $this->sliceMonth();
     }
@@ -614,6 +621,7 @@ class Month extends Agent
             $this->white
         );
 
+
         // Calculate number of days.
 
         $number_of_days = $this->daysMonth(
@@ -688,6 +696,140 @@ class Month extends Agent
 
         //$this->image = $spiral_agent->image;
     }
+
+
+
+    public function nautilusMonth()
+    {
+        $size = null;
+        if ($size == null) {
+            $size = $this->size;
+        }
+        $border = 100;
+        $size = 1000 - $border;
+
+
+        if (isset($this->canvas_size_x)) {
+            $canvas_size_x = $this->canvas_size_x;
+            $canvas_size_y = $this->canvas_size_y;
+        } else {
+            $canvas_size_x = $this->default_canvas_size_x;
+            $canvas_size_y = $this->default_canvas_size_y;
+        }
+
+        // Draw out the state
+        $center_x = $canvas_size_x / 2;
+        $center_y = $canvas_size_y / 2;
+
+        $spiral_agent = new Spiral($this->thing, 'spiral');
+        $spiral_agent->image = imagecreatetruecolor(
+            $canvas_size_x,
+            $canvas_size_y
+        );
+
+        imagefilledrectangle(
+            $spiral_agent->image,
+            0,
+            0,
+            $canvas_size_x,
+            $canvas_size_y,
+            $this->white
+        );
+
+
+        $nautilus_agent = new Nautilus($this->thing, 'nautilus');
+        $nautilus_agent->image = imagecreatetruecolor(
+            $canvas_size_x,
+            $canvas_size_y
+        );
+
+        imagefilledrectangle(
+            $nautilus_agent->image,
+            0,
+            0,
+            $canvas_size_x,
+            $canvas_size_y,
+            $this->white
+        );
+
+
+        // Calculate number of days.
+
+        $number_of_days = $this->daysMonth(
+            $this->datestringMonth($this->dateline)
+        );
+
+        $year = $this->dateline['year'];
+
+        if ($year === false) {
+            $oldDateUnix = strtotime($this->current_time);
+            $year = date("Y", $oldDateUnix);
+        }
+        $first_day = $this->firstdayMonth(
+            $this->datestringMonth($this->dateline) . "-" . $year
+        );
+
+        $first_day_of_week_number = date('N', strtotime($first_day));
+
+        // How many spirals to ignore before starting.
+        // Creates hole in middle.
+        $start_loops = 6;
+
+        // Where in the spiral to start.
+        //        $init = $start_loops * 360;
+        $init =
+            $start_loops * 360 -
+            90 +
+            (($first_day_of_week_number - 1) / 7) * 360;
+        //      $init = $start_loops * 360 - 90;
+
+        $image = $spiral_agent->drawSpiral(
+            10,
+            15.5,
+            0 + $init,
+            ($number_of_days / 7) * (2 * 180) + $init
+        );
+
+        $number = 7;
+        $round_agent = new Spokes($this->thing, "spokes " . $number);
+        $image_spokes = $round_agent->image;
+
+        $width = imagesx($this->image);
+        $height = imagesy($this->image);
+
+        //$dest = @imagecreatefrompng('image1.png');
+        //$src = @imagecreatefrompng('image2.png');
+
+        // Copy and merge
+        imagecopymerge(
+            $this->image,
+            $round_agent->image,
+            0,
+            0,
+            0,
+            0,
+            $width,
+            $height,
+            75
+        );
+
+        imagecopymerge(
+            $this->image,
+            $nautilus_agent->image,
+            0,
+            0, 
+            0,
+            0,
+            $width,
+            $height,
+            70
+        );
+
+
+        //$this->image = $spiral_agent->image;
+    }
+
+
 
     public function wedgeMonth()
     {
@@ -1197,6 +1339,7 @@ class Month extends Agent
         $discriminators = [
             "wedge" => ["pizza", "wheel", "wedge"],
             "slice" => ["slice", "column", "columns"],
+            "nautilus" => ["shell", "moon", "segments", "nautilus"],
         ];
 
         $type = $input_agent->discriminateInput($input, $discriminators);
