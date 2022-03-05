@@ -90,6 +90,13 @@ class Slug extends Agent
 */ 
    }
 
+   public function pdfSlug($token) {
+
+     $pdf_slug = $this->web_prefix . $token . '.pdf';
+     return $pdf_slug;
+
+    }
+
     public function extractSlug($text = null)
     {
         if ($text == null) {
@@ -217,19 +224,27 @@ $hyphenated_text = strtolower(str_replace(" ","-",$text));
     {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/uuid';
 
+$slug = trim(str_replace('s/ pdf slug','', $this->subject));
+
+$link = $this->pdfSlug($slug);
         $this->node_list = ["number" => ["number", "thing"]];
+$web = "";
+        $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
+
 
         $web = '<a href="' . $link . '">';
+/*
         $web .=
             '<img src= "' .
             $this->web_prefix .
             'thing/' .
             $this->uuid .
             '/uuid.png">';
+*/
+$web .= "Downloadable instructions (pdf)";
         $web .= "</a>";
 
         $web .= "<br>";
-        $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
         $web .= $this->subject . "<br>";
 
         /*
