@@ -210,7 +210,7 @@ if (!isset($this->day)) {
         }
 
         $latitude = (float) $this->latitude;
-        $longitude = (float) $this->latitude;
+        $longitude = (float) $this->longitude;
 
         $timestamp_epoch = (float) $this->timestampEpoch($text);
 
@@ -232,14 +232,18 @@ if (!isset($this->day)) {
 
     public function milestonesDay($timestamp_epoch, $latitude, $longitude)
     {
-        $datum_now = new \DateTime();
-        $datum_now->setTimestamp(strtotime($this->current_time));
 
+        $match = false;
+
+        $datum_current_time = new \DateTime();
+        $timestamp_current_time = $datum_current_time->getTimestamp();
 
         $message = "";
         $count = 0;
         foreach (range(0, 1, 1) as $period_index) {
+$index =0;
             foreach ($this->day_solar_milestones as $period => $epoch) {
+
                 // The datum returned is when this event will happen
                 // as a DateTime (datum) object.
 
@@ -266,7 +270,7 @@ if (!isset($this->day)) {
                     continue;
                 }
 
-                if ($count == 0) {
+                if ($count == 0 or $index == 0) {
                     //   $message .=
                     //       $period . " " . $datum->format("Y/m/d G:i:s") . " ";
                     $message .=
@@ -285,7 +289,8 @@ if (!isset($this->day)) {
                 ];
 
                 $count += 1;
-                $match = false;
+                $index += 1;
+                //$match = false;
                 $variable_text = str_replace(" ", "_", $period);
 
                 $solar_day_timestamp = $this->solarDay(
@@ -294,20 +299,11 @@ if (!isset($this->day)) {
                     $longitude
                 )[$variable_text];
 
-                $solar_day_timestamp_now = $this->solarDay(
-                    $datum_now,
-                    $latitude,
-                    $longitude
-                )[$variable_text];
-
 
                 if (
-                    $match === false and
-//                    $solar_day_timestamp < $timestamp_epoch
-                    $solar_day_timestamp < $solar_day_timestamp_now
+                    $solar_day_timestamp < $timestamp_current_time
                 ) {
                     $time_of_day = $period;
-                    $match = true;
                 }
             }
         }
@@ -319,7 +315,6 @@ if (!isset($this->day)) {
         ) {
             $day_time = $this->day_solar_milestones[$time_of_day];
         }
-
         $tz = $datum_projected->getTimezone();
         $message .= $tz->getName();
 
