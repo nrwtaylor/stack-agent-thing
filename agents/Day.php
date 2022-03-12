@@ -1725,6 +1725,7 @@ Now draw the twilight.
         //        $this->getWhatis($this->subject);
         $pdf_handler = new Pdf($this->thing, "pdf");
 
+
         try {
             // initiate FPDI
             $pdf = $pdf_handler->pdf;
