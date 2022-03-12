@@ -27,8 +27,7 @@ return false;
 
 }
 
-    public function getNgrams($input, $n = 3, $delimiter = null) {
-if ($delimiter == null) {$delimiter = "";}
+    public function getNgrams($input, $n = 3) {
 if (!isset($this->ngrams)) {$this->ngrams = array();}
         $words = explode(' ', $input);
         $ngrams = array();
@@ -38,7 +37,7 @@ if (!isset($this->ngrams)) {$this->ngrams = array();}
             if ($key < count($words) - ($n - 1)) {
                 $ngram = "";
                 for ($i = 0; $i < $n; $i++) {
-                    $ngram .= " " . $words[$key + $i]. $delimiter;
+                    $ngram .= " " . $words[$key + $i];
                 }
                 $ngrams[] = trim($this->trimAlpha($ngram));
             }

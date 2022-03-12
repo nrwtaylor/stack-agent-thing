@@ -49,6 +49,10 @@ class Slug extends Agent
             $this->thing,
             "alphanumeric"
         );
+       // $this->alphanumeric_agent = new Alphanumeric(
+       //     $this->thing,
+      //      "alphanumeric"
+      //  );
         $this->getSlugs();
     }
 
@@ -71,6 +75,7 @@ class Slug extends Agent
         $slug = $this->extractSlug($text);
         $this->slug = $slug;
         return $slug;
+/*
 
         $slug = $this->alphanumeric_agent->filterAlphanumeric($text);
 
@@ -82,6 +87,14 @@ class Slug extends Agent
 
         $this->slug = $slug;
         return $slug;
+*/ 
+   }
+
+   public function pdfSlug($token) {
+
+     $pdf_slug = $this->web_prefix . $token . '.pdf';
+     return $pdf_slug;
+
     }
 
     public function extractSlug($text = null)
@@ -103,6 +116,17 @@ class Slug extends Agent
         $slug = trim($slug, "-");
         return $slug;
     }
+
+    public function deSlug($text = null)
+    {
+        if ($text == null) {
+            return true;
+        }
+
+        $deslug = str_replace('-', " ", $text);
+        return $deslug;
+    }
+
 
     /**
      *
@@ -223,21 +247,22 @@ return false;
 
     }
 
+
     public function isSlug($text = null)
     {
         if ($text == null) {
             return false;
         }
 
-        //$allowed_endpoints = require $this->resource_path .
-        //    $this->allowed_slugs_resource;
+        $allowed_endpoints = require $this->resource_path .
+            $this->allowed_slugs_resource;
 
-        if (in_array($text, $this->slugs)) {
+        if (in_array($text, $allowed_endpoints)) {
             return true;
         }
 
-        $hyphenated_text = strtolower(str_replace(" ","-",$text));
-        if (in_array($hyphenated_text, $this->slugs)) {
+$hyphenated_text = strtolower(str_replace(" ","-",$text));
+        if (in_array($hyphenated_text, $allowed_endpoints)) {
             return true;
         }
 
@@ -253,19 +278,27 @@ return false;
     {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/uuid';
 
+$slug = trim(str_replace('s/ pdf slug','', $this->subject));
+
+$link = $this->pdfSlug($slug);
         $this->node_list = ["number" => ["number", "thing"]];
+$web = "";
+        $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
+
 
         $web = '<a href="' . $link . '">';
+/*
         $web .=
             '<img src= "' .
             $this->web_prefix .
             'thing/' .
             $this->uuid .
             '/uuid.png">';
+*/
+$web .= "Downloadable instructions (pdf)";
         $web .= "</a>";
 
         $web .= "<br>";
-        $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
         $web .= $this->subject . "<br>";
 
         /*
