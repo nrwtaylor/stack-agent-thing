@@ -232,6 +232,10 @@ if (!isset($this->day)) {
 
     public function milestonesDay($timestamp_epoch, $latitude, $longitude)
     {
+        $datum_now = new \DateTime();
+        $datum_now->setTimestamp(strtotime($this->current_time));
+
+
         $message = "";
         $count = 0;
         foreach (range(0, 1, 1) as $period_index) {
@@ -244,7 +248,6 @@ if (!isset($this->day)) {
                     $period_index * (60 * 60 * 24);
 
                 $t = $this->projected_time;
-
                 $e = strtotime($t);
 
                 $datum_projected = new \DateTime();
@@ -253,10 +256,12 @@ if (!isset($this->day)) {
                     $timezone = new \DateTimeZone($this->timezone);
                     $datum_projected->setTimezone($timezone);
                 }
+
                 $datum = $this->twilightDay($period, $datum_projected);
                 if ($datum === false) {
                     continue;
                 }
+
                 if ($period_timestamp < $e) {
                     continue;
                 }
@@ -289,9 +294,17 @@ if (!isset($this->day)) {
                     $longitude
                 )[$variable_text];
 
+                $solar_day_timestamp_now = $this->solarDay(
+                    $datum_now,
+                    $latitude,
+                    $longitude
+                )[$variable_text];
+
+
                 if (
                     $match === false and
-                    $solar_day_timestamp < $timestamp_epoch
+//                    $solar_day_timestamp < $timestamp_epoch
+                    $solar_day_timestamp < $solar_day_timestamp_now
                 ) {
                     $time_of_day = $period;
                     $match = true;
@@ -909,7 +922,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         $this->node_list = ["day" => ["day"]];
 
         $web = "";
-
+/*
         $thing = new Thing(null);
         $thing->Create("token", $this->from, "calendar-page-token");
 
@@ -919,7 +932,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
             $web .= $token_handler->web_token["calendar-page"];
             $web .= "<br>";
         }
-
+*/
         if (
             isset($this->day_mesoamerican_flag) and
             $this->day_mesoamerican_flag == "on"
@@ -1560,14 +1573,16 @@ Now draw the twilight.
 
                 if (strpos($period_name, "sunrise") !== false) {
                     $arc_day[$i][] = $angle;
+
                     $colour = $this->colours_agent->blue;
-                    imagesetthickness($this->image, 7);
+                    imagesetthickness($this->image, 3);
+
                 }
 
                 if (strpos($period_name, "sunset") !== false) {
                     $arc_day[$i][] = $angle;
                     $colour = $this->colours_agent->blue;
-                    imagesetthickness($this->image, 7);
+                    imagesetthickness($this->image, 3);
                 }
 
                 $offset = 0;
@@ -1596,6 +1611,9 @@ Now draw the twilight.
                     $this->colours_agent->black
                 );
             }
+
+            imagesetthickness($this->image, 3);
+
 
             imagearc(
                 $this->image,
