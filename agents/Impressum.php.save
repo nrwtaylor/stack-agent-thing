@@ -26,8 +26,6 @@ class Impressum extends Agent
         $this->mail_regulatory =
             $this->thing->container["stack"]["mail_regulatory"];
 
-        $this->entity_name = $this->thing->container["stack"]["entity_name"];
-
         $this->node_list = ["start" => ["start", "opt-in"]];
         $this->impressum();
     }
@@ -65,9 +63,9 @@ class Impressum extends Agent
         }
 
         $text = $this->mail_regulatory;
-        $text = str_replace('\r', " ", $text);
-        $text = str_replace('\n', " ", $text);
-        $text = preg_replace("/\s+/", " ", $text);
+        $text = str_replace('\r', ' ', $text);
+        $text = str_replace('\n', ' ', $text);
+        $text = preg_replace('/\s+/', " ", $text);
         $text = trim($text);
 
         $sms = "IMPRESSUM | " . $text;
@@ -82,7 +80,6 @@ class Impressum extends Agent
      */
     public function makeEmail()
     {
-        return;
         if (!isset($this->thing_report["email"])) {
             $thing = new Thing(null);
             $thing->Create(
@@ -112,17 +109,11 @@ class Impressum extends Agent
 
             $link = $this->web_prefix . "thing/" . $this->uuid . "/day";
 
-            //           $qr_png_embed = $this->imageQr($link);
+            //$qr_png_embed = $this->imageQr($link);
 
             //      $pdf->Image($this->quick_response_png, 175, 5, 30, 30, "PNG");
-            //           $pdf->Image($qr_png_embed, 175, 5, 30, 30, "PNG");
+            //$pdf->Image($qr_png_embed, 175, 5, 30, 30, "PNG");
             //        throw new \Exception('Test.');
-
-            // prod March 16 2022
-            // use older pattern
-            $qr_handler = new Qr($this->thing, $link);
-            $quick_response_png = $qr_handler->PNG_embed;
-            $pdf->Image($quick_response_png, 175, 5, 30, 30, "PNG");
 
             $pdf->SetTextColor(0, 0, 0);
 
@@ -141,7 +132,7 @@ class Impressum extends Agent
             $y = $pdf->GetY() + 0.95;
 
             $pdf->SetXY(15, $y);
-            $text = "v0.0.2";
+            $text = "v0.0.1";
 
             $pdf->MultiCell(
                 150,
@@ -155,21 +146,87 @@ class Impressum extends Agent
 
             $pdf->SetXY(15, $y);
             $text =
-                "Printed text and graphics (c) 2020-2022 " . $this->entity_name;
+                "Pre-printed text and graphics (c) 2020 " . $this->entity_name;
             $pdf->MultiCell(150, $line_height, $text, 0, "L");
 
             // Good until?
 
             $text = "dev";
+ 
+//This causes an infinite loop.
+//            $text = $this->timestampDay();
 
-            //This causes an infinite loop.
-            //            $text = $this->timestampDay();
 
             $pdf->SetXY(175, 35);
             $pdf->MultiCell(30, $line_height, $text, 0, "L");
         } catch (Exception $e) {
             $this->thing->console("Caught exception: ", $e->getMessage(), "\n");
         }
+
+        return $pdf;
+        /*
+if ($pdf == null) {
+if (isset($this->pdf)) {
+$pdf = $this->pdf;
+}
+
+} 
+
+if ($pdf == null) {
+
+$pdf_handler = new Pdf($this->thing, "pdf");
+$pdf = $pdf_handler->pdf;
+
+}
+*/
+        $pdf->SetFont("Helvetica", "", 10);
+        $this->txt = "" . $this->uuid . ""; // Pure uuid.
+
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/day";
+
+        $qr_png_embed = $this->imageQr($link);
+
+        //      $pdf->Image($this->quick_response_png, 175, 5, 30, 30, "PNG");
+        $pdf->Image($qr_png_embed, 175, 5, 30, 30, "PNG");
+        //        throw new \Exception('Test.');
+
+        //$pdf->Link(175,5,30,30, $link);
+
+        $pdf->SetTextColor(0, 0, 0);
+
+        $pdf->SetXY(15, 7);
+
+        $line_height = 4;
+
+        $t = $this->thing_report["sms"];
+
+        $t = str_replace(" | ", "\n", $t);
+
+        $pdf->MultiCell(150, $line_height, $t, 0);
+
+        //$pdf->Link(15,7,150,10, $link);
+
+        $y = $pdf->GetY() + 0.95;
+        $pdf->SetXY(15, $y);
+        $text = "v0.0.1";
+        $pdf->MultiCell(
+            150,
+            $line_height,
+            $this->agent_name . " " . $text,
+            0,
+            "L"
+        );
+
+        $y = $pdf->GetY() + 0.95;
+
+        $pdf->SetXY(15, $y);
+        $text = "Pre-printed text and graphics (c) 2020 " . $this->entity_name;
+        $pdf->MultiCell(150, $line_height, $text, 0, "L");
+
+        // Good until?
+        $text = $this->timestampDay();
+        $pdf->SetXY(175, 35);
+        $pdf->MultiCell(30, $line_height, $text, 0, "L");
 
         return $pdf;
     }
