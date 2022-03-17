@@ -85,10 +85,10 @@ class Day extends Agent
         $this->default_prime_meridian_offset = 0;
         $this->default_julian_correlation["mesoamerican"] = 584283; //GMT
 
-// dev factor up to agent
-if (!isset($this->day)) {
-        $this->initDay();
-}
+        // dev factor up to agent
+        if (!isset($this->day)) {
+            $this->initDay();
+        }
     }
 
     public function initDay()
@@ -232,7 +232,6 @@ if (!isset($this->day)) {
 
     public function milestonesDay($timestamp_epoch, $latitude, $longitude)
     {
-
         $match = false;
 
         $datum_current_time = new \DateTime();
@@ -241,9 +240,8 @@ if (!isset($this->day)) {
         $message = "";
         $count = 0;
         foreach (range(0, 1, 1) as $period_index) {
-$index =0;
+            $index = 0;
             foreach ($this->day_solar_milestones as $period => $epoch) {
-
                 // The datum returned is when this event will happen
                 // as a DateTime (datum) object.
 
@@ -299,10 +297,7 @@ $index =0;
                     $longitude
                 )[$variable_text];
 
-
-                if (
-                    $solar_day_timestamp < $timestamp_current_time
-                ) {
+                if ($solar_day_timestamp < $timestamp_current_time) {
                     $time_of_day = $period;
                 }
             }
@@ -402,10 +397,9 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         return $timestamp_epoch;
     }
 
-    public function makePollInterval() {
-
-      $this->thing_report['poll_interval'] = ['minimum'=>60];
-
+    public function makePollInterval()
+    {
+        $this->thing_report["poll_interval"] = ["minimum" => 60];
     }
 
     public function solarDay($text = null, $latitude = null, $longitude = null)
@@ -840,16 +834,17 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         $uuid = $this->uuid;
 
         $message .=
-            "Keep on stacking.\n\n<p>" .
+            "Thank you.\n\n<p>" .
             $this->web_prefix .
             "thing/$uuid/day.png\n \n\n<br> ";
+        /*
         $message .=
             '<img src="' .
             $this->web_prefix .
             "thing/" .
             $uuid .
             '/day.png" alt="day" height="92" width="92">';
-
+*/
         $this->thing_report["message"] = $message;
     }
 
@@ -897,37 +892,15 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         //  $this->runDay();
     }
 
-    public function datestringDay($datum)
+    public function textDay()
     {
-        $date_string =
-            $datum["year"] .
-            "-" .
-            str_pad($datum["month"], 2, "0", STR_PAD_LEFT) .
-            "-" .
-            str_pad($datum["day_number"], 2, "0", STR_PAD_LEFT);
-
-        return $date_string;
+        return $this->textHtml($this->snippetDay());
     }
-    /**
-     *
-     */
-    public function makeWeb()
+
+    public function snippetDay()
     {
-        $link = $this->web_prefix . "thing/" . $this->uuid . "/day.pdf";
-        $this->node_list = ["day" => ["day"]];
-
         $web = "";
-/*
-        $thing = new Thing(null);
-        $thing->Create("token", $this->from, "calendar-page-token");
 
-        $token_handler = new Token($thing, "calendar-page-token");
-        if (isset($token_handler->itemToken["calendar-page"])) {
-            $token_handler->itemToken["calendar-page"];
-            $web .= $token_handler->web_token["calendar-page"];
-            $web .= "<br>";
-        }
-*/
         if (
             isset($this->day_mesoamerican_flag) and
             $this->day_mesoamerican_flag == "on"
@@ -943,7 +916,6 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         }
 
         $web .= $this->formatDay($this->datestringDay($this->dateline));
-
         $web .= "<br>";
         $latitude_text = $this->formatLatitude($this->latitude);
         $longitude_text = $this->formatLongitude($this->longitude);
@@ -975,10 +947,30 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
                 $web .= strtoupper($day_time_text);
             }
         }
+        return $web;
+    }
 
-        //}
-        $web .= "<p>";
+    public function datestringDay($datum)
+    {
+        $date_string =
+            $datum["year"] .
+            "-" .
+            str_pad($datum["month"], 2, "0", STR_PAD_LEFT) .
+            "-" .
+            str_pad($datum["day_number"], 2, "0", STR_PAD_LEFT);
 
+        return $date_string;
+    }
+    /**
+     *
+     */
+    public function makeWeb()
+    {
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/day.pdf";
+        $this->node_list = ["day" => ["day"]];
+
+        $web = "";
+        $web .= $this->snippetDay();
         /*
                 $this->itemToken($item_slug);
                 $web .= $this->web_token[$item_slug];
@@ -1228,7 +1220,8 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
     }
     // Not sure about this pattern.
     // But I need a dot to represent a day.
-    public function drawDot($image,
+    public function drawDot(
+        $image,
         $text,
         $angle,
         $radius,
@@ -1263,7 +1256,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
             $colour
         );
 
-return $this->image;
+        return $this->image;
     }
     // And then to build Day agent
     public function extractHour($text = null)
@@ -1466,10 +1459,17 @@ Now for projected time
         $sunFlag = $this->isToday();
 
         if ($sunFlag) {
-            $dot_offset = + 23.5;
+            $dot_offset = +23.5;
             $dot_size = 20;
 
-            $this->image = $this->drawDot($this->image, null, $day_degrees, $radius, $dot_size, $dot_offset);
+            $this->image = $this->drawDot(
+                $this->image,
+                null,
+                $day_degrees,
+                $radius,
+                $dot_size,
+                $dot_offset
+            );
         }
 
         /*
@@ -1571,7 +1571,6 @@ Now draw the twilight.
 
                     $colour = $this->colours_agent->blue;
                     imagesetthickness($this->image, 3);
-
                 }
 
                 if (strpos($period_name, "sunset") !== false) {
@@ -1608,7 +1607,6 @@ Now draw the twilight.
             }
 
             imagesetthickness($this->image, 3);
-
 
             imagearc(
                 $this->image,
@@ -1711,7 +1709,16 @@ Now draw the twilight.
             $pdf->SetXY(140, 7);
             $this->getWhatis($this->subject);
 
-            $text = $this->whatis;
+            $text = $this->deSlug($this->whatis);
+            $line_height = 20;
+            $pdf->MultiCell(150, $line_height, $text, 0);
+
+            $pdf->SetFont("Helvetica", "", 14);
+            $text = $this->textDay();
+            $pdf->SetXY(7, 7);
+            //$this->getWhatis($this->subject);
+
+            //$text = $this->whatis;
             $line_height = 20;
             $pdf->MultiCell(150, $line_height, $text, 0);
         } catch (Exception $e) {
@@ -1736,12 +1743,13 @@ Now draw the twilight.
         }
 
         //        $this->getWhatis($this->subject);
-        $pdf_handler = new Pdf($this->thing, "pdf");
-
+        // prod March 16 2022
+        //$pdf_handler = new Pdf($this->thing, "pdf");
+        $pdf = new Fpdi\Fpdi();
 
         try {
             // initiate FPDI
-            $pdf = $pdf_handler->pdf;
+            //$pdf = $pdf_handler->pdf;
             $pdf->setSourceFile($this->default_pdf_page_template);
             $pdf->SetFont("Helvetica", "", 10);
 
