@@ -2499,7 +2499,8 @@ if ($pid == -1) {
         $n = $nuuid->extractNuuid($input);
 
         // See if this matches a stripe token
-        if ($n != false) {
+//        if ($n != false) {
+          if (!($n == false || $n == true)) {
             $temp_email = $this->thing->db->from;
             $this->thing->db->from = "stripe" . $this->mail_postfix;
 

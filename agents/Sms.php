@@ -167,10 +167,18 @@ class Sms
 
     }
 
+    public function logSms($text) {
+
+file_put_contents('/tmp/s.log', $text, FILE_APPEND);
+
+
+    }
+
     // -----------------------
 
     private function respond()
     {
+$this->logSms("merp");
         // Thing actions
         $this->thing->flagGreen();
 
@@ -191,6 +199,7 @@ class Sms
         // Don't send a message if there isn't enough balance,
         // the number of responses per message would be exceeded, or
         // if the message would be sent 'too late'.
+
         if (
             $this->thing->account['stack']->balance['amount'] >= $this->cost and
             $this->sms_count < $this->sms_per_message_responses and
@@ -201,7 +210,7 @@ class Sms
             $test_message = str_replace(" | ", "\n", $test_message);
 
             $response = $this->sendSms($to, $test_message);
-
+//$this->logSms($response);
             if ($response === true) {
                 $this->thing_report['info'] = 'did not send a SMS.';
                 return;
@@ -220,6 +229,8 @@ class Sms
                 $this->sms_count + 1
             );
         } else {
+$this->logSms("Thing not sent.");
+
             $this->thing_report['info'] =
                 'SMS not sent.  Balance of ' .
                 $this->thing->account['stack']->balance['amount'] .
