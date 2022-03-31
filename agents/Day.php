@@ -2066,7 +2066,7 @@ Now draw the twilight.
         $expand_places_input = $this->input;
         $expand_places_input = str_replace(
             "canada places",
-            "vancouver calgary montreal ottawa",
+            "vancouver toronto calgary montreal ottawa",
             $expand_places_input
         );
         $expand_places_input = str_replace(
@@ -2112,6 +2112,20 @@ Now draw the twilight.
                         $first_place = $place_times["abcd"];
                     }
                     break;
+
+                case 'toronto':
+                    $place_times["11ab"] = [
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 43.6529,
+                        "longitude" => -79.3849,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["11ab"];
+                    }
+
+                    break;
+
 
                 case 'new york':
                     $place_times["12ab"] = [
