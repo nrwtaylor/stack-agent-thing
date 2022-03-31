@@ -593,7 +593,9 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         $gmt_julian_day_number =
             $this->default_julian_correlation["mesoamerican"];
 
-        $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
+        $days_since_correlation = intval(
+            $julian_day_number - $gmt_julian_day_number
+        );
 
         // https://sudonull.com/post/158842-Ancient-Mayan-calendar-how-to-calculate-the-date
         $t1 = ($days_since_correlation + 19) % 20;
@@ -615,7 +617,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         return $t1_text . " " . $t2;
     }
 
-    public function lordofthenightDay()
+    public function correlationDays()
     {
         $julian_day_number = $this->julianDay();
 
@@ -626,7 +628,27 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         $gmt_julian_day_number =
             $this->default_julian_correlation["mesoamerican"];
 
+        $days_since_correlation = intval(
+            $julian_day_number - $gmt_julian_day_number
+        );
+        return $days_since_correlation;
+    }
+
+    public function lordofthenightDay()
+    {
+        /*
+        $julian_day_number = $this->julianDay();
+
+        // Today, 5 December 2020 (UTC), in the Long Count is 13.0.8.1.6 (using GMT correlation).
+        // https://en.wikipedia.org/wiki/Mesoamerican_Long_Count_calendar
+        //$gmt_julian_day_number = 584283;
+
+        $gmt_julian_day_number =
+            $this->default_julian_correlation["mesoamerican"];
+
         $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
+*/
+        $days_since_correlation = $this->correlationDays();
 
         $g = (($days_since_correlation + 8) % 9) + 1;
 
@@ -635,6 +657,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
 
     public function haabDay()
     {
+        /*
         $julian_day_number = $this->julianDay();
 
         // Today, 5 December 2020 (UTC), in the Long Count is 13.0.8.1.6 (using GMT correlation).
@@ -644,7 +667,9 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         $gmt_julian_day_number =
             $this->default_julian_correlation["mesoamerican"];
 
-        $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
+        $days_since_correlation = intval($julian_day_number - $gmt_julian_day_number);
+*/
+        $days_since_correlation = $this->correlationDays();
 
         $months = $this->haab_months;
 
@@ -752,7 +777,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         if ($wheels == null) {
             return true;
         }
-
+        /*
         $julian_day_number = $this->julianDay();
 
         // Today, 5 December 2020 (UTC), in the Long Count is 13.0.8.1.6 (using GMT correlation).
@@ -763,6 +788,8 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
             $this->default_julian_correlation["mesoamerican"];
 
         $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
+*/
+        $days_since_correlation = $this->correlationDays();
 
         //$gmt_plus_two_julian_day_number = $gmt_julian_day_number + 2;
 
@@ -1231,6 +1258,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
     ) {
         if ($colour == null) {
             $colour = $this->colours_agent->black;
+            //$colour = $this->colours_agent->yellow;
         }
         // angle in degrees
         //imagesetthickness($this->image, 5);
@@ -1244,15 +1272,24 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         //foreach (range(0, 24 - 1, 1) as $i) {
         $x_dot = ($radius + $offset) * cos($angle_radians + $this->init_angle);
         $y_dot = ($radius + $offset) * sin($angle_radians + $this->init_angle);
-
+        /*
         imagearc(
             $this->image,
-            intval($this->center_x + $x_dot),
-            intval($this->center_y + $y_dot),
-            intval(2 * $size),
-            intval(2 * $size),
+            round(intval($this->center_x + $x_dot)),
+            round(intval($this->center_y + $y_dot)),
+            round(intval(2 * $size)),
+            round(intval(2 * $size)),
             0,
             360,
+            $colour
+        );
+*/
+        imagefilledellipse(
+            $this->image,
+            round(intval($this->center_x + $x_dot)),
+            round(intval($this->center_y + $y_dot)),
+            round(intval(1.4 * $size)),
+            round(intval(1.4 * $size)),
             $colour
         );
 
@@ -1468,7 +1505,8 @@ Now for projected time
                 $day_degrees,
                 $radius,
                 $dot_size,
-                $dot_offset
+                $dot_offset,
+                $colour = $this->colours_agent->grey
             );
         }
 
@@ -1494,17 +1532,17 @@ Now draw the twilight.
 
         imagearc(
             $this->image,
-            $center_x,
-            $center_y,
-            2 * $size,
-            2 * $size,
+            round($center_x),
+            round($center_y),
+            round(2 * $size),
+            round(2 * $size),
             0,
             360,
             $this->colours_agent->black
         );
 
         // HERE
-
+        /*
         $place_times = [];
         $place_times["abcd"] = [
             "datum_projected" => $datum_projected,
@@ -1521,7 +1559,8 @@ Now draw the twilight.
             "latitude" => 36.7174,
             "longitude" => 4.413,
         ];
-
+*/
+        $place_times = $this->place_times;
         $count = 0;
         $step_width = 50;
         foreach ($place_times as $i => $place_time) {
@@ -1596,12 +1635,12 @@ Now draw the twilight.
             if (isset($arc[$i][0]) and isset($arc[$i][1])) {
                 imagearc(
                     $this->image,
-                    $center_x,
-                    $center_y,
-                    2 * $size + $count * ($step_width * 2),
-                    2 * $size + $count * ($step_width * 2),
-                    $arc[$i][1] + ($this->init_angle * 180) / pi(),
-                    $arc[$i][0] + ($this->init_angle * 180) / pi(),
+                    round($center_x),
+                    round($center_y),
+                    round(2 * $size + $count * ($step_width * 2)),
+                    round(2 * $size + $count * ($step_width * 2)),
+                    round($arc[$i][1] + ($this->init_angle * 180) / pi()),
+                    round($arc[$i][0] + ($this->init_angle * 180) / pi()),
                     $this->colours_agent->black
                 );
             }
@@ -1610,12 +1649,12 @@ Now draw the twilight.
 
             imagearc(
                 $this->image,
-                intval($center_x),
-                intval($center_y),
-                intval(2 * $size + $count * ($step_width * 2)),
-                intval(2 * $size + $count * ($step_width * 2)),
-                $arc_day[$i][0] + ($this->init_angle * 180) / pi(),
-                $arc_day[$i][1] + ($this->init_angle * 180) / pi(),
+                round($center_x),
+                round($center_y),
+                round(2 * $size + $count * ($step_width * 2)),
+                round(2 * $size + $count * ($step_width * 2)),
+                round($arc_day[$i][0] + ($this->init_angle * 180) / pi()),
+                round($arc_day[$i][1] + ($this->init_angle * 180) / pi()),
                 $this->colours_agent->blue
                 //$arc[1] + ($this->init_angle * 180) / pi(),
                 //$arc[0] + ($this->init_angle * 180) / pi(),
@@ -1686,10 +1725,10 @@ Now draw the twilight.
 
         imageline(
             $this->image,
-            intval($this->center_x + $x_start),
-            intval($this->center_y + $y_start),
-            intval($this->center_x + $x_end),
-            intval($this->center_y + $y_end),
+            round($this->center_x + $x_start, 0),
+            round($this->center_y + $y_start, 0),
+            round($this->center_x + $x_end, 0),
+            round($this->center_y + $y_end, 0),
             $colour
         );
     }
@@ -2005,6 +2044,14 @@ Now draw the twilight.
         return false;
     }
 
+    function compareMid($a, $b)
+    {
+        if ($a['latitude'] == $b['latitude']) {
+            return 0;
+        }
+        return $a['latitude'] < $b['latitude'] ? -1 : 1;
+    }
+
     /**
      *
      */
@@ -2013,6 +2060,121 @@ Now draw the twilight.
         $i = str_replace("-", " ", $this->input);
 
         $tokens = explode(" ", $i);
+
+        $place_times = [];
+
+        $expand_places_input = $this->input;
+        $expand_places_input = str_replace(
+            "canada places",
+            "vancouver calgary montreal ottawa",
+            $expand_places_input
+        );
+        $expand_places_input = str_replace(
+            "places",
+            "vancouver new york madrid",
+            $expand_places_input
+        );
+
+        //$ngrams = $this->extractNgrams($this->input);
+
+        $ngrams = $this->extractNgrams($expand_places_input);
+
+        $period_index = 0;
+        $period_timestamp =
+            $this->working_datum->getTimestamp() +
+            $period_index * (60 * 60 * 24);
+
+        $datum_projected = new \DateTime();
+        $datum_projected->setTimestamp($period_timestamp);
+
+        foreach ($ngrams as $j => $ngram) {
+            switch ($ngram) {
+                case 'madrid':
+                    $place_times["1234"] = [
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 36.7174,
+                        "longitude" => 4.413,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["1234"];
+                    }
+
+                    break;
+
+                case 'vancouver':
+                    $place_times["abcd"] = [
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 49.2827,
+                        "longitude" => -123.1207,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["abcd"];
+                    }
+                    break;
+
+                case 'new york':
+                    $place_times["12ab"] = [
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 40.6892,
+                        "longitude" => -74.0445,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["12ab"];
+                    }
+
+                    break;
+                // 51.05011
+                case 'calgary':
+                    $place_times["698f"] = [
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 51.05011,
+                        "longitude" => -114.08529,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["698f"];
+                    }
+
+                    break;
+
+                case 'ottawa':
+                    $place_times["12ac"] = [
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 45.41117,
+                        "longitude" => -75.69812,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["12ac"];
+                    }
+
+                    break;
+
+                case 'montreal':
+                    $place_times["12ad"] = [
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 45.50884,
+                        "longitude" => -73.58781,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["12ad"];
+                    }
+
+                    break;
+
+                default:
+            }
+        }
+
+        usort($place_times, function ($first_place, $a) {
+            return $first_place['longitude'] + 720 <=> $a['longitude'] + 720;
+        });
+
+        $this->place_times = $place_times;
+
         $timezones = [];
         foreach ($tokens as $j => $token) {
             $timezone = $this->extractTimezone($token);
