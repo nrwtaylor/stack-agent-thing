@@ -497,7 +497,9 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
      */
     function getWhatis($input)
     {
-        if ($input == null) {return;}
+        if ($input == null) {
+            return;
+        }
         $whatis = "day";
         $whatIWant = $input;
         if (($pos = strpos(strtolower($input), $whatis . " is")) !== false) {
@@ -1398,7 +1400,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
             $size = $this->size;
         }
         $border = 120;
-        $size = 1000 - $border;
+        $size = 0.985 * (1000 - $border);
 
         if (isset($this->canvas_size_x)) {
             $canvas_size_x = $this->canvas_size_x;
@@ -1662,6 +1664,13 @@ Now draw the twilight.
                 //$this->colours_agent->black
             );
 
+            //imagettftext($this->image, 14, 45, 50, 50, $this->colours_agent->black, $this->default_font, "P");
+            $this->circleLabel(
+                strtoupper($place_time['text']),
+                $size,
+                $count,
+                $this->colours_agent->grey
+            );
             $count += 1;
         }
         /*
@@ -1676,6 +1685,55 @@ Now draw the twilight.
             $this->colours_agent->blue
         );
 */
+    }
+
+    public function circleLabel($text, $size, $index, $colour)
+    {
+        $font_size = 20;
+        // Draw out the state
+
+        //      $size = null;
+        //      if ($size == null) {
+        //          $size = $this->size;
+        //      }
+        //      $border = 120;
+        //      $size = 1000 - $border;
+
+        if (isset($this->canvas_size_x)) {
+            $canvas_size_x = $this->canvas_size_x;
+            $canvas_size_y = $this->canvas_size_y;
+        } else {
+            $canvas_size_x = $this->default_canvas_size_x;
+            $canvas_size_y = $this->default_canvas_size_y;
+        }
+
+        $center_x = $canvas_size_x / 2;
+        $center_y = $canvas_size_y / 2;
+
+        $radius = $size + 10;
+        $offset = $index * 50;
+
+        $letters = str_split($text);
+        foreach ($letters as $i => $letter) {
+            $angle = $i * 2;
+            $x_start =
+                ($radius + $offset) *
+                cos(($angle / 180) * pi() + $this->init_angle);
+            $y_start =
+                ($radius + $offset) *
+                sin(($angle / 180) * pi() + $this->init_angle);
+
+            imagettftext(
+                $this->image,
+                $font_size,
+                -1 * $angle,
+                round($center_x + $x_start),
+                round($center_y + $y_start),
+                $colour,
+                $this->default_font,
+                $letter
+            );
+        }
     }
 
     public function get()
@@ -2092,6 +2150,7 @@ Now draw the twilight.
             switch ($ngram) {
                 case 'madrid':
                     $place_times["1234"] = [
+                        "text" => 'madrid',
                         "datum_projected" => $datum_projected,
                         "latitude" => 36.7174,
                         "longitude" => 4.413,
@@ -2104,8 +2163,9 @@ Now draw the twilight.
 
                 case 'dublin':
                     $place_times["ce34"] = [
+                        "text" => 'dublin',
                         "datum_projected" => $datum_projected,
-                        "latitude" => 53.350140,
+                        "latitude" => 53.35014,
                         "longitude" => -6.266155,
                     ];
                     if (!isset($first_place)) {
@@ -2114,9 +2174,9 @@ Now draw the twilight.
 
                     break;
 
-
                 case 'vancouver':
                     $place_times["abcd"] = [
+                        "text" => 'vancouver',
                         "datum_projected" => $datum_projected,
                         "latitude" => 49.2827,
                         "longitude" => -123.1207,
@@ -2129,6 +2189,7 @@ Now draw the twilight.
 
                 case 'toronto':
                     $place_times["11ab"] = [
+                        "text" => 'toronto',
                         "datum_projected" => $datum_projected,
                         "latitude" => 43.6529,
                         "longitude" => -79.3849,
@@ -2140,9 +2201,9 @@ Now draw the twilight.
 
                     break;
 
-
                 case 'new york':
                     $place_times["12ab"] = [
+                        "text" => 'new york',
                         "datum_projected" => $datum_projected,
                         "latitude" => 40.6892,
                         "longitude" => -74.0445,
@@ -2156,6 +2217,7 @@ Now draw the twilight.
                 // 51.05011
                 case 'calgary':
                     $place_times["698f"] = [
+                        "text" => 'calgary',
                         "datum_projected" => $datum_projected,
                         "latitude" => 51.05011,
                         "longitude" => -114.08529,
@@ -2169,6 +2231,7 @@ Now draw the twilight.
 
                 case 'ottawa':
                     $place_times["12ac"] = [
+                        "text" => 'ottawa',
                         "datum_projected" => $datum_projected,
                         "latitude" => 45.41117,
                         "longitude" => -75.69812,
@@ -2182,6 +2245,7 @@ Now draw the twilight.
 
                 case 'montreal':
                     $place_times["12ad"] = [
+                        "text" => 'montreal',
                         "datum_projected" => $datum_projected,
                         "latitude" => 45.50884,
                         "longitude" => -73.58781,
