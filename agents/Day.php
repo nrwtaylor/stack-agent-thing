@@ -497,6 +497,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
      */
     function getWhatis($input)
     {
+        if ($input == null) {return;}
         $whatis = "day";
         $whatIWant = $input;
         if (($pos = strpos(strtolower($input), $whatis . " is")) !== false) {
