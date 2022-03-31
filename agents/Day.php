@@ -2101,6 +2101,19 @@ Now draw the twilight.
 
                     break;
 
+                case 'dublin':
+                    $place_times["ce34"] = [
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 53.350140,
+                        "longitude" => -6.266155,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["ce34"];
+                    }
+
+                    break;
+
+
                 case 'vancouver':
                     $place_times["abcd"] = [
                         "datum_projected" => $datum_projected,
