@@ -1452,7 +1452,58 @@ We mostly agree on that it seems.
                 $t = 1;
                 $colour = $this->colours_agent->black;
                 $start_offset = 200;
-                $length = $size - 50 - $start_offset;
+                $length = $size - 50 - $start_offset - 90;
+
+$font_size = 18;
+$angle = $i * 360 / 24;
+$radius = 750;
+
+if ($i > 12) {
+$radius = 810;
+}
+
+            $x_start =
+                ($radius + $offset) *
+                cos(($angle / 180) * pi() + $this->init_angle);
+            $y_start =
+                ($radius + $offset) *
+                sin(($angle / 180) * pi() + $this->init_angle);
+
+$line_offset = 10;
+
+            $x_offset =
+                ($line_offset) *
+                cos(($angle / 180) * pi() + $this->init_angle + pi()/2);
+            $y_offset =
+                ($line_offset) *
+                sin(($angle / 180) * pi() + $this->init_angle + pi()/2);
+
+
+$str_length =4;
+$num = $i * 100;
+$str = substr("0000{$num}", -$str_length);
+
+if ($i > 12) {
+
+$angle = $angle + 180;
+$x_offset = -$x_offset;
+$y_offset = -$y_offset;
+}
+
+            imagettftext(
+                $this->image,
+                $font_size,
+                -1 * ($angle - 90),
+                round($center_x + $x_start + $x_offset),
+                round($center_y + $y_start + $y_offset),
+                $this->colours_agent->grey,
+                $this->default_font,
+                $str
+            );
+
+
+
+
             }
 
             $this->drawTick(
