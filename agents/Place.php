@@ -143,7 +143,7 @@ class Place extends Agent
         }
     }
 
-    public function loadPlaces($ngrams, $datum_projected = null) {
+    public function loadPlace($ngrams, $datum_projected = null) {
 
         $place_times = [];
 

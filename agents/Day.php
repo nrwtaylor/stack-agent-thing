@@ -2354,10 +2354,10 @@ Now draw the twilight.
         $datum_projected = new \DateTime();
         $datum_projected->setTimestamp($period_timestamp);
 
-        $place_times = $this->loadPlaces($ngrams, $datum_projected);
+        $place_times = $this->loadPlace($ngrams, $datum_projected);
 
         if (count($place_times) == 0) {
-            $place_times = $this->loadPlaces(["vancouver"], $datum_projected);
+            $place_times = $this->loadPlace(["vancouver"], $datum_projected);
         }
 
         /*
