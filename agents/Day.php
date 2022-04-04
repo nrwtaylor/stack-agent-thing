@@ -424,6 +424,10 @@ if (str_contains(strtolower($period), 'twilight') !== true) {
             $message = strtoupper($day_time);
         }
 
+// Tidy up spaces and slashes
+
+$message = str_replace("   ", " ", $message);
+$message = str_replace("  ", " ", $message);
 
 $message = str_replace("/ ", " ", $message);
 $message = str_replace(" /", " ", $message);
@@ -959,12 +963,13 @@ X b943 a867 Added to stack.
             $sms .= " | " . $day_text;
         }
 */
+/*
         $day_text = "Merp.";
         if (isset($this->day_time)) {
             $day_time_text = $this->day_time;
             $sms .= " | " . $day_time_text;
         }
-
+*/
         $sms .= " | " . $this->message . " " . $this->response;
         $this->sms_message = $sms;
         $this->thing_report["sms"] = $sms;

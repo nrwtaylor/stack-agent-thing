@@ -158,7 +158,7 @@ class Place extends Agent
                         "longitude" => 4.9041,
                     ];
                     if (!isset($first_place)) {
-                        $first_place = $place_times["1234"];
+                        $first_place = $place_times["aa34"];
                     }
 
                     break;
