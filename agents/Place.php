@@ -143,6 +143,129 @@ class Place extends Agent
         }
     }
 
+    public function loadPlaces($ngrams, $datum_projected = null) {
+
+        $place_times = [];
+
+        foreach ($ngrams as $j => $ngram) {
+            switch ($ngram) {
+                case 'madrid':
+                    $place_times["1234"] = [
+                        "text" => 'madrid',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 36.7174,
+                        "longitude" => 4.413,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["1234"];
+                    }
+
+                    break;
+
+                case 'dublin':
+                    $place_times["ce34"] = [
+                        "text" => 'dublin',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 53.35014,
+                        "longitude" => -6.266155,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["ce34"];
+                    }
+
+                    break;
+
+                case 'vancouver':
+                    $place_times["abcd"] = [
+                        "text" => 'vancouver',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 49.2827,
+                        "longitude" => -123.1207,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["abcd"];
+                    }
+                    break;
+
+                case 'toronto':
+                    $place_times["11ab"] = [
+                        "text" => 'toronto',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 43.6529,
+                        "longitude" => -79.3849,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["11ab"];
+                    }
+
+                    break;
+
+                case 'new york':
+                    $place_times["12ab"] = [
+                        "text" => 'new york',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 40.6892,
+                        "longitude" => -74.0445,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["12ab"];
+                    }
+
+                    break;
+                // 51.05011
+                case 'calgary':
+                    $place_times["698f"] = [
+                        "text" => 'calgary',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 51.05011,
+                        "longitude" => -114.08529,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["698f"];
+                    }
+
+                    break;
+
+                case 'ottawa':
+                    $place_times["12ac"] = [
+                        "text" => 'ottawa',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 45.41117,
+                        "longitude" => -75.69812,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["12ac"];
+                    }
+
+                    break;
+
+                case 'montreal':
+                    $place_times["12ad"] = [
+                        "text" => 'montreal',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 45.50884,
+                        "longitude" => -73.58781,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["12ad"];
+                    }
+
+                    break;
+
+                default:
+
+
+            }
+}
+return $place_times;
+    }
+
     function nextCode()
     {
         $place_code_candidate = null;
