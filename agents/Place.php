@@ -149,6 +149,21 @@ class Place extends Agent
 
         foreach ($ngrams as $j => $ngram) {
             switch ($ngram) {
+
+                case 'amsterdam':
+                    $place_times["aa34"] = [
+                        "text" => 'amsterdam',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 52.3676,
+                        "longitude" => 4.9041,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["1234"];
+                    }
+
+                    break;
+
+
                 case 'madrid':
                     $place_times["1234"] = [
                         "text" => 'madrid',
