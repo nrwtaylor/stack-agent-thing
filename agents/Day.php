@@ -1071,7 +1071,8 @@ X b943 a867 Added to stack.
 
         if (count($this->place_times) > 0) {
             $place_time = reset($this->place_times);
-            $web .= strtoupper($place_time["text"]);
+            //$web .= strtoupper($place_time["text"]);
+            $web .= "VANCOUVER";
             $web .= "<br>";
         }
 
