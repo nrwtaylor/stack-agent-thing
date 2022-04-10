@@ -432,6 +432,14 @@ $message = str_replace("  ", " ", $message);
 $message = str_replace("/ ", " ", $message);
 $message = str_replace(" /", " ", $message);
 
+$message = str_replace("start twilight", "twilight", $message);
+$message = str_replace("end twilight", "twilight", $message);
+
+$message = str_replace("twilight twilight", "twilight", $message);
+$message = str_replace("twilight", "", $message);
+
+
+
 
         $response = [
             "day_time" => $day_time,
@@ -950,6 +958,14 @@ X b943 a867 Added to stack.
                 $calendar_round_day .
                 "";
         }
+
+        if (
+          isset($this->day_week_flag) and
+            $this->day_week_flag == "on"
+        ) {
+        $web .= $this->formatDay($this->datestringDay($this->dateline));
+        $web .= "<br>";
+}
 
         $days = [];
         if (isset($this->days)) {
@@ -2361,122 +2377,6 @@ Now draw the twilight.
             $place_times = $this->loadPlace(["vancouver"], $datum_projected);
         }
 
-        /*
-        foreach ($ngrams as $j => $ngram) {
-            switch ($ngram) {
-                case 'madrid':
-                    $place_times["1234"] = [
-                        "text" => 'madrid',
-                        "datum_projected" => $datum_projected,
-                        "latitude" => 36.7174,
-                        "longitude" => 4.413,
-                    ];
-                    if (!isset($first_place)) {
-                        $first_place = $place_times["1234"];
-                    }
-
-                    break;
-
-                case 'dublin':
-                    $place_times["ce34"] = [
-                        "text" => 'dublin',
-                        "datum_projected" => $datum_projected,
-                        "latitude" => 53.35014,
-                        "longitude" => -6.266155,
-                    ];
-                    if (!isset($first_place)) {
-                        $first_place = $place_times["ce34"];
-                    }
-
-                    break;
-
-                case 'vancouver':
-                    $place_times["abcd"] = [
-                        "text" => 'vancouver',
-                        "datum_projected" => $datum_projected,
-                        "latitude" => 49.2827,
-                        "longitude" => -123.1207,
-                    ];
-
-                    if (!isset($first_place)) {
-                        $first_place = $place_times["abcd"];
-                    }
-                    break;
-
-                case 'toronto':
-                    $place_times["11ab"] = [
-                        "text" => 'toronto',
-                        "datum_projected" => $datum_projected,
-                        "latitude" => 43.6529,
-                        "longitude" => -79.3849,
-                    ];
-
-                    if (!isset($first_place)) {
-                        $first_place = $place_times["11ab"];
-                    }
-
-                    break;
-
-                case 'new york':
-                    $place_times["12ab"] = [
-                        "text" => 'new york',
-                        "datum_projected" => $datum_projected,
-                        "latitude" => 40.6892,
-                        "longitude" => -74.0445,
-                    ];
-
-                    if (!isset($first_place)) {
-                        $first_place = $place_times["12ab"];
-                    }
-
-                    break;
-                // 51.05011
-                case 'calgary':
-                    $place_times["698f"] = [
-                        "text" => 'calgary',
-                        "datum_projected" => $datum_projected,
-                        "latitude" => 51.05011,
-                        "longitude" => -114.08529,
-                    ];
-
-                    if (!isset($first_place)) {
-                        $first_place = $place_times["698f"];
-                    }
-
-                    break;
-
-                case 'ottawa':
-                    $place_times["12ac"] = [
-                        "text" => 'ottawa',
-                        "datum_projected" => $datum_projected,
-                        "latitude" => 45.41117,
-                        "longitude" => -75.69812,
-                    ];
-
-                    if (!isset($first_place)) {
-                        $first_place = $place_times["12ac"];
-                    }
-
-                    break;
-
-                case 'montreal':
-                    $place_times["12ad"] = [
-                        "text" => 'montreal',
-                        "datum_projected" => $datum_projected,
-                        "latitude" => 45.50884,
-                        "longitude" => -73.58781,
-                    ];
-
-                    if (!isset($first_place)) {
-                        $first_place = $place_times["12ad"];
-                    }
-
-                    break;
-
-                default:
-            }
-        }
-*/
         //foreach($place_times as $i=>$place_time) {
 
         //$place_times[$i]['datum_projected'] = $datum_projected;
@@ -2606,6 +2506,7 @@ Now draw the twilight.
                 "transit",
                 "noon",
             ],
+            "week" => ["week"],
         ];
         $dedash_input = str_replace("-", " ", $input);
         $this->flagAgent($indicators, $dedash_input);
