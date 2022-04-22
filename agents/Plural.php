@@ -12,8 +12,8 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 class Plural extends Agent
@@ -30,18 +30,18 @@ class Plural extends Agent
     /**
      *
      */
-//    public function respondResponse()
-//    {
-//        $message_thing = new Message($this->thing, $this->thing_report);
-//        $this->thing_report['info'] = $message_thing->thing_report['info'];
-//    }
+    //    public function respondResponse()
+    //    {
+    //        $message_thing = new Message($this->thing, $this->thing_report);
+    //        $this->thing_report['info'] = $message_thing->thing_report['info'];
+    //    }
 
     /**
      *
      */
     function makeSMS()
     {
-      $this->thing_report['sms'] =
+        $this->thing_report["sms"] =
             "PLURAL | " . trim($this->response) . " " . trim($this->text);
     }
 
@@ -139,27 +139,27 @@ class Plural extends Agent
     ];
 
     static $irregular = [
-        'move' => 'moves',
-        'foot' => 'feet',
-        'goose' => 'geese',
-        'sex' => 'sexes',
-        'child' => 'children',
-        'man' => 'men',
-        'tooth' => 'teeth',
-        'person' => 'people',
-        'valve' => 'valves',
+        "move" => "moves",
+        "foot" => "feet",
+        "goose" => "geese",
+        "sex" => "sexes",
+        "child" => "children",
+        "man" => "men",
+        "tooth" => "teeth",
+        "person" => "people",
+        "valve" => "valves",
     ];
 
     static $uncountable = [
-        'sheep',
-        'fish',
-        'deer',
-        'series',
-        'species',
-        'money',
-        'rice',
-        'information',
-        'equipment',
+        "sheep",
+        "fish",
+        "deer",
+        "series",
+        "species",
+        "money",
+        "rice",
+        "information",
+        "equipment",
     ];
 
     public static function pluralize($string)
@@ -171,7 +171,7 @@ class Plural extends Agent
 
         // check for irregular singular forms
         foreach (self::$irregular as $pattern => $result) {
-            $pattern = '/' . $pattern . '$/i';
+            $pattern = "/" . $pattern . '$/i';
 
             if (preg_match($pattern, $string)) {
                 return preg_replace($pattern, $result, $string);
@@ -188,6 +188,11 @@ class Plural extends Agent
         return $string;
     }
 
+    public function singularizePlural($string)
+    {
+        return $this->singularize($string);
+    }
+
     public static function singularize($string)
     {
         // save some time in the case that singular and plural are the same
@@ -197,7 +202,7 @@ class Plural extends Agent
 
         // check for irregular plural forms
         foreach (self::$irregular as $result => $pattern) {
-            $pattern = '/' . $pattern . '$/i';
+            $pattern = "/" . $pattern . '$/i';
 
             if (preg_match($pattern, $string)) {
                 return preg_replace($pattern, $result, $string);

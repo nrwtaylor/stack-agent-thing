@@ -329,7 +329,7 @@ class Callsign extends Agent
      * @param unknown $x
      * @return unknown
      */
-    function isDate($x)
+    function _isDate($x)
     {
         $date_array = date_parse($x);
 
@@ -478,6 +478,16 @@ class Callsign extends Agent
 
                     $hit_flag = true;
                 }
+
+                // Match full or part callsigns
+                if (
+                    strpos(strtolower($callsign), strtolower($token)) !== false
+                ) {
+                    $factor = strlen($token) - 3;
+                    if ($factor < 0) {$factor = 0;}
+                    $score = $score * pow(10, $factor);
+                }
+
 
                 // Match first three characters of name.
                 $firstname = $slug_agent->getSlug($call['first_name']);
