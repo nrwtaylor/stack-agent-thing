@@ -711,7 +711,7 @@ $agent_name = strtolower($this->agent_name);
         $agent_name = strtolower($agent_class_name);
 
         $slug = $this->getSlug($agent_name . "-" . $this->from);
-
+        
         $agent_namespace_name =
             "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
 
@@ -2298,6 +2298,16 @@ $agent_names = array_merge($agent_names, $this->variantsAgent($keyword, ""));
                 ];
             }
         }
+
+        // Are any specific agents flagged for agent response.
+        // eg Question
+
+        if ($this->flag_question) {$responsive_agents[] = [
+                    "agent_name" => "Question",
+                    "thing_report" => $this->thing_report,
+                    "score" => 1,
+        ];}
+
         // Use length of matched agent name as proxy for match closeness.
         // If more than one word.
         usort($responsive_agents, function ($a, $b) {
@@ -2401,7 +2411,10 @@ foreach( range(2, $gram_limit,1) as $number) {
             $agent_input_text = "";
         }
 
-        $arr = $this->ngramsText($input);
+        $conditioned_input = $this->getSlug($input);
+        $conditioned_input = str_replace("-", " ", $conditioned_input);
+
+        $arr = $this->ngramsText($conditioned_input);
         // Added this March 6, 2018.  Testing.
 
         if ($this->agent_input == null) {
@@ -2419,7 +2432,7 @@ foreach( range(2, $gram_limit,1) as $number) {
         // Is there a translation for this command.
         $librex_agent = new Librex($this->thing, "agent/agent");
 
-        $text = trim(str_replace("agent", "", $input));
+        $text = trim(str_replace("agent", "", $conditioned_input));
         $text = trim(str_replace("thing", "", $text));
 
         $slug_agent = new Slug($this->thing, "slug");
@@ -2458,6 +2471,7 @@ foreach( range(2, $gram_limit,1) as $number) {
 
         // Does this agent provide a text response.
         $this->responsiveAgents($this->agents);
+
         foreach ($this->responsive_agents as $i => $responsive_agent) {
         }
 
@@ -3301,6 +3315,28 @@ if (!is_string($agent_class_name)) {$agent_class_name = $this->agent_name;}
 
         }
 
+        $flag_question = false;
+        if ($this->hasQuestion($input)) {$flag_question = true;}
+        $this->flag_question = $flag_question;
+
+/*
+        $pattern = "/\?/";
+
+        if (preg_match($pattern, $input)) {
+            // returns true with ? mark
+            $this->thing->log(
+                "found a question mark and created a Question agent",
+                "INFORMATION"
+            );
+            $question_thing = new Question($this->thing);
+//            $this->thing_report = $question_thing->thing_report;
+//            return $this->thing_report;
+var_dump("saw question");
+        }
+
+*/
+
+
         $headcode = new Headcode($this->thing, "extract");
         $headcode->extractHeadcodes($input);
 
@@ -3595,6 +3631,7 @@ foreach($this->responsive_agents as $i=>$responsive_agent) {
             }
         }
 
+/*
         $pattern = "/\?/";
 
         if (preg_match($pattern, $input)) {
@@ -3607,7 +3644,7 @@ foreach($this->responsive_agents as $i=>$responsive_agent) {
             $this->thing_report = $question_thing->thing_report;
             return $this->thing_report;
         }
-
+*/
         // Timecheck
         $this->thing_report = $this->timeout(15000);
         if ($this->thing_report != false) {
