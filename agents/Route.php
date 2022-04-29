@@ -1,411 +1,436 @@
 <?php
+/**
+ * Route.php
+ *
+ * @package default
+ */
+
+// 4 letters.  Is handy to have.
 namespace Nrwtaylor\StackAgentThing;
+
+// Transparency
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-ini_set("allow_url_fopen", 1);
-
-// devstack lots of work here
-
 class Route extends Agent
 {
-    public $var = 'hello';
-
+    /**
+     *
+     */
     function init()
     {
-        $this->keywords = ['next', 'accept', 'clear', 'drop', 'add', 'new'];
+        $this->node_list = ["route" => ["route"]];
 
-        $this->default_route = "Place";
-
-        $this->default_alias = "Thing";
-
-        $this->test = "Development code"; // Always iterative.
-
-        // Agent variables
-
-        $this->head_code = $this->thing->Read([
-            "headcode",
-            "head_code",
-        ]);
-
-        $flag_variable_name = "_" . $this->head_code;
-
-        // Get the current Identities flag
-        $this->variables = new Variables(
-            $this->thing,
-            "variables route" . $flag_variable_name . " " . $this->from
-        );
-
-        $this->state = null; // to avoid error messages
-    }
-
-    public function setRoute($route = null)
-    {
-        $route = null;
-        if (isset($this->route)) {
-            $route = $this->route;
+        //$this->getRoute("123414sdfas asdfsad 234234 *&*dfg") ;
+        $this->state = "X";
+        if (isset($this->settings['state'])) {
+            $this->state = $this->settings['state'];
         }
-        $route['refreshed_at'] = $this->current_time;
 
-        $this->thing->Write(["route"], $route);
+        if (
+            isset(
+                $this->thing->container['api']['route']['allowed_routes_resource']
+            )
+        ) {
+            $this->allowed_routes_resource =
+                $this->thing->container['api']['route'][
+                    'allowed_routes_resource'
+                ];
+        }
+
+
     }
 
+    /**
+     *
+     */
+    function get()
+    {
+        $this->alphanumeric_agent = new Alphanumeric(
+            $this->thing,
+            "alphanumeric"
+        );
+       // $this->alphanumeric_agent = new Alphanumeric(
+       //     $this->thing,
+      //      "alphanumeric"
+      //  );
+        $this->getRoutes();
+    }
+
+    /**
+     *
+     */
     function set()
     {
-        $this->setRoute();
-
-        //$this->route ="meep";
-        $this->variables->setVariable("route", $this->route);
-        $this->variables->setVariable("head_code", $this->head_code);
-        $this->variables->setVariable("refreshed_at", $this->current_time);
+        $this->thing->Write(
+            ["route", "refreshed_at"],
+            $this->thing->time()
+        );
     }
 
-    function getRoutes()
+    public function getRoute($text = null)
     {
-        $this->routes = [];
-        // See if a route record exists.
-        $findagent_thing = new Findagent($this->thing, 'route');
-	$routes = $findagent_thing->thing_report['things'];
+        if ($text == null) {
+            return true;
+        }
+        $route = $this->extractRoute($text);
+        $this->route = $route;
+        return $route;
+   }
 
-if ($routes == true) {return;}
+function cacheRoute($uuid)
+{
+    $key = "thing-report-" . $uuid;
 
-        foreach (
-            array_reverse($routes)
-            as $thing_object
+    try {
+        $mem_cached = new \Memcached(); //point 2.
+        $mem_cached->addServer("127.0.0.1", 11211);
+
+        $thing_report = $mem_cached->get($key);
+
+        $expired = false;
+        if (
+            isset($thing_report["thing"]["refresh_at"]) and
+            $thing_report["thing"]["refresh_at"] !== false
         ) {
-            // While timing is an issue of concern
-
-            $uuid = $thing_object['uuid'];
-
-            $variables_json = $thing_object['variables'];
-            $variables = $this->thing->json->jsontoArray($variables_json);
-
-            if (isset($variables['route'])) {
-                if (!$this->isRoute($variables['route'])) {continue;}
-                if (!isset($variables['route']['refreshed_at'])) {continue;}
-                //$head_code = $variables['route']['head_code'];
-                //$route = $variables['route']['route'];
-
-                //$variables['headcode'][] = $thing_object['task'];
-                $this->routes[] = $variables['route'];
+            if (time() - strtotime($thing_report["thing"]["refresh_at"]) > 0) {
+                $expired = true;
             }
         }
 
-        $refreshed_at = [];
-        foreach ($this->routes as $key => $row) {
-            $refreshed_at[$key] = $row['refreshed_at'];
+        if (
+            isset($thing_report["thing"]["refresh_at"]) and
+            $thing_report["thing"]["refresh_at"] === false
+        ) {
+            $expired = true;
         }
-        array_multisort($refreshed_at, SORT_DESC, $this->routes);
 
+        if (!isset($thing_report["thing"]["refresh_at"])) {
+            $expired = true;
+        }
 
-        return $this->routes;
+        if ($thing_report != false and $expired === false) {
+            return $thing_report;
+        }
+    } catch (\Throwable $t) {
+    } catch (\Error $ex) {
     }
 
-    function getRoute($selector = null)
-    {
-        //$this->route = "Place";
-
-        if (!isset($this->routes)) {
-            $this->getRoutes();
-        }
-
-        foreach ($this->routes as $key => $route) {
-        }
-
-if (count($this->routes) !=0) {
-        $this->route = $this->routes[0];
+    return false;
 }
+
+
+
+function loadRoute($token)
+{
+    $filename = '/var/www/pdf/' . $token;
+    $contents = file_get_contents(
+        $filename
+    );
+ //   $contents = file_get_contents(
+ //       "/var/www/pdf/a-practical-guide-for-the-amateur-time-traveller-ab43.pdf"
+ //   );
+    return $contents;
+}
+
+
+
+   public function pdfRoute($token) {
+
+     $pdf_route = $this->web_prefix . $token . '.pdf';
+     return $pdf_route;
+
     }
 
-    function get($route = null)
+    public function extractRoute($text = null)
     {
-
-        $time_string = $this->thing->Read([
-            "route",
-            "refreshed_at",
-        ]);
-
-        // And if there is no IChing timestamp create one now.
-
-        if ($time_string == false) {
-            $time_string = $this->thing->time();
-            $this->thing->Write(
-                ["route", "refreshed_at"],
-                $time_string
-            );
+        if ($text == null) {
+            return true;
         }
 
-        //$this->route = $this->thing->Read(["route"]);
+        $route = str_replace('\'', "", $text);
+        $route = str_replace('/', " ", $text);
 
-        if (!isset($this->route)) {
-            $this->route = $this->variables->getVariable('route');
-            //$this->head_code = $this->variables->getVariable('head_code');
-        }
-
-        //$this->getRoute();
-
-
+        //$route = $this->alphanumeric_agent->filterAlphanumeric($route);
+        $route = $this->filterAlphanumeric($route);
+        $route = preg_replace('/\s+/', ' ', $route);
+        //$route = str_replace("'","",$despaced_route);
+        //$route = str_replace("/"," ",$route);
+        $route = str_replace(" ", "-", $route);
+        $route = strtolower($route);
+        $route = trim($route, "-");
+        return $route;
     }
 
-    function makeRoute($head_code = null)
+    public function deRoute($text = null)
     {
-        //$this->route = "Place";
-    }
-
-    function deprecate_headcodeTime($input = null)
-    {
-        if ($input == null) {
-            $input_time = $this->current_time;
-        } else {
-            $input_time = $input;
+        if ($text == null) {
+            return true;
         }
 
-        if ($input == "x") {
-            $headcode_time = "x";
-            return $headcode_time;
-        }
-
-        $t = strtotime($input_time);
-
-        $this->hour = date("H", $t);
-        $this->minute = date("i", $t);
-
-        $headcode_time = $this->hour . $this->minute;
-
-        if ($input == null) {
-            $this->headcode_time = $headcode_time;
-        }
-
-        return $headcode_time;
+        $deroute = str_replace('-', " ", $text);
+        return $deroute;
     }
 
-    function addHeadcode()
-    {
-        $this->get();
-    }
 
-    function makeTXT()
-    {
-        if (!isset($this->routes)) {$this->getRoutes();}
-
-        $txt = "Test \n";
-        foreach ($this->routes as $i => $route) {
-            //$txt .= $variable['head_code'] . " | " . $variable['route'];
-
-            if (!isset($route['places'])) {
-                continue;
-            }
-            $txt .= $this->textRoute($route);
-            $txt .= "\n";
-        }
-
-        $this->thing_report['txt'] = $txt;
-    }
-
+    /**
+     *
+     */
     public function respondResponse()
     {
         // Thing actions
 
         $this->thing->flagGreen();
 
-        $this->thing_report['email'] = $this->thing_report['sms'];
-        $this->thing_report['message'] = $this->thing_report['sms']; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        $message_thing = new Message($this->thing, $this->thing_report);
+        $this->thing_report['info'] = $message_thing->thing_report['info'];
 
-        if (!$this->thing->isData($this->agent_input)) {
-            $message_thing = new Message($this->thing, $this->thing_report);
+        $this->thing_report['thing'] = $this->thing->thing;
+        $this->thing_report['help'] = "This makes a route from the datagram.";
+    }
 
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
-        } else {
-            $this->thing_report['info'] =
-                'Agent input was "' . $this->agent_input . '".';
+    /**
+     *
+     * @return unknown
+     */
+    public function readSubject()
+    {
+        $input = $this->subject;
+
+        if ($this->agent_input == "route") {
+            $input = $this->subject;
+        } elseif ($this->agent_input != null) {
+            $input = $this->agent_input;
+        }
+        $filtered_input = $this->assert($input);
+
+        if (!isset($this->route) or $this->route == false) {
+            $this->getRoute($filtered_input);
+            return;
         }
 
-        $this->thing_report['help'] = 'This is a route.';
-    }
+        $pieces = explode(" ", strtolower($input));
 
-    public function makeChoices()
-    {
-        $choices = false;
-        $this->thing_report['choices'] = $choices;
-    }
-
-    public function placesRoute($text = null)
-    {
-        $tokens = array_map('trim', explode('>', $text));
-
-        $places = [];
-        foreach ($tokens as $i => $token) {
-            $places[] = $token;
+        if (count($pieces) == 1) {
+            if ($input == 'route') {
+                $this->getRoute();
+                $this->response = "Last route retrieved.";
+                return;
+            }
         }
 
-        return $places;
+        $status = true;
+
+        return $status;
     }
 
-    public function isRoute($route = null)
-    {
-        // Basic validation of route.
-        if ($route == null) {
+    public function getRoutes() {
+
+        $allowed_endpoints = [];
+        if (file_exists($this->resource_path .
+            $this->allowed_routes_resource)) {
+
+        $allowed_endpoints = require $this->resource_path .
+            $this->allowed_routes_resource;
+        }
+
+        $this->routes = $allowed_endpoints;
+
+        return $this->routes;
+
+    }
+
+function callRoute($datagram, $route)
+{
+    $sender_id = $datagram["to"];
+    $page_id = $datagram["from"];
+    $text = $datagram["subject"];
+    $message = $datagram["agent_input"];
+
+    //               $queue = false;
+    if ($route == "gearman") {
+        $arr = json_encode([
+            "to" => $sender_id,
+            "from" => $page_id,
+            "subject" => $text,
+            "agent_input" => $message,
+        ]);
+        $client = new \GearmanClient();
+        $client->addServer();
+        //$client->addServer("10.0.0.24");
+        //$client->addServer("10.0.0.25");
+        //$client->doNormal("call_agent", $arr);
+        $client->doHighBackground("call_agent", $arr);
+    } else if ($route == "php") {
+        $thing = new Thing(null);
+        $thing->Create($sender_id, $page_id, $text);
+
+        $thing->flagGreen(); // Avoid the que handler picking it up.
+
+        // So when this is turned on it ends up receiving multipl
+        // FB messages and creating multiple similar responses
+        // to reply to.
+        // Need to understand what FB is doing.
+
+        $facebook_agent = new Facebook($thing, $message);
+        $channel = new Channel($thing, "facebook");
+
+        $agent = new Agent($thing);
+    }
+}
+
+
+    public function hasRoute($text = null) {
+// dev
+
+
+
+//
+        if ($text == null) {
             return false;
         }
-        if ($route == []) {
-            return false;
-        }
 
-        if (isset($route['places'])) {
+//$destarred_text = trim(strtolower(str_replace('*'," ",$text)));
+//$text = $destarred_text;
+        //$allowed_endpoints = require $this->resource_path .
+        //    $this->allowed_routes_resource;
+
+        if (in_array($text, $this->routes)) {
             return true;
         }
+
+foreach($this->routes as $i => $route_text) {
+
+$destarred_route_text = trim(strtolower(str_replace('*'," ",$route_text)));
+
+
+if (strpos($text, $destarred_route_text) !== false) {
+    return true;
+}
+
+}
+
+
+        $hyphenated_text = strtolower(str_replace(" ","-",$text));
+        if (in_array($hyphenated_text, $this->routes)) {
+            return true;
+        }
+
+foreach($this->routes as $i => $route_text) {
+
+$destarred_route_text = trim(strtolower(str_replace('*'," ",$route_text)));
+
+
+if (strpos($hyphenated_text, $destarred_route_text) !== false) {
+    return true;
+}
+
+}
+
+
+
+return false;
+
+    }
+
+
+    public function isRoute($text = null)
+    {
+        if ($text == null) {
+            return false;
+        }
+
+        $allowed_endpoints = require $this->resource_path .
+            $this->allowed_routes_resource;
+
+        if (in_array($text, $allowed_endpoints)) {
+            return true;
+        }
+
+$hyphenated_text = strtolower(str_replace(" ","-",$text));
+        if (in_array($hyphenated_text, $allowed_endpoints)) {
+            return true;
+        }
+
+
 
         return false;
     }
 
-    public function readRoute($text = null)
+    /**
+     *
+     */
+    function makeWeb()
     {
-        $places = $this->placesRoute($text);
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/uuid';
 
-        $route = ['places' => $places];
-        return $route;
+$route = trim(str_replace('s/ pdf route','', $this->subject));
+
+$link = $this->pdfRoute($route);
+        $this->node_list = ["number" => ["number", "thing"]];
+$web = "";
+        $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
+
+
+        $web = '<a href="' . $link . '">';
+/*
+        $web .=
+            '<img src= "' .
+            $this->web_prefix .
+            'thing/' .
+            $this->uuid .
+            '/uuid.png">';
+*/
+$web .= "Downloadable instructions (pdf)";
+        $web .= "</a>";
+
+        $web .= "<br>";
+        $web .= $this->subject . "<br>";
+
+        /*
+        if (!isset($this->routes[0])) {
+            $web .= "No routes found<br>";
+        } else {
+            $web .= "First route is ". $this->routes[0] . "<br>";
+            $web .= "Extracted routes are:<br>";
+        }
+        foreach ($this->routes as $key=>$route) {
+            $web .= $route . "<br>";
+        }
+
+        if ($this->recognize_french == true) {
+            // devstack
+        }
+*/
+        $web .= "<br>";
+
+        $this->thing_report['web'] = $web;
     }
 
-    public function textRoute($route = null)
+    /**
+     *
+     */
+    function makeSMS()
     {
-	$text = "X";
-        if ($route == null) {
-            return $text;
-        }
-        if ($this->isRoute($route) === false) {
-            return $text;
+        $route_text = "test";
+        if (isset($this->route)) {
+            $route_text = "Made route " . $this->route . ". ";
         }
 
-        if (!is_array($route['places'])) {return $text;}
-
-        $text = implode(' > ', $route['places']);
-        $text = ucwords($text);
-        return $text;
-    }
-
-    public function makeSMS()
-    {
-        $sms =
-            "ROUTE " .strtoupper($this->head_code) ." " . $this->textRoute($this->route) . " " . $this->response;
+        $sms = "ROUTE | " . $route_text;
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
 
-    function isData($variable)
+    /**
+     *
+     */
+    function makeChoices()
     {
-        if ($variable !== false and $variable !== true and $variable != null) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    // TODO
-    public function nextRoute()
-    {
-        $this->response .= "Request for the next route seen. ";
-    }
-
-    // TODO
-    public function dropRoute()
-    {
-        $this->response .= "Request to drop route seen. ";
-    }
-
-    // TODO
-    public function addRoute()
-    {
-        $this->response .= "Request to add route seen. ";
-    }
-
-    public function recognizeRoute($route)
-    {
-        if ($this->isRoute($route) === false) {
-            return false;
-        }
-
-        if (!isset($this->routes)) {
-            $this->getRoutes();
-        }
-
-        foreach ($this->routes as $i => $known_route) {
-            if ($this->isRoute($known_route) === false) {
-                continue;
-            }
-            if ($known_route['places'] === $route['places']) {
-                $this->response .= "Recognized route. ";
-                return $this->routes[$i];
-            }
-        }
-
-        $this->response .= "New route seen. ";
-
-        return false;
-    }
-
-    public function readSubject()
-    {
-        $input = $this->input;
-
-        // Bail at this point if only a headcode check is needed.
-        if ($this->agent_input == "extract") {
-            return;
-        }
-
-        if (($input == "route") or ($this->agent_input == "route")) {
-            $this->response .= "Saw a request for the current route. ";
-            return;
-        }
-
-        $pos = stripos($input, "route");
-        if ($pos === 0) {
-            $input = trim(substr_replace($input, "", 0, strlen('route')));
-        }
-
-        $route = $this->readRoute($input);
-
-        if ($this->isRoute($route) === true) {
-            $this->recognizeRoute($route);
-
-            $this->route = $route;
-            $this->response .= "Saw and extracted a route. ";
-        }
-
-
-        $pieces = explode(" ", strtolower($input));
-
-        // So this is really the 'sms' section
-        // Keyword
-        if (count($pieces) == 1) {
-            if ($input == 'route') {
-                //$this->readRoute();
-                return;
-            }
-        }
-
-        foreach ($pieces as $key => $piece) {
-            foreach ($this->keywords as $command) {
-                if (strpos(strtolower($piece), $command) !== false) {
-                    switch ($piece) {
-                        case 'next':
-                            $this->thing->log("read subject nextheadcode");
-                            $this->nextRoute();
-                            break;
-
-                        case 'drop':
-                            $this->dropRoute();
-                            break;
-
-                        case 'add':
-                            $this->addRoute();
-                            break;
-
-                        default:
-                    }
-                }
-            }
-        }
+        $choices = false;
+        $this->thing_report['choices'] = $choices;
+        $this->choices = $choices;
     }
 }
