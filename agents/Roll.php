@@ -72,7 +72,7 @@ class Roll extends Agent
     {
         $this->thing->flagGreen();
 
-        $this->makeChoices();
+       // $this->makeChoices();
 
         $this->thing_report["info"] = "This rolls a dice.  See
 				https:\\codegolf.stackexchange.com/questions/25416/roll-dungeons-and-dragons-dice";
@@ -182,12 +182,15 @@ class Roll extends Agent
 
         $this->node_list = ["roll" => ["roll", "card"]];
         // Make buttons
+/*
         $this->thing->choice->Create(
             $this->agent_name,
             $this->node_list,
             "web"
         );
         $choices = $this->thing->choice->makeLinks("web");
+*/
+$this->makeChoices();
 
         $text = "off";
         if ($text == "on") {
