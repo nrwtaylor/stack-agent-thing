@@ -520,7 +520,7 @@ if (!isset($this->db)) {
 
         // Kind of ugly.  But I guess this isn't Python.  And null
         // accounts can't be allowed.
-        if ($this->stack_account != null) {
+        if ((isset($this->stack_account)) and ($this->stack_account != null)) {
             $this->newAccount(
                 $this->stack_uuid,
                 $this->stack_account['account_name'],
@@ -528,7 +528,7 @@ if (!isset($this->db)) {
             );
         }
 
-        if ($this->thing_account != null) {
+        if ((isset($this->stack_account)) and ($this->thing_account != null)) {
             $this->newAccount(
                 $this->uuid,
                 $this->thing_account['account_name'],

@@ -1813,7 +1813,6 @@ $this->makeThingreport();
         if (isset($this->translated_input)) {
             $text = $this->translated_input;
         }
-
         switch (true) {
             case isset($this->input):
                 break;
