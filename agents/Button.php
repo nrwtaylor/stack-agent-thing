@@ -26,6 +26,8 @@ class Button extends Agent
 
     function run()
     {
+//$this->h = new Start($this->thing,"start");
+//var_dump($this->h->thing_report['web']);
         $this->makeSMS();
     }
 
@@ -156,7 +158,10 @@ class Button extends Agent
     }
 
     public function makeWeb()
-    {
+{
+$this->thing_report['web'] =$this->button_agent_handler->thing_report['web'];     
+return;
+
         if (!isset($this->words)) {
             $this->getButtons();
         }
@@ -214,6 +219,15 @@ class Button extends Agent
 
     function makeChoices()
     {
+
+if ((isset($this->button_agent_handler->thing_report['choices']))
+and ($this->button_agent_handler->thing_report['choices']) != null)) {
+$this->thing_report['choices'] =$this->button_agent_handler->thing_report['choices'];     
+return;
+}
+
+
+
         $this->node_list = ["button" => $this->buttons];
         $this->thing->choice->Create(
             $this->agent_name,
@@ -248,6 +262,11 @@ class Button extends Agent
         if ($this->agent_input != null) {
             return;
         }
+$input = $this->input;
+$conditioned_input = str_replace("s/ is ","",$input);
+$conditioned_input = str_replace(" button","",$conditioned_input);
+$handler = $this->getAgent($conditioned_input);
+$this->button_agent_handler = $handler;
 
         return;
 

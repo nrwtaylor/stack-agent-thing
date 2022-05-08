@@ -777,7 +777,7 @@ class Callsign extends Agent
         //$callsign_text = (implode(" ",$this->callsign));
         $r = iconv("UTF-8", "ASCII//TRANSLIT//IGNORE", $this->response);
 
-        $sms = "CALLSIGN DEV | " . $r;
+        $sms = "CALLSIGN | " . $r;
         $this->sms_message = $sms;
         $this->thing_report["sms"] = $sms;
     }

@@ -2379,7 +2379,6 @@ if ($pid == -1) {
         // TODO recognize piped text from command line
 
         // subject and agent_input
-
         if ($this->agent_input == null) {
             $input = $this->to . " " . $this->subject;
         } else {
@@ -2398,7 +2397,6 @@ if ($pid == -1) {
                 $t = trim($t);
                 $button_agent = $t;
             }
-
             $agent_tokens = explode(" ", $this->agent_input);
             // Expect at least  tokens.
             // Get the last alpha tokens.
@@ -2407,13 +2405,19 @@ if ($pid == -1) {
             foreach (array_reverse($agent_tokens) as $i => $agent_token) {
                 //if (is_string($agent_token)) {
 
-                if (ctype_alpha(str_replace(" ", "", $agent_token)) === false) {
+$g = str_replace(" ", "", $agent_token);
+$g = str_replace("-", "", $g);           
+
+     if (ctype_alpha($g) === false) {
+
+//                if (ctype_alpha(str_replace(" ", "", $agent_token)) === false) {
                     break;
                 }
                 $selected_agent_tokens[] = $agent_token;
             }
-
+//exit();
             $token_agent = implode(" ", array_reverse($selected_agent_tokens));
+
             $agglutinated_token_agent = implode(
                 "",
                 array_reverse($selected_agent_tokens)
@@ -2442,6 +2446,10 @@ if ($pid == -1) {
                 if ($button_agent == $token_agent) {
                     $flag = true;
                 }
+
+if ("is ".$button_agent ." button" == $token_agent) {
+$flag = true;
+}
 
                 if ($flag === false) {
                     return false;
