@@ -1,27 +1,27 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
 class Timestamp extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
     function init()
     {
         $this->keywords = [
-            'millis',
-            'milli',
-            'milliseconds',
-            'ms',
-            'microtime',
-            'micros',
-            'micro',
-            'microseconds',
-            'microseconds',
+            "millis",
+            "milli",
+            "milliseconds",
+            "ms",
+            "microtime",
+            "micros",
+            "micro",
+            "microseconds",
+            "microseconds",
         ];
         $this->current_time = $this->thing->json->microtime();
 
@@ -33,6 +33,9 @@ class Timestamp extends Agent
         $this->state = null; // to avoid error messages
 
         $this->timestamp_prefix = "";
+
+        $this->thing_report["help"] =
+            "This returns the current timestamp. Now. Try MICROTIME. Or TIME.";
     }
 
     function test()
@@ -55,8 +58,13 @@ class Timestamp extends Agent
                 break;
             }
             $this->extractTimestamp($line);
-            if ((isset($this->timestamp)) and ($this->timestamp != null)) {
-                $line . "<br>" . "timestamp " . $this->timestamp . "<br>" . "<br>";
+            if (isset($this->timestamp) and $this->timestamp != null) {
+                $line .
+                    "<br>" .
+                    "timestamp " .
+                    $this->timestamp .
+                    "<br>" .
+                    "<br>";
             }
         }
     }
@@ -67,10 +75,7 @@ class Timestamp extends Agent
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->Write(
-                ["timestamp", "refreshed_at"],
-                $time_string
-            );
+            $this->thing->Write(["timestamp", "refreshed_at"], $time_string);
         }
 
         $this->refreshed_at = strtotime($time_string);
@@ -85,9 +90,7 @@ class Timestamp extends Agent
         }
     }
 
-
-
-    function validTimestamp(string $date, string $format = 'Y-m-d'): bool
+    function validTimestamp(string $date, string $format = "Y-m-d"): bool
     {
         $dateObj = \DateTime::createFromFormat($format, $date);
         return $dateObj && $dateObj->format($format) == $date;
@@ -97,8 +100,12 @@ class Timestamp extends Agent
     {
         $timestamp = $this->extractTimestamp($text);
 
-        if (is_string($timestamp) === true) {return true;}
-        if ($timestamp === true) {return true;}
+        if (is_string($timestamp) === true) {
+            return true;
+        }
+        if ($timestamp === true) {
+            return true;
+        }
 
         return false;
     }
@@ -207,7 +214,7 @@ class Timestamp extends Agent
                 }
             }
         }
-return false;
+        return false;
         // Get the clock time.
         // Then date
         $this->timestamp = "X";
@@ -218,7 +225,6 @@ return false;
     {
     }
 
-
     function makeWeb()
     {
         $link = $this->web_prefix . "thing/" . $this->uuid . "/timestamp";
@@ -227,14 +233,20 @@ return false;
             "timestamp" => ["timestamp"],
         ];
 
-        $this->makeChoices();
+        //$this->makeChoices();
 
         $web = "";
         $web .= "<p>";
         $web .= "<p>";
-
-//$web .= $this->timestamp;
-//$web .= $this->sms_message;
+        $this->makeLink();
+        $web .= '<a href="' . $this->link . '">';
+        $web .= $this->link;
+        $web .= "</a>";
+        $web .= " ";
+        $web .= "Copy-and-paste link";
+        $web .= "<br />";
+        $web .= $this->timestamp;
+        //$web .= $this->sms_message;
 
         $web .= "<br>";
         $web .= "<p>";
@@ -242,7 +254,7 @@ return false;
         $this->thing_report["web"] = $web;
     }
 
-  public function makeChoices()
+    public function makeChoices()
     {
         $this->thing->choice->Create(
             $this->agent_name,
@@ -253,6 +265,14 @@ return false;
         $this->thing_report["choices"] = $choices;
     }
 
+    function makeLink()
+    {
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/timestamp";
+
+        $this->link = $link;
+        $this->thing_report["link"] = $link;
+    }
+
     // Devstack
     // ?
     public function respondResponse()
@@ -261,24 +281,14 @@ return false;
 
         $this->thing->flagGreen();
 
-        // Generate email response.
-
-//        $choices = false;
-//        $this->thing_report['choices'] = $choices;
-
-        //$this->thing_report['email'] = $this->sms_message;
-        //$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
-
         if (!$this->thing->isData($this->agent_input)) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         } else {
-            $this->thing_report['info'] =
+            $this->thing_report["info"] =
                 'Agent input was "' . $this->agent_input . '".';
         }
 
-        $this->thing_report['help'] =
-            'This returns the current timestamp. Now. Try MICROTIME. Or TIME.';
     }
 
     function isData($variable)
@@ -290,14 +300,11 @@ return false;
         }
     }
 
-//    public function read($text = null)
-//    {
-//        $this->readSubject();
-//    }
-
     public function findTimestamp($text = null)
     {
-if ($this->timestamp != false) {return;}
+        if ($this->timestamp != false) {
+            return;
+        }
         //        if (strtotime($text) == false) {return true;}
 
         // Apparently strtotime reads "zulu" as 1605193914;
@@ -307,12 +314,12 @@ if ($this->timestamp != false) {return;}
 
     public function makeSMS()
     {
-        if (isset($this->thing_report['sms'])) {
+        if (isset($this->thing_report["sms"])) {
             return;
         }
         $sms = "TIMESTAMP | " . $this->timestamp;
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     public function readSubject()
@@ -326,11 +333,9 @@ if ($this->timestamp != false) {return;}
         if ($this->agent_input == null or $this->agent_input == "") {
             $input = $this->subject;
         }
-
         if ($this->agent_input == "timestamp") {
             $input = $this->subject;
         }
-
         if ($this->isTimestamp($input)) {
             $this->findTimestamp($input);
             return;
