@@ -25,25 +25,25 @@ class Callsign extends Agent
         $this->start_time = microtime(true);
 
         $this->assert_callsign = false;
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/callsign/';
+        $this->resource_path = $GLOBALS["stack_path"] . "resources/callsign/";
 
-        $this->thing_report['info'] = "Possibly helpful to station operators.";
+        $this->thing_report["info"] = "Possibly helpful to station operators.";
 
         $this->net_horizon = 30 * 60; // 30 minutes. Then assume station has gone.
 
         $this->keywords = [
-            'is',
-            'heard',
-            'check in',
-            'check-in',
-            'checkin',
-            'add',
-            'drop',
-            'check out',
-            'checkout',
-            'check-out',
-            '73',
-            'callsign',
+            "is",
+            "heard",
+            "check in",
+            "check-in",
+            "checkin",
+            "add",
+            "drop",
+            "check out",
+            "checkout",
+            "check-out",
+            "73",
+            "callsign",
             "active",
             "net",
             "callsign",
@@ -52,29 +52,9 @@ class Callsign extends Agent
 
         $this->loadCallsigns();
 
-        $this->thing_report['help'] =
-            'Recognises the following modifiers. ' .
+        $this->thing_report["help"] =
+            "Recognises the following modifiers. " .
             ucwords(trim(implode(" ", $this->keywords)) . ".");
-    }
-
-    function deprecate_getTimezone()
-    {
-        // Eventually call the timezone agent.
-        $this->time_zone = "America/Vancouver";
-    }
-
-    function deprecate_t($timestamp)
-    {
-        $i = 1;
-        $this->getTimezone();
-
-        $dt = new \DateTime($timestamp, new \DateTimeZone("UTC"));
-
-        $dt->setTimezone(new \DateTimeZone($this->time_zone));
-
-        $d = $dt->format('H:i');
-
-        return $d;
     }
 
     function netCallsign()
@@ -85,9 +65,9 @@ class Callsign extends Agent
         $callsigns_heard = [];
 
         foreach ($this->callsigns as $i => $callsign) {
-            $call = $callsign['callsign'];
+            $call = $callsign["callsign"];
 
-            $last_refreshed_at = $callsign['refreshed_at'];
+            $last_refreshed_at = $callsign["refreshed_at"];
             $ago =
                 strtotime($this->current_time) - strtotime($last_refreshed_at);
             if ($ago > $this->net_horizon) {
@@ -101,16 +81,16 @@ class Callsign extends Agent
 
         foreach ($callsigns_heard as $i => $callsign) {
             $action = "";
-            if (isset($callsign['action'])) {
-                $action = $callsign['action'];
+            if (isset($callsign["action"])) {
+                $action = $callsign["action"];
             }
 
             $text .=
-                $callsign['callsign'] .
+                $callsign["callsign"] .
                 " " .
                 $action .
                 " " .
-                $this->t($callsign['refreshed_at']) .
+                $this->t($callsign["refreshed_at"]) .
                 " / ";
             //$text .= $callsign['callsign'] ." ". $callsign['refreshed_at'] . " / ";
         }
@@ -124,23 +104,14 @@ class Callsign extends Agent
      */
     function get()
     {
-        $time_string = $this->thing->Read([
-            "callsign",
-            "refreshed_at",
-        ]);
+        $time_string = $this->thing->Read(["callsign", "refreshed_at"]);
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->Write(
-                ["callsign", "refreshed_at"],
-                $time_string
-            );
+            $this->thing->Write(["callsign", "refreshed_at"], $time_string);
         }
 
-        $this->reading = $this->thing->Read([
-            "callsign",
-            "reading",
-        ]);
+        $this->reading = $this->thing->Read(["callsign", "reading"]);
 
         $this->variables = new Variables(
             $this->thing,
@@ -159,8 +130,8 @@ class Callsign extends Agent
         $city_agent = new City($this->thing, "city");
         $this->city_name = $city_agent->city_name;
         $this->zones = [];
-        if ($this->city_name == 'Vancouver') {
-            $this->zones = ['VE7', 'VA7'];
+        if ($this->city_name == "Vancouver") {
+            $this->zones = ["VE7", "VA7"];
         }
     }
 
@@ -176,10 +147,7 @@ class Callsign extends Agent
      */
     function set()
     {
-        $this->thing->Write(
-            ["callsign", "reading"],
-            $this->reading
-        );
+        $this->thing->Write(["callsign", "reading"], $this->reading);
 
         if ($this->assert_callsign) {
             $this->variables->setVariable(
@@ -216,13 +184,13 @@ class Callsign extends Agent
 
     public function checkinCallsign()
     {
-        $this->callsign['action'] = "checkin";
+        $this->callsign["action"] = "checkin";
         $this->response .= "Checked in. ";
     }
 
     public function checkoutCallsign()
     {
-        $this->callsign['action'] = "checkout";
+        $this->callsign["action"] = "checkout";
         $this->response .= "Checked out. ";
     }
 
@@ -236,9 +204,9 @@ class Callsign extends Agent
         $this->callsigns = [];
 
         // See if a headcode record exists.
-        $findagent_thing = new Findagent($this->thing, 'callsign');
+        $findagent_thing = new Findagent($this->thing, "callsign");
 
-        $things = $findagent_thing->thing_report['things'];
+        $things = $findagent_thing->thing_report["things"];
 
         if ($things === true) {
             return [$this->callsign_list, $this->callsigns];
@@ -248,34 +216,34 @@ class Callsign extends Agent
 
         $this->thing->log(
             'Agent "Callsign" found ' .
-                count($findagent_thing->thing_report['things']) .
+                count($findagent_thing->thing_report["things"]) .
                 " Callsign Things."
         );
 
         if ($count > 0) {
             foreach (
-                array_reverse($findagent_thing->thing_report['things'])
+                array_reverse($findagent_thing->thing_report["things"])
                 as $thing_object
             ) {
-                $uuid = $thing_object['uuid'];
-                $variables_json = $thing_object['variables'];
+                $uuid = $thing_object["uuid"];
+                $variables_json = $thing_object["variables"];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
-                if (isset($variables['callsign'])) {
+                if (isset($variables["callsign"])) {
                     $callsign = "X";
                     $refreshed_at = "X";
                     $action = "X";
 
-                    if (isset($variables['callsign']['action'])) {
-                        $action = $variables['callsign']['action'];
+                    if (isset($variables["callsign"]["action"])) {
+                        $action = $variables["callsign"]["action"];
                     }
 
-                    if (isset($variables['callsign']['callsign'])) {
-                        $callsign = $variables['callsign']['callsign'];
+                    if (isset($variables["callsign"]["callsign"])) {
+                        $callsign = $variables["callsign"]["callsign"];
                     }
 
-                    if (isset($variables['callsign']['refreshed_at'])) {
-                        $refreshed_at = $variables['callsign']['refreshed_at'];
+                    if (isset($variables["callsign"]["refreshed_at"])) {
+                        $refreshed_at = $variables["callsign"]["refreshed_at"];
                     }
 
                     // Check for junk entries. And discard.
@@ -301,7 +269,7 @@ class Callsign extends Agent
 
         $refreshed_at = [];
         foreach ($this->callsigns as $key => $row) {
-            $refreshed_at[$key] = $row['refreshed_at'];
+            $refreshed_at[$key] = $row["refreshed_at"];
         }
         array_multisort($refreshed_at, SORT_DESC, $this->callsigns);
 
@@ -334,9 +302,9 @@ class Callsign extends Agent
         $date_array = date_parse($x);
 
         if (
-            $date_array['day'] != false and
-            $date_array['month'] != false and
-            $date_array['year'] != false
+            $date_array["day"] != false and
+            $date_array["month"] != false and
+            $date_array["year"] != false
         ) {
             return true;
         }
@@ -351,7 +319,7 @@ class Callsign extends Agent
     function extractCallsigns($string)
     {
         //        $pattern = '/\b\w*?\p{N}\w*\b/u';
-        $pattern = '/\b[a-z]{1,2}[0-9]{1}[a-z]{1,3}\b/i';
+        $pattern = "/\b[a-z]{1,2}[0-9]{1}[a-z]{1,3}\b/i";
 
         preg_match_all($pattern, $string, $callsigns);
 
@@ -378,7 +346,7 @@ class Callsign extends Agent
             }
 
             foreach ($text as $x) {
-                $line = $x['line'];
+                $line = $x["line"];
                 $line = utf8_encode($line);
                 $a = explode(";", $line);
                 $t = $a[1];
@@ -396,7 +364,7 @@ class Callsign extends Agent
                     ];
                 }
 
-                if ($callsign['first_name'] == 'first_name') {
+                if ($callsign["first_name"] == "first_name") {
                     continue;
                 }
 
@@ -419,7 +387,6 @@ class Callsign extends Agent
     function selectCallsign($callsign = null)
     {
         $input = $this->input;
-
         $slug_agent = new Slug($this->thing, "slug");
         $chatbot_agent = new Chatbot($this->thing, "chatbot");
         $mixed_agent = new _Mixed($this->thing, "mixed");
@@ -484,13 +451,14 @@ class Callsign extends Agent
                     strpos(strtolower($callsign), strtolower($token)) !== false
                 ) {
                     $factor = strlen($token) - 3;
-                    if ($factor < 0) {$factor = 0;}
+                    if ($factor < 0) {
+                        $factor = 0;
+                    }
                     $score = $score * pow(10, $factor);
                 }
 
-
                 // Match first three characters of name.
-                $firstname = $slug_agent->getSlug($call['first_name']);
+                $firstname = $slug_agent->getSlug($call["first_name"]);
                 if (substr($token, 0, 2) == substr($firstname, 0, 2)) {
                     $score = $score * 10;
                     $name_hit = true;
@@ -504,7 +472,7 @@ class Callsign extends Agent
                 }
 
                 // Match first three characters of name.
-                $secondname = $slug_agent->getSlug($call['second_name']);
+                $secondname = $slug_agent->getSlug($call["second_name"]);
                 if (substr($token, 0, 5) == substr($secondname, 0, 5)) {
                     $score = $score * 10;
                     $hit_flag = true;
@@ -542,8 +510,8 @@ class Callsign extends Agent
                 $score = $score * pow(10, 4);
             }
 
-            $this->callsigns[$callsign]['score'] = $score;
-            $this->callsigns[$callsign]['hits'] = $hits;
+            $this->callsigns[$callsign]["score"] = $score;
+            $this->callsigns[$callsign]["hits"] = $hits;
         }
 
         $min_hit_count = count($tokens);
@@ -551,11 +519,11 @@ class Callsign extends Agent
         $test_array = $this->callsigns;
         $score = [];
         foreach ($test_array as $key => $row) {
-            if ($row['hits'] == 0) {
+            if ($row["hits"] == 0) {
                 $score[$key] = 0;
                 continue;
             }
-            $score[$key] = $row['score'];
+            $score[$key] = $row["score"];
         }
         array_multisort($score, SORT_DESC, $test_array);
         $this->callsign = reset($test_array);
@@ -619,7 +587,7 @@ class Callsign extends Agent
             return;
         }
 
-        $file = $this->resource_path . 'amateur_delim.txt';
+        $file = $this->resource_path . "amateur_delim.txt";
 
         if (file_exists($file) === false) {
             return true;
@@ -644,7 +612,7 @@ class Callsign extends Agent
                 $fields[0] . ";" . $fields[1] . ";" . $fields[2] . "\n";
         }
 
-        $file = $this->resource_path . 'special_callsign.txt';
+        $file = $this->resource_path . "special_callsign.txt";
 
         if (file_exists($file) != false) {
             $contents .= file_get_contents($file);
@@ -677,7 +645,7 @@ class Callsign extends Agent
                 $line_match_tokens = explode(";", $line_match);
 
                 $line_match_tokens = array_map(
-                    'strtolower',
+                    "strtolower",
                     $line_match_tokens
                 );
                 if (
@@ -710,10 +678,9 @@ class Callsign extends Agent
 
         $score = [];
         foreach ($test_array as $key => $row) {
-            $score[$key] = $row['score'];
+            $score[$key] = $row["score"];
         }
         array_multisort($score, SORT_DESC, $test_array);
-
         $i = 0;
         foreach ($test_array as $key => $value) {
             $i += 1;
@@ -746,6 +713,16 @@ class Callsign extends Agent
                 }
 
                 if (
+                    $this->suffixCallsign(strtolower($word)) ==
+                    strtolower($text_word)
+                ) {
+                    //$score += mb_strlen($text_word) * 10;
+                    $score += 5 * 10;
+
+                    //break;
+                }
+
+                if (
                     strpos(strtolower($word), strtolower($text_word)) !== false
                 ) {
                     $score += 2;
@@ -771,6 +748,7 @@ class Callsign extends Agent
                 }
             }
         }
+
         return $score;
     }
 
@@ -786,7 +764,7 @@ class Callsign extends Agent
         $this->thing->flagGreen();
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
 
         return $this->thing_report;
     }
@@ -797,11 +775,17 @@ class Callsign extends Agent
     function makeSMS()
     {
         //$callsign_text = (implode(" ",$this->callsign));
-        $r = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $this->response);
+        $r = iconv("UTF-8", "ASCII//TRANSLIT//IGNORE", $this->response);
 
-        $sms = "CALLSIGN | " . $r;
+        $sms = "CALLSIGN DEV | " . $r;
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
+    }
+
+    public function makeTXT()
+    {
+        $txt = "Test";
+        $this->thing_report["txt"] = $txt;
     }
 
     /**
@@ -811,14 +795,32 @@ class Callsign extends Agent
     {
         $web = "";
 
+        $web .= "<b>Callsign Agent</b><br>";
+        $web .= "<p>";
+        $callsigns = $this->callsigns;
+        foreach ($callsigns as $key => $row) {
+            $score[$key] = $row["score"];
+        }
+        array_multisort($score, SORT_DESC, $callsigns);
+
+        foreach ($callsigns as $i => $callsign) {
+            $web .= $callsign["callsign"];
+            $web .= " ";
+            $web .= $callsign["first_name"];
+            $web .= " ";
+
+            $web .= "[" . $callsign["score"] . "]";
+            $web .= "<br />";
+        }
+        /*
         $web .= "</a>";
         $web .= "<br>";
         $web .= '<b>Callsign Agent</b><br>';
         $web .= "<p>";
         $web .= "No web response available.";
-
+*/
         $this->web_message = $web;
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     /**
@@ -829,17 +831,32 @@ class Callsign extends Agent
         $this->email_message = "CALLSIGN | " . $this->response;
     }
 
+    public function prefixCallsign($text)
+    {
+        $result = strtr($text, "0123456789", str_repeat("-", 10));
+        $parts = explode("-", $result);
+        return strtolower($parts[0]);
+    }
+
+    public function suffixCallsign($text)
+    {
+        $result = strtr($text, "0123456789", str_repeat("-", 10));
+        $parts = explode("-", $result);
+        return strtolower($parts[1]);
+    }
+
     /**
      *
      * @return unknown
      */
     public function readSubject()
     {
-        $prefix = 'callsign';
+        $input = $this->subject;
+        $prefix = "callsign";
         $callsigns = preg_replace(
-            '/^' . preg_quote($prefix, '/') . '/',
-            '',
-            $this->input
+            "/^" . preg_quote($prefix, "/") . "/",
+            "",
+            $input
         );
         $callsigns = ltrim($callsigns);
 
@@ -851,17 +868,17 @@ class Callsign extends Agent
 
         $ngram_agent = new Ngram($this->thing, "ngram");
         $pieces = [];
-        $arr = $ngram_agent->getNgrams(strtolower($this->input), 3);
+        $arr = $ngram_agent->getNgrams(strtolower($input), 3);
         $pieces = array_merge($pieces, $arr);
-        $arr = $ngram_agent->getNgrams(strtolower($this->input), 2);
+        $arr = $ngram_agent->getNgrams(strtolower($input), 2);
         $pieces = array_merge($pieces, $arr);
-        $arr = $ngram_agent->getNgrams(strtolower($this->input), 1);
+        $arr = $ngram_agent->getNgrams(strtolower($input), 1);
         $pieces = array_merge($pieces, $arr);
 
         $pieces = array_reverse($pieces);
 
         if (count($pieces) == 1) {
-            if ($this->input == 'callsign') {
+            if ($input == "callsign") {
                 $this->extractCallsigns($this->callsign_text);
                 if (isset($this->callsign)) {
                     $this->response =
@@ -882,8 +899,8 @@ class Callsign extends Agent
             foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'net':
-                        case 'active':
+                        case "net":
+                        case "active":
                             $this->getCallsigns();
                             $this->netCallsign();
                             $count = 0;
@@ -894,19 +911,19 @@ class Callsign extends Agent
                                 "Retrieved " . $count . " active callsigns. ";
                             return;
 
-                        case 'check in':
-                        case 'check-in':
-                        case 'checkin':
-                        case 'add':
-                        case 'heard':
-                        case 'is':
-                            $this->assertCallsign(strtolower($this->input));
+                        case "check in":
+                        case "check-in":
+                        case "checkin":
+                        case "add":
+                        case "heard":
+                        case "is":
+                            $this->assertCallsign(strtolower($input));
 
                             if (empty($this->callsign)) {
                                 $this->response = "Did not find a callsign.";
                             } else {
                                 $this->response =
-                                    'Callsign asserted to be ' .
+                                    "Callsign asserted to be " .
                                     strtoupper($this->callsign["callsign"]) .
                                     ". ";
                                 $this->checkinCallsign();
@@ -914,18 +931,18 @@ class Callsign extends Agent
 
                             return;
 
-                        case 'check out':
-                        case 'check-out':
-                        case 'checkout':
-                        case 'drop':
-                        case '73':
-                            $this->assertCallsign(strtolower($this->input));
+                        case "check out":
+                        case "check-out":
+                        case "checkout":
+                        case "drop":
+                        case "73":
+                            $this->assertCallsign(strtolower($input));
 
                             if (empty($this->callsign)) {
                                 $this->response = "Did not find a callsign. ";
                             } else {
                                 $this->response =
-                                    'Callsign asserted to be ' .
+                                    "Callsign asserted to be " .
                                     strtoupper($this->callsign["callsign"]) .
                                     ". ";
                                 $this->checkoutCallsign();
@@ -941,7 +958,7 @@ class Callsign extends Agent
 
         $first_name = "X";
 
-        if (isset($this->callsign['first_name'])) {
+        if (isset($this->callsign["first_name"])) {
             $first_name = $this->callsign["first_name"];
         }
 
@@ -963,7 +980,7 @@ class Callsign extends Agent
 
             $score = [];
             foreach ($this->callsigns as $key => $row) {
-                $score[$key] = $row['score'];
+                $score[$key] = $row["score"];
             }
             array_multisort($score, SORT_DESC, $callsigns);
 
@@ -974,21 +991,21 @@ class Callsign extends Agent
                     break;
                 }
                 if (!isset($last_score)) {
-                    $last_score = $call['score'];
+                    $last_score = $call["score"];
                 }
 
                 //$t .= $callsign ." " . $call['first_name'] . " [" . $call['score']."] / ";
 
-                if ($call['score'] == $last_score) {
-                    $t .= $callsign . " " . $call['first_name'] . " / ";
+                if ($call["score"] == $last_score) {
+                    $t .= $callsign . " " . $call["first_name"] . " / ";
                     // . $call['score']."] / ";
                 }
 
-                if ($call['score'] != $last_score) {
+                if ($call["score"] != $last_score) {
                     break;
                 }
 
-                $last_score = $call['score'];
+                $last_score = $call["score"];
             }
 
             $this->response =
