@@ -28,20 +28,21 @@ class Mongo extends Agent
         $this->mongo_test_flag = "off";
         $path =
             "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
-
         try {
             $client = new \MongoDB\Client($path);
             $this->db = $client;
             $this->collection = $this->db->stack_db->things;
         } catch (\Throwable $t) {
+var_dump($t);
             $this->error = "Could not connect to MySQL database";
             $this->errorMongo($t->getMessage());
-            $this->collection = true;
+            //$this->collection = true;
         } catch (\Error $ex) {
+var_dump($ex);
             $this->errorMongo($ex->getMessage());
 
             $this->error = "Could not connect to MySQL database";
-            $this->collection = true;
+            //$this->collection = true;
         }
     }
 
@@ -203,19 +204,19 @@ class Mongo extends Agent
         try {
             $result = $this->collection->findOne(["_id" => $text]);
         } catch (\Throwable $t) {
-            //var_dump($t->getMessage());
+            var_dump($t->getMessage());
             //exit();
-            $this->error = "Could not connect to MySQL database";
+            $this->error = "Could not connect to Mongo database";
             $this->errorMongo($t->getMessage());
-            $this->collection = true;
+            //$this->collection = true;
         } catch (\Error $ex) {
-            //var_dump($ex->getMessage());
+            var_dump($ex->getMessage());
             //exit();
 
             $this->errorMongo($ex->getMessage());
 
-            $this->error = "Could not connect to MySQL database";
-            $this->collection = true;
+            $this->error = "Could not connect to Mongo database";
+            //$this->collection = true;
         }
 
         //        $result = $this->collection->findOne(["_id" => $text]);
@@ -337,12 +338,12 @@ class Mongo extends Agent
         } catch (\Throwable $t) {
             $this->error = "Could not connect to Mongo database";
             $this->errorMongo($t->getMessage());
-            $this->collection = true;
+            //$this->collection = true;
         } catch (\Error $ex) {
             $this->errorMongo($ex->getMessage());
 
             $this->error = "Could not connect to Mongo database";
-            $this->collection = true;
+            //$this->collection = true;
         }
 
         return $key;

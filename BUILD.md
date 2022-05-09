@@ -865,6 +865,8 @@ sudo apt-get install php-mbstring
 }
 ```
 
+composer require overtrue/chinese-calendar -vvv
+
 ## 15. Syllables
 
 **Use the vanderlee composer package.**  

@@ -963,21 +963,22 @@ class Year extends Agent
         }
         $year = false;
 
-        if (isset($this->years) and $this->years == []) {
-            return false;
-        }
+//        if (isset($this->years) and $this->years == []) {
+//            return false;
+//        }
 
-        if (isset($this->years)) {
-            $years = $this->years;
-        }
-
-        if (!isset($this->years)) {
+//        if (isset($this->years)) {
+//            $years = $this->years;
+//        }
+//        if (!isset($this->years)) {
             $years = $this->extractYears($text);
-        }
+//        }
 
         if (count($years) == 1) {
             $year = $years[0];
         }
+//var_dump($year);
+//exit();
         return $year;
     }
 

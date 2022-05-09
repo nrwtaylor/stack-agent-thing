@@ -84,21 +84,6 @@ class ThingJson
 
     /**
      *
-     * @param unknown $time (optional)
-     * @return unknown
-     */
-    function deprecate_time($time = null)
-    {
-        if ($time == null) {
-            $time = time();
-        }
-        $this->time = gmdate("Y-m-d\TH:i:s\Z", $time);
-
-        return $this->time;
-    }
-
-    /**
-     *
      * @return unknown
      */
     function isUsed()

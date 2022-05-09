@@ -106,7 +106,6 @@ class Database
         if (isset($settings["settings"]["stacks"])) {
             $this->stacks = $settings["settings"]["stacks"];
         }
-
         $this->web_prefix = $settings["settings"]["stack"]["web_prefix"];
         $this->state = $settings["settings"]["stack"]["state"];
 
@@ -139,6 +138,7 @@ class Database
                 $handler = $this->connectDatabase($candidate_service);
             } catch (\Throwable $t) {
             } catch (\Error $ex) {
+
             }
 
             if ($handler !== true) {
@@ -543,6 +543,8 @@ class Database
                     $thing["mongo"] = $this->stack_handlers[
                         $stack["infrastructure"]
                     ]->getMongo($this->uuid);
+var_dump("getMongo", $this->uuid, $thing['mongo']);
+
                     break;
 
                 //                    if ($thing !== false and $thing !== true) {

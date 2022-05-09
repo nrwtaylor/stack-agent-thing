@@ -255,6 +255,7 @@ class Thing
 
             $this->log("Thing made a db connector.");
             // Provide handler for Json translation from/to MySQL.
+var_dump($this->uuid);
             $this->json = new ThingJson($this->uuid);
 
             // This is a placeholder for refactoring the Thing variables
