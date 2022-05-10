@@ -5,22 +5,19 @@ use Overtrue\ChineseCalendar\Calendar;
 
 class Chinesecalendar extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
         //dev
 
-        date_default_timezone_set('PRC');
+        date_default_timezone_set("PRC");
 
         $this->chinese_calendar = new \Overtrue\ChineseCalendar\Calendar();
 
         //$result = $calendar->solar(2017, 5, 5); // 阳历
-        //var_dump($result);
         //$result = $calendar->lunar(2017, 4, 10); // 阴历
-        //var_dump($result);
         //$result = $calendar->solar(2017, 5, 5, 23) // 阳历，带 $hour 参数
-        //var_dump($result);
     }
 
     function run()
@@ -30,9 +27,9 @@ class Chinesecalendar extends Agent
 
     public function doChineseCalendar()
     {
-        $year = $this->parsed_date['year'];
-        $month = $this->parsed_date['month'];
-        $day = $this->parsed_date['day'];
+        $year = $this->parsed_date["year"];
+        $month = $this->parsed_date["month"];
+        $day = $this->parsed_date["day"];
 
         $gregorian_text = $year . " " . $month . " " . $day;
 
@@ -109,19 +106,19 @@ array(32) {
 
         $lunar_text =
             "lunar year/month/day " .
-            $result['lunar_year'] .
+            $result["lunar_year"] .
             " " .
-            $result['lunar_month'] .
+            $result["lunar_month"] .
             " " .
-            $result['lunar_day'];
+            $result["lunar_day"];
         $lunar_chinese_text =
-            $result['lunar_year_chinese'] .
+            $result["lunar_year_chinese"] .
             " " .
-            $result['lunar_month_chinese'] .
+            $result["lunar_month_chinese"] .
             " " .
-            $result['lunar_day_chinese'];
-        $animal_text = "animal " . $result['animal'];
-        $animal_english_text = $this->wordChinese($result['animal']);
+            $result["lunar_day_chinese"];
+        $animal_text = "animal " . $result["animal"];
+        $animal_english_text = $this->wordChinese($result["animal"]);
 
         $chinese_calendar_date_text =
             $lunar_text .
@@ -158,7 +155,7 @@ https://www.php.net/manual/en/function.easter-date.php
 
         $t = $this->timestampTime($datum);
 
-        $text = $datum->format('j F Y');
+        $text = $datum->format("j F Y");
 
         return $text;
     }
@@ -167,47 +164,35 @@ https://www.php.net/manual/en/function.easter-date.php
     {
         $this->node_list = ["easter" => ["easter"]];
         $this->sms_message = "" . $this->message;
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     function makeChoices()
     {
-        $this->thing->choice->Create('channel', $this->node_list, "cat");
-        $choices = $this->thing->choice->makeLinks('easter');
-        $this->thing_report['choices'] = $choices;
+        $this->thing->choice->Create("channel", $this->node_list, "cat");
+        $choices = $this->thing->choice->makeLinks("easter");
+        $this->thing_report["choices"] = $choices;
     }
 
     public function readSubject()
     {
         $input = $this->input;
         $filtered_input = strtolower($input);
-        $filtered_text = str_replace('chinese calendar', '', $filtered_input);
-        $filtered_text = str_replace('chinesecalendar', '', $filtered_input);
+        $filtered_text = str_replace("chinese calendar", "", $filtered_input);
+        $filtered_text = str_replace("chinesecalendar", "", $filtered_input);
 
         $parsed_date = date_parse($filtered_input);
 
         if (
-            $parsed_date['year'] == false or
-            $parsed_date['month'] == false or
-            $parsed_date['day'] == false
+            $parsed_date["year"] == false or
+            $parsed_date["month"] == false or
+            $parsed_date["day"] == false
         ) {
             $timestamp = $this->humanTime();
-            var_dump($timestamp);
             $parsed_date = date_parse($timestamp);
-            var_dump($parsed_date);
-            var_dump("asdfasdfasdfasdfasdf");
         }
 
         $this->parsed_date = $parsed_date;
         return;
-        var_dump($parsed_date);
-        //exit()
-
-        $year_array = $this->extractYear($input);
-
-        $year = $year_array['year'];
-        $this->year = $year;
-
-        return false;
     }
 }
