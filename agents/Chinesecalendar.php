@@ -31,8 +31,10 @@ class Chinesecalendar extends Agent
         $month = $this->parsed_date["month"];
         $day = $this->parsed_date["day"];
 
-        $gregorian_text = $year . " " . $month . " " . $day;
-
+        $gregorian_text = "gregorian " . $year . " " . $month . " " . $day;
+        if (isset($this->timestamp)) {
+            $gregorian_text .= " " . $this->timestamp;
+        }
         $result = $this->chinese_calendar->solar($year, $month, $day); // 阳历
 
         /*
@@ -174,9 +176,33 @@ https://www.php.net/manual/en/function.easter-date.php
         $this->thing_report["choices"] = $choices;
     }
 
+    public function scoreChinesecalendar($text)
+    {
+        if (strpos("chinese calendar", $text) !== false) {
+            $this->score = 10;
+            return;
+        }
+
+        if (stripos("chinesecalendar", $word) !== false) {
+            $this->score = 10;
+            return;
+        }
+
+        if (stripos("calendar chinese", $word) !== false) {
+            $this->score = 10;
+            return;
+        }
+
+        if (stripos("calendarchinese", $word) !== false) {
+            $this->score = 10;
+            return;
+        }
+    }
+
     public function readSubject()
     {
         $input = $this->input;
+        $this->scoreChinesecalendar($input);
         $filtered_input = strtolower($input);
         $filtered_text = str_replace("chinese calendar", "", $filtered_input);
         $filtered_text = str_replace("chinesecalendar", "", $filtered_input);
@@ -188,8 +214,10 @@ https://www.php.net/manual/en/function.easter-date.php
             $parsed_date["month"] == false or
             $parsed_date["day"] == false
         ) {
-            $timestamp = $this->humanTime();
-            $parsed_date = date_parse($timestamp);
+            // $this->timestamp = $this->humanTime();
+            $this->timestamp = date("c", time());
+            //$timestamp = time();
+            $parsed_date = date_parse($this->timestamp);
         }
 
         $this->parsed_date = $parsed_date;
