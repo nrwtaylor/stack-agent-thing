@@ -1063,4 +1063,11 @@ class Year extends Agent
 
         $this->getYear();
     }
+
+    public function currentYear() {
+       $year = $this->extractYear($this->current_time)['year'];
+       return $year;
+
+    }
+
 }

@@ -23,7 +23,7 @@ class Easter extends Agent
         }
 
         if ($this->agent_input == null) {
-            $response = "EASTER | " . $easter_date_text;
+            $response = "EASTER | " . $easter_date_text . " [" . $this->year . "].";
 
             $this->message = $response; // mewsage?
         } else {
@@ -70,6 +70,11 @@ https://www.php.net/manual/en/function.easter-date.php
         $year_array = $this->extractYear($input);
 
         $year = $year_array['year'];
+
+        if ($year == null) {
+            $year = $this->currentYear();
+        }
+
         $this->year = $year;
 
         return false;
