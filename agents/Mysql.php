@@ -151,7 +151,7 @@ try {
         $this->error = null;
         try {
             $pdo = new PDO(
-                "mysql:host=" . $this->host . ";dbname=" . $this->dbname,
+                "mysql:host=" . $this->host . ";dbname=" . $this->dbname . ";charset=utf8",
                 $this->user,
                 $this->pass
             );
