@@ -123,7 +123,7 @@ class LimitedBeta extends Agent {
      *
      */
     public function readSubject() {
-        $this->limitedbeta();
+//        $this->limitedbeta();
     }
 
 
