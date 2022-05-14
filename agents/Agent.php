@@ -1726,8 +1726,12 @@ var_dump($this->thing_report['link']);
      */
     public function makeMessage()
     {
+        if (!isset($this->message)) {
+            if (isset($this->thing_report['sms'])) {
+                $this->message = $this->thing_report['sms'];
+            }
+        }
     }
-
     /**
      *
      */
