@@ -865,7 +865,10 @@ sudo apt-get install php-mbstring
 }
 ```
 
+You might need these additional composer installs.
+
 composer require overtrue/chinese-calendar -vvv
+composer require mongodb/mongodb
 
 ## 15. Syllables
 

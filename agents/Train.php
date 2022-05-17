@@ -1493,9 +1493,18 @@ class Train extends Agent
     function getRoute()
     {
         $this->route_agent = new Route($this->train_thing, "route");
-        if ($this->route_agent->route !== false) {
+
+
+
+        if (($this->route_agent->route !== false) and (is_array($this->route_agent->route))) {
             $this->route = implode(' > ', $this->route_agent->route['places']);
         }
+
+        if (($this->route_agent->route !== false) and (is_string($this->route_agent->route))) {
+            $this->route = $this->route_agent->route;
+        }
+
+
         if (!isset($this->route)) {
             $this->route = "X";
         }

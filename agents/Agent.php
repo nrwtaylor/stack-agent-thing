@@ -927,8 +927,8 @@ public function __set($name, $value) {
         if (isset($this->web_state)) {
             $web_state = $this->web_state;
         }
-var_dump($this->thing->web_agent->state);
-var_dump($this->thing_report['link']);
+//var_dump($this->thing->web_agent->state);
+//var_dump($this->thing_report['link']);
         if (
             isset($this->thing->web_agent->state) and
             $this->thing->web_agent->state == "on"

@@ -977,8 +977,6 @@ class Year extends Agent
         if (count($years) == 1) {
             $year = $years[0];
         }
-//var_dump($year);
-//exit();
         return $year;
     }
 

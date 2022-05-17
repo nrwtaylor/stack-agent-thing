@@ -543,7 +543,7 @@ class Database
                     $thing["mongo"] = $this->stack_handlers[
                         $stack["infrastructure"]
                     ]->getMongo($this->uuid);
-var_dump("getMongo", $this->uuid, $thing['mongo']);
+//var_dump("getMongo", $this->uuid, $thing['mongo']);
 
                     break;
 
