@@ -85,12 +85,29 @@ class Mongo extends Agent
 
         $things = $this->collection->find(["from" => $nom_from]);
 
-//        var_dump($things);
-/*        
+        //        var_dump($things);
+        /*        
         usort($things, function ($first, $second) {
             return strtotime($first->created_at) > strtotime($second->created_at);
         });
 */
+
+        foreach ($things as $object_key => $thing) {
+            $conditioned_things[$thing['uuid']] = $thing;
+        }
+
+        usort($conditioned_things, function ($first, $second) {
+            return strtotime($first['created_at']) <
+                strtotime($second['created_at']);
+        });
+
+        $obj = $conditioned_things[0];
+
+        $arr = (array) $obj;
+        unset($arr['_id']);
+        //var_dump($arr);
+        return $arr;
+        /*
         
         foreach ($things as $object_key => $thing) {
 
@@ -105,7 +122,7 @@ class Mongo extends Agent
                 $thing["subject"] .
                 "\n";
         }
-
+*/
     }
 
     public function testMongo()
