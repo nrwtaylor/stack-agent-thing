@@ -341,6 +341,8 @@ return false;
             return false;
         }
 
+        if (!isset($this->allowed_routes_resource)) {return false;}
+
         $allowed_endpoints = require $this->resource_path .
             $this->allowed_routes_resource;
 
