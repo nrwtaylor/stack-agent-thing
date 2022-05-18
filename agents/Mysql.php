@@ -473,9 +473,9 @@ try {
             //                'made MYSQL record.',
             //                "INFORMATION"
             //            );
-
-            return true;
-            return $query;
+            return $uuid;
+            //return true;
+            //return $query;
         } catch (\Exception $e) {
             //           $this->thing->log(
             //                'could not create MySQL record.',

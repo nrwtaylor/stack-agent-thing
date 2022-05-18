@@ -476,6 +476,7 @@ class Database
                 $this->available_stacks["mysql"]["response"] = $response;
             }
 
+
             if ($stack_infrastructure == "memory") {
                 $response = $this->stack_handlers["memory"]->createMemory(
                     $subject,
@@ -485,18 +486,36 @@ class Database
             }
 
             if ($stack_infrastructure == "mongo") {
+
                 $response = $this->stack_handlers["mongo"]->createMongo(
                     $subject,
                     $to
                 );
-                $this->available_stacks["memory"]["response"] = $response;
+
+// Mongo agent returns true for failure condition.
+// And uuid for success.
+// Test for this here.
+// dev other agents to return similar response.
+// This should be the model.
+
+$conditioned_response = true;
+if (($response == true) or ($response == false)) {
+  $conditioned_response = false;
+}
+
+                $this->available_stacks["mongo"]["response"] = $conditioned_response;
+
             }
+
         }
 
+        // Test for valid response.
+        // Either true or a uuid.
+        // dev stack handlers to respond with uuids (not true).
         foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
             if (
                 isset($stack_descriptor["response"]) and
-                $stack_descriptor["response"] === true
+                ($stack_descriptor["response"] === true)
             ) {
                 return true;
             }
@@ -505,6 +524,10 @@ class Database
         return false;
     }
 
+
+    public function getDatabase() {
+       $this->Get();
+    }
     /**
      *
      * @return unknown
@@ -543,7 +566,6 @@ class Database
                     $thing["mongo"] = $this->stack_handlers[
                         $stack["infrastructure"]
                     ]->getMongo($this->uuid);
-//var_dump("getMongo", $this->uuid, $thing['mongo']);
 
                     break;
 
@@ -581,25 +603,69 @@ class Database
         }
 
         // dev decide which thing is most authorative.
+
+        // There should only be one return with a matching uuid.
+        // Because stacks cannot create a defined uuid.
+        // So uuid is unique.
+
         // merge?
-        $thing = $thing["mysql"];
+//var_dump("mongo Daatabase", $thing['mongo']);
 
-        /*
-if (is_array($thing)) {
+        //$thing = $thing["mysql"];
 
-if (count($thing) == 0) {
-$thing = false;
+// Here is a test.
+//var_dump($thing);
+
+$candidate_things = [];
+foreach($thing as $service=>$candidate_thing) {
+//if ($candidate_thing == null) {continue;}
+//if ($candidate_thing == false) {continue;}
+//if ($candidate_thing == true) {continue;}
+if (is_object($candidate_thing)) {
+//if (!is_array($candidate_thing)) {continue;}
+$candidate_things[$service] = $candidate_thing;
+}
+}
+//var_dump($candidate_things);
+//exit();
+//var_dump($candidate_things);
+$authorative_thing = false;
+if (is_array($candidate_things)) {
+
+  if (count($candidate_things) == 0) {
+    $authorative_thing = false;
+  }
+
+  // More than one match is an error (true) condition.
+  if (count($candidate_things) > 1) {
+    //$thing = $thing[array_key_first($thing)];
+    $authorative_thing = true;
+  }
+
+  if (count($candidate_things) == 1) {
+    $authorative_thing = $candidate_things[array_key_first($candidate_things)];
+  }
 }
 
-if (count($thing) >= 1) {
-$thcing = $thing[array_key_first($thing)];
+/*
+foreach($thing as $service=>$t) {
+var_dump("service", $service);
+if (is_array($t)) {
+var_dump("array");
+} else if (is_object($t)) {
+var_dump("object");
+} else {
+var_dump($t);
 }
-
-
 }
 */
+
+// For now only recognize mysql stack.
+
+$authorative_thing=$thing['mysql'];
+
         $thingreport = [
-            "thing" => $thing,
+            "thing" => $authorative_thing,
             "info" =>
                 "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing " .
                 $this->web_prefix .
