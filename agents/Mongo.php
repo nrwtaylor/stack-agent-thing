@@ -46,7 +46,7 @@ class Mongo extends Agent
             return;
         }
         $this->statusMongo('error');
-        var_dump("error: " . $text);
+        //var_dump("error: " . $text);
         $this->error = $text;
 
         if (!isset($this->response)) {
@@ -388,7 +388,7 @@ class Mongo extends Agent
             $value = $variable[0];
         }
         $value['uuid'] = $key;
-        //var_dump("value", $value);
+
         try {
             $result = $this->collection->updateOne($condition, [
                 '$set' => $value,
