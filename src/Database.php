@@ -138,7 +138,6 @@ class Database
                 $handler = $this->connectDatabase($candidate_service);
             } catch (\Throwable $t) {
             } catch (\Error $ex) {
-
             }
 
             if ($handler !== true) {
@@ -379,46 +378,41 @@ class Database
      * @param unknown $field_text
      * @param unknown $string_text
      */
-    public function writeField($field_text, $string_text, $uuid = null)
+    public function writeDatabase($field_text, $string_text, $uuid = null)
     {
         foreach (
             $this->active_stacks
             as $active_service_name => $active_service
         ) {
             if ($active_service_name == "mysql") {
-                $r = $this->stack_handlers["mysql"]->writeField(
+                $r = $this->stack_handlers["mysql"]->writeMysql(
                     $field_text,
                     $string_text
                 );
             }
             if ($active_service_name == "memcached") {
-                $key = $this->stack_handlers["memcached"]->writeField(
+                $key = $this->stack_handlers["memcached"]->writeMemcached(
                     $field_text,
                     $string_text
                 );
                 //if ($key === true) {return true;}
             }
+
+            if ($active_service_name == "memory") {
+                $key = $this->stack_handlers["memory"]->writeMemory(
+                    $field_text,
+                    $string_text
+                );
+                //if ($key === true) {return true;}
+            }
+
 
             if ($active_service_name == "mongo") {
                 $key = $this->stack_handlers["mongo"]->writeMongo(
                     $field_text,
                     $string_text
                 );
-                //if ($key === true) {return true;}
             }
-            /*
-        if ($active_service == "memory") {
-            $memory = $this->stack_handlers["memory"]->set($key, $value);
-
-            if ($memory === false) {
-                return true;
-            } //error
-            if ($memory === true) {
-                return $value;
-            } // success
-            return true; // error
-        }
-*/
         }
     }
 
@@ -445,6 +439,7 @@ class Database
      */
     function readField($field)
     {
+
         $thingreport = $this->Get();
 
         $this->thing = $thingreport["thing"];
@@ -469,53 +464,52 @@ class Database
         foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
             $stack_infrastructure = $stack_descriptor["infrastructure"];
             if ($stack_infrastructure == "mysql") {
-                $response = $this->stack_handlers["mysql"]->createMysql(
+                $uuid = $this->stack_handlers["mysql"]->createMysql(
                     $subject,
                     $to
                 );
-                $this->available_stacks["mysql"]["response"] = $response;
+                $this->available_stacks["mysql"]["uuid"] = $uuid;
             }
 
-
             if ($stack_infrastructure == "memory") {
-                $response = $this->stack_handlers["memory"]->createMemory(
+                $uuid = $this->stack_handlers["memory"]->createMemory(
                     $subject,
                     $to
                 );
-                $this->available_stacks["memory"]["response"] = $response;
+                $this->available_stacks["memory"]["uuid"] = $uuid;
+            }
+
+            if ($stack_infrastructure == "memcached") {
+                $uuid = $this->stack_handlers["memcached"]->createMemcached(
+                    $subject,
+                    $to
+                );
+                $this->available_stacks["memcached"]["uuid"] = $uuid;
             }
 
             if ($stack_infrastructure == "mongo") {
-
-                $response = $this->stack_handlers["mongo"]->createMongo(
+                $uuid = $this->stack_handlers["mongo"]->createMongo(
                     $subject,
                     $to
                 );
 
-// Mongo agent returns true for failure condition.
-// And uuid for success.
-// Test for this here.
-// dev other agents to return similar response.
-// This should be the model.
+                // Mongo agent returns true for failure condition.
+                // And uuid for success.
+                // Test for this here.
+                // dev other agents to return similar response.
 
-$conditioned_response = true;
-if (($response == true) or ($response == false)) {
-  $conditioned_response = false;
-}
-
-                $this->available_stacks["mongo"]["response"] = $conditioned_response;
-
+                // This should be the model.
+                $this->available_stacks["mongo"]["uuid"] = $uuid;
             }
-
         }
-
-        // Test for valid response.
+        var_dump($this->available_stacks);
+        // Test for at least one valid response.
         // Either true or a uuid.
         // dev stack handlers to respond with uuids (not true).
         foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
             if (
-                isset($stack_descriptor["response"]) and
-                ($stack_descriptor["response"] === true)
+                isset($stack_descriptor["uuid"]) and
+                $this->isUuid($stack_descriptor["uuid"])
             ) {
                 return true;
             }
@@ -524,15 +518,29 @@ if (($response == true) or ($response == false)) {
         return false;
     }
 
+    // dev
+    public function isUuid($text)
+    {
+        $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
+        preg_match_all($pattern, $text, $m);
 
-    public function getDatabase() {
-       $this->Get();
+        $arr = $m[0];
+
+        if (count($arr) == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    public function getDatabase()
+    {
+        $this->Get();
     }
     /**
      *
      * @return unknown
      */
-    function Get()
+    function Get($uuid = null)
     {
         // But we don't need to find, it because the UUID is randomly created.
         // Chance of collision super-super-small.
@@ -541,128 +549,114 @@ if (($response == true) or ($response == false)) {
 
         // Get first available.
 
-        //        $thing = false;
+        //if ($uuid == null) {$uuid = $this->uuid;}
+
+            if ($uuid == null) {
+               $uuid = $this->uuid;
+            }
+
         $thing = [];
         foreach ($this->available_stacks as $stack_name => $stack) {
             switch ($stack["infrastructure"]) {
                 case "mysql":
                     $thing["mysql"] = $this->stack_handlers[
                         $stack["infrastructure"]
-                    ]->getMysql();
-
-                    //          if ($thing['mysql'] !== false and $thing['mysql'] !== true) {
-                    //              break 2;
-                    //          }
-
-                    //if ($thing === false) {$thing = $thing['mysql'];}
+                    ]->getMysql($uuid);
                     break;
                 case "memcached":
                     $thing["memcached"] = $this->stack_handlers[
                         $stack["infrastructure"]
-                    ]->getMemcached($this->uuid);
+                    ]->getMemcached($uuid);
+                    break;
+
+                case "memory":
+                    $thing["memory"] = $this->stack_handlers[
+                        $stack["infrastructure"]
+                    ]->getMemory($uuid);
                     break;
 
                 case "mongo":
                     $thing["mongo"] = $this->stack_handlers[
                         $stack["infrastructure"]
-                    ]->getMongo($this->uuid);
+                    ]->getMongo($uuid);
 
-                    break;
+     break;
 
-                //                    if ($thing !== false and $thing !== true) {
-                //                        break 2;
-                //                   }
-
-                /*
-                case "mongo":
-                    break;
-                case "memory":
-                    $thing = $this->stack_handlers[
-                        $stack["infrastructure"]
-                    ]->getMemory($this->uuid);
-
-                    if ($thing !== false and $thing !== true) {
-                        break 2;
-                    }
-*/
-                /*
-                    if ($thing !== false) {
-                        //$thing = new Thing(null);
-                        //$thing->created_at = null;
-                        //$thing->nom_to = null;
-                        //$thing->nom_from = null;
-              c          //$thing->task = "empty task";
-                        //$thing->variables = json_encode($t, true);
-                        //$thing->settings = null;
-                        break;
-                    }
-*/
-
-                //break 2;
             }
         }
-
-        // dev decide which thing is most authorative.
 
         // There should only be one return with a matching uuid.
         // Because stacks cannot create a defined uuid.
         // So uuid is unique.
 
         // merge?
-//var_dump("mongo Daatabase", $thing['mongo']);
+        //var_dump("mongo Daatabase", $thing['mongo']);
 
         //$thing = $thing["mysql"];
 
-// Here is a test.
-//var_dump($thing);
+        // Here is a test.
+        //var_dump($thing);
 
-$candidate_things = [];
-foreach($thing as $service=>$candidate_thing) {
-//if ($candidate_thing == null) {continue;}
-//if ($candidate_thing == false) {continue;}
-//if ($candidate_thing == true) {continue;}
-if (is_object($candidate_thing)) {
-//if (!is_array($candidate_thing)) {continue;}
-$candidate_things[$service] = $candidate_thing;
-}
-}
-//var_dump($candidate_things);
-//exit();
-//var_dump($candidate_things);
-$authorative_thing = false;
-if (is_array($candidate_things)) {
+        $candidate_things = [];
+        foreach ($thing as $service => $candidate_thing) {
+            //if ($candidate_thing == null) {continue;}
+            //if ($candidate_thing == false) {continue;}
+            //if ($candidate_thing == true) {continue;}
+            if (is_object($candidate_thing)) {
+                //if (!is_array($candidate_thing)) {continue;}
+                $candidate_things[$service] = $candidate_thing;
+            }
 
-  if (count($candidate_things) == 0) {
-    $authorative_thing = false;
-  }
 
-  // More than one match is an error (true) condition.
-  if (count($candidate_things) > 1) {
-    //$thing = $thing[array_key_first($thing)];
-    $authorative_thing = true;
-  }
+// Thing is expecting an object.
+            if (is_array($candidate_thing)) {
+                //if (!is_array($candidate_thing)) {continue;}
+                $candidate_things[$service] = (object) $candidate_thing;
+            }
 
-  if (count($candidate_things) == 1) {
-    $authorative_thing = $candidate_things[array_key_first($candidate_things)];
-  }
-}
 
+        }
 /*
-foreach($thing as $service=>$t) {
-var_dump("service", $service);
-if (is_array($t)) {
-var_dump("array");
-} else if (is_object($t)) {
-var_dump("object");
-} else {
-var_dump($t);
-}
+var_dump("uuid ". $uuid);
+foreach($candidate_things as $service=>$t) {
+
+var_dump("candidate thing ". $service . " " .  $t->uuid);
+//var_dump($t);
+
 }
 */
+/*
+        $authorative_thing = false;
+        if (is_array($candidate_things)) {
+            //var_dump("candidate_things", $candidate_things);
+            if (count($candidate_things) == 0) {
+                $authorative_thing = false;
+            }
 
-// For now only recognize mysql stack.
+            // More than one match is an error (true) condition.
+            if (count($candidate_things) > 1) {
+                //$thing = $thing[array_key_first($thing)];
+                $authorative_thing = true;
+            }
 
-$authorative_thing=$thing['mysql'];
+            if (count($candidate_things) == 1) {
+                $authorative_thing =
+                    $candidate_things[array_key_first($candidate_things)];
+            }
+        }
+*/
+ $authorative_thing = $thing['mysql'];
+
+//$authorative_thing = $thing['memory'];
+
+/*
+$thing = (object) ["nom_to"=>$this->from,
+          "nom_from"=>$this->to,
+          "task"=>$this->subject,
+          "associations"=>null];
+$authorative_thing = $thing;
+*/
+
 
         $thingreport = [
             "thing" => $authorative_thing,
@@ -754,6 +748,7 @@ $authorative_thing=$thing['mysql'];
             "help" => "Finds associated things.",
         ];
 
+                     if ($uuid == null) {$uuid = $this->uuid;}
         if ($this->stack["infrastructure"] == "mysql") {
             $thing_report = $this->stack_handlers[
                 "mysql"

@@ -42,6 +42,7 @@ class Mongo extends Agent
 
     public function errorMongo($text = null)
     {
+        var_dump("error" . $text);
         if ($text == null) {
             return;
         }
@@ -81,26 +82,24 @@ class Mongo extends Agent
             return;
         }
 
-        $things = $this->collection->find(["from" => $nom_from]);
+        $things = $this->collection->find(["nom_from" => $nom_from]);
 
         foreach ($things as $object_key => $thing) {
             $conditioned_things[$thing['uuid']] = $thing;
         }
 
         usort($conditioned_things, function ($first, $second) {
-
-            // dev
-            // Deprecated: strtotime(): Passing null to parameter #1 ($datetime)
-            // of type string is deprecated in ... Mongo.php on line 95
-
-
             // dev Allow null fields in sort.
-            //if ($first['created_at'] == null) {return +2;}
-            //if ($second['created_at'] == null) {return -2;}
-            return strtotime($first['created_at']) <
+            if ($first['created_at'] == null) {
+                return +1;
+            }
+            if ($second['created_at'] == null) {
+                return -1;
+            }
+
+            return strtotime($first['created_at']) -
                 strtotime($second['created_at']);
         });
-
         $obj = $conditioned_things[0];
 
         $arr = (array) $obj;
@@ -127,15 +126,20 @@ class Mongo extends Agent
         $test_create_uuid = $this->createMongo("test create mongo", "mongo");
         $test_response .= "Created Mongo thing . " . $test_create_uuid . ". ";
         $prior_thing = $this->priorMongo();
-        $test_response .= "Got prior thing " . $prior_thing['uuid'] . " " . $prior_thing['subject'] . ". ";
+        $test_response .=
+            "Got prior thing " .
+            $prior_thing['uuid'] .
+            " " .
+            $prior_thing['subject'] .
+            ". ";
         // Test will fail if this uuid does not exist in database.
 
         $uuid = $test_create_uuid;
         $thing = [
             //            "uuid" => $uuid,
-            "subject" => $this->subject,
-            "from" => $this->from,
-            "to" => $this->to,
+            "task" => $this->subject,
+            "nom_from" => $this->from,
+            "nom_to" => $this->to,
             "settings" => null,
             "variables" => null,
         ];
@@ -176,7 +180,6 @@ class Mongo extends Agent
         }
 
         $existing = $this->getMongo($this->uuid);
-
         //$variables = $existing['variables'];
         // Hmmm
         // Ugly but do this for now.
@@ -212,9 +215,11 @@ class Mongo extends Agent
         if (is_array($existing)) {
             $d = array_replace_recursive($existing, $data);
         }
-
+        //var_dump("u", $this->uuid);
+        //var_dump("e", $d);
         // In development
-        $this->setMongo($this->uuid, $d);
+        $uuid = $this->setMongo($this->uuid, $d);
+        //var_dump("r", $uuid);
     }
 
     function run()
@@ -246,7 +251,10 @@ class Mongo extends Agent
         if ($result == null) {
             return true;
         }
-        return iterator_to_array($result);
+        $thing = iterator_to_array($result);
+        unset($thing['_id']);
+        return $thing;
+        //        return iterator_to_array($result);
     }
 
     public function createMongo($subject, $to)
@@ -288,9 +296,9 @@ class Mongo extends Agent
         }
 
         $thing = [
-            "subject" => $subject,
-            "from" => $from,
-            "to" => $this->to,
+            "task" => $subject,
+            "nom_from" => $from,
+            "nom_to" => $this->to,
             "created_at" => $created_at,
             "variables" => null,
         ];
@@ -311,9 +319,8 @@ class Mongo extends Agent
 
         $thing['uuid'] = $uuid;
 
-
         try {
-           $result = $this->collection->insertOne($thing);
+            $result = $this->collection->insertOne($thing);
         } catch (\Throwable $t) {
             $this->errorMongo($t->getMessage());
             return true;
@@ -338,7 +345,9 @@ class Mongo extends Agent
 
         if (isset($variable['uuid'])) {
             if ($variable['uuid'] != $key and $key != null) {
-                $this->errorMongo("Thing update requested with inconsistent uuids.");
+                $this->errorMongo(
+                    "Thing update requested with inconsistent uuids."
+                );
                 return;
             }
 
@@ -464,11 +473,10 @@ class Mongo extends Agent
 
         $text_response = $this->response;
 
-
-        $empty_agent = new _Empty($this->thing, "empty");
-        if ($empty_agent->isEmpty($this->response)) {
-            $text_response = "Mongo connector responded. ";
-        }
+        //        $empty_agent = new _Empty($this->thing, "empty");
+        //        if ($empty_agent->isEmpty($this->response)) {
+        //            $text_response = "Mongo connector responded. ";
+        //        }
 
         $sms = "MONGO | " . $text_response;
 
@@ -479,6 +487,8 @@ class Mongo extends Agent
     public function readSubject()
     {
         $input = $this->assert($this->input);
+        $uuid = $this->extractUuid($input);
+
         if ($input == "test") {
             $this->mongo_test_flag = "on";
             $this->testMongo();
@@ -486,8 +496,28 @@ class Mongo extends Agent
 
         if ($input == "prior") {
             $prior_thing = $this->priorMongo();
-            $this->response .= "Got prior thing " . $prior_thing['uuid'] . " " . $prior_thing['subject'] . ". ";
+            $this->response .=
+                "Got prior thing " .
+                $prior_thing['uuid'] .
+                " " .
+                $prior_thing['subject'] .
+                ". ";
+        }
 
+        if ($this->hasText($input, 'get')) {
+            //    if ($input == "get") {
+            var_dump($uuid);
+            $thing = $this->getMongo($uuid);
+            var_dump($thing);
+            $this->response .=
+                "Got thing " . $uuid . " " . $thing['subject'] . ". ";
+        }
+        if ($this->hasText($input, 'create')) {
+            //    if ($input == "create") {
+            var_dump($uuid);
+            $create_mongo_uuid = $this->createMongo("foo", "bar");
+            var_dump($thing);
+            $this->response .= "Created " . $create_mongo_uuid . ". ";
         }
     }
 }

@@ -59,32 +59,8 @@ class Mysql extends Agent
 
     public function initMysql()
     {
-        /*
-        if ($uuid == null) {
-            $uuid = $this->uuid;
-        }
-        if ($nom_from == null) {
-            $nom_from = $this->from;
-        }
-echo "initMysql";
-        if ($nom_from == null and $uuid == null) {
-            throw new \Exception('No
-			$nom_from and $uuid provided to Class Db.');
-        }
+        $this->statusMysql('loading');
 
-        if ($nom_from == null) {
-            throw new \Exception('No $nom_from provided to
-			Class Db.');
-        }
-
-        if ($uuid == null) {
-            throw new \Exception('No $uuid provided to
-			Class Db.');
-        }
-echo "fopo";
-        $this->from = $nom_from;
-        $this->uuid = $uuid;
-*/
         // create ontainer and configure it
 
         $settings = require $GLOBALS["stack_path"] . "private/settings.php";
@@ -140,15 +116,6 @@ echo "fopo";
             $this->pass = $db["pass"];
         }
         // https://stackoverflow.com/questions/6263443/pdo-connection-test/6263868#6263868
-        /*
-try {
-    $this->pdo = new PDO($cfg['DB'], $cfg['DB_USER'], $cfg['DB_PASS'],
-        array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
-} catch {
-    echo("Can't open the database.");
-}
-*/
-        $this->error = null;
         try {
             $pdo = new PDO(
                 "mysql:host=" . $this->host . ";dbname=" . $this->dbname,
@@ -159,13 +126,11 @@ try {
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             $this->pdo = $pdo;
+            $this->statusMysql('ready');
         } catch (\Throwable $t) {
-            $this->error = "Could not connect to MySQL database";
             $this->errorMysql($t->getMessage());
         } catch (\Error $ex) {
             $this->errorMysql($ex->getMessage());
-
-            $this->error = "Could not connect to MySQL database";
         }
     }
 
@@ -174,11 +139,32 @@ try {
         if ($text == null) {
             return;
         }
+
+        $this->statusMysql('error');
+        $this->error = $text;
+
         if (!isset($this->response)) {
             $this->response = "";
         }
         $this->response .= $text . " ";
     }
+
+    public function statusMysql($text = null)
+    {
+        if ($text != null) {
+            $this->status = $text;
+        }
+        return $this->status;
+    }
+
+    public function isReadyMysql()
+    {
+        if (isset($this->status) and $this->status == 'ready') {
+            return true;
+        }
+        return false;
+    }
+
     function get()
     {
     }
@@ -322,12 +308,13 @@ try {
      * @param unknown $field_text
      * @param unknown $string_text
      */
-    function writeField($field_text, $string_text)
+    function writeMysql($field_text, $string_text)
     {
         // merp
         if (strlen($string_text) > 100000) {
             //var_dump($string_text);
-            $this->error .= "Field length exceeded.";
+            //$this->error .= "Field length exceeded.";
+            $this->errorMysql("Field length exceeded.");
             $string_text = json_encode(["mysql" => ["field length exceed"]]);
             // Do not write field if too large.
             //return;
@@ -355,16 +342,17 @@ try {
             $sth->execute();
 
             if (!$sth) {
-                $this->error .= $sth->errorInfo();
+                //$this->error .= $sth->errorInfo();
+                $this->errorMysql($sth->errorInfo());
             }
 
             $this->last_update = false;
         } catch (\PDOException $e) {
-            $this->error .= $e->getMessage();
+            $this->errorMysql($e->getMessage());
         } catch (\Throwable $e) {
-            $this->error .= $e->getMessage();
+            $this->errorMysql($e->getMessage());
         } catch (\Exception $e) {
-            $this->error .= $e->getMessage();
+            $this->errorMysql($e->getMessage());
 
             $thing = false;
             $this->last_update = true;
@@ -390,11 +378,11 @@ try {
             $thing_count = $sth->fetchColumn();
             $info = "Counted " . $thing_count . "  records on stack.";
         } catch (\PDOException $e) {
-            $this->error .= $e->getMessage();
+            $this->errorMysql($e->getMessage());
         } catch (\Throwable $e) {
-            $this->error .= $e->getMessage();
+            $this->errorMysql($e->getMessage());
         } catch (\Exception $e) {
-            $this->error .= $e->getMessage();
+            $this->errorMysql($e->getMessage());
 
             //            $thing = false;
             //            $this->last_update = true;
@@ -439,8 +427,8 @@ try {
      */
     function createMysql($subject, $to)
     {
-        if (!isset($this->pdo) or $this->pdo == null) {
-            return false;
+        if (!$this->isReadyMysql()) {
+            return true;
         }
         try {
             // Create a new record in the db for the Thing.
@@ -497,7 +485,8 @@ try {
             $query = null;
             $thing = false;
             $this->last_update = true;
-            return false;
+            return true;
+            //return false;
         }
     }
 
@@ -507,14 +496,22 @@ try {
      */
     //function Get()
 
-    function getMysql()
+    function getMysql($uuid = null)
     {
         // But we don't need to find, it because the UUID is randomly created.
         // Chance of collision super-super-small.
         // So just return the contents of thing.  false if it doesn't exist.
-        if (!isset($this->pdo) or $this->pdo == null) {
-            return false;
+        //        if (!isset($this->pdo) or $this->pdo == null) {
+        //            return false;
+        //        }
+        if (!$this->isReadyMysql()) {
+            return true;
         }
+
+        if ($uuid == null) {
+            $uuid = $this->uuid;
+        }
+
         try {
             // Trying long form.  Doesn't seme to have performance advantage.
             //            $sth = $this->pdo->prepare(
@@ -525,7 +522,7 @@ try {
             $sth = $this->pdo->prepare($query);
 
             //$sth = $this->container->db->prepare("SELECT * FROM stack WHERE uuid=:uuid");
-            $sth->bindParam("uuid", $this->uuid);
+            $sth->bindParam("uuid", $uuid);
 
             $sth->execute();
 
@@ -557,6 +554,10 @@ try {
      */
     function forgetMysql($uuid = null)
     {
+        if (!$this->isReadyMysql()) {
+            return true;
+        }
+
         if ($uuid == null) {
             $uuid = $this->uuid;
         }

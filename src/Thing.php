@@ -71,8 +71,6 @@ class Thing
         $url = $GLOBALS['stack_path'] . 'private/settings.php';
         $settings = require $url;
 
-        //        $settings = require $url;
-
         $this->container = new \Slim\Container($settings);
 
         //$this->container = $app->getContainer();
@@ -854,7 +852,7 @@ echo "Previous uuid got " . ($prior_uuid) . "\n";
 
 $thing = false;
 if (isset($this->db)) {
-        $thingreport = $this->db->Get($this->uuid);
+        $thingreport = $this->db->Get();
         $thing = $thingreport['thing'];
 }
 
