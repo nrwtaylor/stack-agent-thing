@@ -406,7 +406,6 @@ class Database
                 //if ($key === true) {return true;}
             }
 
-
             if ($active_service_name == "mongo") {
                 $key = $this->stack_handlers["mongo"]->writeMongo(
                     $field_text,
@@ -439,7 +438,6 @@ class Database
      */
     function readField($field)
     {
-
         $thingreport = $this->Get();
 
         $this->thing = $thingreport["thing"];
@@ -551,9 +549,9 @@ class Database
 
         //if ($uuid == null) {$uuid = $this->uuid;}
 
-            if ($uuid == null) {
-               $uuid = $this->uuid;
-            }
+        if ($uuid == null) {
+            $uuid = $this->uuid;
+        }
 
         $thing = [];
         foreach ($this->available_stacks as $stack_name => $stack) {
@@ -580,8 +578,7 @@ class Database
                         $stack["infrastructure"]
                     ]->getMongo($uuid);
 
-     break;
-
+                    break;
             }
         }
 
@@ -607,16 +604,13 @@ class Database
                 $candidate_things[$service] = $candidate_thing;
             }
 
-
-// Thing is expecting an object.
+            // Thing is expecting an object.
             if (is_array($candidate_thing)) {
                 //if (!is_array($candidate_thing)) {continue;}
                 $candidate_things[$service] = (object) $candidate_thing;
             }
-
-
         }
-/*
+        /*
 var_dump("uuid ". $uuid);
 foreach($candidate_things as $service=>$t) {
 
@@ -625,7 +619,7 @@ var_dump("candidate thing ". $service . " " .  $t->uuid);
 
 }
 */
-/*
+        /*
         $authorative_thing = false;
         if (is_array($candidate_things)) {
             //var_dump("candidate_things", $candidate_things);
@@ -645,18 +639,17 @@ var_dump("candidate thing ". $service . " " .  $t->uuid);
             }
         }
 */
- $authorative_thing = $thing['mysql'];
+        $authorative_thing = $thing['mysql'];
 
-//$authorative_thing = $thing['memory'];
+        //$authorative_thing = $thing['memory'];
 
-/*
+        /*
 $thing = (object) ["nom_to"=>$this->from,
           "nom_from"=>$this->to,
           "task"=>$this->subject,
           "associations"=>null];
 $authorative_thing = $thing;
 */
-
 
         $thingreport = [
             "thing" => $authorative_thing,
@@ -748,7 +741,9 @@ $authorative_thing = $thing;
             "help" => "Finds associated things.",
         ];
 
-                     if ($uuid == null) {$uuid = $this->uuid;}
+        if ($uuid == null) {
+            $uuid = $this->uuid;
+        }
         if ($this->stack["infrastructure"] == "mysql") {
             $thing_report = $this->stack_handlers[
                 "mysql"

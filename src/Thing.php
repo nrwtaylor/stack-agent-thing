@@ -193,6 +193,9 @@ class Thing
 
             // And then we pull out some Thing related svariables and settings.
 
+            $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
+
+
             $this->container['thing'] = function ($c) {
                 $db = $c['settings']['thing'];
                 return $db;
@@ -369,6 +372,7 @@ $function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedenc
         if ($from == null) {
             $from = 'null' . $this->mail_postfix;
         }
+var_dump("from", $from);
         $message0 = [];
         $message0['50 words'] = null;
         $message0['500 words'] = null;
@@ -384,9 +388,11 @@ $function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedenc
             $message0['50 words'] .=
                 $this->uuid . " found and removed an @ sign";
         }
-if (!isset($this->db)) {
+
+
+//if (!isset($this->db)) {
         $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>$from] );
-}
+//}
 
         $this->log("Create. Database connector made.");
 
@@ -572,6 +578,35 @@ And review Agent variables.
 
     public function Read($path) {
         $this->json->setField("variables");
+
+
+/*
+
+        $json_data = $this->db->readField("variables");
+        $array_data = $this->json->jsontoArray($json_data);
+        if ($array_data == false) {
+            return false;
+        }
+
+        $var_path = $this->json->recursive_array_search(
+            $path,
+            $array_data
+        );
+
+        // Report with array's match.
+//var_dump($var_path, $path);
+        if ($var_path == $path) {
+            $value = $this->getValueFromPath($array_data, $var_path);
+        } else {
+            $value = false;
+        }
+
+        return $value;
+*/
+
+
+
+
         return $this->json->readVariable($path);
     }
 
