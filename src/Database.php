@@ -380,6 +380,7 @@ class Database
      */
     public function writeDatabase($field_text, $string_text, $uuid = null)
     {
+if ($string_text == null) {return true;}
         foreach (
             $this->active_stacks
             as $active_service_name => $active_service
@@ -389,7 +390,7 @@ class Database
                     $field_text,
                     $string_text
                 );
-var_dump($r);
+var_dump("r",$field_text,$string_text);
             }
             if ($active_service_name == "memcached") {
                 $key = $this->stack_handlers["memcached"]->writeMemcached(

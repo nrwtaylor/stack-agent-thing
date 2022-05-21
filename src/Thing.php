@@ -482,7 +482,7 @@ return true;
             $message0['500 words'] .= $this->sqlresponse;
 
 $this->uuid = $query;
-
+$this->db->uuid = $query;
 /*
 
         if ($query == true) {
@@ -625,6 +625,9 @@ And review Agent variables.
 
 return;
 if ($path == null) {return true;}
+if ($value == null) {return true;}
+if ($value == false) {return true;}
+
         $json_data = $this->db->readField("variables");
 
         $array_data = $this->json->jsontoArray($json_data);
@@ -634,11 +637,13 @@ if ($path == null) {return true;}
         $json_data = $this->json->arraytoJson($array_data);
 //var_dump($json_data);
         //$t = $this->json->write();
+//var_dump($json_data);
+
                 $last_write = $this->db->writeDatabase(
                     "variables",
                     $json_data
                 );
-var_dump($last_write);
+//var_dump($last_write);
 
         // Failing to write a variable isn't a problem.
         // The agents will do what they can.
