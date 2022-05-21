@@ -442,6 +442,7 @@ var_dump("from", $from);
         $this->created_at = time();
 
         if ($query == true) {
+return true;
             // will return true if successfull else it will return false
 
             // This increases the expectation of unreliability.
@@ -474,6 +475,16 @@ var_dump("from", $from);
             return true;
         }
 
+            $this->sqlresponse = "New record created successfully.";
+            $this->to = $to;
+            $this->from = $from;
+            $this->subject = $subject;
+            $message0['500 words'] .= $this->sqlresponse;
+
+$this->uuid = $query;
+
+/*
+
         if ($query == true) {
             $this->sqlresponse = "New record created successfully.";
             $this->to = $to;
@@ -488,7 +499,7 @@ var_dump("from", $from);
 //return $this->Get();
             //return false;
         }
-
+*/
         // Create new accounts.  Still under development as of 25 April.
         // Credit and debit records testing pass.
 
@@ -577,10 +588,8 @@ And review Agent variables.
 */
 
     public function Read($path) {
-        $this->json->setField("variables");
+//        $this->json->setField("variables");
 
-
-/*
 
         $json_data = $this->db->readField("variables");
         $array_data = $this->json->jsontoArray($json_data);
@@ -602,17 +611,50 @@ And review Agent variables.
         }
 
         return $value;
-*/
 
 
 
 
-        return $this->json->readVariable($path);
+
+//        return $this->json->readVariable($path);
     }
 
     public function Write($path, $value) {
         $this->json->setField("variables");
         $this->json->writeVariable($path, $value);
+
+return;
+if ($path == null) {return true;}
+        $json_data = $this->db->readField("variables");
+
+        $array_data = $this->json->jsontoArray($json_data);
+
+        $this->json->setValueFromPath($array_data, $path, $value);
+
+        $json_data = $this->json->arraytoJson($array_data);
+//var_dump($json_data);
+        //$t = $this->json->write();
+                $last_write = $this->db->writeDatabase(
+                    "variables",
+                    $json_data
+                );
+var_dump($last_write);
+
+        // Failing to write a variable isn't a problem.
+        // The agents will do what they can.
+
+        //        if ($t === false) {throw new \Exception("Stack write failed.");}
+/*
+        $this->size_overflow = false;
+        if ($t === false) {
+            $this->size_overflow = strlen($this->json_data) - $this->char_max;
+            $this->write_fail_count += 1;
+            $t = new Thing(null);
+            $t->Create("x", "y", "s/ error");
+            $a = new Hey($t);
+        }
+*/
+
     }
 
     public function loadAccounts()

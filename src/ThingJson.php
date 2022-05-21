@@ -178,13 +178,16 @@ class ThingJson
     /**
      *
      */
-    function arraytoJson()
+    function arraytoJson($array_data = null)
     {
+
+        if ($array_data == null) {$array_data = $this->array_data;}
         $this->json_data = json_encode(
-            $this->array_data,
+            $array_data,
             JSON_PRESERVE_ZERO_FRACTION
         );
         $this->thing_array[$this->field] = $this->json_data;
+        return $this->json_data;
     }
 
     /**

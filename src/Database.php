@@ -389,6 +389,7 @@ class Database
                     $field_text,
                     $string_text
                 );
+var_dump($r);
             }
             if ($active_service_name == "memcached") {
                 $key = $this->stack_handlers["memcached"]->writeMemcached(
@@ -509,7 +510,8 @@ class Database
                 isset($stack_descriptor["uuid"]) and
                 $this->isUuid($stack_descriptor["uuid"])
             ) {
-                return true;
+// return first found uuid.
+                return $stack_descriptor["uuid"];
             }
         }
 
