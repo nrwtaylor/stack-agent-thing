@@ -390,13 +390,20 @@ if ($string_text == null) {return true;}
                     $field_text,
                     $string_text
                 );
-var_dump("r",$field_text,$string_text);
+
+var_dump("write Mysql uuid " . $this->stack_handlers['mysql']->uuid, $r);
+var_dump($this->stack_handlers['mysql']->error);
+
+
             }
             if ($active_service_name == "memcached") {
                 $key = $this->stack_handlers["memcached"]->writeMemcached(
                     $field_text,
                     $string_text
                 );
+var_dump("write Memcached uuid " . $this->stack_handlers['memcached']->uuid, $key);
+var_dump($this->stack_handlers['memcached']->error);
+
                 //if ($key === true) {return true;}
             }
 
@@ -405,14 +412,20 @@ var_dump("r",$field_text,$string_text);
                     $field_text,
                     $string_text
                 );
+var_dump("write Memory uuid " . $this->stack_handlers['memory']->uuid, $key);
+var_dump($this->stack_handlers['memory']->error);
                 //if ($key === true) {return true;}
             }
 
             if ($active_service_name == "mongo") {
+
                 $key = $this->stack_handlers["mongo"]->writeMongo(
                     $field_text,
                     $string_text
                 );
+var_dump("write Mongo uuid " . $this->stack_handlers['mongo']->uuid, $key);
+var_dump($this->stack_handlers['mongo']->error);
+
             }
         }
     }
@@ -557,29 +570,48 @@ var_dump("r",$field_text,$string_text);
         }
 
         $thing = [];
+var_dump("Database Get uuid ". $uuid);
+//$available_stacks = $this->available_stacks;
+//if (isset($this->responsive_stacks)) {$available_stacks = $this->responsive_stacks;}
+
         foreach ($this->available_stacks as $stack_name => $stack) {
             switch ($stack["infrastructure"]) {
                 case "mysql":
-                    $thing["mysql"] = $this->stack_handlers[
+                    $result = $this->stack_handlers[
                         $stack["infrastructure"]
                     ]->getMysql($uuid);
+
+if (($result === null) or ($result === false) or ($result === true)) {break;}
+
+//var_dump("Database Get mysql", $result);
+$thing['mysql'] = $result;
                     break;
                 case "memcached":
-                    $thing["memcached"] = $this->stack_handlers[
+                    $result = $this->stack_handlers[
                         $stack["infrastructure"]
                     ]->getMemcached($uuid);
+if (($result === null) or ($result === false) or ($result === true)) {break;}
+//var_dump("Database Get memcached", $result);
+$thing['memcached'] = $result;
                     break;
 
                 case "memory":
-                    $thing["memory"] = $this->stack_handlers[
+                    $result = $this->stack_handlers[
                         $stack["infrastructure"]
                     ]->getMemory($uuid);
+if (($result === null) or ($result === false) or ($result === true)) {break;}
+//var_dump("Database Get memory", $result);
+$thing['memory'] = $result;
+
                     break;
 
                 case "mongo":
-                    $thing["mongo"] = $this->stack_handlers[
+                    $result = $this->stack_handlers[
                         $stack["infrastructure"]
                     ]->getMongo($uuid);
+if (($result === null) or ($result === false) or ($result === true)) {break;}
+//var_dump("Database Get mongo", $result);
+$thing['mongo'] = $result;
 
                     break;
             }
@@ -597,11 +629,13 @@ var_dump("r",$field_text,$string_text);
         // Here is a test.
         //var_dump($thing);
 
+//var_dump("thing", $thing);
+
+        // Deal with resuls coming back as either an array or object.
+        // dev address this - which should it be?
+
         $candidate_things = [];
         foreach ($thing as $service => $candidate_thing) {
-            //if ($candidate_thing == null) {continue;}
-            //if ($candidate_thing == false) {continue;}
-            //if ($candidate_thing == true) {continue;}
             if (is_object($candidate_thing)) {
                 //if (!is_array($candidate_thing)) {continue;}
                 $candidate_things[$service] = $candidate_thing;
@@ -613,15 +647,22 @@ var_dump("r",$field_text,$string_text);
                 $candidate_things[$service] = (object) $candidate_thing;
             }
         }
-        /*
-var_dump("uuid ". $uuid);
+
 foreach($candidate_things as $service=>$t) {
 
-var_dump("candidate thing ". $service . " " .  $t->uuid);
+var_dump("candidate thing ". $service . " " .  $t->uuid, $t->nom_from, $t->task, $t->created_at);
+
+//if (!isset($t->created_at)) {
+//var_dump($service);
+//var_dump($t);
+//exit();
+
+//}
+
 //var_dump($t);
 
 }
-*/
+
         /*
         $authorative_thing = false;
         if (is_array($candidate_things)) {

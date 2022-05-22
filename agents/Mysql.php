@@ -322,9 +322,14 @@ class Mysql extends Agent
             return true;
         }
 
-        if (!isset($this->pdo)) {
+//        if (!isset($this->pdo)) {
+//            return true;
+//        }
+
+        if (!$this->isReadyMysql()) {
             return true;
         }
+
 
         $uuid = $this->uuid;
 
@@ -349,15 +354,25 @@ class Mysql extends Agent
             $this->last_update = false;
         } catch (\PDOException $e) {
             $this->errorMysql($e->getMessage());
+
+            $sth = null;
+            return true;
         } catch (\Throwable $e) {
             $this->errorMysql($e->getMessage());
+
+            $sth = null;
+            return true;
         } catch (\Exception $e) {
             $this->errorMysql($e->getMessage());
 
             $thing = false;
             $this->last_update = true;
+
+            $sth = null;
+            return true;
         }
         $sth = null;
+        return $this->uuid;
     }
 
     /**

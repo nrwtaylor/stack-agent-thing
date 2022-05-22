@@ -176,7 +176,7 @@ class Mongo extends Agent
     public function writeMongo($field_text, $string_json)
     {
         if (!$this->isReadyMongo()) {
-            return;
+            return true;
         }
 
         $existing = $this->getMongo($this->uuid);
@@ -211,6 +211,11 @@ class Mongo extends Agent
         }
 
         $existing = $this->getMongo($this->uuid);
+        if ($existing == false) {
+            $this->errorMongo("Existing uuid not found on write request.");
+            return false;
+        }
+
         $d = $data;
         if (is_array($existing)) {
             $d = array_replace_recursive($existing, $data);
@@ -219,6 +224,10 @@ class Mongo extends Agent
         //var_dump("e", $d);
         // In development
         $uuid = $this->setMongo($this->uuid, $d);
+
+var_dump("Mongo write " . $uuid);
+
+
         //var_dump("r", $uuid);
     }
 
@@ -249,7 +258,7 @@ class Mongo extends Agent
         }
 
         if ($result == null) {
-            return true;
+            return false;
         }
         $thing = iterator_to_array($result);
         unset($thing['_id']);
@@ -506,17 +515,13 @@ class Mongo extends Agent
 
         if ($this->hasText($input, 'get')) {
             //    if ($input == "get") {
-            var_dump($uuid);
             $thing = $this->getMongo($uuid);
-            var_dump($thing);
             $this->response .=
                 "Got thing " . $uuid . " " . $thing['subject'] . ". ";
         }
         if ($this->hasText($input, 'create')) {
             //    if ($input == "create") {
-            var_dump($uuid);
             $create_mongo_uuid = $this->createMongo("foo", "bar");
-            var_dump($thing);
             $this->response .= "Created " . $create_mongo_uuid . ". ";
         }
     }

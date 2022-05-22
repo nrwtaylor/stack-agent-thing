@@ -16,6 +16,8 @@ class Memory extends Agent
 
     public function initMemory()
     {
+        $this->error = null;
+        $this->status = 'loading';
         if (
             isset($this->agent_input) and
             $this->agent_input == 'fallback memory'
@@ -50,6 +52,38 @@ class Memory extends Agent
         }
     }
 
+    public function errorMemory($text = null)
+    {
+        if ($text == null) {
+            return;
+        }
+
+        $this->statusMemory('error');
+        $this->error = $text;
+
+        if (!isset($this->response)) {
+            $this->response = "";
+        }
+        $this->response .= $text . " ";
+    }
+
+    public function statusMemory($text = null)
+    {
+        if ($text != null) {
+            $this->status = $text;
+        }
+        return $this->status;
+    }
+
+    public function isReadyMemory()
+    {
+        if (isset($this->status) and $this->status == 'ready') {
+            return true;
+        }
+        return false;
+    }
+
+
     function run()
     {
         $this->doMemory();
@@ -68,9 +102,15 @@ class Memory extends Agent
         // Hmmm
         // Ugly but do this for now.
         $j = new ThingJson($this->uuid);
-        $j->jsontoarrayJson($string_json);
+//        $j->jsontoarrayJson($string_json);
         $data = $j->jsontoarrayJson($string_json);
+//$data = null;
 
+//        $j->jsontoarrayJson($string_json);
+//        $data = $this->jsontoarrayJson($string_json);
+
+
+var_dump("Memory data", $data);
         $data = ['variables' => $data];
 
         // dev develop associations.
@@ -97,7 +137,9 @@ class Memory extends Agent
 
         $existing = $this->memory->get($this->uuid);
 
-if ($existing == false) {return false;}
+if ($existing == false) {
+$this->errorMemory("Existing uuid not found on write request.");
+return false;}
 
         $d = $data;
         if (is_array($existing)) {
@@ -108,7 +150,12 @@ if ($existing == false) {return false;}
 
         $response = $this->memory->set($this->uuid, $d);
 
-if ($response === true) {return $this->uuid;}
+if ($response === true) {
+var_dump("Memory write OK " . $this->uuid);
+return $this->uuid;}
+
+$this->errorMemory("Write request not successful.");
+
 return true;
 
     }

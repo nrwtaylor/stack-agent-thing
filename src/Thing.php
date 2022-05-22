@@ -483,6 +483,9 @@ return true;
 
 $this->uuid = $query;
 $this->db->uuid = $query;
+
+           $this->json = new ThingJson($this->uuid);
+
 /*
 
         if ($query == true) {
@@ -620,21 +623,33 @@ And review Agent variables.
     }
 
     public function Write($path, $value) {
+
+var_dump("this json uuid", $this->json->uuid);
+var_dump("this uuid", $this->uuid);
         $this->json->setField("variables");
         $this->json->writeVariable($path, $value);
 
 return;
-if ($path == null) {return true;}
-if ($value == null) {return true;}
-if ($value == false) {return true;}
 
+
+//if ($path == null) {return true;}
+//if ($value == null) {return true;}
+//if ($value == false) {return true;}
+var_dump("Thing Write path", $path);
+//var_dump("Thing Write uuid ". $this->uuid  . " path " . implode(" ",$path) . " value " . $value);
+        $this->json->field = "variables";
         $json_data = $this->db->readField("variables");
-
+        $this->json->json_data = $json_data;
         $array_data = $this->json->jsontoArray($json_data);
+        
 
         $this->json->setValueFromPath($array_data, $path, $value);
+//        $this->json->setValueFromPath($this->json->array_data, $path, $value);
+
 
         $json_data = $this->json->arraytoJson($array_data);
+//        $json_data = $this->json->arraytoJson();
+
 //var_dump($json_data);
         //$t = $this->json->write();
 //var_dump($json_data);

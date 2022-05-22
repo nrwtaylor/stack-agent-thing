@@ -61,6 +61,12 @@ class Memcached extends Agent
         }
 
         $existing = $this->mem_cached->get($this->uuid);
+
+        if ($existing == false) {
+            $this->errorMemcached("Existing uuid not found on write request.");
+            return false;
+        }
+
         $d = $data;
         if (is_array($existing)) {
             $d = array_replace_recursive($existing, $data);
@@ -68,7 +74,16 @@ class Memcached extends Agent
 
         // In development
 
-        $this->mem_cached->set($this->uuid, $d);
+        $response = $this->mem_cached->set($this->uuid, $d);
+
+        if ($response === true) {
+            var_dump("Memcached write OK " . $this->uuid);
+            return $this->uuid;
+        }
+
+        $this->errorMemcached("Write request not successful.");
+
+        return true;
     }
 
     public function createMemcached($subject, $to)

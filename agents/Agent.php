@@ -24,6 +24,10 @@ class Agent
      */
     function __construct(Thing $thing = null, $input = null)
     {
+
+        $this->error = null;
+        $this->status = 'loading';
+
         //        if ($thing == false) {
         //           $thing = new Thing(false);
         //$this->thing = false;
@@ -332,6 +336,38 @@ class Agent
                 "ms."
         );
     }
+
+    public function errorAgent($text = null)
+    {
+        if ($text == null) {
+            return;
+        }
+
+        $this->statusMysql('error');
+        $this->error = $text;
+
+        if (!isset($this->response)) {
+            $this->response = "";
+        }
+        $this->response .= $text . " ";
+    }
+
+    public function statusAgent($text = null)
+    {
+        if ($text != null) {
+            $this->status = $text;
+        }
+        return $this->status;
+    }
+
+    public function isReadyAgent()
+    {
+        if (isset($this->status) and $this->status == 'ready') {
+            return true;
+        }
+        return false;
+    }
+
 
     public function variantsAgent(
         $agent_class_name,

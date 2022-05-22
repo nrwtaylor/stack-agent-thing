@@ -163,6 +163,7 @@ class Json
      */
     public function jsontoArray($json_data = null)
     {
+        var_dump("Json jsontoArray called");
         if ($json_data == null) {
             $json_data = $this->json_data;
         }
@@ -171,7 +172,7 @@ class Json
 
         if ($array_data == false) {
             $this->array_data = false;
-            return;
+            return false;
         }
 
         if (is_string($array_data)) {
