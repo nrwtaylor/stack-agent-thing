@@ -391,7 +391,7 @@ var_dump("from", $from);
 
 
 //if (!isset($this->db)) {
-        $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>$from] );
+//        $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>$from] );
 //}
 
         $this->log("Create. Database connector made.");
@@ -431,9 +431,14 @@ var_dump("from", $from);
         //$query = $this->db->Create($subject, $to); // 3s
 
         $query = $this->db->Create($subject, $to); // 3s
+
         $this->log("Create. Database create call completed.");
         $this->to = $to;
         $this->from = $from;
+
+            $this->db = new Database(null, ['uuid'=>$query, 'from'=>$from]);
+
+
         $this->subject = $subject;
 
         $this->agent_input = $agent_input;
@@ -442,7 +447,7 @@ var_dump("from", $from);
         $this->created_at = time();
 
         if ($query == true) {
-return true;
+            return true;
             // will return true if successfull else it will return false
 
             // This increases the expectation of unreliability.
@@ -459,9 +464,9 @@ return true;
 
             return false;
         } else {
-            $error_text = $query->errorInfo();
-            $this->sqlresponse = "Error: " . implode(":", $query->error_text());
-            $message0['50 words'] .= $this->sqlresponse;
+            //$error_text = $query->errorInfo();
+            //$this->sqlresponse = "Error: " . implode(":", $query->error_text());
+            //$message0['50 words'] .= $this->sqlresponse;
         }
 
         if ($to == "error") {
@@ -591,8 +596,6 @@ And review Agent variables.
 */
 
     public function Read($path) {
-//        $this->json->setField("variables");
-
 
         $json_data = $this->db->readField("variables");
         $array_data = $this->json->jsontoArray($json_data);
@@ -606,7 +609,6 @@ And review Agent variables.
         );
 
         // Report with array's match.
-//var_dump($var_path, $path);
         if ($var_path == $path) {
             $value = $this->getValueFromPath($array_data, $var_path);
         } else {
@@ -614,12 +616,6 @@ And review Agent variables.
         }
 
         return $value;
-
-
-
-
-
-//        return $this->json->readVariable($path);
     }
 
     public function Write($path, $value) {
@@ -631,28 +627,23 @@ var_dump("this uuid", $this->uuid);
 
 return;
 
-
-//if ($path == null) {return true;}
-//if ($value == null) {return true;}
-//if ($value == false) {return true;}
+//$this->json = new ThingJson($this->uuid);
 var_dump("Thing Write path", $path);
 //var_dump("Thing Write uuid ". $this->uuid  . " path " . implode(" ",$path) . " value " . $value);
         $this->json->field = "variables";
         $json_data = $this->db->readField("variables");
         $this->json->json_data = $json_data;
+
         $array_data = $this->json->jsontoArray($json_data);
-        
+        $array_data = $this->json->array_data;
+
+var_dump("path", $path);
+var_dump("value", $value);
 
         $this->json->setValueFromPath($array_data, $path, $value);
 //        $this->json->setValueFromPath($this->json->array_data, $path, $value);
 
-
         $json_data = $this->json->arraytoJson($array_data);
-//        $json_data = $this->json->arraytoJson();
-
-//var_dump($json_data);
-        //$t = $this->json->write();
-//var_dump($json_data);
 
                 $last_write = $this->db->writeDatabase(
                     "variables",

@@ -109,8 +109,6 @@ class Memory extends Agent
 //        $j->jsontoarrayJson($string_json);
 //        $data = $this->jsontoarrayJson($string_json);
 
-
-var_dump("Memory data", $data);
         $data = ['variables' => $data];
 
         // dev develop associations.
@@ -154,7 +152,7 @@ if ($response === true) {
 var_dump("Memory write OK " . $this->uuid);
 return $this->uuid;}
 
-$this->errorMemory("Write request not successful.");
+$this->errorMemory("Memory write NOT OK " . $this->uuid);
 
 return true;
 

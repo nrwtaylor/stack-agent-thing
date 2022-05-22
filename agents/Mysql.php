@@ -333,6 +333,8 @@ class Mysql extends Agent
 
         $uuid = $this->uuid;
 
+
+var_dump("Mysql writeMysql uuid " . $uuid);
         try {
             $query = "UPDATE stack SET $field_text=:string_text WHERE uuid=:uuid";
             $sth = $this->pdo->prepare($query);
