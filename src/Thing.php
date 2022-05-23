@@ -596,10 +596,12 @@ And review Agent variables.
 */
 
     public function Read($path) {
-
+        var_dump("Thing Read uuid " . $this->uuid . " path ", $path);
         $json_data = $this->db->readField("variables");
         $array_data = $this->json->jsontoArray($json_data);
         if ($array_data == false) {
+        var_dump("Thing Read array_data " . $array_data);
+
             return false;
         }
 
@@ -615,11 +617,12 @@ And review Agent variables.
             $value = false;
         }
 
+        var_dump("Thing Read value ", $value);
         return $value;
     }
 
     public function Write($path, $value) {
-
+var_dump("Thing Write " . $this->uuid . " path ", $path, $value);
 var_dump("this json uuid", $this->json->uuid);
 var_dump("this uuid", $this->uuid);
         $this->json->setField("variables");

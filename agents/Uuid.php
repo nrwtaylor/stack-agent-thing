@@ -7,8 +7,8 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-//use Ramsey\Uuid\Uuid;
-//use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
+use Ramsey\Uuid\Uuid as RamseyUuid;
+//use Ramsey\Uuid\Exception\UnsatisfiedDependencyException as MerpB;
 
 // Recognizes and handles UUIDS.
 // Does not generate them.  That is a Thing function.
@@ -91,7 +91,7 @@ $uuids = $this->extractUuids($text);
     // dev problem redeclaring class name.
     public static function createUuid() {
 
-        return (string) Uuid::uuid4();
+        return (string) RamseyUuid::uuid4();
 
     }
 

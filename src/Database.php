@@ -21,6 +21,7 @@ use Nrwtaylor\StackAgentThing\Mongo;
 use Nrwtaylor\StackAgentThing\Agent;
 use Nrwtaylor\StackAgentThing\Thing;
 
+
 class Database
 {
     public $var = "hello";
@@ -692,7 +693,7 @@ class Database
 
         foreach ($candidate_things as $service => $t) {
             var_dump(
-                "candidate thing " . $service . " " . $t->uuid,
+                "Database Get candidate thing " . $service . " " . $t->uuid,
                 $t->nom_from,
                 $t->task,
                 $t->created_at
@@ -708,7 +709,7 @@ class Database
             //var_dump($t);
         }
 
-        /*
+
         $authorative_thing = false;
         if (is_array($candidate_things)) {
             //var_dump("candidate_things", $candidate_things);
@@ -727,8 +728,8 @@ class Database
                     $candidate_things[array_key_first($candidate_things)];
             }
         }
-*/
-        $authorative_thing = $thing['mysql'];
+
+//        $authorative_thing = $thing['mysql'];
 
         //$authorative_thing = $thing['memory'];
 

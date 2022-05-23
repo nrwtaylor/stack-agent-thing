@@ -447,14 +447,19 @@ var_dump("Mysql writeMysql uuid " . $uuid);
         if (!$this->isReadyMysql()) {
             return true;
         }
+
+// dev
+$u= Uuid::createUuid();
+
         try {
             // Create a new record in the db for the Thing.
 
             $query = $this->pdo->prepare("INSERT INTO stack
                         (uuid,task,nom_from,nom_to)
                         VALUES (:uuid, :task, :nom_from, :nom_to)");
-
+//var_dump("Mysql createMysql u", $u);
             $uuid = $this->uuid;
+//$uuid = $u;
             $task = $subject;
             $nom_from = $this->from;
 
