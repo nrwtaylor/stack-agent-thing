@@ -22,7 +22,7 @@ class ThingJson
      * @param unknown $uuid
      * @return unknown
      */
-    function __construct($uuid)
+    function __construct($thing = null, $uuid)
     {
         $this->start_time = microtime(true);
         //        $settings = require 'settings.php';
@@ -42,7 +42,6 @@ class ThingJson
         $this->char_max = $this->container['stack']['char_max'];
 
         $this->write_on_destruct = false;
-
         // Consider factor this out.  Json should not need to call
         // Database functions.  Database should do the reading and writing
         // to the database.
@@ -55,7 +54,10 @@ class ThingJson
         // $this->db = new Database(null, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
 
         // new Database(false, ...) creates a read-only thing.
-        $this->db = new Database(null, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
+//        $this->db = new Database(null, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
+       // $uuid = $this->uuid;
+        $this->db = new Database($thing, ['uuid'=>$uuid, 'from'=>'null' . $this->mail_postfix]);
+
         $this->array_data = array();
         $this->json_data = '{}';
 
@@ -539,6 +541,8 @@ return true;
 
             return false;
         } else {
+var_dump("Json Write pre-write");
+
             //$this->thing_array[$this->field] = $this->json_data;
             if ($this->write_on_destruct) {
                 //$this->thing_array[] = array("field"=>$this->field,"data"=>$this->json_data);
@@ -549,6 +553,8 @@ return true;
                     $this->json_data
                 );
             }
+var_dump("ThingJson write done");
+
             return true;
         }
         return;

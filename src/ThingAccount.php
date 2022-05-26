@@ -9,7 +9,7 @@ class ThingAccount
 
     function __construct($uuid, $account_uuid, $account_name)
     {
-        $this->json = new ThingJson($uuid);
+        $this->json = new ThingJson(null, $uuid);
 
         $settings = require $GLOBALS["stack_path"] . "private/settings.php";
 

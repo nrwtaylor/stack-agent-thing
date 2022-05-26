@@ -183,7 +183,7 @@ class Mongo extends Agent
         //$variables = $existing['variables'];
         // Hmmm
         // Ugly but do this for now.
-        $j = new ThingJson($this->uuid);
+        $j = new Json(null, $this->uuid);
         $j->jsontoarrayJson($string_json);
         $data = $j->jsontoarrayJson($string_json);
 
@@ -312,6 +312,10 @@ var_dump("Mongo write " . $uuid);
             "variables" => null,
         ];
 
+// dev
+$uuid = Uuid::createUuid();
+
+/*
         if (isset($this->thing)) {
             if ($this->thing == null) {
                 $t = new Thing(null);
@@ -325,7 +329,7 @@ var_dump("Mongo write " . $uuid);
             $t = new Thing(null);
             $uuid = $t->uuid;
         }
-
+*/
         $thing['uuid'] = $uuid;
 
         try {

@@ -22,7 +22,7 @@ class ThingChoice
      */
     function __construct($uuid, $nom_from = null)
     {
-        $this->json = new ThingJson($uuid);
+        $this->json = new ThingJson(null, $uuid);
 
         $this->uuid = $uuid;
 

@@ -101,7 +101,7 @@ class Memory extends Agent
         }
         // Hmmm
         // Ugly but do this for now.
-        $j = new ThingJson($this->uuid);
+        $j = new Json(null, $this->uuid);
 //        $j->jsontoarrayJson($string_json);
         $data = $j->jsontoarrayJson($string_json);
 //$data = null;
@@ -258,11 +258,15 @@ if (!isset($this->response)) {$this->response = "";}
             }
         }
 
+// dev
+$uuid = Uuid::createUuid();
+/*
+
         if (!isset($this->thing)) {
             $t = new Thing(null);
             $uuid = $t->uuid;
         }
-
+*/
         $thing['uuid'] = $uuid;
 
         try {

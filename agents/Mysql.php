@@ -449,7 +449,7 @@ var_dump("Mysql writeMysql uuid " . $uuid);
         }
 
 // dev
-$u= Uuid::createUuid();
+$uuid = Uuid::createUuid();
 
         try {
             // Create a new record in the db for the Thing.

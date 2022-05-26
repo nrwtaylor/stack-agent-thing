@@ -22,7 +22,7 @@ class Json
      * @param unknown $uuid
      * @return unknown
      */
-    function __construct($uuid)
+    function __construct($thing = null, $uuid)
     {
         $this->start_time = microtime(true);
         //        $settings = require 'settings.php';
@@ -554,6 +554,8 @@ return true;
 
             return false;
         } else {
+var_dump("Json Write pre-write");
+
             //$this->thing_array[$this->field] = $this->json_data;
             if ($this->write_on_destruct) {
                 //$this->thing_array[] = array("field"=>$this->field,"data"=>$this->json_data);
@@ -564,6 +566,7 @@ return true;
                     $this->json_data
                 );
             }
+var_dump("Json Write performed");
             return true;
         }
         return;

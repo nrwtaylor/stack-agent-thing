@@ -193,7 +193,7 @@ class Thing
 
             // And then we pull out some Thing related svariables and settings.
 
-            $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
+            $this->db = new Database($this, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
 
 
             $this->container['thing'] = function ($c) {
@@ -214,13 +214,13 @@ class Thing
 
             // Can't call db here, can only call it when $from is known.
 
-            $this->json = new ThingJson($this->uuid);
+            $this->json = new ThingJson($this, $this->uuid);
 
             $this->log("JSON connector made.");
             $this->log("Made a thing from null.");
 
             // Testing this as of 15 June 2018.  Not used by framework yet.
-            $this->variables = new ThingJson($this->uuid);
+            $this->variables = new ThingJson($this, $this->uuid);
 
             $this->variables->setField("variables");
 
@@ -252,15 +252,15 @@ class Thing
             // Is link to the ->db broken when the Thing is deinstantiated.
             // Assume yes.
 
-            $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
+            $this->db = new Database($this, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
 
             $this->log("Thing made a db connector.");
             // Provide handler for Json translation from/to MySQL.
 var_dump($this->uuid);
-            $this->json = new ThingJson($this->uuid);
+            $this->json = new ThingJson($this, $this->uuid);
 
             // This is a placeholder for refactoring the Thing variables
-            $this->variables = new ThingJson($this->uuid);
+            $this->variables = new ThingJson($this, $this->uuid);
             $this->variables->setField("variables");
             $this->log("Thing made a json connector.");
 
@@ -372,7 +372,6 @@ $function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedenc
         if ($from == null) {
             $from = 'null' . $this->mail_postfix;
         }
-var_dump("from", $from);
         $message0 = [];
         $message0['50 words'] = null;
         $message0['500 words'] = null;
@@ -436,7 +435,7 @@ var_dump("from", $from);
         $this->to = $to;
         $this->from = $from;
 
-            $this->db = new Database(null, ['uuid'=>$query, 'from'=>$from]);
+//            $this->db = new Database(null, ['uuid'=>$query, 'from'=>$from]);
 
 
         $this->subject = $subject;
@@ -489,7 +488,7 @@ var_dump("from", $from);
 $this->uuid = $query;
 $this->db->uuid = $query;
 
-           $this->json = new ThingJson($this->uuid);
+           $this->json = new ThingJson($this, $this->uuid);
 
 /*
 
@@ -622,9 +621,11 @@ And review Agent variables.
     }
 
     public function Write($path, $value) {
+
 var_dump("Thing Write " . $this->uuid . " path ", $path, $value);
 var_dump("this json uuid", $this->json->uuid);
 var_dump("this uuid", $this->uuid);
+
         $this->json->setField("variables");
         $this->json->writeVariable($path, $value);
 
@@ -633,7 +634,11 @@ return;
 //$this->json = new ThingJson($this->uuid);
 var_dump("Thing Write path", $path);
 //var_dump("Thing Write uuid ". $this->uuid  . " path " . implode(" ",$path) . " value " . $value);
+$this->json = new ThingJson($this, $this->uuid);
+var_dump("Thing write set json field");
         $this->json->field = "variables";
+        $this->db->uuid = $this->uuid;
+        $this->db->Get($this->uuid);
         $json_data = $this->db->readField("variables");
         $this->json->json_data = $json_data;
 
@@ -648,10 +653,14 @@ var_dump("value", $value);
 
         $json_data = $this->json->arraytoJson($array_data);
 
+var_dump("Json Write pre-write");
+
+
                 $last_write = $this->db->writeDatabase(
                     "variables",
                     $json_data
                 );
+var_dump("Thing Write performed");
 //var_dump($last_write);
 
         // Failing to write a variable isn't a problem.
@@ -1051,7 +1060,7 @@ if ($things != false) {
             // record if true.  Previous record updated to point to new record.
 
             if ($this->associate_posterior === true) {
-                $posterior_thing->json = new ThingJson($posterior_thing->uuid);
+                $posterior_thing->json = new ThingJson($this, $posterior_thing->uuid);
                 $posterior_thing->json->setField("associations");
                 $posterior_thing->json->pushStream($this->uuid);
                 //Tested with unset and commented out

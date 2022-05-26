@@ -36,6 +36,17 @@ class Database
     function __construct($thing = null, $agent_input = null)
     {
         $uuid = $agent_input["uuid"];
+var_dump("uuid", $uuid);
+if ($uuid == null) {
+if (isset($thing->uuid)) {
+var_dump($thing->uuid);
+$uuid = $thing->uuid;}
+}
+// dev test
+if ($uuid == null) {
+
+$uuid = (string) Uuid::uuid4();
+}
         $nom_from = $agent_input["from"];
         $to = isset($agent_input["to"]) ? $agent_input["to"] : null;
         $subject = isset($agent_input["subject"])
