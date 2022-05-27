@@ -22,18 +22,21 @@ class Dummyload extends Agent
 
     public function set()
     {
-        $this->thing->variables->writeVariable(
+        $this->thing->Write(
             ["dummyload", "value_created"],
             $this->value_created
         );
-        $this->thing->variables->writeVariable(
+        $this->thing->Write(
             ["dummyload", "things_created"],
             $this->things_created
         );
-        $this->thing->variables->writeVariable(
+        $this->thing->Write(
             ["dummyload", "refreshed_at"],
             $this->current_time
         );
+
+
+
     }
 
     public function respondResponse()

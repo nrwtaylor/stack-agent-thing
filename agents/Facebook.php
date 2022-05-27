@@ -83,8 +83,8 @@ class Facebook extends Agent
 
                 //                $this->thing->db->setFrom($this->from);
 
-                $this->thing->json->setField("message0");
-                $this->thing->json->writeVariable(["facebook"], $input);
+                $this->thing->Write(["facebook"], $input), 'message0';
+
             }
         }
     }
@@ -329,20 +329,17 @@ class Facebook extends Agent
         }
 
         var_dump($result);
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["facebook", "result"],
             $result
         );
         $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["facebook", "refreshed_at"],
             $time_string
         );
 
+
         return;
     }
 }
-?>
-
- ?>

@@ -594,9 +594,10 @@ Use this pattern. And deprecate getVariables.
 And review Agent variables.
 */
 
-    public function Read($path) {
+    public function Read($path, $field = null) {
+if ($field == null) {$field = 'variables';}
         var_dump("Thing Read uuid " . $this->uuid . " path ", $path);
-        $json_data = $this->db->readField("variables");
+        $json_data = $this->db->readField($field);
         $array_data = $this->json->jsontoArray($json_data);
         if ($array_data == false) {
         var_dump("Thing Read array_data " . $array_data);
@@ -620,23 +621,26 @@ And review Agent variables.
         return $value;
     }
 
-    public function Write($path, $value) {
+    public function Write($path, $value, $field = null) {
 
 var_dump("Thing Write " . $this->uuid . " path ", $path, $value);
 var_dump("this json uuid", $this->json->uuid);
 var_dump("this uuid", $this->uuid);
 
-        $this->json->setField("variables");
+if ($field == null) {$field = "variables";}
+
+
+        $this->json->setField($field);
         $this->json->writeVariable($path, $value);
 
 return;
 
-//$this->json = new ThingJson($this->uuid);
+
 var_dump("Thing Write path", $path);
 //var_dump("Thing Write uuid ". $this->uuid  . " path " . implode(" ",$path) . " value " . $value);
-$this->json = new ThingJson($this, $this->uuid);
+//$this->json = new ThingJson($this, $this->uuid);
 var_dump("Thing write set json field");
-        $this->json->field = "variables";
+        $this->json->field = $field;
         $this->db->uuid = $this->uuid;
         $this->db->Get($this->uuid);
         $json_data = $this->db->readField("variables");

@@ -558,8 +558,8 @@ return $response;
 
         $this->thing->db->setFrom($this->from);
 
-        $this->thing->json->setField("message0");
-        $this->thing->json->writeVariable(["read"], $this->contents);
+        $this->thing->Write(["read"], $this->contents, 'message0');
+
         $this->response .= "Cached contents in stack. ";
     }
 

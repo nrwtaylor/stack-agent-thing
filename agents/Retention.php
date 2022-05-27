@@ -98,12 +98,12 @@ class Retention extends Agent
         }
 
         // Thing actions
-
-        $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(
+        //$this->thing->setField("settings");
+        $this->thing->Write(
             ["retention", "received_at"],
             $this->thing->time()
         );
+
 
         $this->thing->flagGreen();
 

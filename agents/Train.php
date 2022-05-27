@@ -815,34 +815,6 @@ class Train extends Agent
                 $this->head_code = "BORK";
         }
 
-        /*
-
-        // Set-up empty block variables.
-        $this->flagposts = array();
-        $this->trains = array();
-        $this->bells = array();
-
-            $this->train_thing->json->setField("associations");
-            $this->associations = $this->train_thing->json->readVariable( array("agent") );
-
-            foreach ($this->associations as $association_uuid) {
-
-                $association_thing = new Thing($association_uuid);
-
-                $association_thing->json->setField("variables");
-                $this->flagposts[] = $association_thing->json->readVariable( array("flagpost") );
-
-                $association_thing->json->setField("variables");
-                $this->trains[] = $association_thing->json->readVariable( array("train") );
-
-                $association_thing->json->setField("variables");
-                $this->bells[] = $association_thing->json->readVariable( array("bell") );
-
-            }
-
-
-*/
-
         return $this->train_thing;
     }
 
@@ -1735,11 +1707,6 @@ class Train extends Agent
         // Set elapsed time as 0 and state as stopped.
         $this->elapsed_time = 0;
         $this->thing->choice->Create('train', $this->node_list, 'red');
-        /*
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("stopwatch", "refreshed_at"), $this->current_time);
-        $this->thing->json->writeVariable( array("stopwatch", "elapsed"), $this->elapsed_time);
-*/
         $this->thing->choice->Choose('start');
 
         //$this->set();

@@ -310,6 +310,16 @@ class Mysql extends Agent
      */
     function writeMysql($field_text, $string_text)
     {
+/*
+if (is_array($string_text)) {
+$string_text = $this->arrayJson($string_text);
+var_dump("string_text", $string_text);
+}
+*/
+
+//$arr = $this->arrayJson($string_text);
+//$string_text = $this->jsonArr($arr);
+
         // merp
         if (strlen($string_text) > 100000) {
             //var_dump($string_text);

@@ -385,6 +385,30 @@ $uuid = (string) Uuid::uuid4();
         return $thingreport;
     }
 
+// For dev
+    public function jsonArr($json_data = null)
+    {
+        $array_data = json_decode($json_data, true);
+
+        if ($array_data == false) {
+            return false;
+        } 
+
+        if (is_string($array_data)) {
+            $array_data = ['text'=>$array_data];
+        }
+
+
+        foreach ($array_data as $key => $value) {
+            if ($key != "") {
+                $this->{$key} = $value;
+            }
+        }
+
+        return $array_data;
+    }
+
+
     /**
      *
      * @param unknown $field_text
@@ -395,6 +419,9 @@ $uuid = (string) Uuid::uuid4();
         if ($string_text == null) {
             return true;
         }
+
+//$array = $this->jsonArr($string_text);
+
         foreach (
             $this->active_stacks
             as $active_service_name => $active_service

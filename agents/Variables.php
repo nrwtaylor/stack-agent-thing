@@ -466,8 +466,7 @@ $this->thing->variables_thing = $this->variables_thing;
         }
 
         $this->variables_thing->db->setFrom($this->identity);
-        $this->variables_thing->json->setField("variables");
-        $this->variables_thing->$variable = $this->variables_thing->json->readVariable(
+        $this->variables_thing->$variable = $this->variables_thing->Read(
             [$this->variable_set_name, $variable]
         );
 
@@ -678,11 +677,11 @@ $this->thing->variables_thing = $this->variables_thing;
             // Is this a train agent.
             // One which has a headcode associated with it.
             if (in_array($pieces[1], $train_agents)) {
-                $this->thing->json->setField("variables");
-                $this->head_code = $this->thing->json->readVariable([
+                $this->head_code = $this->thing->Read([
                     "headcode",
                     "head_code",
                 ]);
+
 
                 $variable_headcode = "_" . $this->head_code;
             }

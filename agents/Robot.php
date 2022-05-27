@@ -80,13 +80,7 @@ class Robot extends Agent
         }
 
         $this->thing->db->setFrom($this->from);
-
-        $this->thing->json->setField("message0");
-        $this->thing->json->writeVariable(["robot"], $this->robots_txt);
-
-        //$this->thing->flagGreen();
-
-        return;
+        $this->thing->Write(["robot"], $this->robots_txt, 'message0');
     }
 
     public function metaRobot($html)

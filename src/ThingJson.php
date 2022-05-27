@@ -165,12 +165,13 @@ class ThingJson
             $array_data = ['text'=>$array_data];
         }
 
-
+if (is_array($array_data)) {
         foreach ($array_data as $key => $value) {
             if ($key != "") {
                 $this->{$key} = $value;
             }
         }
+}
 
         $this->array_data = $array_data;
 
@@ -381,6 +382,10 @@ if ($this->array_data[$stream_id] == null) {return;}
      */
     function writeVariable(array $var_path, $value)
     {
+
+//        $array_data = $this->array_data;
+
+
         $this->setValueFromPath($this->array_data, $var_path, $value);
         $this->arraytoJson();
         $t = $this->write();
@@ -434,6 +439,7 @@ if ($this->array_data[$stream_id] == null) {return;}
      */
     private function setValueFromPath(&$arr, $path, $value)
     {
+if (!is_array($arr)) {return true;}
         // we need references as we will modify the first parameter
         $dest = &$arr;
 if ($dest == null) {

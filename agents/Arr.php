@@ -165,6 +165,34 @@ return $temp_variable;
         return $flat;
     }
 
+    /**
+     *
+     * @param unknown $json_data (optional)
+     * @return unknown
+     */
+    public function jsonArr($json_data = null)
+    {
+        $array_data = json_decode($json_data, true);
+
+        if ($array_data == false) {
+            return false;
+        }
+
+        if (is_string($array_data)) {
+            $array_data = ['text'=>$array_data];
+        }
+
+/*
+        foreach ($array_data as $key => $value) {
+            if ($key != "") {
+                $this->{$key} = $value;
+            }
+        }
+*/
+        return $array_data;
+    }
+
+
     public function readSubject()
     {
         return false;

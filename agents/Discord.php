@@ -241,9 +241,8 @@ $this->sendDiscord("merp",'edna:#general@edna.discord');
         }
 
         $this->thing->db->setFrom($this->from);
+        $this->thing->Write(["discord"], $input, 'message0');
 
-        $this->thing->json->setField("message0");
-        $this->thing->json->writeVariable(["discord"], $input);
     }
 
     function getResponseurl()
@@ -332,7 +331,7 @@ $this->sendDiscord("merp",'edna:#general@edna.discord');
 
         //$message_reply_id = $this->agent_input;
         //        $this->thing->json->setField("variables");
-        //       $names = $this->thing->json->writeVariable(
+        //       $names = $this->thing->Write(
         //           ["discord", "reply_id"],
         //           null
         //       );

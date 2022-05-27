@@ -40,21 +40,20 @@ class LoadGoogleMail {
 
         $this->keywords = array();
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("load_googlemail", "refreshed_at") );
+        $time_string = $this->thing->Read( array("load_googlemail", "refreshed_at") );
 
         if ($time_string == false) {
             //$this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("load_googlemail", "refreshed_at"), $time_string );
+            $this->thing->Write( array("load_googlemail", "refreshed_at"), $time_string );
         }
 
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable( array("load_googlemail", "reading") );
+        $this->reading = $this->thing->Read( array("load_googlemail", "reading") );
 
             $this->readSubject();
 
-            $this->thing->json->writeVariable( array("load_googlemail", "reading"), $this->reading );
+            $this->thing->Write( array("load_googlemail", "reading"), $this->reading );
 
             if ($this->agent_input == null) {$this->Respond();}
 
@@ -163,7 +162,7 @@ class LoadGoogleMail {
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
         $this->reading = count($this->messages);
-        $this->thing->json->writeVariable(array("load_googlemail", "reading"), $this->reading);
+        $this->thing->Write(array("load_googlemail", "reading"), $this->reading);
 
         return $this->thing_report;
 	}

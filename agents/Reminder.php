@@ -86,8 +86,7 @@ class Reminder extends Agent
     {
         // Thing actions
 
-        $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["reminder", "received_at"],
             gmdate("Y-m-d\TH:i:s\Z", time())
         );

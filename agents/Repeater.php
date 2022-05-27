@@ -131,10 +131,11 @@ return false;
 
 function set() {
 
-        $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(array("repeater",
+        $this->thing->Write(array("repeater",
                 "received_at"),  $this->thing->time()
         );
+
+
 
 }
 

@@ -38,17 +38,6 @@ class Remember extends Agent
 
     function setRemember()
     {
-        //     $thingreport = $this->thing->db->reminder($this->from, array('s/', 'stack record'), array('ant', 'email', 'transit' , 'translink'));
-        //     $things = $thingreport['thing'];
-
-        //     $this->reminder_ids = array();
-
-        //     foreach ($things as $thing) {
-
-        //           $this->reminder_ids[] = $thing['uuid'];
-
-        // }
-
         $this->thing->Write(["remember", "status"], true);
     }
 
@@ -75,11 +64,12 @@ class Remember extends Agent
 
     public function set()
     {
-        $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["remember", "received_at"],
             gmdate("Y-m-d\TH:i:s\Z", time())
         );
+
+
     }
     public function run()
     {

@@ -41,12 +41,6 @@ class Notstack extends Agent
     {
         // Thing actions
 
- //       $this->thing->json->setField("settings");
- //       $this->thing->json->writeVariable(
-//            ["notstack", "receipt", "received_at"],
-//            date("Y-m-d H:i:s")
-//        );
-
         $this->thing->flagGreen();
 
         // Get the current user-state.

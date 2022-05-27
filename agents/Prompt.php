@@ -307,8 +307,8 @@ class Prompt extends Agent
                 break;
 
             default:
-                $this->thing->json->setField("settings");
-                $this->thing->json->writeVariable(
+                //$this->thing->json->setField("settings");
+                $this->thing->Write(
                     ["prompt", "received_at"],
                     $this->thing->time()
                 );

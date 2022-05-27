@@ -191,6 +191,16 @@ class Json
         return $array_data;
     }
 
+    public function arrayJson($arr) {
+
+        $json_data = json_encode(
+            $arr,
+            JSON_PRESERVE_ZERO_FRACTION
+        );
+        return $json_data;
+
+    }
+
     /**
      *
      */
