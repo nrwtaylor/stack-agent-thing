@@ -554,10 +554,17 @@ var_dump("Json Write pre-write");
                 //$this->thing_array[] = array("field"=>$this->field,"data"=>$this->json_data);
                 //$this->write_field_list[] = $this->field;
             } else {
+/*
                 $this->last_write = $this->db->writeDatabase(
                     $this->field,
                     $this->json_data
                 );
+*/
+                $this->last_write = $this->db->writeDatabase(
+                    $this->field,
+                    $this->array_data
+                );
+
             }
 var_dump("ThingJson write done");
 

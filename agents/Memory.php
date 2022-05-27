@@ -90,7 +90,7 @@ class Memory extends Agent
     }
 
     // dev
-    public function writeMemory($field_text, $string_json)
+    public function writeMemory($field_text, $arr)
     {
         if (!isset($this->uuid)) {
             return true;
@@ -101,11 +101,11 @@ class Memory extends Agent
         }
         // Hmmm
         // Ugly but do this for now.
-        $j = new Json(null, $this->uuid);
+//        $j = new Json(null, $this->uuid);
 //        $j->jsontoarrayJson($string_json);
-        $data = $j->jsontoarrayJson($string_json);
+//        $data = $j->jsontoarrayJson($string_json);
 //$data = null;
-
+$data = $arr;
 //        $j->jsontoarrayJson($string_json);
 //        $data = $this->jsontoarrayJson($string_json);
 

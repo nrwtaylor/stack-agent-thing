@@ -426,14 +426,14 @@ $uuid = (string) Uuid::uuid4();
      * @param unknown $field_text
      * @param unknown $string_text
      */
-    public function writeDatabase($field_text, $string_text, $uuid = null)
+    public function writeDatabase($field_text, $array, $uuid = null)
     {
-        if ($string_text == null) {
+        if ($array == null) {
             return true;
         }
 
-$array = $this->jsonArr($string_text);
-$string_text = $this->arrayJson($array);
+//$array = $this->jsonArr($string_text);
+//$string_text = $this->arrayJson($array);
         foreach (
             $this->active_stacks
             as $active_service_name => $active_service
@@ -471,7 +471,7 @@ $string_text = $this->arrayJson($array);
             if ($active_service_name == "memory") {
                 $key = $this->stack_handlers["memory"]->writeMemory(
                     $field_text,
-                    $string_text
+                    $array
                 );
                 var_dump(
                     "write Memory uuid " .
