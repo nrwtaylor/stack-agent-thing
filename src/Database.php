@@ -399,14 +399,26 @@ $uuid = (string) Uuid::uuid4();
         }
 
 
-        foreach ($array_data as $key => $value) {
-            if ($key != "") {
-                $this->{$key} = $value;
-            }
-        }
+//        foreach ($array_data as $key => $value) {
+//            if ($key != "") {
+//                $this->{$key} = $value;
+//            }
+//        }
 
         return $array_data;
     }
+
+
+    function arrayJson($array_data = null)
+    {
+
+        $json_data = json_encode(
+            $array_data,
+            JSON_PRESERVE_ZERO_FRACTION
+        );
+        return $json_data;
+    }
+
 
 
     /**
@@ -420,8 +432,8 @@ $uuid = (string) Uuid::uuid4();
             return true;
         }
 
-//$array = $this->jsonArr($string_text);
-
+$array = $this->jsonArr($string_text);
+$string_text = $this->arrayJson($array);
         foreach (
             $this->active_stacks
             as $active_service_name => $active_service
@@ -429,7 +441,7 @@ $uuid = (string) Uuid::uuid4();
             if ($active_service_name == "mysql") {
                 $r = $this->stack_handlers["mysql"]->writeMysql(
                     $field_text,
-                    $string_text
+                    $array
                 );
 
                 var_dump(
@@ -443,7 +455,7 @@ $uuid = (string) Uuid::uuid4();
             if ($active_service_name == "memcached") {
                 $key = $this->stack_handlers["memcached"]->writeMemcached(
                     $field_text,
-                    $string_text
+                    $array
                 );
                 var_dump(
                     "write Memcached uuid " .

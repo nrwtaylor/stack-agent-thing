@@ -28,14 +28,14 @@ class Memcached extends Agent
     }
 
     // dev
-    public function writeMemcached($field_text, $string_json)
+    public function writeMemcached($field_text, $arr)
     {
         // Hmmm
         // Ugly but do this for now.
-        $j = new Json(null, $this->uuid);
-        $j->jsontoarrayJson($string_json);
-        $data = $j->jsontoarrayJson($string_json);
-
+//        $j = new Json(null, $this->uuid);
+//        $j->jsontoarrayJson($string_json);
+//        $data = $j->jsontoarrayJson($string_json);
+$data = $arr;
         $data = ['variables' => $data];
 
         // dev develop associations.

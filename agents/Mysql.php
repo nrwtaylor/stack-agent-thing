@@ -303,6 +303,17 @@ class Mysql extends Agent
         return $thingreport;
     }
 
+    function arrayJson($array_data = null)
+    {
+
+        $json_data = json_encode(
+            $array_data,
+            JSON_PRESERVE_ZERO_FRACTION
+        );
+        return $json_data;
+    }
+
+
     /**
      *
      * @param unknown $field_text
@@ -319,6 +330,9 @@ var_dump("string_text", $string_text);
 
 //$arr = $this->arrayJson($string_text);
 //$string_text = $this->jsonArr($arr);
+
+$string_text = $this->arrayJson($string_text);
+
 
         // merp
         if (strlen($string_text) > 100000) {
