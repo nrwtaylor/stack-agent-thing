@@ -172,6 +172,7 @@ return $temp_variable;
      */
     public function jsonArr($json_data = null)
     {
+var_dump("Arr jsonArr");
         $array_data = json_decode($json_data, true);
 
         if ($array_data == false) {

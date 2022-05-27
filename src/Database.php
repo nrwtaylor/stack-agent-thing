@@ -21,7 +21,6 @@ use Nrwtaylor\StackAgentThing\Mongo;
 use Nrwtaylor\StackAgentThing\Agent;
 use Nrwtaylor\StackAgentThing\Thing;
 
-
 class Database
 {
     public $var = "hello";
@@ -36,17 +35,17 @@ class Database
     function __construct($thing = null, $agent_input = null)
     {
         $uuid = $agent_input["uuid"];
-var_dump("uuid", $uuid);
-if ($uuid == null) {
-if (isset($thing->uuid)) {
-var_dump($thing->uuid);
-$uuid = $thing->uuid;}
-}
-// dev test
-if ($uuid == null) {
-
-$uuid = (string) Uuid::uuid4();
-}
+        var_dump("uuid", $uuid);
+        if ($uuid == null) {
+            if (isset($thing->uuid)) {
+                var_dump($thing->uuid);
+                $uuid = $thing->uuid;
+            }
+        }
+        // dev test
+        if ($uuid == null) {
+            $uuid = (string) Uuid::uuid4();
+        }
         $nom_from = $agent_input["from"];
         $to = isset($agent_input["to"]) ? $agent_input["to"] : null;
         $subject = isset($agent_input["subject"])
@@ -385,41 +384,33 @@ $uuid = (string) Uuid::uuid4();
         return $thingreport;
     }
 
-// For dev
+    // For dev
     public function jsonArr($json_data = null)
     {
         $array_data = json_decode($json_data, true);
 
         if ($array_data == false) {
             return false;
-        } 
-
-        if (is_string($array_data)) {
-            $array_data = ['text'=>$array_data];
         }
 
+        if (is_string($array_data)) {
+            $array_data = ['text' => $array_data];
+        }
 
-//        foreach ($array_data as $key => $value) {
-//            if ($key != "") {
-//                $this->{$key} = $value;
-//            }
-//        }
+        //        foreach ($array_data as $key => $value) {
+        //            if ($key != "") {
+        //                $this->{$key} = $value;
+        //            }
+        //        }
 
         return $array_data;
     }
 
-
     function arrayJson($array_data = null)
     {
-
-        $json_data = json_encode(
-            $array_data,
-            JSON_PRESERVE_ZERO_FRACTION
-        );
+        $json_data = json_encode($array_data, JSON_PRESERVE_ZERO_FRACTION);
         return $json_data;
     }
-
-
 
     /**
      *
@@ -432,8 +423,8 @@ $uuid = (string) Uuid::uuid4();
             return true;
         }
 
-//$array = $this->jsonArr($string_text);
-//$string_text = $this->arrayJson($array);
+        //$array = $this->jsonArr($string_text);
+        //$string_text = $this->arrayJson($array);
         foreach (
             $this->active_stacks
             as $active_service_name => $active_service
@@ -486,7 +477,7 @@ $uuid = (string) Uuid::uuid4();
             if ($active_service_name == "mongo") {
                 $key = $this->stack_handlers["mongo"]->writeMongo(
                     $field_text,
-                    $string_text
+                    $array
                 );
                 var_dump(
                     "write Mongo uuid " .
@@ -742,6 +733,7 @@ $uuid = (string) Uuid::uuid4();
         }
 
         foreach ($candidate_things as $service => $t) {
+var_dump("candidate thing", $service, $t);
             var_dump(
                 "Database Get candidate thing " . $service . " " . $t->uuid,
                 $t->nom_from,
@@ -758,7 +750,6 @@ $uuid = (string) Uuid::uuid4();
 
             //var_dump($t);
         }
-
 
         $authorative_thing = false;
         if (is_array($candidate_things)) {
@@ -779,7 +770,7 @@ $uuid = (string) Uuid::uuid4();
             }
         }
 
-//        $authorative_thing = $thing['mysql'];
+        //        $authorative_thing = $thing['mysql'];
 
         //$authorative_thing = $thing['memory'];
 

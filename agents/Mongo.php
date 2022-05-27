@@ -173,7 +173,7 @@ class Mongo extends Agent
         $this->response .= $test_response . "Test result: " . $test_result;
     }
 
-    public function writeMongo($field_text, $string_json)
+    public function writeMongo($field_text, $arr)
     {
         if (!$this->isReadyMongo()) {
             return true;
@@ -183,10 +183,10 @@ class Mongo extends Agent
         //$variables = $existing['variables'];
         // Hmmm
         // Ugly but do this for now.
-        $j = new Json(null, $this->uuid);
-        $j->jsontoarrayJson($string_json);
-        $data = $j->jsontoarrayJson($string_json);
-
+   //     $j = new Json(null, $this->uuid);
+   //     $j->jsontoarrayJson($string_json);
+   //     $data = $j->jsontoarrayJson($string_json);
+$data = $arr;
         $data = ["variables" => $data];
 
         // dev develop associations.
