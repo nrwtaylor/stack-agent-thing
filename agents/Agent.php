@@ -927,7 +927,8 @@ public function __set($name, $value) {
         if (isset($this->web_state)) {
             $web_state = $this->web_state;
         }
-
+//var_dump($this->thing->web_agent->state);
+//var_dump($this->thing_report['link']);
         if (
             isset($this->thing->web_agent->state) and
             $this->thing->web_agent->state == "on"
@@ -1725,8 +1726,12 @@ public function __set($name, $value) {
      */
     public function makeMessage()
     {
+        if (!isset($this->message)) {
+            if (isset($this->thing_report['sms'])) {
+                $this->message = $this->thing_report['sms'];
+            }
+        }
     }
-
     /**
      *
      */
@@ -2567,7 +2572,11 @@ if ($pid == -1) {
             foreach (array_reverse($agent_tokens) as $i => $agent_token) {
                 //if (is_string($agent_token)) {
 
-                if (ctype_alpha(str_replace(" ", "", $agent_token)) === false) {
+$g = str_replace(" ", "", $agent_token);
+$g = str_replace("-", "", $g);
+
+     if (ctype_alpha($g) === false) {
+       //         if (ctype_alpha(str_replace(" ", "", $agent_token)) === false) {
                     break;
                 }
                 $selected_agent_tokens[] = $agent_token;
@@ -2602,6 +2611,11 @@ if ($pid == -1) {
                 if ($button_agent == $token_agent) {
                     $flag = true;
                 }
+
+if ("is ".$button_agent ." button" == $token_agent) {
+$flag = true;
+}
+
 
                 if ($flag === false) {
                     return false;

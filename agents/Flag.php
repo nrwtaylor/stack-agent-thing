@@ -551,7 +551,7 @@ class Flag extends Agent
                 $a = $n * (125 / 6);
                 $b = $n * (125 / 6) + 200 / 6;
 
-                imagefilledrectangle($this->image, 0, $a, 200, $b, $color);
+                imagefilledrectangle($this->image, 0, intval($a), 200, intval($b), $color);
             }
         } else {
             if (!isset($color)) {

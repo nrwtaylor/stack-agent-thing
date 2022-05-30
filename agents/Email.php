@@ -90,23 +90,14 @@ class Email
         $this->node_list = ["email" => ["email"]];
 
         // Borrow this from iching
-        $time_string = $this->thing->Read([
-            "email",
-            "refreshed_at",
-        ]);
+        $time_string = $this->thing->Read(["email", "refreshed_at"]);
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->Write(
-                ["email", "refreshed_at"],
-                $time_string
-            );
+            $this->thing->Write(["email", "refreshed_at"], $time_string);
         }
 
-        $this->email_count = $this->thing->Read([
-            "email",
-            "count",
-        ]);
+        $this->email_count = $this->thing->Read(["email", "count"]);
 
         if ($this->email_count == false) {
             $this->email_count = 0;
@@ -158,19 +149,19 @@ class Email
         return;
     }
 
-    public function isEmail($text) {
-       $meta = $this->metaEmail($text);
-$is_email = true;
-if (!isset($meta['from'])) {
-$is_email = false;
-}
+    public function isEmail($text)
+    {
+        $meta = $this->metaEmail($text);
+        $is_email = true;
+        if (!isset($meta["from"])) {
+            $is_email = false;
+        }
 
-if (!isset($meta['subject'])) {
-$is_email = false;
-}
+        if (!isset($meta["subject"])) {
+            $is_email = false;
+        }
 
-
-       return $is_email;
+        return $is_email;
     }
 
     public function metaEmail($text)
@@ -188,7 +179,13 @@ $is_email = false;
         $received = $message->getHeaderValue("Received");
         $date = $message->getHeaderValue("Date");
 
-        $meta = ["from"=>$from, "subject"=>$subject, "sent"=>$sent, "received"=>$received, "date"=>$date];
+        $meta = [
+            "from" => $from,
+            "subject" => $subject,
+            "sent" => $sent,
+            "received" => $received,
+            "date" => $date,
+        ];
 
         return $meta;
     }
@@ -398,7 +395,7 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
 
         // Generate email response.
         $to = $this->from;
-        $from = $this->to;
+        $from = $this->to . $this->mail_postfix;
 
         if ($this->message != null) {
             $test_message = $this->message;
@@ -431,7 +428,10 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
 
         $this->thing_report["info"] = 'Agent "Email" did not send an email.';
 
-        if ( (isset($this->thing->account)) and (isset($this->thing->account['stack'])) ) {
+        if (
+            isset($this->thing->account) and
+            isset($this->thing->account["stack"])
+        ) {
             if (
                 $this->thing->account["stack"]->balance["amount"] >= $this->cost
             ) {
@@ -617,7 +617,14 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
             );
             $donotsend = true;
         }
-        $subject = $this->mail_prefix . " " . $subject;
+        //        $subject = $this->mail_prefix . " " . $subject;
+        if (
+            isset($this->mail_prefix) and
+            is_string($this->mail_prefix) and
+            $this->mail_prefix != ""
+        ) {
+            $subject = $this->mail_prefix . " " . $subject;
+        }
 
         if (
             strpos(strtolower($subject), strtolower("Stack record: ")) !== false
@@ -917,7 +924,8 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
      */
     function generateMultipart($from, $raw_message, $choices = null)
     {
-        $from = $this->robot_name . $this->mail_postfix;
+        //        $from = $this->robot_name . $this->mail_postfix;
+        //   $from = $from . $this->mail_postfix;
 
         // useful in dev - to create the same message received by email.
         $this->generateHTML($raw_message, $choices);
@@ -1002,7 +1010,8 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
         $choices = null
     ) {
         //    $from = $from .$this->mail_postfix;
-        $from = $this->robot_name . $this->mail_postfix;
+        //      $from = $this->robot_name . $this->mail_postfix;
+        //     $from = $from . $this->mail_postfix;
 
         //https://webdesign.tutsplus.com/articles/build-an-html-email-template-from-scratch--webdesign-12770
 

@@ -202,7 +202,7 @@ class Start extends Agent
 
         $this->thing->flagGreen();
 
-        $this->makeChoices();
+        //$this->makeChoices();
 
         $this->thing_report["message"] = $this->sms_message;
         $this->thing_report["email"] = $this->sms_message;

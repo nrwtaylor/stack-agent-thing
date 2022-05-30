@@ -42,15 +42,24 @@ class Youtube extends Agent
 
     function get()
     {
+        $time_string = $this->thing->Read(["roll", "refreshed_at"]);
+
+        if ($time_string == false) {
+            $time_string = $this->thing->time();
+            $this->thing->Write(["roll", "refreshed_at"], $time_string);
+        }
+
+        $this->refreshed_at = strtotime($time_string);
+
         $this->variables_agent = new Variables(
             $this->thing,
             "variables " . "youtube" . " " . $this->from
         );
 
         $this->counter = $this->variables_agent->getVariable("counter");
-        $this->refreshed_at = $this->variables_agent->getVariable(
-            "refreshed_at"
-        );
+        //        $this->refreshed_at = $this->variables_agent->getVariable(
+        //            "refreshed_at"
+        //        );
 
         $this->thing->log(
             $this->agent_prefix . "loaded " . $this->counter . ".",
@@ -332,6 +341,30 @@ class Youtube extends Agent
             }
         }
 
+        $time_ago = time() - $this->refreshed_at;
+
+        $elapsed = 0;
+        if (isset($this->url)) {
+            $l = $this->url;
+            $t = 0;
+            $parts = explode("?t=", $this->url);
+            if (isset($parts[1])) {
+                $t = $parts[1];
+                $t = intval($t);
+            }
+            $t2 = $t + $time_ago;
+
+            $l .= "?t=" . $t2;
+
+            $html_link = '<p><a href="' . $l . '">' . $l . "</a>";
+            $html .= $html_link;
+        }
+
+        // ?t=69
+
+        $ago = $this->thing->human_time($time_ago);
+        $html .= "<p>Requested about " . $ago . " ago.";
+
         $this->html_message = $html;
     }
 
@@ -345,7 +378,7 @@ class Youtube extends Agent
 
         switch ($this->items_count) {
             case 0:
-                $sms .= " | No definitions found.";
+                $sms .= " | No videos returned from Youtube API.";
                 break;
             case 1:
                 $sms .=
@@ -365,7 +398,7 @@ class Youtube extends Agent
         }
 
         $sms .= " | " . $this->response;
-
+        //$sms .= " > " . $this->link;
         // Really need to refactor this double :/
         $this->sms_message = $sms;
     }
@@ -394,6 +427,24 @@ class Youtube extends Agent
         $this->message = $message;
     }
 
+    public function isYoutube($text = null)
+    {
+        if ($text == null) {
+            return true;
+        }
+        $url = $this->extractUrl($text);
+
+        if ($this->hasText($url, "youtube.com/")) {
+            return $url;
+        }
+
+        if ($this->hasText($url, "youtu.be/")) {
+            return $url;
+        }
+
+        return false;
+    }
+
     private function thingreportYoutube()
     {
         $this->thing_report["sms"] = $this->sms_message;
@@ -408,7 +459,7 @@ class Youtube extends Agent
         $this->num_hits = 0;
 
         $keywords = $this->keywords;
-
+        /*
         if ($this->agent_input != null) {
             // If agent input has been provided then
             // ignore the subject.
@@ -419,6 +470,14 @@ class Youtube extends Agent
         }
 
         $this->input = $input;
+*/
+        $input = $this->input;
+        $is_youtube = $this->isYoutube($input);
+        if ($is_youtube != false) {
+            $this->url = $is_youtube;
+            $this->response .= "Saw a Youtube link. ";
+            return;
+        }
 
         $pieces = explode(" ", strtolower($input));
 

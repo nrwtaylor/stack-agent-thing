@@ -21,18 +21,6 @@ class Microtime extends Agent
 
     }
 
-    public function deprecate_textMicrotime($timestamp)
-    {
-        $t = explode(".", $timestamp);
-
-        $n = str_pad($t[1], 4, "0") / 10000;
-        $text = $n . " " . $t[0];
-
-        //$text = $this->thing->microtime($text);
-
-        return $text;
-    }
-
     public function epochtimeMicrotime($text = null)
     {
         if (is_numeric($text)) {
@@ -212,11 +200,34 @@ class Microtime extends Agent
             $ago = $this->thing->human_time(
                 time() - strtotime($this->thing->thing->created_at)
             );
-        $web .= "Microtime timestamp was created about " . $ago . " ago. ";
+        $web .= " ";
+         $web .= "Microtime timestamp was created about " . $ago . " ago. ";
         $web .= "<br>";
+
         }
+
+        $this->makeLink();
+        $web .= "<p>";
+        $web .= '<a href="' . $this->link . '">';
+        $web .= $this->link;
+        $web .= "</a>";
+        $web .= " ";
+        $web .= "Copy-and-paste link";
+        $web .= "<br />";
+
+
         $this->thing_report['web'] = $web;
     }
+
+    function makeLink()
+    {
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/microtime";
+
+        $this->link = $link;
+        $this->thing_report["link"] = $link;
+    }
+
+
 
     public function readSubject()
     {

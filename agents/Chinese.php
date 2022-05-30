@@ -128,6 +128,12 @@ class Chinese extends Agent
      * @param unknown $logogram (optional)
      * @return unknown
      */
+    public function wordChinese($logogram) {
+$word = $this->logogramChinese($logogram);
+return $word['concept']['english'][0];
+
+    }
+
     function getWord($text = null, $logogram = null)
     {
         $logogram = trim($logogram);
@@ -1356,7 +1362,6 @@ if ($input != null) {
                 $min_bestie_length = $bestie_length;
             }
         }
-
         return $best_bestie;
     }
 
@@ -1441,8 +1446,9 @@ if ($input != null) {
             }
             // Then return shortest matching
             $x = $this->bestChinese($t, $token_string);
+            $concept = $this->conceptChinese($x);
             //if ($x == false) {return false;}
-            return ['english' => $token_string, 'chinese' => $x];
+            return ['english' => $token_string, 'chinese' => $x, 'concept'=>$concept];
         }
 
         return false;

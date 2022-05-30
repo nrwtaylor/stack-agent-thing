@@ -1,31 +1,30 @@
 {
-    "name": "nrwtaylor/stack-agent-thing",
-    "version": "0.3.0",
+    "name": "nrwtaylor/stack-thing-5b5e",
+    "version": "0.2.4",
     "description": "Stack Agent Thing framework",
     "require": {
         "slim/slim": "^3.0",
         "slim/php-view": "*",
-        "ramsey/uuid": "^3.7",
+        "ramsey/uuid": "^4.3",
         "monolog/monolog": "^1.23",
         "hyperthese/php-serial": "*",
-        "nrwtaylor/stack-agent-thing":"*",
         "linkorb/tty": "dev-master",
         "setasign/fpdi-fpdf": "^2.0",
-        "endroid/qr-code": "^4",
+        "endroid/qr-code": "*",
         "ekinhbayar/brill-tagger": "^0.3.1",
         "vanderlee/syllable": "^1.5",
         "vanderlee/php-sentence": "^1.0",
         "webignition/robots-txt-file": "^2.1",
-        "symfony/console": "^4.3",
+        "symfony/console": "*",
         "google/apiclient": "^2.0",
         "johngrogg/ics-parser": "^2",
-        "zbateson/mail-mime-parser": "^1.3"
-    },
-    "require-dev": {
+        "zbateson/mail-mime-parser": "^1.3",
+        "auroras-live/suncalc-php": "dev-master",
+        "stripe/stripe-php": "^7",
+        "overtrue/chinese-calendar": "^1.0"
     },
     "autoload": {
         "psr-4": {"Nrwtaylor\\StackAgentThing\\": ["src/", "agents/"]}
-
     },
     "minimum-stability": "dev",
     "prefer-stable": true

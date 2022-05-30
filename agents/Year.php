@@ -963,17 +963,16 @@ class Year extends Agent
         }
         $year = false;
 
-        if (isset($this->years) and $this->years == []) {
-            return false;
-        }
+//        if (isset($this->years) and $this->years == []) {
+//            return false;
+//        }
 
-        if (isset($this->years)) {
-            $years = $this->years;
-        }
-
-        if (!isset($this->years)) {
+//        if (isset($this->years)) {
+//            $years = $this->years;
+//        }
+//        if (!isset($this->years)) {
             $years = $this->extractYears($text);
-        }
+//        }
 
         if (count($years) == 1) {
             $year = $years[0];
@@ -1062,4 +1061,11 @@ class Year extends Agent
 
         $this->getYear();
     }
+
+    public function currentYear() {
+       $year = $this->extractYear($this->current_time)['year'];
+       return $year;
+
+    }
+
 }
