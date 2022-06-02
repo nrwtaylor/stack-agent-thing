@@ -2167,6 +2167,7 @@ Now draw the twilight.
                 $day_text = strval($response);
 
                 //$era = $this->eraDay($text);
+                $era = null;
                 $day = ["day" => $day_text, "era" => $era];
                 $days[] = $day;
             }

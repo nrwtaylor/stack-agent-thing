@@ -596,10 +596,10 @@ var_dump("Json Write performed");
      */
     function read()
     {
-        $this->json_data = $this->db->readField($this->field);
+        $this->array_data = $this->db->readField($this->field);
         //        if ($this->json_data == null) {$this->initField();}
-
-        $array = $this->jsontoArray();
+var_dump("Json read", $this->array_data);
+        //$array = $this->jsontoArray();
         $array = $this->array_data;
 
         return $array;

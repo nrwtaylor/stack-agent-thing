@@ -169,8 +169,11 @@ class Alias extends Agent
             $uuid = $thing_object["uuid"];
 
             if ($thing_object["nom_to"] != "usermanager") {
-                $variables_json = $thing_object["variables"];
-                $variables = $this->thing->json->jsontoArray($variables_json);
+                //$variables_json = $thing_object["variables"];
+                //$variables = $this->thing->json->jsontoArray($variables_json);
+
+                $variables = $thing_object["variables"];
+
 
                 if (
                     isset($variables["alias"]) and

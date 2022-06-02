@@ -646,13 +646,19 @@ public function __set($name, $value) {
                 as $thing_object
             ) {
                 $uuid = $thing_object["uuid"];
-                $variables_json = $thing_object["variables"];
-                $variables = $this->thing->json->jsontoArray($variables_json);
+        //        $variables_json = $thing_object["variables"];
+        //        $variables = $this->thing->json->jsontoArray($variables_json);
 
-                $associations_json = $thing_object["associations"];
-                $associations = $this->thing->json->jsontoArray(
-                    $associations_json
-                );
+                $variables = $thing_object["variables"];
+
+
+            //    $associations_json = $thing_object["associations"];
+            //    $associations = $this->thing->json->jsontoArray(
+            //        $associations_json
+            //    );
+
+    $associations = $thing_object["associations"];
+
                 //$thing = new \stdClass();
                 $thing = new Thing(null);
                 $thing->subject = $thing_object["task"];
@@ -712,8 +718,11 @@ public function __set($name, $value) {
                 as $thing_object
             ) {
                 $uuid = $thing_object["uuid"];
-                $variables_json = $thing_object["variables"];
-                $variables = $this->thing->json->jsontoArray($variables_json);
+//                $variables_json = $thing_object["variables"];
+//                $variables = $this->thing->json->jsontoArray($variables_json);
+
+                $variables = $thing_object["variables"];
+
 
                 $variables_array[$uuid] = $variables;
             }
@@ -1821,8 +1830,11 @@ public function __set($name, $value) {
         $this->prior_agent = $prior_thing["thing"]->nom_to;
 
         $uuid = $prior_thing["thing"]->uuid;
-        $variables_json = $prior_thing["thing"]->variables;
-        $variables = $this->thing->json->jsontoArray($variables_json);
+      //  $variables_json = $prior_thing["thing"]->variables;
+      //  $variables = $this->thing->json->jsontoArray($variables_json);
+
+        $variables = $prior_thing["thing"]->variables;
+
 
         $this->prior_variables = $variables;
     }
@@ -2372,6 +2384,7 @@ if ($pid == -1) {
             );
             $this->thing->console($j["agent_name"] . " " . $j["score"] . "\n");
         }
+var_dump($this->responsive_agents);
     }
 
     // Take a piece of returned text,

@@ -57,13 +57,12 @@ class Thing
         // It is a significant Stack concern.
 
         if (!isset($GLOBALS['stack_path'])) {
-//$directory = __DIR__ .'/../../../../';
+            //$directory = __DIR__ .'/../../../../';
 
             // Try this, otherwise fail.
             $GLOBALS['stack_path'] = "/var/www/stackr.test/";
             //$GLOBALS['stack_path'] = "/var/www/html/stackr.ca/";
             //$GLOBALS['stack_path'] = $directory;
-
         }
 
         //set_error_handler(array($this, "exception_error_handler"));
@@ -147,7 +146,6 @@ class Thing
             $this->hash_algorithm = $this->container['stack']['hash_algorithm'];
         }
 
-
         //set_error_handler(array($this, "exception_error_handler"));
         try {
             $this->getThing($uuid);
@@ -156,7 +154,12 @@ class Thing
             $this->log("No Thing to get.");
 
             // Fail quietly. There was no Thing to get.
-            $this->log('Caught exception: ',  $e->getMessage(), "\n", 'INFORMATION');
+            $this->log(
+                'Caught exception: ',
+                $e->getMessage(),
+                "\n",
+                'INFORMATION'
+            );
         }
         // Deal with it.
 
@@ -168,7 +171,6 @@ class Thing
 
     public function __destruct()
     {
-
         $t = "";
         if (isset($this->nuuid)) {
             $t = $this->nuuid;
@@ -192,9 +194,22 @@ class Thing
             $this->log("Thing made a UUID.");
 
             // And then we pull out some Thing related svariables and settings.
+/*
+            $this->db = new Database($this, [
+                'uuid' => $this->uuid,
+                'from' => 'null' . $this->mail_postfix,
+            ]);
+*/
+            $this->db = new Database($this, [
+                'uuid' => $this->uuid,
+                'from' => $this->from,
+            ]);
 
-            $this->db = new Database($this, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
 
+//            $this->db = new Database($this, null);
+
+
+            //            $this->db = new Database($this, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
 
             $this->container['thing'] = function ($c) {
                 $db = $c['settings']['thing'];
@@ -252,11 +267,14 @@ class Thing
             // Is link to the ->db broken when the Thing is deinstantiated.
             // Assume yes.
 
-            $this->db = new Database($this, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
+            $this->db = new Database($this, [
+                'uuid' => $this->uuid,
+                'from' => 'null' . $this->mail_postfix,
+            ]);
 
             $this->log("Thing made a db connector.");
             // Provide handler for Json translation from/to MySQL.
-var_dump($this->uuid);
+            var_dump("Thing Create uuid",$this->uuid);
             $this->json = new ThingJson($this, $this->uuid);
 
             // This is a placeholder for refactoring the Thing variables
@@ -305,9 +323,7 @@ var_dump($this->uuid);
 
     function spawn($datagram = null)
     {
-
         if (strtolower($this->queue_handler) != "gearman") {
-
             $this->log("No queue handler recognized");
             return true;
         }
@@ -316,14 +332,24 @@ var_dump($this->uuid);
         // Try to catch.
         //set_error_handler(array($this, "exception_error_handler"));
         try {
-        $client = new \GearmanClient();
+            $client = new \GearmanClient();
         } catch (\Throwable $e) {
             $this->error = $e->getMessage();
-            $this->log('Caught throwable: ',  $e->getMessage(), "\n", 'INFORMATION');
+            $this->log(
+                'Caught throwable: ',
+                $e->getMessage(),
+                "\n",
+                'INFORMATION'
+            );
             return true;
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
-            $this->log('Caught exception: ',  $e->getMessage(), "\n", 'INFORMATION');
+            $this->log(
+                'Caught exception: ',
+                $e->getMessage(),
+                "\n",
+                'INFORMATION'
+            );
             return true;
         }
 
@@ -341,13 +367,13 @@ var_dump($this->uuid);
 
         $client->addServer();
         $arr = json_encode($datagram);
-$function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedence'] : "");
+        $function_name =
+            "call_agent" .
+            (isset($arr['precedence']) ? "_" . $arr['precedence'] : "");
 
+        //$function_name = "call_agent";
 
-//$function_name = "call_agent";
-
-
-//        $client->doLowBackground("call_agent", $arr);
+        //        $client->doLowBackground("call_agent", $arr);
         $client->doLowBackground($function_name, $arr);
 
         $this->log("spawned a Thing.");
@@ -388,10 +414,9 @@ $function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedenc
                 $this->uuid . " found and removed an @ sign";
         }
 
-
-//if (!isset($this->db)) {
-//        $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>$from] );
-//}
+        //if (!isset($this->db)) {
+        //        $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>$from] );
+        //}
 
         $this->log("Create. Database connector made.");
 
@@ -435,8 +460,7 @@ $function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedenc
         $this->to = $to;
         $this->from = $from;
 
-//            $this->db = new Database(null, ['uuid'=>$query, 'from'=>$from]);
-
+        //            $this->db = new Database(null, ['uuid'=>$query, 'from'=>$from]);
 
         $this->subject = $subject;
 
@@ -454,12 +478,7 @@ $function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedenc
             $this->sqlresponse = "New record created successfully.";
             $message0['500 words'] .= $this->sqlresponse;
         } elseif ($query == false) {
-
-           $this->log(
-                'new record received FALSE on create.',
-                "INFORMATION"
-            );
-
+            $this->log('new record received FALSE on create.', "INFORMATION");
 
             return false;
         } else {
@@ -469,28 +488,23 @@ $function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedenc
         }
 
         if ($to == "error") {
-
-           $this->log(
-                'new record heard error.',
-                "INFORMATION"
-            );
-
+            $this->log('new record heard error.', "INFORMATION");
 
             return true;
         }
 
-            $this->sqlresponse = "New record created successfully.";
-            $this->to = $to;
-            $this->from = $from;
-            $this->subject = $subject;
-            $message0['500 words'] .= $this->sqlresponse;
+        $this->sqlresponse = "New record created successfully.";
+        $this->to = $to;
+        $this->from = $from;
+        $this->subject = $subject;
+        $message0['500 words'] .= $this->sqlresponse;
 
-$this->uuid = $query;
-$this->db->uuid = $query;
+        $this->uuid = $query;
+        $this->db->uuid = $query;
 
-           $this->json = new ThingJson($this, $this->uuid);
+        $this->json = new ThingJson($this, $this->uuid);
 
-/*
+        /*
 
         if ($query == true) {
             $this->sqlresponse = "New record created successfully.";
@@ -559,9 +573,9 @@ $this->db->uuid = $query;
         //$this->stackBalance();
 
         $this->log("Create completed.");
-$g = $this->Get();
+        $g = $this->Get();
         $this->log("Finished create.");
-
+        var_dump("Thing finished create");
         return $g;
     }
 
@@ -589,26 +603,30 @@ $g = $this->Get();
         return false;
     }
 
-/*
+    /*
 Use this pattern. And deprecate getVariables.
 And review Agent variables.
 */
 
-    public function Read($path, $field = null) {
-if ($field == null) {$field = 'variables';}
-        var_dump("Thing Read uuid " . $this->uuid . " path ", $path);
-        $json_data = $this->db->readField($field);
-        $array_data = $this->json->jsontoArray($json_data);
+    public function Read($path, $field = null)
+    {
+        if ($field == null) {
+            $field = 'variables';
+        }
+        var_dump(
+            "Thing Read uuid " . $this->uuid . " path ",
+            implode(">", $path)
+        );
+
+        $array_data = $this->db->readField($field);
+
         if ($array_data == false) {
-        var_dump("Thing Read array_data " . $array_data);
+            var_dump("Thing Read array_data " . $array_data);
 
             return false;
         }
 
-        $var_path = $this->json->recursive_array_search(
-            $path,
-            $array_data
-        );
+        $var_path = $this->json->recursive_array_search($path, $array_data);
 
         // Report with array's match.
         if ($var_path == $path) {
@@ -621,67 +639,27 @@ if ($field == null) {$field = 'variables';}
         return $value;
     }
 
-    public function Write($path, $value, $field = null) {
+    public function Write($path, $value, $field = null)
+    {
+        var_dump(
+            "Thing Write " . $this->uuid . " path " . $this->uuid . " path ",
+            implode(">", $path),
+            $value
+        );
+        var_dump("Thing Write db uuid ", $this->db->uuid);
+        var_dump("Thing Write uuid", $this->uuid);
 
-var_dump("Thing Write " . $this->uuid . " path ", $path, $value);
-var_dump("this json uuid", $this->json->uuid);
-var_dump("this uuid", $this->uuid);
+        if ($field == null) {
+            $field = "variables";
+        }
 
-if ($field == null) {$field = "variables";}
-
-
-        $this->json->setField($field);
-        $this->json->writeVariable($path, $value);
-
-return;
-
-
-var_dump("Thing Write path", $path);
-//var_dump("Thing Write uuid ". $this->uuid  . " path " . implode(" ",$path) . " value " . $value);
-//$this->json = new ThingJson($this, $this->uuid);
-var_dump("Thing write set json field");
-        $this->json->field = $field;
-        $this->db->uuid = $this->uuid;
-        $this->db->Get($this->uuid);
-        $json_data = $this->db->readField("variables");
-        $this->json->json_data = $json_data;
-
-        $array_data = $this->json->jsontoArray($json_data);
-        $array_data = $this->json->array_data;
-
-var_dump("path", $path);
-var_dump("value", $value);
+        $array_data = $this->db->readField($field);
 
         $this->json->setValueFromPath($array_data, $path, $value);
-//        $this->json->setValueFromPath($this->json->array_data, $path, $value);
 
-        $json_data = $this->json->arraytoJson($array_data);
+        $last_write = $this->db->writeDatabase("variables", $array_data);
 
-var_dump("Json Write pre-write");
-
-
-                $last_write = $this->db->writeDatabase(
-                    "variables",
-                    $json_data
-                );
-var_dump("Thing Write performed");
-//var_dump($last_write);
-
-        // Failing to write a variable isn't a problem.
-        // The agents will do what they can.
-
-        //        if ($t === false) {throw new \Exception("Stack write failed.");}
-/*
-        $this->size_overflow = false;
-        if ($t === false) {
-            $this->size_overflow = strlen($this->json_data) - $this->char_max;
-            $this->write_fail_count += 1;
-            $t = new Thing(null);
-            $t->Create("x", "y", "s/ error");
-            $a = new Hey($t);
-        }
-*/
-
+        var_dump("Thing Write array data", $array_data);
     }
 
     public function loadAccounts()
@@ -817,7 +795,7 @@ var_dump("Thing Write performed");
         // Call Db and forget the record.
 
         if (!isset($this->db)) {
-            return ['error'=>true];
+            return ['error' => true];
         }
         $thingreport = $this->db->Forget($this->uuid);
         return $thingreport;
@@ -945,7 +923,7 @@ var_dump("Thing Write performed");
         // Bootstrapping db access.
         // A Thing can call an UUID so called up
         // the requested UUID.  Using the null account.
-/*
+        /*
 if (isset($this->db)) {
         $hash_nom_from = hash($this->hash_algorithm, $this->from);
 
@@ -954,21 +932,20 @@ echo "Previous uuid got " . ($prior_uuid) . "\n";
 }
 */
 
-$thing = false;
-if (isset($this->db)) {
-        $thingreport = $this->db->Get();
-        $thing = $thingreport['thing'];
-}
+        $thing = false;
+        if (isset($this->db)) {
+            $thingreport = $this->db->Get();
+            $thing = $thingreport['thing'];
+        }
 
         $this->log("loaded thing " . $this->nuuid . " from db.");
 
         if ($thing == false) {
+            // Returned thing is false.
+            // So not on stack.
 
-// Returned thing is false.
-// So not on stack.
-
-// Use what we know.
-/*
+            // Use what we know.
+            /*
             $this->to = null;
             $this->from = null;
             $this->subject = null;
@@ -1013,22 +990,22 @@ if (isset($this->db)) {
         $things = $thingreport['things'];
 
         $states = [];
-if ($things != false) {
-        foreach ($things as $thing) {
-            $uuid = $thing['uuid'];
+        if ($things != false) {
+            foreach ($things as $thing) {
+                $uuid = $thing['uuid'];
 
-            $thing = new Thing($uuid);
-            // append to states
+                $thing = new Thing($uuid);
+                // append to states
 
-            $t = $thing->choice->load($agent);
+                $t = $thing->choice->load($agent);
 
-            if (is_array($t)) {
-                // unexpected
-                $t = true;
+                if (is_array($t)) {
+                    // unexpected
+                    $t = true;
+                }
+                $states[] = $t;
             }
-            $states[] = $t;
         }
-}
         if ($states == []) {
             return $this->current_state = null;
         }
@@ -1064,7 +1041,10 @@ if ($things != false) {
             // record if true.  Previous record updated to point to new record.
 
             if ($this->associate_posterior === true) {
-                $posterior_thing->json = new ThingJson($this, $posterior_thing->uuid);
+                $posterior_thing->json = new ThingJson(
+                    $this,
+                    $posterior_thing->uuid
+                );
                 $posterior_thing->json->setField("associations");
                 $posterior_thing->json->pushStream($this->uuid);
                 //Tested with unset and commented out
@@ -1125,10 +1105,11 @@ if ($things != false) {
     {
         // Console does a straight output of text.
         // No processing.
-        if ($this->console_output == 'off') {return;}
+        if ($this->console_output == 'off') {
+            return;
+        }
 
         if (!isset($this->console_output)) {
-
             $this->console_output = 'on';
             echo "Thing console started. Turn off in private/settings.\n";
         }
@@ -1142,7 +1123,7 @@ if ($things != false) {
         echo $text;
     }
 
-function log($text = null, $logging_level = null)
+    function log($text = null, $logging_level = null)
     {
         if ($text == null) {
             return $this->log_last;
@@ -1173,11 +1154,11 @@ function log($text = null, $logging_level = null)
         //        $trace = debug_backtrace();
         //        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 
-//        $trace = debug_backtrace(false, 2);
+        //        $trace = debug_backtrace(false, 2);
 
         // Get the class that is asking for who awoke it
         $class_name = "X";
-/*
+        /*
         if (isset($trace[1]['class'])) {
             $class_namespace = $trace[1]['class'];
             $class_name_array = explode("\\", $class_namespace);
@@ -1187,9 +1168,9 @@ function log($text = null, $logging_level = null)
         $runtime = number_format($this->elapsed_runtime()) . "ms";
 
         $text = strip_tags($text);
-if (isset($this->agent_class_name_current )){
-$class_name = $this->agent_class_name_current;
-}
+        if (isset($this->agent_class_name_current)) {
+            $class_name = $this->agent_class_name_current;
+        }
         $agent_prefix = 'Agent "' . ucwords($class_name) . '"';
 
         $text = str_replace($agent_prefix, "", $text);
@@ -1261,11 +1242,11 @@ $class_name = $this->agent_class_name_current;
         //        $trace = debug_backtrace();
         //        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 
-//        $trace = debug_backtrace(false, 2);
+        //        $trace = debug_backtrace(false, 2);
 
         // Get the class that is asking for who awoke it
         $class_name = "X";
-/*
+        /*
         if (isset($trace[1]['class'])) {
             $class_namespace = $trace[1]['class'];
             $class_name_array = explode("\\", $class_namespace);
@@ -1275,9 +1256,9 @@ $class_name = $this->agent_class_name_current;
         $runtime = number_format($this->elapsed_runtime()) . "ms";
 
         $text = strip_tags($text);
-if (isset($this->agent_class_name_current )){
-$class_name = $this->agent_class_name_current;
-}
+        if (isset($this->agent_class_name_current)) {
+            $class_name = $this->agent_class_name_current;
+        }
         $agent_prefix = 'Agent "' . ucwords($class_name) . '"';
 
         $text = str_replace($agent_prefix, "", $text);
@@ -1367,11 +1348,10 @@ $class_name = $this->agent_class_name_current;
         }
     }
 
-    public function isThing($thing) {
-
-//var_dump(get_class($thing));
-//echo 'isThing?';
-
+    public function isThing($thing)
+    {
+        //var_dump(get_class($thing));
+        //echo 'isThing?';
     }
     //}
 

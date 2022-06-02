@@ -79,6 +79,8 @@ class Wikipedia extends Agent
 
         $prop = "&prop=revisions";
         $prop = "&prop=extracts";
+$prop .= "&prop=info&inprop=url";
+
 
         //if we just want the intro, we can use exintro. Otherwise it shows all sections
         $exintro = "&exintro=1";
@@ -96,9 +98,11 @@ class Wikipedia extends Agent
         // Gets a list of matches
         $data_source =
             "http://en.wikipedia.org/w/api.php?action=query" .
+$prop . 
             $list .
             $srsearch .
             "&utf8=&format=json";
+
 
         $data = file_get_contents($data_source);
 
@@ -115,7 +119,7 @@ class Wikipedia extends Agent
             $this->text = "Wikipedia did not find anything.";
             return true;
         }
-
+$this->results = $json_data['query']['search'];
         $snippet = strip_tags($json_data["query"]["search"][0]["snippet"]);
         $this->text = html_entity_decode($snippet);
         return false;
@@ -157,6 +161,20 @@ class Wikipedia extends Agent
         }
         $this->html_message = $html;
     }
+
+    public function makeSnippet()
+    {
+        $s = "";
+        if (!isset($this->text)) {
+            $s .= "<br>Nothing found on Wikipedia.";
+        } else {
+            $s .= "<br>" . $this->text;
+        }
+        $this->snippet = $s;
+        $this->thing_report['snippet'] = $html;
+    }
+
+
 
     function truncate($string, $length = 100, $append = "[...]")
     {

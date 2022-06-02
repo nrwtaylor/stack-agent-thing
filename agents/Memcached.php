@@ -30,12 +30,16 @@ class Memcached extends Agent
     // dev
     public function writeMemcached($field_text, $arr)
     {
+        if (!isset($this->write_fail_count)) {
+            $this->write_fail_count = 0;
+        }
+
         // Hmmm
         // Ugly but do this for now.
-//        $j = new Json(null, $this->uuid);
-//        $j->jsontoarrayJson($string_json);
-//        $data = $j->jsontoarrayJson($string_json);
-$data = $arr;
+        //        $j = new Json(null, $this->uuid);
+        //        $j->jsontoarrayJson($string_json);
+        //        $data = $j->jsontoarrayJson($string_json);
+        $data = $arr;
         $data = ['variables' => $data];
 
         // dev develop associations.
@@ -64,6 +68,7 @@ $data = $arr;
 
         if ($existing == false) {
             $this->errorMemcached("Existing uuid not found on write request.");
+            $this->write_fail_count += 1;
             return false;
         }
 
@@ -82,7 +87,7 @@ $data = $arr;
         }
 
         $this->errorMemcached("Write request not successful.");
-
+        $this->write_fail_count += 1;
         return true;
     }
 
@@ -132,9 +137,9 @@ $data = $arr;
             "variables" => null,
         ];
 
-// dev
-$uuid = Uuid::createUuid();
-/*
+        // dev
+        $uuid = Uuid::createUuid();
+        /*
         if (isset($this->thing)) {
             if ($this->thing == null) {
                 $t = new Thing(null);

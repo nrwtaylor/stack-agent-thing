@@ -175,7 +175,12 @@ class Mongo extends Agent
 
     public function writeMongo($field_text, $arr)
     {
+        if (!isset($this->write_fail_count)) {
+            $this->write_fail_count = 0;
+        }
+
         if (!$this->isReadyMongo()) {
+            $this->write_fail_count += 1;
             return true;
         }
 
@@ -183,10 +188,10 @@ class Mongo extends Agent
         //$variables = $existing['variables'];
         // Hmmm
         // Ugly but do this for now.
-   //     $j = new Json(null, $this->uuid);
-   //     $j->jsontoarrayJson($string_json);
-   //     $data = $j->jsontoarrayJson($string_json);
-$data = $arr;
+        //     $j = new Json(null, $this->uuid);
+        //     $j->jsontoarrayJson($string_json);
+        //     $data = $j->jsontoarrayJson($string_json);
+        $data = $arr;
         $data = ["variables" => $data];
 
         // dev develop associations.
@@ -224,11 +229,14 @@ $data = $arr;
         //var_dump("e", $d);
         // In development
         $uuid = $this->setMongo($this->uuid, $d);
+        if ($uuid == true) {
+            $this->write_fail_count += 1;
+            return true;
+        }
 
-var_dump("Mongo write " . $uuid);
+        var_dump("Mongo write " . $uuid);
 
-
-        //var_dump("r", $uuid);
+        return $uuid;
     }
 
     function run()
@@ -312,10 +320,10 @@ var_dump("Mongo write " . $uuid);
             "variables" => null,
         ];
 
-// dev
-$uuid = Uuid::createUuid();
+        // dev
+        $uuid = Uuid::createUuid();
 
-/*
+        /*
         if (isset($this->thing)) {
             if ($this->thing == null) {
                 $t = new Thing(null);
@@ -353,7 +361,7 @@ $uuid = Uuid::createUuid();
     public function setMongo($key = null, $variable = null)
     {
         if (!$this->isReadyMongo()) {
-            return;
+            return true;
         }
 
         if (isset($variable['uuid'])) {
@@ -361,7 +369,7 @@ $uuid = Uuid::createUuid();
                 $this->errorMongo(
                     "Thing update requested with inconsistent uuids."
                 );
-                return;
+                return true;
             }
 
             if ($key == null) {
@@ -417,8 +425,10 @@ $uuid = Uuid::createUuid();
             ]);
         } catch (\Throwable $t) {
             $this->errorMongo($t->getMessage());
+            return true;
         } catch (\Error $ex) {
             $this->errorMongo($ex->getMessage());
+            return true;
         }
         return $key;
     }

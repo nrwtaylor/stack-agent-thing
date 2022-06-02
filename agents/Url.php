@@ -179,8 +179,11 @@ class Url extends Agent
                 as $thing_object
             ) {
                 $uuid = $thing_object["uuid"];
-                $variables_json = $thing_object["variables"];
-                $variables = $this->thing->json->jsontoArray($variables_json);
+               // $variables_json = $thing_object["variables"];
+               // $variables = $this->thing->json->jsontoArray($variables_json);
+
+                $variables = $thing_object["variables"];
+
 
                 $age =
                     strtotime($this->thing->time()) -

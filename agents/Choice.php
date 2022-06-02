@@ -193,17 +193,24 @@ class Choice extends Agent
         // Since Thing has control of which, this is satisfactory in terms of
         // over-writes of the $uuid record.
 
-        $this->json->setField("settings");
+        //$this->json->setField("settings");
 
         // Pretty hacky here with the 0.  This is because of how
         // PHP does the json -> php array conversion and back.
         // Seems to work consistently.  So working on it being the
         // simplest solution.  For now.
-        $this->node_list = $this->json->readVariable([
+//        $this->node_list = $this->json->readVariable([
+//            "choice",
+//            $this->name,
+//            0,
+//        ]);
+
+        $this->node_list = $this->thing->Read([
             "choice",
             $this->name,
             0,
-        ]);
+        ], 'settings');
+
 
         return $this->node_list;
     }
@@ -225,8 +232,12 @@ class Choice extends Agent
 // ?
 if (!isset($this->json)) {return true;}
 
-        $this->json->setField("settings");
-        $this->json->writeVariable(["choice", $this->name], [$state_map]);
+//        $this->json->setField("settings");
+//        $this->json->writeVariable(["choice", $this->name], [$state_map]);
+
+        $this->thing->Write(["choice", $this->name], [$state_map], 'settings');
+
+
         $this->node_list = $state_map;
 
         return true;
@@ -256,11 +267,17 @@ if (!isset($this->json)) {return true;}
             $variable = $this->name;
         }
 
-        $this->json->setField("variables");
-        $this->current_node = $this->json->readVariable([
+//        $this->json->setField("variables");
+//        $this->current_node = $this->json->readVariable([
+//            $this->uuid,
+//            $variable,
+//        ]);
+
+        $this->current_node = $this->thing->Read([
             $this->uuid,
             $variable,
-        ]);
+        ], 'variables');
+
 
         // If the variable is not found return false.  Otherwise, return
         // the found state.
@@ -286,8 +303,10 @@ if (!isset($this->json)) {return true;}
             $variable = $this->name;
         }
 
-        $this->json->setField("variables");
-        $this->json->writeVariable([$this->uuid, $variable], $value);
+//        $this->json->setField("variables");
+//        $this->json->writeVariable([$this->uuid, $variable], $value);
+
+        $this->thing->Write([$this->uuid, $variable], $value);
 
 
 //$this->thing->Write( [$this->uuid, $variable], $value);

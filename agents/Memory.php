@@ -83,7 +83,6 @@ class Memory extends Agent
         return false;
     }
 
-
     function run()
     {
         $this->doMemory();
@@ -92,22 +91,28 @@ class Memory extends Agent
     // dev
     public function writeMemory($field_text, $arr)
     {
+        if (!isset($this->write_fail_count)) {
+            $this->write_fail_count = 0;
+        }
+
         if (!isset($this->uuid)) {
+            $this->write_fail_count += 1;
             return true;
         }
 
         if ($this->uuid == null) {
+            $this->write_fail_count += 1;
             return true;
         }
         // Hmmm
         // Ugly but do this for now.
-//        $j = new Json(null, $this->uuid);
-//        $j->jsontoarrayJson($string_json);
-//        $data = $j->jsontoarrayJson($string_json);
-//$data = null;
-$data = $arr;
-//        $j->jsontoarrayJson($string_json);
-//        $data = $this->jsontoarrayJson($string_json);
+        //        $j = new Json(null, $this->uuid);
+        //        $j->jsontoarrayJson($string_json);
+        //        $data = $j->jsontoarrayJson($string_json);
+        //$data = null;
+        $data = $arr;
+        //        $j->jsontoarrayJson($string_json);
+        //        $data = $this->jsontoarrayJson($string_json);
 
         $data = ['variables' => $data];
 
@@ -135,9 +140,12 @@ $data = $arr;
 
         $existing = $this->memory->get($this->uuid);
 
-if ($existing == false) {
-$this->errorMemory("Existing uuid not found on write request.");
-return false;}
+        if ($existing == false) {
+            $this->write_fail_count += 1;
+
+            $this->errorMemory("Existing uuid not found on write request.");
+            return false;
+        }
 
         $d = $data;
         if (is_array($existing)) {
@@ -148,14 +156,16 @@ return false;}
 
         $response = $this->memory->set($this->uuid, $d);
 
-if ($response === true) {
-var_dump("Memory write OK " . $this->uuid);
-return $this->uuid;}
+        if ($response === true) {
+            var_dump("Memory write OK " . $this->uuid);
+            return $this->uuid;
+        }
 
-$this->errorMemory("Memory write NOT OK " . $this->uuid);
+        $this->write_fail_count += 1;
 
-return true;
+        $this->errorMemory("Memory write NOT OK " . $this->uuid);
 
+        return true;
     }
 
     public function doMemory()
@@ -258,9 +268,9 @@ if (!isset($this->response)) {$this->response = "";}
             }
         }
 
-// dev
-$uuid = Uuid::createUuid();
-/*
+        // dev
+        $uuid = Uuid::createUuid();
+        /*
 
         if (!isset($this->thing)) {
             $t = new Thing(null);

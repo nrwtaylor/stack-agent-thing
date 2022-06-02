@@ -56,7 +56,9 @@ class ThingJson
         // new Database(false, ...) creates a read-only thing.
 //        $this->db = new Database(null, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
        // $uuid = $this->uuid;
-        $this->db = new Database($thing, ['uuid'=>$uuid, 'from'=>'null' . $this->mail_postfix]);
+
+
+//        $this->db = new Database($thing, ['uuid'=>$uuid, 'from'=>'null' . $this->mail_postfix]);
 
         $this->array_data = array();
         $this->json_data = '{}';
@@ -107,7 +109,7 @@ class ThingJson
     function setField($field)
     {
         $this->field = $field;
-        $this->read();
+        //$this->read();
     }
 
     /**
@@ -125,7 +127,7 @@ class ThingJson
             $this->{$key} = $value;
         }
         $this->arraytoJson();
-        $this->write();
+        //$this->write();
     }
 
     /**
@@ -136,7 +138,7 @@ class ThingJson
     {
         $this->json_data = $json_data;
         $this->jsontoArray();
-        $this->write();
+        //$this->write();
     }
 
     public function jsontoarrayJson($json_data = null) {
@@ -260,22 +262,22 @@ if (is_array($array_data)) {
         // Drop N items off end of queue until less than max_chars.
 
         // First push onto the left.
-        $this->pushStream($value, 0);
+        $response = $this->pushStream($value, 0);
 
-        if ($this->db->last_update != true) {
+        if ($response != true) {
             echo "fallingWater";
             return;
         }
         // Check if JSON string too long.
-        if ($this->db->last_update == true) {
+        if ($response == true) {
             // Failed to push
             $this->popStream();
             $this->popStream();
         }
 
-        $this->pushStream($value, 0);
+        $response = $this->pushStream($value, 0);
 
-        if ($this->db->last_update == true) {
+        if ($response == true) {
             // Failed to push
             $this->popStream();
             $this->popStream();
@@ -297,13 +299,14 @@ if (is_array($array_data)) {
         $this->setField($this->field);
 
         $stream_id = $this->idStream();
-if ($this->array_data[$stream_id] == null) {return;}
+if ($this->array_data[$stream_id] == null) {return true;}
 
         if ($pos == -1) {
             $pos = count($this->array_data[$stream_id]);
         }
         array_splice($this->array_data[$stream_id], $pos, 0, $value);
         $this->setArray($this->array_data);
+return null;
     }
 
     /**
@@ -329,7 +332,7 @@ if ($this->array_data[$stream_id] == null) {return;}
         unset($dest[$finalKey]);
 
         $this->arraytoJson();
-        $this->write();
+        //$this->write();
     }
 
     /**
@@ -337,7 +340,7 @@ if ($this->array_data[$stream_id] == null) {return;}
      * @param array   $target_path
      * @return unknown
      */
-    function readVariable(array $target_path)
+    function deprecate_readVariable(array $target_path)
     {
         // See if this helps.
 
@@ -388,13 +391,14 @@ if ($this->array_data[$stream_id] == null) {return;}
 
         $this->setValueFromPath($this->array_data, $var_path, $value);
         $this->arraytoJson();
-        $t = $this->write();
+        //$t = $this->write();
 
         // Failing to write a variable isn't a problem.
         // The agents will do what they can.
 
         //        if ($t === false) {throw new \Exception("Stack write failed.");}
         $this->size_overflow = false;
+/*
         if ($t === false) {
             $this->size_overflow = strlen($this->json_data) - $this->char_max;
             $this->write_fail_count += 1;
@@ -402,6 +406,7 @@ if ($this->array_data[$stream_id] == null) {return;}
             $t->Create("x", "y", "s/ error");
             $a = new Hey($t);
         }
+*/
     }
 
     /**
@@ -510,7 +515,7 @@ return true;
      *
      * @return unknown
      */
-    function write()
+    function deprecate_write()
     {
         // Now write to defined column.
         if ($this->field == null) {
@@ -577,14 +582,24 @@ var_dump("ThingJson write done");
      *
      * @return unknown
      */
-    function read()
+    function deprecate_read()
     {
         $this->json_data = $this->db->readField($this->field);
         //        if ($this->json_data == null) {$this->initField();}
-
+var_dump("ThingJson merp");
         $array = $this->jsontoArray();
         $array = $this->array_data;
 
         return $array;
     }
+function read() {
+var_dump("ThingJson read called");
+}
+
+function write() {
+var_dump("ThingJson write called");
+}
+
+
+
 }

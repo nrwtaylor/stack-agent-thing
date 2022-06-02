@@ -868,7 +868,6 @@ class Second extends Agent
                 }
                 $second_text = strval($response);
 
-                //$era = $this->eraYear($text);
                 $second = ["second" => $second_text];
                 $seconds[] = $second;
             }

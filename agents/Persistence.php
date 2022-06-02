@@ -53,8 +53,13 @@ class Persistence extends Agent
 
             $this->persist_to = $dteStart + $age;
 
-            $this->thing->json->setField("variables");
-            $variables = $this->thing->json->read();
+//            $this->thing->mjson->setField("variables");
+//            $variables = $this->thing->json->read();
+// dev
+
+            $variables = $this->thing->Read([]);
+
+
             $this->refreshed_at = 0;
             if ($variables != false) {
                 foreach ($variables as $key => $variable) {

@@ -222,8 +222,11 @@ if (!isset($this->error_message)) {
 
         $this->thing->db->setFrom($this->from);
 
-        $this->thing->json->setField("message0");
-        $this->body = $this->thing->json->readVariable(["slack"]);
+//        $this->thing->json->setField("message0");
+//        $this->body = $this->thing->json->readVariable(["slack"]);
+
+        $this->body = $this->thing->Read(["slack"], 'message0');
+
 
         $this->variablesGet();
 
@@ -262,11 +265,18 @@ if (!isset($this->error_message)) {
 
         $test_message = $this->makeMessage("command");
 
-        $this->thing->json->setField("message0");
-        $this->response_url = $this->thing->json->readVariable([
+//        $this->thing->json->setField("message0");
+//        $this->response_url = $this->thing->json->readVariable([
+//            "slack",
+//            "response_url",
+//        ]);
+
+
+        $this->response_url = $this->thing->Read([
             "slack",
             "response_url",
-        ]);
+        ], 'message0');
+
 
         if ($this->response_url != false) {
             $this->chat_webhookResponse(null, $test_message);

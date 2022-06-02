@@ -141,13 +141,13 @@ class Mysql extends Agent
 
         if ($array_data == false) {
             return false;
-        } 
-
-        if (is_string($array_data)) {
-            $array_data = ['text'=>$array_data];
         }
 
-/*
+        if (is_string($array_data)) {
+            $array_data = ['text' => $array_data];
+        }
+
+        /*
         foreach ($array_data as $key => $value) {
             if ($key != "") {
                 $this->{$key} = $value;
@@ -156,7 +156,6 @@ class Mysql extends Agent
 */
         return $array_data;
     }
-
 
     public function errorMysql($text = null)
     {
@@ -173,20 +172,31 @@ class Mysql extends Agent
         $this->response .= $text . " ";
     }
 
-    public function thingMysql($obj) {
+    public function thingMysql($obj)
+    {
+        $thing = (array) $obj;
 
+        $json_fields = [
+            'variables',
+            'settings',
+            'associations',
+            'message0',
+            'message1',
+            'message2',
+            'message3',
+            'message4',
+            'message5',
+            'message6',
+            'message7',
+        ];
 
-       $thing = (array) $obj;
-
-
-$json_fields = ['variables','settings','associations','message0','message1',
-'message2','message3', 'message4', 'message5', 'message6', 'message7'];
-
-foreach($json_fields as $i=>$json_field) {
-if (!isset($thing[$json_field])) {continue;}
-       $thing[$json_field] = $this->jsonArr($thing[$json_field]);
-}
-return $thing;
+        foreach ($json_fields as $i => $json_field) {
+            if (!isset($thing[$json_field])) {
+                continue;
+            }
+            $thing[$json_field] = $this->jsonArr($thing[$json_field]);
+        }
+        return $thing;
     }
 
     public function statusMysql($text = null)
@@ -345,24 +355,22 @@ return $thing;
 
     function arrayJson($array_data = null)
     {
-
-        $json_data = json_encode(
-            $array_data,
-            JSON_PRESERVE_ZERO_FRACTION
-        );
+        $json_data = json_encode($array_data, JSON_PRESERVE_ZERO_FRACTION);
         return $json_data;
     }
-
 
     /**
      *
      * @param unknown $field_text
      * @param unknown $string_text
      */
-    function writeMysql($field_text, $string_text)
+    function writeMysql($field_text, $array)
     {
-
-        $string_text = $this->arrayJson($string_text);
+        if (!isset($this->write_fail_count)) {
+            $this->write_fail_count = 0;
+        }
+        //$this->thingMysql([$field_text=>$array]);
+        $string_text = $this->arrayJson($array);
 
         if (strlen($string_text) > 100000) {
             //$this->error .= "Field length exceeded.";
@@ -371,16 +379,20 @@ return $thing;
             // Do not write field if too large.
             //return;
             $this->last_update = true;
+            $this->write_fail_count += 1;
             return true;
         }
 
         if (!$this->isReadyMysql()) {
+            $this->write_fail_count += 1;
             return true;
         }
 
         $uuid = $this->uuid;
 
         var_dump("Mysql writeMysql uuid " . $uuid);
+        var_dump("Mysql writeMysql string_text " . $string_text);
+
         try {
             $query = "UPDATE stack SET $field_text=:string_text WHERE uuid=:uuid";
             $sth = $this->pdo->prepare($query);
@@ -402,11 +414,13 @@ return $thing;
             $this->last_update = false;
         } catch (\PDOException $e) {
             $this->errorMysql($e->getMessage());
+            $this->write_fail_count += 1;
 
             $sth = null;
             return true;
         } catch (\Throwable $e) {
             $this->errorMysql($e->getMessage());
+            $this->write_fail_count += 1;
 
             $sth = null;
             return true;
@@ -415,6 +429,7 @@ return $thing;
 
             $thing = false;
             $this->last_update = true;
+            $this->write_fail_count += 1;
 
             $sth = null;
             return true;
@@ -494,8 +509,8 @@ return $thing;
             return true;
         }
 
-// dev
-$uuid = Uuid::createUuid();
+        // dev
+        $uuid = Uuid::createUuid();
 
         try {
             // Create a new record in the db for the Thing.
@@ -503,11 +518,13 @@ $uuid = Uuid::createUuid();
             $query = $this->pdo->prepare("INSERT INTO stack
                         (uuid,task,nom_from,nom_to)
                         VALUES (:uuid, :task, :nom_from, :nom_to)");
-//var_dump("Mysql createMysql u", $u);
+            //var_dump("Mysql createMysql u", $u);
             $uuid = $this->uuid;
-//$uuid = $u;
+            //$uuid = $u;
             $task = $subject;
             $nom_from = $this->from;
+
+            //$nom_from = "merp";
 
             $hash_nom_from = hash($this->hash_algorithm, $nom_from);
 
@@ -524,7 +541,6 @@ $uuid = Uuid::createUuid();
 
             $query->execute();
             $query = null;
-
             //           $this->thing->log(
             //                'made MYSQL record.',
             //                "INFORMATION"
@@ -533,6 +549,7 @@ $uuid = Uuid::createUuid();
             //return true;
             //return $query;
         } catch (\Exception $e) {
+            var_dump($e->getMessage());
             //           $this->thing->log(
             //                'could not create MySQL record.',
             //                "INFORMATION"
@@ -612,7 +629,7 @@ $uuid = Uuid::createUuid();
             $thing = false;
         }
         $sth = null;
-//$thing = $this->thingMysql($thing);
+        $thing = $this->thingMysql($thing);
         return $thing;
     }
 
