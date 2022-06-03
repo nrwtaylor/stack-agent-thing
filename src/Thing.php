@@ -32,7 +32,7 @@ class Thing
         //require $resource_path . '/HardCoreDebugLogger.php';
         //\HardCoreDebugLogger::register();
 
-        // Now at 0.0.10
+        // Now at 0.0.11
 
         // Imagine both a need not to touch anything.
         // And a need to make this much tidier.
@@ -171,6 +171,35 @@ class Thing
 
     public function __destruct()
     {
+// Write
+// var_dump($this->variables);
+//if (isset($this->variables->array_data)) {
+// $this->Write([], $this->variables->array_data);
+//}
+
+        try {
+        } catch (\Throwable $e) {
+            $this->error = $e->getMessage();
+            $this->log(
+                'Caught throwable: ',
+                $e->getMessage(),
+                "\n",
+                'INFORMATION'
+            );
+//            return true;
+        } catch (\Exception $e) {
+            $this->error = $e->getMessage();
+            $this->log(
+                'Caught exception: ',
+                $e->getMessage(),
+                "\n",
+                'INFORMATION'
+            );
+//            return true;
+        }
+
+
+
         $t = "";
         if (isset($this->nuuid)) {
             $t = $this->nuuid;
@@ -187,9 +216,13 @@ class Thing
             // THIS IS CORE TECHNOLOGY.  THE SELECTION OF THE UUID GENERATOR IS
             // CRITICAL.  INTENTIONALLY LEFT OPEN AS CHAR(34) DB FIELD.
 
-            $this->uuid = $this->getUUid();
+ //           $this->uuid = $this->getUUid();
+ //           $this->nuuid = substr($this->uuid, 0, 4);
+ 
+            // Thing must always have a uuid. Unique to the stack.
+            $this->uuid = (string) Uuid::uuid4();
+            // May as wll compute the nuuid here.
             $this->nuuid = substr($this->uuid, 0, 4);
-            //$this->uuid = (string) Uuid::uuid4();
 
             $this->log("Thing made a UUID.");
 
@@ -202,7 +235,7 @@ class Thing
 */
             $this->db = new Database($this, [
                 'uuid' => $this->uuid,
-                'from' => $this->from,
+                'from' => null,
             ]);
 
 
@@ -229,15 +262,25 @@ class Thing
 
             // Can't call db here, can only call it when $from is known.
 
-            $this->json = new ThingJson($this, $this->uuid);
+//            $this->json = new ThingJson($this, $this->uuid);
+
+// Causes inf loop.
+//$this->array_handler = new \Nrwtaylor\StackAgentThing\Arr($this, 'arr');
 
             $this->log("JSON connector made.");
             $this->log("Made a thing from null.");
 
             // Testing this as of 15 June 2018.  Not used by framework yet.
-            $this->variables = new ThingJson($this, $this->uuid);
+            $this->json = new ThingJson($this, $this->uuid);
+            $this->json->setField("variables");
 
+
+            $this->variables = new ThingJson($this, $this->uuid);
             $this->variables->setField("variables");
+
+            $this->associations = new ThingJson($this, $this->uuid);
+            $this->associations->setField("associations");
+
 
             $this->choice = new ThingChoice($this->uuid, $this->from);
 
@@ -274,12 +317,19 @@ class Thing
 
             $this->log("Thing made a db connector.");
             // Provide handler for Json translation from/to MySQL.
-            var_dump("Thing Create uuid",$this->uuid);
+            $this->log('Thing Create uuid '.$this->uuid);
+
             $this->json = new ThingJson($this, $this->uuid);
+            $this->json->setField("variables");
+
 
             // This is a placeholder for refactoring the Thing variables
             $this->variables = new ThingJson($this, $this->uuid);
             $this->variables->setField("variables");
+
+            $this->associations = new ThingJson($this, $this->uuid);
+            $this->associations->setField("associations");
+
             $this->log("Thing made a json connector.");
 
             // Provide handler to support state maps and navigation.
@@ -309,7 +359,6 @@ class Thing
             // $message0-7 not implemented except for development testing.
 
             $this->Get();
-
             $this->log("Get call completed.");
 
             // And fire up the stack balance calculation to make
@@ -502,7 +551,7 @@ class Thing
         $this->uuid = $query;
         $this->db->uuid = $query;
 
-        $this->json = new ThingJson($this, $this->uuid);
+        $this->variables = new ThingJson($this, $this->uuid);
 
         /*
 
@@ -575,7 +624,7 @@ class Thing
         $this->log("Create completed.");
         $g = $this->Get();
         $this->log("Finished create.");
-        var_dump("Thing finished create");
+        //var_dump("Thing finished create");
         return $g;
     }
 
@@ -613,20 +662,19 @@ And review Agent variables.
         if ($field == null) {
             $field = 'variables';
         }
-        var_dump(
-            "Thing Read uuid " . $this->uuid . " path ",
-            implode(">", $path)
-        );
+        $this->log(
+            "Thing Read uuid " . $this->uuid . " path " .
+            implode(">", $path));
 
         $array_data = $this->db->readField($field);
 
         if ($array_data == false) {
-            var_dump("Thing Read array_data " . $array_data);
+            //var_dump("Thing Read array_data " . $array_data);
 
             return false;
         }
 
-        $var_path = $this->json->recursive_array_search($path, $array_data);
+        $var_path = $this->variables->recursive_array_search($path, $array_data);
 
         // Report with array's match.
         if ($var_path == $path) {
@@ -642,7 +690,7 @@ And review Agent variables.
     public function Write($path, $value, $field = null)
     {
         var_dump(
-            "Thing Write " . $this->uuid . " path " . $this->uuid . " path ",
+            "Thing Write " . $this->uuid . " path " . $this->uuid . " path " ,
             implode(">", $path),
             $value
         );
@@ -655,7 +703,8 @@ And review Agent variables.
 
         $array_data = $this->db->readField($field);
 
-        $this->json->setValueFromPath($array_data, $path, $value);
+        $this->variables->setValueFromPath($array_data, $path, $value);
+//$this->array_handler->setPathValueArr($array_data, $path, $value);
 
         $last_write = $this->db->writeDatabase("variables", $array_data);
 
@@ -664,7 +713,7 @@ And review Agent variables.
 
     public function loadAccounts()
     {
-        $this->json->setField("variables");
+        $this->variables->setField("variables");
 
         $accounts = $this->Read(["account"]);
 
@@ -745,7 +794,7 @@ And review Agent variables.
         if ($action == null) {
             $action = "did something with";
         }
-        // Keep it simple for now.
+        // Keep it simple for now.c
 
         //		echo '<pre> Agent "'.$agent.'" ' . $action . ' this Thing at ';print_r($variable);echo'</pre>';
     }
@@ -756,7 +805,8 @@ And review Agent variables.
             return true;
         }
 
-        $variables = $this->account['stack']->json->array_data;
+return;
+$variables = $this->variables->array_data;
 
         if (isset($variables[$variable_set])) {
             $this->$variable_set = (object) [$variables[$variable_set]][0];
@@ -1041,12 +1091,12 @@ echo "Previous uuid got " . ($prior_uuid) . "\n";
             // record if true.  Previous record updated to point to new record.
 
             if ($this->associate_posterior === true) {
-                $posterior_thing->json = new ThingJson(
+                $posterior_thing->associations = new ThingJson(
                     $this,
                     $posterior_thing->uuid
                 );
-                $posterior_thing->json->setField("associations");
-                $posterior_thing->json->pushStream($this->uuid);
+                $posterior_thing->associations->setField("associations");
+                $posterior_thing->associations->pushStream($this->uuid);
                 //Tested with unset and commented out
                 //doesn't seem to improve (at least) the
                 //too many connection issue.  Leave it in for
@@ -1073,19 +1123,19 @@ echo "Previous uuid got " . ($prior_uuid) . "\n";
         }
 
         if (is_array($uuids)) {
-            $current_field = $this->json->field;
-            $this->json->setField("associations");
+            $current_field = $this->variables->field;
+//            $this->variables->setField("associations");
 
             foreach ($uuids as $uuid) {
                 //$this->json->setField("associations");
                 //$this->json->pushStream($uuid);
                 if ($mode == "default") {
-                    $this->json->pushStream($uuid);
+                    $this->associations->pushStream($uuid);
                 } else {
-                    $this->json->fallingWater($uuid);
+                    $this->associations->fallingWater($uuid);
                 }
             }
-            $this->json->setField($current_field);
+//            $this->json->setField($current_field);
 
             return false;
         }
@@ -1124,94 +1174,6 @@ echo "Previous uuid got " . ($prior_uuid) . "\n";
     }
 
     function log($text = null, $logging_level = null)
-    {
-        if ($text == null) {
-            return $this->log_last;
-        }
-
-        if (!isset($this->log)) {
-            $this->log = "\n";
-        }
-        // DEBUG, INFORMATION, WARNING, ERROR, FATAL
-        // Plus OPTIMIZE
-
-        if ($logging_level == null) {
-            $logging_level = "INFORMATION";
-            if (isset($this->logging_level_default)) {
-                $logging_level = $this->logging_level_default; // If message isn't specific - assume WARNING
-            }
-            //if (isset($this->logging_level)) {$logging_level = $this->logging_level;}
-        }
-
-        //get the calling class
-
-        // Causing a segmentation fault?
-        //    72.1589   76828520
-        //   -> debug_backtrace() /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php:1020
-
-        // Adjusted PHP7.4 CLI dev memory limit. Test
-
-        //        $trace = debug_backtrace();
-        //        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-
-        //        $trace = debug_backtrace(false, 2);
-
-        // Get the class that is asking for who awoke it
-        $class_name = "X";
-        /*
-        if (isset($trace[1]['class'])) {
-            $class_namespace = $trace[1]['class'];
-            $class_name_array = explode("\\", $class_namespace);
-            $class_name = end($class_name_array);
-        }
-*/
-        $runtime = number_format($this->elapsed_runtime()) . "ms";
-
-        $text = strip_tags($text);
-        if (isset($this->agent_class_name_current)) {
-            $class_name = $this->agent_class_name_current;
-        }
-        $agent_prefix = 'Agent "' . ucwords($class_name) . '"';
-
-        $text = str_replace($agent_prefix, "", $text);
-
-        $text = lcfirst($text);
-        $text = trim($text);
-        $t =
-            str_pad($runtime, 10, " ", STR_PAD_LEFT) .
-            " " .
-            $agent_prefix .
-            ' ' .
-            strip_tags($text);
-
-        $this->log .= $t . " [" . $logging_level . "]" . "<br>";
-
-        if (isset($this->logging_console)) {
-            switch (strtoupper($this->logging_console)) {
-                case "ON":
-                    $this->console($t . " [" . $logging_level . "]" . "\n");
-                    break;
-                case "OPTIMIZE":
-                case "FATAL":
-                case "ERROR":
-                case "WARNING":
-                case "INFORMATION":
-                case "DEBUG":
-                    if (
-                        strtoupper($logging_level) ===
-                        strtoupper($this->logging_console)
-                    ) {
-                        $this->console($t . " [" . $logging_level . "]" . "\n");
-                        break;
-                    }
-                default:
-                // No action.
-            }
-        }
-        $this->log_last = $t;
-    }
-
-    function deprecate_log($text = null, $logging_level = null)
     {
         if ($text == null) {
             return $this->log_last;

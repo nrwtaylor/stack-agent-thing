@@ -227,7 +227,8 @@ class Callsign extends Agent
             ) {
                 $uuid = $thing_object["uuid"];
                 $variables_json = $thing_object["variables"];
-                $variables = $this->thing->json->jsontoArray($variables_json);
+                $variables = $this->thing->variables->jsontoArray($variables_json);
+
 
                 if (isset($variables["callsign"])) {
                     $callsign = "X";

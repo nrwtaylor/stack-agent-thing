@@ -36,9 +36,9 @@ class Arr extends Agent
     {
         $this->thing->flagGreen();
 
-        $this->thing_report["info"] = "This agent handles HTML.";
+        $this->thing_report["info"] = "This agent handles Arrays.";
         $this->thing_report["help"] =
-            "This is about recognizing and processing HTML.";
+            "This is about recognizing and processing Arrays.";
 
         $this->thing_report["message"] = $this->sms_message;
         $this->thing_report["txt"] = $this->sms_message;
@@ -192,6 +192,35 @@ var_dump("Arr jsonArr");
 */
         return $array_data;
     }
+
+
+    private function setPathValueArr(&$arr, $path, $value)
+    {
+if (!is_array($arr)) {return true;}
+        // we need references as we will modify the first parameter
+        $dest = &$arr;
+if ($dest == null) {
+$dest =[];
+}
+//var_dump($dest);
+//return null;}
+        $finalKey = array_pop($path);
+        foreach ($path as $key) {
+            $dest = &$dest[$key];
+        }
+
+        if (is_array($finalKey)) {
+           throw new Exception('Array received as path.');
+           return true;
+        }
+if (is_string($dest)) {
+return true;
+// dev 5 November 2021
+}
+        $dest[$finalKey] = $value;
+    }
+
+
 
 
     public function readSubject()

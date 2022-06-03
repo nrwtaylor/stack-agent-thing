@@ -34,6 +34,7 @@ class Database
     //public function init()
     function __construct($thing = null, $agent_input = null)
     {
+        $this->thing = $thing;
         $uuid = null;
         if (isset($agent_input['uuid'])) {
             $uuid = $agent_input["uuid"];
@@ -300,7 +301,7 @@ if (isset($this->stack_handlers[$candidate_service_name])) {continue;}
 
         try {
             //$handler = new $agent_namespace_name($this->thing, $this->agent_input);
-            $handler = new $agent_namespace_name(null, $this->agent_input);
+            $handler = new $agent_namespace_name($this->thing, $this->agent_input);
 
             $handler->uuid = $this->uuid;
             $handler->from = $this->from;
@@ -564,6 +565,7 @@ var_dump("writeDatabase saw mysql active service");
     {
         $thingreport = $this->Get();
 //var_dump($thingreport);
+
         $this->thing = $thingreport["thing"];
         if (isset($this->thing->$field)) {
             // I think I should also do

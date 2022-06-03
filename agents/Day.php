@@ -2354,6 +2354,13 @@ Now draw the twilight.
             "vancouver toronto calgary montreal ottawa",
             $expand_places_input
         );
+
+        $expand_places_input = str_replace(
+            "canada",
+            "vancouver st johns",
+            $expand_places_input
+        );
+
         $expand_places_input = str_replace(
             "places",
             "vancouver new york madrid",
@@ -2418,7 +2425,9 @@ Now draw the twilight.
 
             $this->working_datum = $this->time_agent->datumTime($date_string);
             $this->dateline = $dateline;
+
         } else {
+
             $timestamp = $this->zuluStamp($this->current_time);
 
             $dateline = $this->extractDateline($timestamp);
@@ -2429,6 +2438,7 @@ Now draw the twilight.
             $this->working_datum = $this->time_agent->datumTime(
                 $this->current_time
             );
+
         }
         $longitude = $this->extractLongitude($i);
         $latitude = $this->extractLatitude($i);

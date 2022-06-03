@@ -23,7 +23,7 @@ class Timestamp extends Agent
             "microseconds",
             "microseconds",
         ];
-        $this->current_time = $this->thing->json->microtime();
+        $this->current_time = $this->thing->microtime();
 
         // Default is not to show end user microtime.
         $this->micro_time_flag = false;

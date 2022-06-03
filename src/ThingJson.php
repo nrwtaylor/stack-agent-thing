@@ -22,11 +22,11 @@ class ThingJson
      * @param unknown $uuid
      * @return unknown
      */
-    function __construct($thing = null, $uuid)
+    function __construct($thing = null, $text = null)
     {
         $this->start_time = microtime(true);
         //        $settings = require 'settings.php';
-        $settings = require($GLOBALS['stack_path'] . "private/settings.php");
+        $settings = require $GLOBALS['stack_path'] . "private/settings.php";
         $this->container = new \Slim\Container($settings);
 
         $this->mail_postfix = $settings['settings']['stack']['mail_postfix'];
@@ -42,32 +42,19 @@ class ThingJson
         $this->char_max = $this->container['stack']['char_max'];
 
         $this->write_on_destruct = false;
-        // Consider factor this out.  Json should not need to call
-        // Database functions.  Database should do the reading and writing
-        // to the database.
 
-        // Guess Json needs to be able to trigger
-        // a database write though.
+        // This is a useful function to maintain an in-sync
+        // PHP Array and JSON text pair of variables.
 
-        // This will be creating multiple (unnecessay?) db calls.
-        // But needed otherwise readField on null line 422
-        // $this->db = new Database(null, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
-
-        // new Database(false, ...) creates a read-only thing.
-//        $this->db = new Database(null, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
-       // $uuid = $this->uuid;
-
-
-//        $this->db = new Database($thing, ['uuid'=>$uuid, 'from'=>'null' . $this->mail_postfix]);
-
-        $this->array_data = array();
+        $this->array_data = [];
         $this->json_data = '{}';
 
         $this->field = null;
         //        $this->write_field_list = array();
-        $this->thing_array = array();
+//        $this->thing_array = [];
         // Temporary hack of sorts.
-        $this->uuid = $uuid;
+        // $this->uuid = $uuid;
+        $this->uuid = $this->uuid;
     }
 
     /**
@@ -122,10 +109,11 @@ class ThingJson
             $array_data = $this->array_data;
         }
         $this->array_data = $array_data;
-
+/*
         foreach ($array_data as $key => $value) {
             $this->{$key} = $value;
         }
+*/
         $this->arraytoJson();
         //$this->write();
     }
@@ -141,8 +129,9 @@ class ThingJson
         //$this->write();
     }
 
-    public function jsontoarrayJson($json_data = null) {
-       return $this->jsontoArray($json_data);
+    public function jsontoarrayJson($json_data = null)
+    {
+        return $this->jsontoArray($json_data);
     }
 
     /**
@@ -164,16 +153,19 @@ class ThingJson
         }
 
         if (is_string($array_data)) {
-            $array_data = ['text'=>$array_data];
+            $array_data = ['text' => $array_data];
         }
 
-if (is_array($array_data)) {
-        foreach ($array_data as $key => $value) {
-            if ($key != "") {
-                $this->{$key} = $value;
+        if (is_array($array_data)) {
+
+/*
+            foreach ($array_data as $key => $value) {
+                if ($key != "") {
+                    $this->{$key} = $value;
+                }
             }
+*/
         }
-}
 
         $this->array_data = $array_data;
 
@@ -185,13 +177,14 @@ if (is_array($array_data)) {
      */
     function arraytoJson($array_data = null)
     {
-
-        if ($array_data == null) {$array_data = $this->array_data;}
+        if ($array_data == null) {
+            $array_data = $this->array_data;
+        }
         $this->json_data = json_encode(
             $array_data,
             JSON_PRESERVE_ZERO_FRACTION
         );
-        $this->thing_array[$this->field] = $this->json_data;
+  //      $this->thing_array[$this->field] = $this->json_data;
         return $this->json_data;
     }
 
@@ -230,7 +223,7 @@ if (is_array($array_data)) {
     {
         // I guess this is appropriate.  A default 'agent' fingers
         // the thing and then identifies posterior associations.
-        $arr = array("agent" => array());
+        $arr = ["agent" => []];
         $this->setArray($arr);
     }
 
@@ -293,20 +286,22 @@ if (is_array($array_data)) {
      */
     function pushStream($value, $pos = -1)
     {
-// dev
-//if ($this->array_data == null) {return;}
+        // dev
+        //if ($this->array_data == null) {return;}
 
         $this->setField($this->field);
 
         $stream_id = $this->idStream();
-if ($this->array_data[$stream_id] == null) {return true;}
+        if ($this->array_data[$stream_id] == null) {
+            return true;
+        }
 
         if ($pos == -1) {
             $pos = count($this->array_data[$stream_id]);
         }
         array_splice($this->array_data[$stream_id], $pos, 0, $value);
         $this->setArray($this->array_data);
-return null;
+        return null;
     }
 
     /**
@@ -337,57 +332,12 @@ return null;
 
     /**
      *
-     * @param array   $target_path
-     * @return unknown
-     */
-    function deprecate_readVariable(array $target_path)
-    {
-        // See if this helps.
-
-        $this->jsontoArray();
-
-        // Returns false if variable not found.
-        //$this->rec_array_replace($var_path, $value, $this->array_data);
-
-        // Here a recursive array search is required because of the
-        // ambiguity that the value can also be a key.
-        // A key building pattern (using the get/setValuefromPath doesn't
-        // accomodate this.
-
-        // So here do a search for each element of the target_path
-        // regardless whether the 'key' or 'value' matches.
-        // Return the path.
-
-        if ($this->array_data == false) {
-            return false;
-        }
-
-        $var_path = $this->recursive_array_search(
-            $target_path,
-            $this->array_data
-        );
-
-        // Report with array's match.
-
-        if ($var_path == $target_path) {
-            $value = $this->getValueFromPath($this->array_data, $var_path);
-        } else {
-            $value = false;
-        }
-
-        return $value;
-    }
-
-    /**
-     *
      * @param array   $var_path
      * @param unknown $value
      */
     function writeVariable(array $var_path, $value)
     {
-
-//        $array_data = $this->array_data;
-
+        //        $array_data = $this->array_data;
 
         $this->setValueFromPath($this->array_data, $var_path, $value);
         $this->arraytoJson();
@@ -398,7 +348,7 @@ return null;
 
         //        if ($t === false) {throw new \Exception("Stack write failed.");}
         $this->size_overflow = false;
-/*
+        /*
         if ($t === false) {
             $this->size_overflow = strlen($this->json_data) - $this->char_max;
             $this->write_fail_count += 1;
@@ -444,27 +394,29 @@ return null;
      */
     private function setValueFromPath(&$arr, $path, $value)
     {
-if (!is_array($arr)) {return true;}
+        if (!is_array($arr)) {
+            return true;
+        }
         // we need references as we will modify the first parameter
         $dest = &$arr;
-if ($dest == null) {
-$dest =[];
-}
-//var_dump($dest);
-//return null;}
+        if ($dest == null) {
+            $dest = [];
+        }
+        //var_dump($dest);
+        //return null;}
         $finalKey = array_pop($path);
         foreach ($path as $key) {
             $dest = &$dest[$key];
         }
 
         if (is_array($finalKey)) {
-           throw new Exception('Array received as path.');
-           return true;
+            throw new Exception('Array received as path.');
+            return true;
         }
-if (is_string($dest)) {
-return true;
-// dev 5 November 2021
-}
+        if (is_string($dest)) {
+            return true;
+            // dev 5 November 2021
+        }
         $dest[$finalKey] = $value;
     }
 
@@ -478,7 +430,7 @@ return true;
     private function recursive_array_search(
         $target_path,
         $haystack,
-        $var_path = array()
+        $var_path = []
     ) {
         // Pop off the first value of the array.
         $find = array_shift($target_path);
@@ -511,95 +463,13 @@ return true;
         return $var_path;
     }
 
-    /**
-     *
-     * @return unknown
-     */
-    function deprecate_write()
+    function read()
     {
-        // Now write to defined column.
-        if ($this->field == null) {
-            return;
-        }
-
-        if (strlen($this->json_data) > $this->char_max) {
-
-            // devstack what do you do here?
-            // This is the place where Json borks when asked to save too much.
-
-            // Clearly expected behaviour and the agents should be aware.
-            // Rather not raise an exception for something so routine.
-
-            // Rely on agents to check if it's necessary to flag an exception.
-
-            // Nah. Do the hard work through exceptions.
-
-            $thing = new Thing(null);
-            $thing->Create(
-                null,
-                "human",
-                'Stack variables size exceeded ' . $this->uuid . " writing to field " . $this->field . "."
-            );
-            $thing_agent = new Hey($thing);
-
-            $this->last_write = true;
-
-            //            throw new \Error('Insufficient space in DB record ' . $this->uuid . ".");
-            throw new \OverflowException(
-                'Overflow: Insufficient space in DB record ' . $this->uuid . " writing to field " . $this->field . "."
-            );
-            //            $this->overload_length = strlen($this->json_data) - $this->char_max;
-
-            return false;
-        } else {
-var_dump("Json Write pre-write");
-
-            //$this->thing_array[$this->field] = $this->json_data;
-            if ($this->write_on_destruct) {
-                //$this->thing_array[] = array("field"=>$this->field,"data"=>$this->json_data);
-                //$this->write_field_list[] = $this->field;
-            } else {
-/*
-                $this->last_write = $this->db->writeDatabase(
-                    $this->field,
-                    $this->json_data
-                );
-*/
-                $this->last_write = $this->db->writeDatabase(
-                    $this->field,
-                    $this->array_data
-                );
-
-            }
-var_dump("ThingJson write done");
-
-            return true;
-        }
-        return;
+        var_dump("ThingJson read called");
     }
 
-    /**
-     *
-     * @return unknown
-     */
-    function deprecate_read()
+    function write()
     {
-        $this->json_data = $this->db->readField($this->field);
-        //        if ($this->json_data == null) {$this->initField();}
-var_dump("ThingJson merp");
-        $array = $this->jsontoArray();
-        $array = $this->array_data;
-
-        return $array;
+        var_dump("ThingJson write called");
     }
-function read() {
-var_dump("ThingJson read called");
-}
-
-function write() {
-var_dump("ThingJson write called");
-}
-
-
-
 }

@@ -1395,11 +1395,11 @@ public function __set($name, $value) {
     {
         //        $previous_thing = new Thing($block_thing['uuid']);
         //        $this->prior_thing = $previous_thing;
-        if (!isset($this->thing->json->array_data["message"]["agent"])) {
+        if (!isset($this->thing->variables->array_data["message"]["agent"])) {
             $this->current_agent = "help";
         } else {
             $this->current_agent =
-                $this->thing->json->array_data["message"]["agent"];
+                $this->thing->variables->array_data["message"]["agent"];
         }
         /*
         $this->link =
@@ -1446,11 +1446,11 @@ public function __set($name, $value) {
 
         $previous_thing = new Thing($block_thing["uuid"]);
         $this->prior_thing = $previous_thing;
-        if (!isset($previous_thing->json->array_data["message"]["agent"])) {
+        if (!isset($previous_thing->variables->array_data["message"]["agent"])) {
             $this->prior_agent = "help";
         } else {
             $this->prior_agent =
-                $previous_thing->json->array_data["message"]["agent"];
+                $previous_thing->variables->array_data["message"]["agent"];
         }
 
         $this->link =

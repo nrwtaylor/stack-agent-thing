@@ -255,11 +255,11 @@ class Log extends Agent
 
         $previous_thing = new Thing($block_thing["uuid"]);
 
-        if (!isset($previous_thing->json->array_data["message"]["agent"])) {
+        if (!isset($previous_thing->variables->array_data["message"]["agent"])) {
             $this->prior_agent = "php";
         } else {
             $this->prior_agent =
-                $previous_thing->json->array_data["message"]["agent"];
+                $previous_thing->variables->array_data["message"]["agent"];
         }
 
         return $this->link_uuid;
