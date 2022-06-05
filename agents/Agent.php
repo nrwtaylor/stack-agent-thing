@@ -1493,21 +1493,41 @@ $this->makeThingreport();
         }
     }
 
+
+    // Dev __call recognise snake case
+    public function firstLetterCapitalise($text) {
+       return ucfirst($text);
+    }
+
     /**
      *
      */
     public function makeInfo()
     {
+
         if (!isset($this->thing_report["info"])) {
             if (isset($this->info)) {
-                $this->thing_report["info"] = $this->info;
+                $info = $this->firstLetterCapitalise($this->info);
+                $this->thing_report["info"] = $info;
                 return;
             }
 
             $info = $this->info();
+
             $this->thing_report["info"] = $info;
             $this->info = $info;
         }
+
+        if (isset($this->thing_report['info'])) {
+
+           $info = $this->thing_report['info'];
+        }
+
+        $info = $this->firstLetterCapitalise($info);
+
+$this->info = $info;
+$this->thing_report['info'] = $info;
+
     }
 
     public function info()

@@ -260,6 +260,9 @@ class Ping extends Agent
     {
         $parts = explode("=", $text);
 
+        $tokens = explode(" ", $text);
+        $first_token = $tokens[0];
+
         $data = "";
         $address = "";
         if (count($parts) == 2) {
@@ -270,7 +273,7 @@ class Ping extends Agent
             // dev parse ping
 
             $ping = [
-                "text" => $address . " " . $data,
+                "text" => $first_token . " " .$address . " " . $data,
                 "minimum" => null,
                 "average" => null,
                 "maximum" => null,

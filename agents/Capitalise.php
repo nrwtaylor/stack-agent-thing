@@ -27,6 +27,14 @@ class Capitalise extends Agent
         $this->initCapitalise();
     }
 
+    public function firstLetterCapitalise($text = null) {
+        return ucfirst($text);
+    }
+
+    public function titleCapitalise($text = null) {
+        return capitaliseTitle($text = null);
+    }
+
     public function capitaliseTitle($text = null)
     {
         $h_test = $this->getCapitalisation($text);

@@ -744,7 +744,7 @@ class Message extends Agent
             switch (true) {
                 case strpos($this->from, $this->mail_postfix) !== false:
                     $this->thing_report["info"] =
-                        "did not send an Email to an internal address.";
+                        "Did not send an Email to an internal address.";
                     break;
 
                 case $token_thing->thing_report["token"] != "email":
