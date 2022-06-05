@@ -186,15 +186,7 @@ class Ping extends Agent
     public function getPing()
     {
         $received_at = $this->created_at;
-
-//        $this->ping_time = time() - $received_at;
         $this->ping_time = strtotime($this->current_time) - $received_at;
-
-        if ($this->ping_time < 1) {
-            $this->ping_text = "<1 second";
-        } else {
-            $this->ping_text = $this->ping_time;
-        }
     }
 
     /**
@@ -268,6 +260,9 @@ class Ping extends Agent
     {
         $parts = explode("=", $text);
 
+        $tokens = explode(" ", $text);
+        $first_token = $tokens[0];
+
         $data = "";
         $address = "";
         if (count($parts) == 2) {
@@ -278,7 +273,7 @@ class Ping extends Agent
             // dev parse ping
 
             $ping = [
-                "text" => $address . " " . $data,
+                "text" => $first_token . " " .$address . " " . $data,
                 "minimum" => null,
                 "average" => null,
                 "maximum" => null,
