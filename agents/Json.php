@@ -22,7 +22,7 @@ class Json
      * @param unknown $uuid
      * @return unknown
      */
-    function __construct($thing = null, $uuid)
+    function __construct($thing = null, $uuid = null)
     {
         $this->start_time = microtime(true);
         //        $settings = require 'settings.php';

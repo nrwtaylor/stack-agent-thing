@@ -42,7 +42,7 @@ class Database
 
         if ($uuid == null) {
             if (isset($thing->uuid)) {
-                var_dump($thing->uuid);
+                var_dump("Database __construct uuid " . $thing->uuid);
                 $uuid = $thing->uuid;
             }
         }
@@ -58,7 +58,7 @@ class Database
 
         if ($nom_from == null) {
             if (isset($thing->from)) {
-                var_dump($thing->from);
+                var_dump("Database __construct thing from " . $thing->from);
                 $nom_from = $thing->from;
             }
         }
@@ -323,7 +323,7 @@ if (isset($this->stack_handlers[$candidate_service_name])) {continue;}
             if (isset($stack["user"])) {
                 $handler->user = $stack["user"];
             }
-var_dump($agent_namespace_name, "connected");
+var_dump("Database connectDatabase " . $agent_namespace_name . "connected");
             return $handler;
         } catch (\Throwable $t) {
            var_dump($t->getMessage());
@@ -683,7 +683,7 @@ var_dump("Database readField field this thing", $field, $this->thing->$field);
         }
 
         $thing = [];
-        var_dump("Database Get uuid " . $uuid);
+        //var_dump("Database Get uuid " . $uuid);
         //$available_stacks = $this->available_stacks;
         //if (isset($this->responsive_stacks)) {$available_stacks = $this->responsive_stacks;}
 

@@ -972,8 +972,7 @@ public function __set($name, $value) {
         if (isset($this->web_state)) {
             $web_state = $this->web_state;
         }
-//var_dump($this->thing->web_agent->state);
-//var_dump($this->thing_report['link']);
+
         if (
             isset($this->thing->web_agent->state) and
             $this->thing->web_agent->state == "on"
@@ -2384,7 +2383,7 @@ if ($pid == -1) {
             );
             $this->thing->console($j["agent_name"] . " " . $j["score"] . "\n");
         }
-var_dump($this->responsive_agents);
+
     }
 
     // Take a piece of returned text,
@@ -3047,7 +3046,7 @@ $flag = true;
 
             $burst_age_limit = 900; //s
             $similiarness_limit = 90;
-            //var_dump ($this->current_time);
+
             $burst_age = 0;
             if ($this->thing->burst_handler->burst_time != null) {
                 $burst_age =
@@ -3401,7 +3400,6 @@ echo "TRUE";
             $question_thing = new Question($this->thing);
 //            $this->thing_report = $question_thing->thing_report;
 //            return $this->thing_report;
-var_dump("saw question");
         }
 
 */

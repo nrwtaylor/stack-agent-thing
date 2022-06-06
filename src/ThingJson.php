@@ -54,7 +54,7 @@ class ThingJson
 //        $this->thing_array = [];
         // Temporary hack of sorts.
         // $this->uuid = $uuid;
-        $this->uuid = $this->uuid;
+        //$this->uuid = $thing->uuid;
     }
 
     /**
@@ -465,11 +465,11 @@ class ThingJson
 
     function read()
     {
-        var_dump("ThingJson read called");
+        var_dump("ThingJson read called - no action");
     }
 
     function write()
     {
-        var_dump("ThingJson write called");
+        var_dump("ThingJson write called - no action");
     }
 }
