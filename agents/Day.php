@@ -2367,6 +2367,25 @@ Now draw the twilight.
             $expand_places_input
         );
 
+        $expand_places_input = str_replace(
+            "day twilight",
+            " ",
+            $expand_places_input
+        );
+
+        $expand_places_input = str_replace(
+            "twilight",
+            " ",
+            $expand_places_input
+        );
+
+        $expand_places_input = str_replace(
+            "day",
+            " ",
+            $expand_places_input
+        );
+
+
         //$ngrams = $this->extractNgrams($this->input);
 
         $ngrams = $this->extractNgrams($expand_places_input);
