@@ -2,8 +2,8 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
@@ -20,54 +20,54 @@ class Place extends Agent
     // This is an agent of a place.  They can probaby do a lot for somebody.
     // With the right questions.
 
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
         $this->keywords = [
-            'place',
-            'next',
-            'accept',
-            'clear',
-            'drop',
-            'add',
-            'new',
-            'here',
-            'there',
+            "place",
+            "next",
+            "accept",
+            "clear",
+            "drop",
+            "add",
+            "new",
+            "here",
+            "there",
         ];
 
         $this->default_place_name = "Here";
         $this->default_place_code = "BMYK";
 
-        if (isset($this->thing->container['api']['place'])) {
+        if (isset($this->thing->container["api"]["place"])) {
             if (
                 isset(
-                    $this->thing->container['api']['place'][
-                        'default_place_name'
+                    $this->thing->container["api"]["place"][
+                        "default_place_name"
                     ]
                 )
             ) {
                 $this->default_place_name =
-                    $this->thing->container['api']['place'][
-                        'default_place_name'
+                    $this->thing->container["api"]["place"][
+                        "default_place_name"
                     ];
             }
 
             if (
                 isset(
-                    $this->thing->container['api']['place'][
-                        'default_place_code'
+                    $this->thing->container["api"]["place"][
+                        "default_place_code"
                     ]
                 )
             ) {
                 $this->default_place_code =
-                    $this->thing->container['api']['place'][
-                        'default_place_code'
+                    $this->thing->container["api"]["place"][
+                        "default_place_code"
                     ];
             }
         }
 
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+        $this->resource_path = $GLOBALS["stack_path"] . "resources/";
 
         $this->default_alias = "Thing";
         $this->current_time = $this->thing->time();
@@ -76,7 +76,7 @@ class Place extends Agent
 
         $this->state = null; // to avoid error messages
 
-        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/place';
+        $this->link = $this->web_prefix . "thing/" . $this->uuid . "/place";
 
         $this->lastPlace();
 
@@ -85,12 +85,10 @@ class Place extends Agent
             $this->thing,
             "variables place " . $this->from
         );
-
     }
 
     function set()
     {
-
         if (!isset($this->refreshed_at)) {
             $this->refreshed_at = $this->thing->time();
         }
@@ -104,9 +102,9 @@ class Place extends Agent
 
         $this->thing->log(
             $this->agent_prefix .
-                ' set ' .
+                " set " .
                 $this->place_code .
-                ' and ' .
+                " and " .
                 $this->place_name .
                 ".",
             "INFORMATION"
@@ -143,16 +141,35 @@ class Place extends Agent
         }
     }
 
-    public function loadPlace($ngrams, $datum_projected = null) {
+    // dev
+    public function pruneArr($arr, $text = null)
+    {
+$ngrams = $this->getNgrams($text);
 
+        foreach ($arr as $key => $ll) {
+foreach($ngrams as $i=>$ngram) {
+            if (stripos($ngram, $ll) !== false) {
+                unset($arr[$key]);
+            }
+}
+        }
+
+        return $arr;
+    }
+
+    public function loadPlace($ngrams, $datum_projected = null)
+    {
         $place_times = [];
+
+        usort($ngrams, function ($a, $b) {
+            return strlen($b) <=> strlen($a);
+        });
 
         foreach ($ngrams as $j => $ngram) {
             switch ($ngram) {
-
-                case 'amsterdam':
+                case "amsterdam":
                     $place_times["aa34"] = [
-                        "text" => 'amsterdam',
+                        "text" => "amsterdam",
                         "datum_projected" => $datum_projected,
                         "latitude" => 52.3676,
                         "longitude" => 4.9041,
@@ -160,13 +177,11 @@ class Place extends Agent
                     if (!isset($first_place)) {
                         $first_place = $place_times["aa34"];
                     }
-
                     break;
 
-
-                case 'madrid':
+                case "madrid":
                     $place_times["1234"] = [
-                        "text" => 'madrid',
+                        "text" => "madrid",
                         "datum_projected" => $datum_projected,
                         "latitude" => 36.7174,
                         "longitude" => 4.413,
@@ -177,9 +192,9 @@ class Place extends Agent
 
                     break;
 
-                case 'dublin':
+                case "dublin":
                     $place_times["ce34"] = [
-                        "text" => 'dublin',
+                        "text" => "dublin",
                         "datum_projected" => $datum_projected,
                         "latitude" => 53.35014,
                         "longitude" => -6.266155,
@@ -190,9 +205,9 @@ class Place extends Agent
 
                     break;
 
-                case 'vancouver':
+                case "vancouver":
                     $place_times["abcd"] = [
-                        "text" => 'vancouver',
+                        "text" => "vancouver",
                         "datum_projected" => $datum_projected,
                         "latitude" => 49.2827,
                         "longitude" => -123.1207,
@@ -201,11 +216,12 @@ class Place extends Agent
                     if (!isset($first_place)) {
                         $first_place = $place_times["abcd"];
                     }
+
                     break;
 
-                case 'toronto':
+                case "toronto":
                     $place_times["11ab"] = [
-                        "text" => 'toronto',
+                        "text" => "toronto",
                         "datum_projected" => $datum_projected,
                         "latitude" => 43.6529,
                         "longitude" => -79.3849,
@@ -217,9 +233,9 @@ class Place extends Agent
 
                     break;
 
-                case 'new york':
+                case "new york":
                     $place_times["12ab"] = [
-                        "text" => 'new york',
+                        "text" => "new york",
                         "datum_projected" => $datum_projected,
                         "latitude" => 40.6892,
                         "longitude" => -74.0445,
@@ -231,9 +247,9 @@ class Place extends Agent
 
                     break;
 
-                case 'cape mudge lighthouse':
+                case "cape mudge lighthouse":
                     $place_times["12ac"] = [
-                        "text" => 'cape mudge lighthouse',
+                        "text" => "cape mudge lighthouse",
                         "datum_projected" => $datum_projected,
                         "latitude" => 49.998556,
                         "longitude" => -125.195528,
@@ -244,10 +260,10 @@ class Place extends Agent
                     }
 
                     break;
-// https://geohack.toolforge.org/geohack.php?pagename=Royal_Observatory,_Greenwich&params=51.4778_N_0.0014_W_
-                case 'greenwich observatory':
+                // https://geohack.toolforge.org/geohack.php?pagename=Royal_Observatory,_Greenwich&params=51.4778_N_0.0014_W_
+                case "greenwich observatory":
                     $place_times["12ad"] = [
-                        "text" => 'greenwich observatory',
+                        "text" => "greenwich observatory",
                         "datum_projected" => $datum_projected,
                         "latitude" => 51.4778,
                         "longitude" => -0.0014,
@@ -259,10 +275,10 @@ class Place extends Agent
 
                     break;
 
-// https://www.google.com/search?q=dominion+observatory+lat+long&client=ubuntu&hs=kjd&channel=fs&ei=8LZLYvmcHK-s0PEPxpCm8Ak&ved=0ahUKEwj51LqB_fv2AhUvFjQIHUaICZ4Q4dUDCA0&uact=5&oq=dominion+observatory+lat+long&gs_lcp=Cgdnd3Mtd2l6EAMyBQghEKABMgUIIRCgATIFCCEQoAEyBQghEKABMgUIIRCgAToHCAAQRxCwAzoOCC4QgAQQsQMQxwEQowI6CAgAEIAEELEDOggILhCxAxCDAToICC4QgAQQ1AI6CwgAEIAEELEDEIMBOgsILhCABBDHARCjAjoNCC4QsQMQxwEQowIQQzoECAAQQzoLCC4QgAQQsQMQgwE6CAguEIAEELEDOgoILhDHARCvARBDOgYIABAKEEM6CgguELEDENQCEEM6BAguEEM6BwgAELEDEEM6BwguELEDEEM6CwguEIAEEMcBEK8BOgUIABCRAjoICAAQsQMQyQM6BQgAEIAEOhEILhCABBCxAxCDARDHARCvAToFCC4QgAQ6CwguEIAEEMcBENEDOgYIABAWEB5KBAhBGABKBAhGGABQpARY_Tpgnz1oAXABeACAAZMFiAG_MpIBCzAuMi40LjEuNC41mAEAoAEByAEIwAEB&sclient=gws-wiz
-                case 'dominion observatory':
+                // https://www.google.com/search?q=dominion+observatory+lat+long&client=ubuntu&hs=kjd&channel=fs&ei=8LZLYvmcHK-s0PEPxpCm8Ak&ved=0ahUKEwj51LqB_fv2AhUvFjQIHUaICZ4Q4dUDCA0&uact=5&oq=dominion+observatory+lat+long&gs_lcp=Cgdnd3Mtd2l6EAMyBQghEKABMgUIIRCgATIFCCEQoAEyBQghEKABMgUIIRCgAToHCAAQRxCwAzoOCC4QgAQQsQMQxwEQowI6CAgAEIAEELEDOggILhCxAxCDAToICC4QgAQQ1AI6CwgAEIAEELEDEIMBOgsILhCABBDHARCjAjoNCC4QsQMQxwEQowIQQzoECAAQQzoLCC4QgAQQsQMQgwE6CAguEIAEELEDOgoILhDHARCvARBDOgYIABAKEEM6CgguELEDENQCEEM6BAguEEM6BwgAELEDEEM6BwguELEDEEM6CwguEIAEEMcBEK8BOgUIABCRAjoICAAQsQMQyQM6BQgAEIAEOhEILhCABBCxAxCDARDHARCvAToFCC4QgAQ6CwguEIAEEMcBENEDOgYIABAWEB5KBAhBGABKBAhGGABQpARY_Tpgnz1oAXABeACAAZMFiAG_MpIBCzAuMi40LjEuNC41mAEAoAEByAEIwAEB&sclient=gws-wiz
+                case "dominion observatory":
                     $place_times["12af"] = [
-                        "text" => 'dominion observatory',
+                        "text" => "dominion observatory",
                         "datum_projected" => $datum_projected,
                         "latitude" => 45.3936,
                         "longitude" => -75.7144,
@@ -274,10 +290,10 @@ class Place extends Agent
 
                     break;
 
-// https://en.wikipedia.org/wiki/Brockton_Point_Lighthouse
-                case 'brockton point lighthouse':
+                // https://en.wikipedia.org/wiki/Brockton_Point_Lighthouse
+                case "brockton point lighthouse":
                     $place_times["12bf"] = [
-                        "text" => 'brockton point lighthouse',
+                        "text" => "brockton point lighthouse",
                         "datum_projected" => $datum_projected,
                         "latitude" => 49.300917,
                         "longitude" => -123.117018,
@@ -289,12 +305,12 @@ class Place extends Agent
 
                     break;
 
-// https://cdnc.ucr.edu/?a=d&d=SFC19110910.2.43.7&
-// https://books.google.ca/books?id=qfTu-wAQAO8C&pg=PA143&lpg=PA143&dq=%22mare+island+observatory%22+latitude+longitude&source=bl&ots=lNCBamPF9R&sig=ACfU3U3YRTpMQYuU7Le1_8ZERWfu391uhQ&hl=en&sa=X&ved=2ahUKEwiav8GC__v2AhVTOH0KHW3RAYsQ6AF6BAgIEAM#v=onepage&q=%22mare%20island%20observatory%22%20latitude%20longitude&f=false
-// Poition of observatory Lat. 38 05'59" north 122 15'15" west, in time 9h 09m 01*.2 W"
-                case 'mare island observatory':
+                // https://cdnc.ucr.edu/?a=d&d=SFC19110910.2.43.7&
+                // https://books.google.ca/books?id=qfTu-wAQAO8C&pg=PA143&lpg=PA143&dq=%22mare+island+observatory%22+latitude+longitude&source=bl&ots=lNCBamPF9R&sig=ACfU3U3YRTpMQYuU7Le1_8ZERWfu391uhQ&hl=en&sa=X&ved=2ahUKEwiav8GC__v2AhVTOH0KHW3RAYsQ6AF6BAgIEAM#v=onepage&q=%22mare%20island%20observatory%22%20latitude%20longitude&f=false
+                // Poition of observatory Lat. 38 05'59" north 122 15'15" west, in time 9h 09m 01*.2 W"
+                case "mare island observatory":
                     $place_times["13bf"] = [
-                        "text" => 'mare island observatory',
+                        "text" => "mare island observatory",
                         "datum_projected" => $datum_projected,
                         "latitude" => 38.09972,
                         "longitude" => -122.2542,
@@ -306,26 +322,24 @@ class Place extends Agent
 
                     break;
 
-                case 'gonzales point':
+                case "gonzales point":
                     $place_times["14bf"] = [
-                        "text" => 'gonzales point',
+                        "text" => "gonzales point",
                         "datum_projected" => $datum_projected,
                         "latitude" => 48.41,
                         "longitude" => -123.33,
                     ];
 
                     if (!isset($first_place)) {
-                        $first_place = $place_times["13bf"];
+                        $first_place = $place_times["14bf"];
                     }
 
                     break;
 
-
-
                 // 51.05011
-                case 'calgary':
+                case "calgary":
                     $place_times["698f"] = [
-                        "text" => 'calgary',
+                        "text" => "calgary",
                         "datum_projected" => $datum_projected,
                         "latitude" => 51.05011,
                         "longitude" => -114.08529,
@@ -337,9 +351,40 @@ class Place extends Agent
 
                     break;
 
-                case 'ottawa':
+                case "edmonton":
+                    $place_times["f498"] = [
+                        "text" => "edmonton",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 53.55014,
+                        "longitude" => -113.46871,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["f498"];
+                    }
+
+                    break;
+
+                case "saskatoon":
+                    $place_times["75cc"] = [
+                        "text" => "saskatoon",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 52.13238 ,
+                        "longitude" => -106.66892,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["f498"];
+                    }
+
+                    break;
+
+
+
+
+                case "ottawa":
                     $place_times["12ac"] = [
-                        "text" => 'ottawa',
+                        "text" => "ottawa",
                         "datum_projected" => $datum_projected,
                         "latitude" => 45.41117,
                         "longitude" => -75.69812,
@@ -351,81 +396,119 @@ class Place extends Agent
 
                     break;
 
-                case 'montreal':
-                    $place_times["12ad"] = [
-                        "text" => 'montreal',
+                case "montreal":
+                    $place_times["4f05"] = [
+                        "text" => "montreal",
                         "datum_projected" => $datum_projected,
                         "latitude" => 45.50884,
                         "longitude" => -73.58781,
                     ];
 
                     if (!isset($first_place)) {
-                        $first_place = $place_times["12ad"];
+                        $first_place = $place_times["4f05"];
                     }
 
                     break;
 
-                case 'campbell river':
+                case "campbell river":
                     $place_times["7c7b"] = [
-                        "text" => 'campbell river',
+                        "text" => "campbell river",
                         "datum_projected" => $datum_projected,
                         "latitude" => 50.0163,
                         "longitude" => -125.2446,
-                        "source"=>"https://latitude.to/map/ca/canada/cities/cambell-river",
+                        "source" =>
+                            "https://latitude.to/map/ca/canada/cities/cambell-river",
                     ];
 
                     if (!isset($first_place)) {
-                        $first_place = $place_times["12ad"];
+                        $first_place = $place_times["7c7b"];
                     }
 
                     break;
 
-                case 'st johns':
+                case "st johns":
                     $place_times["62b5"] = [
-                        "text" => 'st johns',
+                        "text" => "st johns",
                         "datum_projected" => $datum_projected,
                         "latitude" => 47.56494,
                         "longitude" => -52.70931,
-                        "source"=>"https://latitude.to/map/ca/canada/cities/st-johns",
+                        "source" =>
+                            "https://latitude.to/map/ca/canada/cities/st-johns",
                     ];
 
                     if (!isset($first_place)) {
-                        $first_place = $place_times["12ad"];
+                        $first_place = $place_times["62b5"];
                     }
 
                     break;
 
-                case 'churchill':
+                case "churchill":
                     $place_times["8dba"] = [
-                        "text" => 'churchill',
+                        "text" => "churchill",
                         "datum_projected" => $datum_projected,
-                        "latitude" =>  58.768410,
+                        "latitude" => 58.76841,
                         "longitude" => -94.164963,
-                        "source"=>"https://latitude.to/map/ca/canada/cities/st-johns",
+                        "source" =>
+                            "https://latitude.to/map/ca/canada/cities/st-johns",
                     ];
 
                     if (!isset($first_place)) {
-                        $first_place = $place_times["12ad"];
+                        $first_place = $place_times["8dba"];
                     }
 
                     break;
-
 
                 default:
-
-
             }
+}
 
-// dev integratin test
-$geolocation_handler = new Geolocation($this->thing, "geolocation");
+$pruned_ngrams = $ngrams;
+foreach($place_times as $i=>$place_time) {
 
-$geolocation_handler->getPlace($text = null);
-//var_dump($geolocation_handler->places);
-
-
+$pruned_ngrams = $this->pruneArr($pruned_ngrams,$place_time['text']);
 
 }
-return $place_times;
+$use_geolocation = false;
+if ($use_geolocation) {
+foreach($pruned_ngrams as $i=>$pruned_ngram) {
+
+                $nuuid = $this->randomNuuid();
+                // dev integratin test
+                $geolocation_handler = new Geolocation(
+                    $this->thing,
+                    "geolocation"
+                );
+
+                $geolocation_handler->getGeolocation($pruned_ngram);
+                //$geolocation_handler->bestPlaces($ngram);
+
+                //var_dump($geolocation_handler->places);
+                //$places = $geolocation_handler->best_matches;
+                $places = $geolocation_handler->places;
+
+                if ($places !== null and count($places) > 0) {
+                    $place = $places[0];
+
+                    $latitude = $place["coordinates"][0];
+                    $longitude = $place["coordinates"][1];
+                    $place_times[$nuuid] = [
+                        "text" =>
+                            $ngram .
+                            "                      " .
+                            $ngram .
+                            " " .
+                            $place["description"],
+                        "datum_projected" => $datum_projected,
+                        "source" => "geolocation",
+                        "latitude" => $latitude,
+                        "longitude" => $longitude,
+                    ];
+                    //$ngrams = $this->pruneArr($ngrams, $ngram);
+                }
+            }
+}
+//        }
+        return $place_times;
     }
 
     function nextCode()
@@ -437,7 +520,7 @@ return $place_times;
         $place_code_candidate = $alpha_agent->a4;
 
         foreach ($this->places as $place) {
-            $existing_place_code = strtolower($place['code']);
+            $existing_place_code = strtolower($place["code"]);
             if (
                 $existing_place_code == $place_code_candidate or
                 $place_code_candidate == null
@@ -526,12 +609,12 @@ return $place_times;
             }
 
             if (
-                strtolower($place['code']) == strtolower($selector) or
-                $place['name'] == $selector
+                strtolower($place["code"]) == strtolower($selector) or
+                $place["name"] == $selector
             ) {
-                $this->refreshed_at = $place['refreshed_at'];
-                $this->place_name = $place['name'];
-                $this->place_code = $place['code'];
+                $this->refreshed_at = $place["refreshed_at"];
+                $this->place_name = $place["name"];
+                $this->place_code = $place["code"];
                 $this->place = new Variables(
                     $this->thing,
                     "variables " . $this->place_code . " " . $this->from
@@ -561,13 +644,13 @@ return $place_times;
         foreach ($this->places as $key => $place) {
             if (
                 strtolower($requested_place_identifier) ==
-                strtolower($place['code'])
+                strtolower($place["code"])
             ) {
                 return true;
             }
             if (
                 strtolower($requested_place_identifier) ==
-                strtolower($place['name'])
+                strtolower($place["name"])
             ) {
                 return true;
             }
@@ -575,10 +658,10 @@ return $place_times;
             $words = explode(" ", $requested_place_identifier);
             foreach ($words as $index => $word) {
                 $word = trim($word);
-                if (strtolower($word) == strtolower($place['code'])) {
+                if (strtolower($word) == strtolower($place["code"])) {
                     return true;
                 }
-                if (strtolower($word) == strtolower($place['name'])) {
+                if (strtolower($word) == strtolower($place["name"])) {
                     return true;
                 }
             }
@@ -595,22 +678,22 @@ return $place_times;
         $this->places = [];
 
         // See if a headcode record exists.
-//        $findagent_thing = new Findagent($this->thing, 'place');
-//        $count = count($findagent_thing->thing_report['things']);
-$things = $this->getThings('place');
+        //        $findagent_thing = new Findagent($this->thing, 'place');
+        //        $count = count($findagent_thing->thing_report['things']);
+        $things = $this->getThings("place");
 
         $this->max_index = 0;
 
-if ($things === true) {return;}
-if ($things === null) {return;}
+        if ($things === true) {
+            return;
+        }
+        if ($things === null) {
+            return;
+        }
 
-$count = count($things);
+        $count = count($things);
 
-        $this->thing->log(
-            'found ' .
-                $count .
-                " place Things."
-        );
+        $this->thing->log("found " . $count . " place Things.");
 
         //        if ($findagent_thing->thing_reports['things'] == false) {
         //                $place_code = $this->default_place_code;
@@ -624,26 +707,23 @@ $count = count($things);
         if (!$this->is_positive_integer($count)) {
             // No places found
         } else {
-            foreach (
-                array_reverse($things)
-                as $i=>$thing
-            ) {
+            foreach (array_reverse($things) as $i => $thing) {
                 //$uuid = $thing_object['uuid'];
-$uuid = $thing->uuid;
-$variables = $thing->variables;
-                if (isset($variables['place'])) {
+                $uuid = $thing->uuid;
+                $variables = $thing->variables;
+                if (isset($variables["place"])) {
                     $place_code = $this->default_place_code;
                     $place_name = $this->default_place_name;
                     $refreshed_at = "meep getPlaces";
 
-                    if (isset($variables['place']['place_code'])) {
-                        $place_code = $variables['place']['place_code'];
+                    if (isset($variables["place"]["place_code"])) {
+                        $place_code = $variables["place"]["place_code"];
                     }
-                    if (isset($variables['place']['place_name'])) {
-                        $place_name = $variables['place']['place_name'];
+                    if (isset($variables["place"]["place_name"])) {
+                        $place_name = $variables["place"]["place_name"];
                     }
-                    if (isset($variables['place']['refreshed_at'])) {
-                        $refreshed_at = $variables['place']['refreshed_at'];
+                    if (isset($variables["place"]["refreshed_at"])) {
+                        $refreshed_at = $variables["place"]["refreshed_at"];
                     }
 
                     /*
@@ -683,24 +763,24 @@ $found = false;
 
         $filtered_places = [];
         foreach (array_reverse($this->places) as $key => $place) {
-            $place_name = $place['name'];
-            $place_code = $place['code'];
+            $place_name = $place["name"];
+            $place_code = $place["code"];
 
-            if (!isset($place['refreshed_at'])) {
+            if (!isset($place["refreshed_at"])) {
                 continue;
             }
 
-            $refreshed_at = $place['refreshed_at'];
+            $refreshed_at = $place["refreshed_at"];
 
-            if (isset($filtered_places[$place_name]['refreshed_at'])) {
+            if (isset($filtered_places[$place_name]["refreshed_at"])) {
                 if (
                     strtotime($refreshed_at) >
-                    strtotime($filtered_places[$place_name]['refreshed_at'])
+                    strtotime($filtered_places[$place_name]["refreshed_at"])
                 ) {
                     $filtered_places[$place_name] = [
                         "name" => $place_name,
                         "code" => $place_code,
-                        'refreshed_at' => $refreshed_at,
+                        "refreshed_at" => $refreshed_at,
                     ];
                 }
                 continue;
@@ -709,56 +789,55 @@ $found = false;
             $filtered_places[$place_name] = [
                 "name" => $place_name,
                 "code" => $place_code,
-                'refreshed_at' => $refreshed_at,
+                "refreshed_at" => $refreshed_at,
             ];
         }
 
         $refreshed_at = [];
         foreach ($this->places as $key => $row) {
-            $refreshed_at[$key] = $row['refreshed_at'];
+            $refreshed_at[$key] = $row["refreshed_at"];
         }
         array_multisort($refreshed_at, SORT_DESC, $this->places);
 
         $this->old_places = $this->places;
         $this->places = [];
         foreach ($this->old_places as $key => $row) {
-            if (strtotime($row['refreshed_at']) != false) {
+            if (strtotime($row["refreshed_at"]) != false) {
                 $this->places[] = $row;
             }
         }
 
-
         // Add in a set of default places
-        $file = $this->resource_path . 'place/places.txt';
+        $file = $this->resource_path . "place/places.txt";
 
-if (file_exists($file)) {
-        $contents = file_get_contents($file);
+        if (file_exists($file)) {
+            $contents = file_get_contents($file);
 
-        $handle = fopen($file, "r");
+            $handle = fopen($file, "r");
 
-        if ($handle) {
-            while (($line = fgets($handle)) !== false) {
-                // process the line read.
+            if ($handle) {
+                while (($line = fgets($handle)) !== false) {
+                    // process the line read.
 
-                // It's just a list of place names.
-                // Common ones.
-                $place_name = $line;
-                // This is where the place index will be called.
-                // $place_code = str_pad(RAND(1,99999), 8, " ", STR_PAD_LEFT);
-                $place_code = $this->thing->nuuid;
+                    // It's just a list of place names.
+                    // Common ones.
+                    $place_name = $line;
+                    // This is where the place index will be called.
+                    // $place_code = str_pad(RAND(1,99999), 8, " ", STR_PAD_LEFT);
+                    $place_code = $this->thing->nuuid;
 
-                $this->placecode_list[] = $place_code;
-                $this->placename_list[] = $place_name;
-                $this->places[] = [
-                    "code" => $place_code,
-                    "name" => $place_name,
-                ];
+                    $this->placecode_list[] = $place_code;
+                    $this->placename_list[] = $place_name;
+                    $this->places[] = [
+                        "code" => $place_code,
+                        "name" => $place_name,
+                    ];
+                }
+                fclose($handle);
+            } else {
+                // error opening the file.
             }
-            fclose($handle);
-        } else {
-            // error opening the file.
         }
-}
         // Indexing not implemented
         $this->max_index = 0;
 
@@ -829,14 +908,14 @@ if (file_exists($file)) {
         // See if the code or name already exists
         foreach ($this->places as $place) {
             if (
-                $place_code == $place['code'] or
-                $place_name == $place['name']
+                $place_code == $place["code"] or
+                $place_name == $place["name"]
             ) {
-                $this->place_name = $place['name'];
-                $place_code = $place['code'];
+                $this->place_name = $place["name"];
+                $place_code = $place["code"];
 
-                if (isset($place['refreshed_at'])) {
-                    $this->last_refreshed_at = $place['refreshed_at'];
+                if (isset($place["refreshed_at"])) {
+                    $this->last_refreshed_at = $place["refreshed_at"];
                 } else {
                     $this->last_refreshed_at = "X";
                 }
@@ -882,7 +961,7 @@ if (file_exists($file)) {
 
             $this->place_thing = $this->thing;
         }
-        $this->thing->log('found a Place and pointed to it.');
+        $this->thing->log("found a Place and pointed to it.");
     }
 
     function placeTime($input = null)
@@ -940,8 +1019,8 @@ if (file_exists($file)) {
         }
 
         foreach ($this->places as $place) {
-            $place_name = strtolower($place['name']);
-            $place_code = strtolower($place['code']);
+            $place_name = strtolower($place["name"]);
+            $place_code = strtolower($place["code"]);
 
             if (empty($place_name)) {
                 continue;
@@ -983,9 +1062,9 @@ if (file_exists($file)) {
 
             $this->thing->log(
                 $this->agent_prefix .
-                    'found a place code (' .
+                    "found a place code (" .
                     $this->place_code .
-                    ') in the text.'
+                    ") in the text."
             );
             return [$this->place_code, $this->place_name];
         }
@@ -1027,7 +1106,7 @@ if (file_exists($file)) {
     {
         $message = "Place is " . ucwords($this->place_name) . ".";
         $this->message = $message;
-        $this->thing_report['message'] = $message;
+        $this->thing_report["message"] = $message;
     }
 
     // dev
@@ -1043,9 +1122,9 @@ if (file_exists($file)) {
             $txt = "Not here";
         } else {
             $txt =
-                'These are PLACES for PLACE ' .
+                "These are PLACES for PLACE " .
                 $this->railway_place->nuuid .
-                '. ';
+                ". ";
         }
         $txt .= "\n";
         //        $txt .= count($this->placecode_list). ' Place codes and names retrieved.';
@@ -1091,7 +1170,7 @@ if (file_exists($file)) {
             $txt .=
                 " " .
                 str_pad(
-                    strtoupper(trim($place['name'])),
+                    strtoupper(trim($place["name"])),
                     40,
                     " ",
                     STR_PAD_RIGHT
@@ -1099,15 +1178,15 @@ if (file_exists($file)) {
             $txt .=
                 " " .
                 "  " .
-                str_pad(strtoupper(trim($place['code'])), 6, " ", STR_PAD_LEFT);
-            if (isset($place['refreshed_at'])) {
+                str_pad(strtoupper(trim($place["code"])), 6, " ", STR_PAD_LEFT);
+            if (isset($place["refreshed_at"])) {
                 //if ($place['refreshed_at'] == $last_refreshed_at) {continue;}
-                $last_refreshed_at = $place['refreshed_at'];
+                $last_refreshed_at = $place["refreshed_at"];
                 $txt .=
                     " " .
                     "  " .
                     str_pad(
-                        strtoupper($place['refreshed_at']),
+                        strtoupper($place["refreshed_at"]),
                         15,
                         "X",
                         STR_PAD_LEFT
@@ -1120,7 +1199,7 @@ if (file_exists($file)) {
         $txt .= "Last place " . strtoupper($this->last_place_name) . "\n";
         $txt .= "Now at " . strtoupper($this->place_name);
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
@@ -1163,7 +1242,6 @@ if (file_exists($file)) {
             //            $sms .= " | " . "TEXT " . "AGENT";
         }
 
-
         /* dev
 
 //        if (!isset($this->last_refreshed_at) {$this->lastPlace();}
@@ -1191,14 +1269,14 @@ if (file_exists($file)) {
         $sms = str_replace(" | ", "\n", $sms);
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     public function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/agent";
 
-        $link_txt = $this->web_prefix . 'thing/' . $this->uuid . '/place.txt';
+        $link_txt = $this->web_prefix . "thing/" . $this->uuid . "/place.txt";
 
         //        $this->node_list = array("place"=>array("translink", "job"));
         // Make buttons
@@ -1235,35 +1313,35 @@ if (file_exists($file)) {
         $web .= $this->sms_message;
         $web .= "<br>";
 
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/place.txt';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/place.txt";
         $web .= '<a href="' . $link . '">place.txt</a>';
         $web .= " | ";
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/place.log';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/place.log";
         $web .= '<a href="' . $link . '">place.log</a>';
 
         $web .= " | ";
 
         $link =
             $this->web_prefix .
-            'thing/' .
+            "thing/" .
             $this->uuid .
-            '/' .
+            "/" .
             $this->place_name;
-        $web .= '<a href="' . $link . '">' . $this->place_name . '</a>';
+        $web .= '<a href="' . $link . '">' . $this->place_name . "</a>";
 
         $web .= " | ";
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/' . "place";
-        $web .= '<a href="' . $link . '">' . "place" . '</a>';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/" . "place";
+        $web .= '<a href="' . $link . '">' . "place" . "</a>";
 
         $web .= " | ";
         $link =
             $this->web_prefix .
-            'thing/' .
+            "thing/" .
             $this->uuid .
-            '/' .
+            "/" .
             urlencode($this->place_code);
 
-        $web .= '<a href="' . $link . '">' . $this->place_code . '</a>';
+        $web .= '<a href="' . $link . '">' . $this->place_code . "</a>";
 
         /*
         $web .= " | ";
@@ -1284,7 +1362,7 @@ if (file_exists($file)) {
 
         $web .= "<br>";
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     public function makeImage()
@@ -1330,44 +1408,43 @@ if (file_exists($file)) {
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
         $sizes_allowed = [72, 36, 24, 12, 6];
 
-            $width = imagesx($image);
-            $height = imagesy($image);
+        $width = imagesx($image);
+        $height = imagesy($image);
 
-if (file_exists($font)) {
+        if (file_exists($font)) {
+            foreach ($sizes_allowed as $size) {
+                $angle = 0;
+                $bbox = imagettfbbox($size, $angle, $font, $text);
+                $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+                $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+                $bbox["width"] =
+                    max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
+                    min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+                $bbox["height"] =
+                    max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
+                    min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+                extract($bbox, EXTR_PREFIX_ALL, "bb");
 
-        foreach ($sizes_allowed as $size) {
-            $angle = 0;
-            $bbox = imagettfbbox($size, $angle, $font, $text);
-            $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-            $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-            $bbox["width"] =
-                max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
-                min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-            $bbox["height"] =
-                max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
-                min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-            extract($bbox, EXTR_PREFIX_ALL, 'bb');
-
-            //check width of the image
-//            $width = imagesx($image);
-//            $height = imagesy($image);
-            if ($bbox['width'] < $image_width - 50) {
-                break;
+                //check width of the image
+                //            $width = imagesx($image);
+                //            $height = imagesy($image);
+                if ($bbox["width"] < $image_width - 50) {
+                    break;
+                }
             }
-        }
 
-        $pad = 0;
-        imagettftext(
-            $image,
-            $size,
-            $angle,
-            $width / 2 - $bb_width / 2,
-            $height / 2 + $bb_height / 2,
-            $grey,
-            $font,
-            $text
-        );
-}
+            $pad = 0;
+            imagettftext(
+                $image,
+                $size,
+                $angle,
+                $width / 2 - $bb_width / 2,
+                $height / 2 + $bb_height / 2,
+                $grey,
+                $font,
+                $text
+            );
+        }
 
         imagestring(
             $image,
@@ -1393,7 +1470,7 @@ if (file_exists($font)) {
         $this->image = $agent->image;
         $this->PNG = $agent->PNG;
         $this->PNG_embed = $agent->PNG_embed;
-        $this->thing_report['png'] = $agent->image_string;
+        $this->thing_report["png"] = $agent->image_string;
     }
 
     // Must be able to factor this out with Image. Eventually.
@@ -1461,13 +1538,12 @@ if (file_exists($font)) {
 
     public function respondResponse()
     {
-
         // Thing actions
 
         $this->thing->flagGreen();
 
         $choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
 
         // Allow for indexing.
         if (!isset($this->index)) {
@@ -1476,15 +1552,15 @@ if (file_exists($font)) {
             $index = $this->index; //
         }
 
-        $this->thing_report['email'] = $this->sms_message;
+        $this->thing_report["email"] = $this->sms_message;
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
 
-        $this->thing_report['help'] =
-            'This is a Place.  The union of a code and a name.';
+        $this->thing_report["help"] =
+            "This is a Place.  The union of a code and a name.";
 
         if ($this->agent_input != "extract") {
             $this->set();
@@ -1506,12 +1582,12 @@ if (file_exists($font)) {
             $this->thing,
             "variables place " . $this->from
         );
-        $this->last_place_code = $this->last_place->getVariable('place_code');
-        $this->last_place_name = $this->last_place->getVariable('place_name');
+        $this->last_place_code = $this->last_place->getVariable("place_code");
+        $this->last_place_name = $this->last_place->getVariable("place_name");
 
         // This doesn't work
         $this->last_refreshed_at = $this->last_place->getVariable(
-            'refreshed_at'
+            "refreshed_at"
         );
         return;
 
@@ -1522,8 +1598,8 @@ if (file_exists($font)) {
         }
 
         foreach (array_reverse($this->places) as $key => $place) {
-            if ($place['name'] == $this->last_place_name) {
-                $this->last_refreshed_at = $place['refreshed_at'];
+            if ($place["name"] == $this->last_place_name) {
+                $this->last_refreshed_at = $place["refreshed_at"];
                 break;
             }
         }
@@ -1537,18 +1613,20 @@ if (file_exists($font)) {
         $places = [];
         $count = 0;
         foreach ($this->places as $i => $place) {
-            $place_name = $place['name'];
+            $place_name = $place["name"];
             if ($count > 2) {
                 break;
             }
-            if ((isset($last_place_name)) and ($place_name == $last_place_name)) {
+            if (isset($last_place_name) and $place_name == $last_place_name) {
                 continue;
             }
 
-            if (in_array($place_name, $places)) {continue;}
+            if (in_array($place_name, $places)) {
+                continue;
+            }
 
             $last_place_name = $place_name;
-            $places[] = $place['name'];
+            $places[] = $place["name"];
             $count += 1;
         }
 
@@ -1574,13 +1652,13 @@ if (file_exists($font)) {
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'place') {
+            if ($input == "place") {
                 $this->getPlace();
                 $this->response .= "Last 'place' retrieved.";
                 return;
             }
 
-            if ($input == 'places') {
+            if ($input == "places") {
                 $this->getPlace();
                 $places_text = $this->textPlaces();
 
@@ -1594,21 +1672,21 @@ if (file_exists($font)) {
             foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'next':
+                        case "next":
                             $this->thing->log("read subject nextheadcode");
                             $this->nextPlace();
                             break;
 
-                        case 'drop':
+                        case "drop":
                             //     //$this->thing->log("read subject nextheadcode");
                             $this->dropPlace();
                             break;
 
-                        case 'make':
-                        case 'new':
-                        case 'place':
-                        case 'create':
-                        case 'add':
+                        case "make":
+                        case "new":
+                        case "place":
+                        case "create":
+                        case "add":
                             $this->assertPlace(strtolower($input));
 
                             //$this->refreshed_at = $this->thing->time();
@@ -1618,7 +1696,7 @@ if (file_exists($font)) {
                             }
 
                             $this->response .=
-                                'Asserted Place and found ' .
+                                "Asserted Place and found " .
                                 strtoupper($this->place_name) .
                                 ".";
                             return;
@@ -1639,7 +1717,7 @@ if (file_exists($font)) {
             $this->getPlace($this->place_code);
             $this->thing->log(
                 $this->agent_prefix .
-                    'using extracted place_code ' .
+                    "using extracted place_code " .
                     $this->place_code .
                     ".",
                 "INFORMATION"
@@ -1653,7 +1731,7 @@ if (file_exists($font)) {
 
             $this->thing->log(
                 $this->agent_prefix .
-                    'using extracted place_name ' .
+                    "using extracted place_name " .
                     $this->place_name .
                     ".",
                 "INFORMATION"
@@ -1667,7 +1745,7 @@ if (file_exists($font)) {
             $this->getPlace($this->last_place_code);
             $this->thing->log(
                 $this->agent_prefix .
-                    'using extracted last_place_code ' .
+                    "using extracted last_place_code " .
                     $this->last_place_code .
                     ".",
                 "INFORMATION"
@@ -1694,7 +1772,7 @@ if (file_exists($font)) {
         $this->makePlace(null, $place);
         $this->thing->log(
             $this->agent_prefix .
-                'using default_place_code ' .
+                "using default_place_code " .
                 $this->default_place_code .
                 ".",
             "INFORMATION"
@@ -1713,7 +1791,6 @@ if (file_exists($font)) {
 
         return false;
     }
-
 }
 
 /* More on places
