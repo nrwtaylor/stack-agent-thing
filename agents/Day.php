@@ -2353,6 +2353,14 @@ Now draw the twilight.
             "vancouver toronto calgary montreal ottawa",
             $expand_places_input
         );
+
+        $expand_places_input = str_replace(
+            "canada",
+            "st johns churchill vancouver",
+            $expand_places_input
+        );
+
+
         $expand_places_input = str_replace(
             "places",
             "vancouver new york madrid",
