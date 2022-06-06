@@ -365,10 +365,65 @@ class Place extends Agent
 
                     break;
 
+                case 'campbell river':
+                    $place_times["7c7b"] = [
+                        "text" => 'campbell river',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 50.0163,
+                        "longitude" => -125.2446,
+                        "source"=>"https://latitude.to/map/ca/canada/cities/cambell-river",
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["12ad"];
+                    }
+
+                    break;
+
+                case 'st johns':
+                    $place_times["62b5"] = [
+                        "text" => 'st johns',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 47.56494,
+                        "longitude" => -52.70931,
+                        "source"=>"https://latitude.to/map/ca/canada/cities/st-johns",
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["12ad"];
+                    }
+
+                    break;
+
+                case 'churchill':
+                    $place_times["8dba"] = [
+                        "text" => 'churchill',
+                        "datum_projected" => $datum_projected,
+                        "latitude" =>  58.768410,
+                        "longitude" => -94.164963,
+                        "source"=>"https://latitude.to/map/ca/canada/cities/st-johns",
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["12ad"];
+                    }
+
+                    break;
+
+
                 default:
 
 
             }
+
+// dev integratin test
+$geolocation_handler = new Geolocation($this->thing, "geolocation");
+
+$geolocation_handler->getPlace($text = null);
+//var_dump($geolocation_handler->places);
+
+
+
 }
 return $place_times;
     }

@@ -2167,7 +2167,6 @@ Now draw the twilight.
                 $day_text = strval($response);
 
                 //$era = $this->eraDay($text);
-                $era = null;
                 $day = ["day" => $day_text, "era" => $era];
                 $days[] = $day;
             }
@@ -2357,9 +2356,10 @@ Now draw the twilight.
 
         $expand_places_input = str_replace(
             "canada",
-            "vancouver st johns",
+            "st johns churchill vancouver",
             $expand_places_input
         );
+
 
         $expand_places_input = str_replace(
             "places",
@@ -2425,9 +2425,7 @@ Now draw the twilight.
 
             $this->working_datum = $this->time_agent->datumTime($date_string);
             $this->dateline = $dateline;
-
         } else {
-
             $timestamp = $this->zuluStamp($this->current_time);
 
             $dateline = $this->extractDateline($timestamp);
@@ -2438,7 +2436,6 @@ Now draw the twilight.
             $this->working_datum = $this->time_agent->datumTime(
                 $this->current_time
             );
-
         }
         $longitude = $this->extractLongitude($i);
         $latitude = $this->extractLatitude($i);
