@@ -333,7 +333,7 @@ class Facebook extends Agent
             ["facebook", "result"],
             $result
         );
-        $time_string = $this->thing->json->time();
+        $time_string = $this->thing->time();
         $this->thing->Write(
             ["facebook", "refreshed_at"],
             $time_string

@@ -7,13 +7,14 @@ class ThingAccount
 {
     public $var = "hello";
 
-    function __construct($uuid, $account_uuid, $account_name)
+    function __construct($thing, $uuid, $account_uuid, $account_name)
     {
-        $this->json = new ThingJson(null, $uuid);
-
+        //$this->json = new ThingJson($thing, $uuid);
+        $this->thing = $thing;
         $settings = require $GLOBALS["stack_path"] . "private/settings.php";
 
-        $this->uuid = $uuid;
+//        $this->uuid = $uuid;
+$this->uuid = $thing->uuid;
 
         $this->container = new \Slim\Container($settings);
 
@@ -31,7 +32,7 @@ class ThingAccount
         $this->account_uuid = $account_uuid;
         //$this->state = true;
 
-        $this->choice = new \Nrwtaylor\StackAgentThing\ThingChoice($this->uuid);
+        $this->choice = new \Nrwtaylor\StackAgentThing\ThingChoice($thing, $this->uuid);
         $this->node_list = [
             // choice
             "open" => ["credit", "debit", "close"], // only states available
@@ -215,12 +216,20 @@ class ThingAccount
 
     function loadBalance()
     {
+/*
         $this->json->setField("variables");
         $this->balance = $this->json->readVariable([
             "account",
             $this->account_uuid,
             $this->account_name,
         ]);
+*/
+        $this->balance = $this->thing->Read([
+            "account",
+            $this->account_uuid,
+            $this->account_name,
+        ], "variables");
+
 
         return $this->balance;
     }
@@ -228,10 +237,12 @@ class ThingAccount
     function saveBalance()
     {
         $var_path = ["account", $this->account_uuid, $this->account_name];
-
+/*
         $this->json->setField("variables");
-
         $m = $this->json->writeVariable($var_path, $this->balance);
+*/
+        $m = $this->thing->Write($var_path, $this->balance, 'variables');
+
 
         return;
     }

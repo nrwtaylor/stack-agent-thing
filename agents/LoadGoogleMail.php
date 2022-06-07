@@ -44,7 +44,7 @@ class LoadGoogleMail {
 
         if ($time_string == false) {
             //$this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
+            $time_string = $this->thing->time();
             $this->thing->Write( array("load_googlemail", "refreshed_at"), $time_string );
         }
 

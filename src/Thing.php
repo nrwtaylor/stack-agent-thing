@@ -149,10 +149,11 @@ class Thing
         //set_error_handler(array($this, "exception_error_handler"));
         try {
             $this->getThing($uuid);
+if (isset($this->db)) {var_dump("Thing database connected.");} else {var_dump("Problem with thing database");}
         } catch (\Exception $e) {
             $this->error = "No Thing to get";
             $this->log("No Thing to get.");
-
+var_dump($e->getMessage());
             // Fail quietly. There was no Thing to get.
             $this->log(
                 'Caught exception: ',
@@ -282,7 +283,7 @@ class Thing
             $this->associations->setField("associations");
 
 
-            $this->choice = new ThingChoice($this->uuid, $this->from);
+            $this->choice = new ThingChoice($this, $this->uuid, $this->from);
 
             $this->log("Choice connector made.");
 
@@ -334,7 +335,7 @@ class Thing
 
             // Provide handler to support state maps and navigation.
             // And state persistence through de-instantiation/instantiation.
-            $this->choice = new ThingChoice($this->uuid, $this->from);
+            $this->choice = new ThingChoice($this, $this->uuid, $this->from);
             $this->log("Thing made a choice connector.");
 
             // Cost of connecting to a Thing is 100 <units>.
@@ -642,7 +643,7 @@ class Thing
             $this->account = [];
         }
 
-        $this->account[$account_name] = new ThingAccount(
+        $this->account[$account_name] = new ThingAccount($this,
             $this->uuid,
             $account_uuid,
             $account_name
@@ -689,6 +690,7 @@ And review Agent variables.
 
     public function Write($path, $value, $field = null)
     {
+/*
         var_dump(
             "Thing Write " . $this->uuid . " path " . $this->uuid . " path " ,
             implode(">", $path),
@@ -696,7 +698,7 @@ And review Agent variables.
         );
         var_dump("Thing Write db uuid ", $this->db->uuid);
         var_dump("Thing Write uuid", $this->uuid);
-
+*/
         if ($field == null) {
             $field = "variables";
         }
@@ -708,7 +710,7 @@ And review Agent variables.
 
         $last_write = $this->db->writeDatabase("variables", $array_data);
 
-        var_dump("Thing Write array data", $array_data);
+//        var_dump("Thing Write array data", $array_data);
     }
 
     public function loadAccounts()
