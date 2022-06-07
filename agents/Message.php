@@ -598,7 +598,7 @@ class Message extends Agent
                 $token_thing->thing_report["token"] == "discord" or
                 $dev_overide == true
             ) {
-                $this->sendDiscord($this->thing_report["sms"], $from);
+                $this->sendDiscord($this->thing_report["sms"], $from, ['image_url'=>$this->thing_report['image_url'], 'png'=>$this->thing_report['png']]);
 
                 $this->thing_report["channel"] = "discord"; // one of sms, email, keyword etc
                 $this->thing_report["info"] =
