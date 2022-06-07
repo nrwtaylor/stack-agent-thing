@@ -705,7 +705,7 @@ public function __set($name, $value) {
         $this->makeJson();
 
         // Explore adding in INFO and HELP to web response.
-        $dev_agents = ["response", "help", "info", "sms", "message"];
+        $dev_agents = ["response", "help", "info", "sms", "message","link"];
         $prod_agents = ["response", "help", "info"];
 
         $agents = $dev_agents;
@@ -735,6 +735,15 @@ public function __set($name, $value) {
                 // dev stack filter out repeated agent web reports
                 $needle = "<b>" . strtoupper($agent_name) . "</b>";
                 if (strpos($this->thing_report["web"], $needle) !== false) {
+                    continue;
+                }
+
+                if (strtolower($agent_name) =='link') {
+                $web .= "<b>" . strtoupper($agent_name) . "</b><p>";
+
+                    $web .= '<a href="' . $this->thing_report[$agent_name] .'">'. $this->thing_report[$agent_name]. "</a>";
+                $web .= "<p>";
+
                     continue;
                 }
 

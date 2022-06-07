@@ -165,6 +165,12 @@ foreach($ngrams as $i=>$ngram) {
             return strlen($b) <=> strlen($a);
         });
 
+$cut_ngrams = [];
+
+//$sub_ngrams = $this->getNgrams($ngram);
+//array_push($cut_ngrams, $sub_ngrams);
+
+
         foreach ($ngrams as $j => $ngram) {
             switch ($ngram) {
                 case "amsterdam":
@@ -177,6 +183,7 @@ foreach($ngrams as $i=>$ngram) {
                     if (!isset($first_place)) {
                         $first_place = $place_times["aa34"];
                     }
+
                     break;
 
                 case "madrid":
@@ -204,6 +211,114 @@ foreach($ngrams as $i=>$ngram) {
                     }
 
                     break;
+
+                case "prince rupert":
+                    $place_times["ce35"] = [
+                        "text" => "prince rupert",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 54.3150,
+                        "longitude" => -130.3208,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["ce35"];
+                    }
+
+                    break;
+
+                case "terrace":
+                    $place_times["ce36"] = [
+                        "text" => "terrace",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 54.5182,
+                        "longitude" => -128.6032,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["ce36"];
+                    }
+
+                    break;
+
+                case "fort nelson":
+                    $place_times["ce37"] = [
+                        "text" => "fort nelson",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 58.8050,
+                        "longitude" => -122.6972,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["ce37"];
+                    }
+
+                    break;
+
+
+               case "penticton":
+                    $place_times["ce38"] = [
+                        "text" => "penticton",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 49.4991,
+                        "longitude" => -119.5937,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["ce38"];
+                    }
+
+                    break;
+
+               case "kamloops":
+                    $place_times["ce39"] = [
+                        "text" => "kamloops",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 50.6745,
+                        "longitude" => -120.3273,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["ce39"];
+                    }
+
+                    break;
+
+               case "cranbrook":
+                    $place_times["ce40"] = [
+                        "text" => "cranbrook",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 49.5130,
+                        "longitude" => -115.7694,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["ce40"];
+                    }
+
+                    break;
+
+                case "victoria":
+                    $place_times["3967"] = [
+                        "text" => "victoria",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 48.4284,
+                        "longitude" => -123.3656,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["3967"];
+                    }
+
+                    break;
+
+                case "burnaby":
+                    $place_times["358a"] = [
+                        "text" => "burnaby",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 49.2488,
+                        "longitude" => -122.9805,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["358a"];
+                    }
+
+                    break;
+
 
                 case "vancouver":
                     $place_times["abcd"] = [
@@ -465,19 +580,33 @@ foreach($ngrams as $i=>$ngram) {
 $pruned_ngrams = $ngrams;
 foreach($place_times as $i=>$place_time) {
 
-$pruned_ngrams = $this->pruneArr($pruned_ngrams,$place_time['text']);
+$sub_ngrams = $this->getNgrams($ngram);
+
+        foreach ($sub_ngrams as $key => $ll) {
+if (strtolower($ngram) == strtolower($ll)) {continue;}
+
+            if (stripos($ngram, $ll) !== false) {
+                unset($pruned_ngrams[$key]);
+            }
+        }
+
 
 }
-$use_geolocation = false;
-if ($use_geolocation) {
-foreach($pruned_ngrams as $i=>$pruned_ngram) {
 
-                $nuuid = $this->randomNuuid();
-                // dev integratin test
+$use_geolocation = false;
+$p_places = [];
+
+if ($use_geolocation) {
                 $geolocation_handler = new Geolocation(
                     $this->thing,
                     "geolocation"
                 );
+$cut_ngrams = [];
+foreach($pruned_ngrams as $i=>$pruned_ngram) {
+//if ($pruned_ngram === true) {continue;}
+if (in_array($pruned_ngram, $cut_ngrams)) {continue;}
+                $nuuid = $this->randomNuuid();
+                // dev integration test
 
                 $geolocation_handler->getGeolocation($pruned_ngram);
                 //$geolocation_handler->bestPlaces($ngram);
@@ -487,15 +616,20 @@ foreach($pruned_ngrams as $i=>$pruned_ngram) {
                 $places = $geolocation_handler->places;
 
                 if ($places !== null and count($places) > 0) {
+
+//$pruned_ngrams[$i] = true;
+$sub_ngrams = $this->getNgrams($ngram);
+array_push($cut_ngrams, $sub_ngrams);
                     $place = $places[0];
 
                     $latitude = $place["coordinates"][0];
                     $longitude = $place["coordinates"][1];
-                    $place_times[$nuuid] = [
+
+                    $place_time = [
+                        "ngram"=>$ngram,
                         "text" =>
-                            $ngram .
                             "                      " .
-                            $ngram .
+                            "[" .$pruned_ngram . "]" .
                             " " .
                             $place["description"],
                         "datum_projected" => $datum_projected,
@@ -503,11 +637,14 @@ foreach($pruned_ngrams as $i=>$pruned_ngram) {
                         "latitude" => $latitude,
                         "longitude" => $longitude,
                     ];
+
+                    $place_times[$nuuid] = $place_time;
                     //$ngrams = $this->pruneArr($ngrams, $ngram);
                 }
             }
 }
 //        }
+
         return $place_times;
     }
 

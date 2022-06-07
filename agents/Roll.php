@@ -118,6 +118,20 @@ class Roll extends Agent
         $this->thing_report["json"] = $json;
     }
 
+    public function makeLink() {
+
+            $link =
+                $this->web_prefix .
+                "thing/" .
+                $this->uuid .
+                "/roll";
+
+        $this->link = $link;
+        $this->thing_report["link"] = $link;
+
+
+    }
+
     /**
      *
      */
