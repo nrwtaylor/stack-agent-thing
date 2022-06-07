@@ -449,7 +449,6 @@ class Message extends Agent
                 'Agent "Message" saw, "Do not send this thing."';
             return;
         }
-
         // Thing actions
 
         $this->thing->Write(["message", "received_at"], $this->thing->time());
@@ -599,7 +598,7 @@ class Message extends Agent
                 $token_thing->thing_report["token"] == "discord" or
                 $dev_overide == true
             ) {
-                $this->sendDiscord($this->thing_report["sms"], $from);
+                $this->sendDiscord($this->thing_report["sms"], $from, ['image_url'=>$this->thing_report['image_url'], 'png'=>$this->thing_report['png']]);
 
                 $this->thing_report["channel"] = "discord"; // one of sms, email, keyword etc
                 $this->thing_report["info"] =
@@ -668,7 +667,6 @@ class Message extends Agent
             $this->thing_report["channel"] = "sms"; // one of sms, email, keyword etc
 
             // Cost is handled by sms.php
-
             // Check both a thing token and a stack quota.
             $token_thing = new Tokenlimiter($this->thing, "sms");
             $quota = new Quota($this->thing, "quota");
