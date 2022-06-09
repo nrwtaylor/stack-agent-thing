@@ -46,7 +46,7 @@ class Brilltagger extends Agent
 
         // Load word list into memory.
 
-        $this->getMemcached();
+        $this->memcachedAgent();
 
         //   if ($this->wordpress_path_to !== false) {
         //       require_once $this->wordpress_path_to. 'wp-load.php';

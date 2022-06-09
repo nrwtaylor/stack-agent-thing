@@ -62,7 +62,6 @@ class Json
         $this->field = null;
         //        $this->write_field_list = array();
         $this->thing_array = array();
-
         // Temporary hack of sorts.
         $this->uuid = $uuid;
     }
@@ -96,26 +95,6 @@ class Json
         $this->time = gmdate("Y-m-d\TH:i:s\Z", $time);
 
         return $this->time;
-    }
-
-    /**
-     *
-     * @param unknown $time (optional)
-     * @return unknown
-     */
-    function deprecate_microtime($time = null)
-    {
-        if ($time == null) {
-            $time = time();
-        }
-        //$this->time = gmdate("Y-m-d\TH:i:s.u\Z", $time);
-
-        list($usec, $sec) = explode(' ', microtime());
-        //print date('Y-m-d H:i:s', $sec) . $usec;
-
-        $this->microtime = date('Y-m-d H:i:s', $sec) . " " . $usec;
-
-        return $this->microtime;
     }
 
     /**
@@ -173,12 +152,16 @@ class Json
         $this->write();
     }
 
+    public function jsontoarrayJson($json_data = null) {
+       return $this->jsontoArray($json_data);
+    }
+
     /**
      *
      * @param unknown $json_data (optional)
      * @return unknown
      */
-    function jsontoArray($json_data = null)
+    public function jsontoArray($json_data = null)
     {
         if ($json_data == null) {
             $json_data = $this->json_data;
@@ -317,9 +300,14 @@ class Json
      */
     function pushStream($value, $pos = -1)
     {
+// dev
+//if ($this->array_data == null) {return;}
+
         $this->setField($this->field);
 
         $stream_id = $this->idStream();
+if ($this->array_data[$stream_id] == null) {return;}
+
         if ($pos == -1) {
             $pos = count($this->array_data[$stream_id]);
         }
@@ -406,6 +394,7 @@ class Json
         $this->setValueFromPath($this->array_data, $var_path, $value);
         $this->arraytoJson();
         $t = $this->write();
+
         // Failing to write a variable isn't a problem.
         // The agents will do what they can.
 
@@ -457,7 +446,13 @@ class Json
     {
         // we need references as we will modify the first parameter
         $dest = &$arr;
-if ($dest == null) {return null;}
+
+if ($dest == null) {
+$dest =[];
+}
+//var_dump($dest);
+//return null;}
+
         $finalKey = array_pop($path);
         foreach ($path as $key) {
             $dest = &$dest[$key];
@@ -467,6 +462,10 @@ if ($dest == null) {return null;}
            throw new Exception('Array received as path.');
            return true;
         }
+if (is_string($dest)) {
+return true;
+// dev 5 November 2021
+}
         $dest[$finalKey] = $value;
     }
 
@@ -523,6 +522,7 @@ if ($dest == null) {return null;}
         if ($this->field == null) {
             return;
         }
+
         if (strlen($this->json_data) > $this->char_max) {
 
             // devstack what do you do here?

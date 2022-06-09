@@ -33,13 +33,18 @@ class Input extends Agent
     function readInput($text = null)
     {
         $filtered_text = strtolower($text);
+/*
         $ngram_agent = new Ngram($this->thing, $filtered_text);
 
-        if (!isset($ngram_agent->ngrams) or $ngram_agent->ngrams == null) {
+*/
+        $input_ngrams = array_reverse($this->ngramsText($filtered_text, 4 , ' '));
+
+        if (!isset($input_ngrams) or $input_ngrams == null) {
+        //if (!isset($ngram_agent->ngrams) or $ngram_agent->ngrams == null) {
             return;
         }
-
-        foreach ($ngram_agent->ngrams as $index => $ngram) {
+        foreach ($input_ngrams as $index => $ngram) {
+        //foreach ($ngram_agent->ngrams as $index => $ngram) {
             switch ($ngram) {
                 case "break":
                     //    $this->input_agent = null;

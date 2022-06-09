@@ -11,7 +11,7 @@ use RecursiveArrayIterator;
 
 ini_set("allow_url_fopen", 1);
 
-class Choice
+class ThingChoice
 {
     public $var = "hello";
 
@@ -22,7 +22,7 @@ class Choice
      */
     function __construct($uuid, $nom_from = null)
     {
-        $this->json = new Json($uuid);
+        $this->json = new ThingJson($uuid);
 
         $this->uuid = $uuid;
 

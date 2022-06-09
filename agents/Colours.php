@@ -129,6 +129,18 @@ class Colours extends Agent
         ];
     }
 
+    public function makeSMS() {
+
+$message = $this->response;
+if ($this->response == "") {
+$message = "No colour response.";
+}
+$sms = "COLOURS | " . $message;
+$this->sms_message = $sms;
+$this->thing_report['sms'] = $sms;
+
+    }
+
     public function loadColours()
     {
         $this->colour_names = [];

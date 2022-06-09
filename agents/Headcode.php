@@ -437,13 +437,14 @@ class Headcode extends Agent
         $this->node_list = ["headcode web" => ["headcode", "headcode 0Z99"]];
 
         // Make buttons
+/*
         $this->thing->choice->Create(
             $this->agent_name,
             $this->node_list,
             "headcode web"
         );
         $choices = $this->thing->choice->makeLinks("headcode web");
-
+*/
         if (!isset($this->html_image)) {
             $this->makePNG();
         }
@@ -469,7 +470,10 @@ class Headcode extends Agent
 
         $web .= "<br>";
 
-        $web .= $this->makeSMS();
+if (!isset($this->sms_message)) {
+$this->makeSMS();
+}
+        $web .= $this->sms_message;
 
         $this->thing_report["web"] = $web;
     }
@@ -633,8 +637,10 @@ class Headcode extends Agent
 
         $pattern = "|[A-Za-z]|";
 
+if ($input != null) {
         preg_match_all($pattern, $input, $m);
         $this->consists = $m[0];
+}
 
         return $this->consists;
     }
@@ -791,8 +797,8 @@ if (file_exists($font)) {
             $image,
             $size,
             $angle,
-            $width / 2 - $bb_width / 2,
-            $height / 2 + $bb_height / 2,
+            intval($width / 2 - $bb_width / 2),
+            intval($height / 2 + $bb_height / 2),
             $grey,
             $font,
             $text
@@ -817,14 +823,19 @@ if (file_exists($font)) {
             $this->getHeadcodes();
         }
 
+        if (!isset($this->headcodes)) {
+            $this->getHeadcodes();
+        }
+
         $txt =
             "These are HEADCODES for RAILWAY " . $this->headcode->nuuid . ". ";
         $txt .= "\n";
 
         $count = "X";
-        if (is_array($this->headcodes)) {
+        if (isset($this->headcodes) and is_array($this->headcodes)) {
             $count = count($this->headcodes);
         }
+
 
         $txt .= "Last " . $count . " Headcodes retrieved.";
 
@@ -850,7 +861,7 @@ if (file_exists($font)) {
 
         $txt .= "\n";
         $txt .= "\n";
-
+if (isset($this->headcodes)) {
         //$txt = "Test \n";
         foreach (array_reverse($this->headcodes) as $headcode) {
             //            $txt .= " " . str_pad(strtoupper($headcode['head_code']), 4, "X", STR_PAD_LEFT);
@@ -927,7 +938,7 @@ if (file_exists($font)) {
             }
             $txt .= "\n";
         }
-
+}
         $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }

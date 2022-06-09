@@ -17,12 +17,12 @@ class Add extends Agent
     public function doAdd()
     {
         if ($this->agent_input == null) {
-            $array = array('miao', 'miaou', 'hiss', 'prrr', 'grrr');
-            $k = array_rand($array);
-            $v = $array[$k];
+            //$array = array('miao', 'miaou', 'hiss', 'prrr', 'grrr');
+            //$k = array_rand($array);
+            //$v = $array[$k];
 
-            $response = "ADD | " . strtolower($v) . ".";
-
+            //$response = "ADD | " . strtolower($v) . ".";
+            $response = "";
             $this->add_message = $response; // mewsage?
         } else {
             $this->add_message = $this->agent_input;
@@ -58,7 +58,8 @@ class Add extends Agent
 $response = "No response.";
 if ($this->response != "") {$response = $this->response;}
         //$this->node_list = array("add" => array("add", "subtract"));
-        $this->sms_message = "" . $this->add_message . $this->response;;
+        $sms = "ADD | " . $this->add_message . $this->response;
+        $this->sms_message = $sms;
         $this->thing_report['sms'] = $this->sms_message;
     }
 

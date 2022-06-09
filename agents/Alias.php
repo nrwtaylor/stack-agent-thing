@@ -478,7 +478,7 @@ class Alias extends Agent
             $index = $this->index;
         }
 
-        $this->makeChoices();
+//        $this->makeChoices();
 
         $this->thing_report["email"] = $this->sms_message;
         $this->thing_report["message"] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
@@ -488,7 +488,7 @@ class Alias extends Agent
 
         $this->thing_report["help"] = "This is the Aliasing manager.";
     }
-
+/*
     public function makeChoices()
     {
         if (!isset($this->choices)) {
@@ -501,7 +501,7 @@ class Alias extends Agent
         }
         $this->thing_report["choices"] = $this->choices;
     }
-
+*/
     public function makeSMS()
     {
         if (!isset($this->sms_messages)) {

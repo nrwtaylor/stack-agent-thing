@@ -23,6 +23,8 @@ class Kplex extends Agent
     {
         $this->node_list = ["kplex" => ["nmea", "opencpn"]];
         $this->colour_indicators = ["red", "green"];
+$this->kplex_terse_flag = "on";
+
     }
 
     public function listenKplex()
@@ -35,13 +37,9 @@ class Kplex extends Agent
 
         if (!$fp) {
             echo "$errstr ($errno)<br />\n";
-            $this->snapshot = null;
-            return;
-         }
-
-
-        $this->thing->console("Connected to Kplex server."); 
-        //$this->response .= "Connected to Kplex server. ";
+            die();
+        }
+        echo "Connected to kplex server.\n";
 
         $ship_handler = new Ship($this->thing, "ship");
         $snapshot = null;
@@ -135,7 +133,16 @@ if ($this->snapshot != null) {
         $sms .= "latitude " . $this->snapshot->current_latitude_decimal . " ";
         $sms .= "longitude " . $this->snapshot->current_longitude_decimal . " ";
         $sms .= "speed " . $this->snapshot->speed_in_knots . " knots ";
-        $sms .= "course " . $this->snapshot->true_course . " degrees ";
+
+$true_course_text = "";
+if ($this->snapshot->true_course != null) {
+$true_course_text = $this->snapshot->true_course;
+        $sms .= "course " . $true_course_text . " degrees ";
+
+}
+
+//        $sms .= "course " . $true_course_text . " degrees ";
+
         if (isset($this->snapshot->destination_waypoint_id)) {
             $sms .=
                 "destination waypoint " .
@@ -165,7 +172,16 @@ if ($this->snapshot != null) {
         }
 }
 
-        $sms .= $this->response;
+        if (
+            isset($this->kplex_terse_flag) and
+            $this->kplex_terse_flag == "on"
+        ) {
+        } else {
+            $sms .= $this->response;
+        }
+
+
+//        $sms .= $this->response;
         $this->sms_message = $sms;
         $this->thing_report["sms"] = $sms;
     }
@@ -180,10 +196,6 @@ if ($this->snapshot != null) {
         $input = $this->input;
         $filtered_input = $this->assert(strtolower($input));
         $kplex = false;
-        //if ($filtered_input == 'l') {
-        //if (isset($this->snapshot)) {
-        //var_dump($this->snapshot);
-        //return;}
         $this->listenKplex();
 
         if (isset($this->snapshot) and $this->snapshot !== false) {

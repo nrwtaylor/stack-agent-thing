@@ -22,15 +22,30 @@ class Notstack extends Agent
         $this->previous_state = $this->thing->getState('usermanager');
     }
 
+    public function set()
+    {
+        $this->setNotstack();
+    }
+
+    function setNotstack()
+    {
+        $this->thing->Write(
+            ["notstack", "refreshed_at"],
+            $this->thing->time()
+        );
+    }
+
+
+
     public function respondResponse()
     {
         // Thing actions
 
-        $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(
-            ["notstack", "receipt", "received_at"],
-            date("Y-m-d H:i:s")
-        );
+ //       $this->thing->json->setField("settings");
+ //       $this->thing->json->writeVariable(
+//            ["notstack", "receipt", "received_at"],
+//            date("Y-m-d H:i:s")
+//        );
 
         $this->thing->flagGreen();
 
@@ -70,6 +85,15 @@ class Notstack extends Agent
 
         return $thing_report;
     }
+
+    public function makeSMS() {
+
+       $sms = "NOT STACK";
+       $this->sms_message = $sms;
+       $this->thing_report['sms'] = $sms;
+
+    }
+
 
     public function readSubject()
     {

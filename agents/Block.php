@@ -27,7 +27,7 @@ class Block extends Agent
             "start" => ["stop 1" => ["stop 2", "stop 1"], "stop 3"],
             "stop 3",
         ];
-        $this->thing->choice->load('block');
+        $this->loadChoice('block');
 
         $this->state = "off";
 
@@ -77,7 +77,7 @@ class Block extends Agent
             $this->current_time
         );
 
-        $this->block_thing->choice->save('block', $this->state);
+        $this->saveChoice('block', $this->state);
     }
 
     function nextBlock()
@@ -517,12 +517,12 @@ if ($things === true) {return true;}
         $this->get();
         // Set elapsed time as 0 and state as stopped.
         $this->elapsed_time = 0;
-        $this->thing->choice->Create('block', $this->node_list, 'red');
+        $this->createChoice('block', $this->node_list, 'red');
         /*
         $this->thing->Write( array("stopwatch", "refreshed_at"), $this->current_time);
         $this->thing->Write( array("stopwatch", "elapsed"), $this->elapsed_time);
 */
-        $this->thing->choice->Choose('start');
+        $this->chooseChoice('start');
 
         $this->set();
 
@@ -533,7 +533,7 @@ if ($things === true) {return true;}
     {
         $this->thing->log("stop");
         $this->get();
-        $this->thing->choice->Choose('red');
+        $this->chooseChoice('red');
         $this->set();
 
         return $this->quantity_available;
@@ -546,7 +546,7 @@ if ($things === true) {return true;}
         $this->get();
 
         if ($this->previous_state == 'stop') {
-            $this->thing->choice->Choose('start');
+            $this->chooseChoice('start');
             $this->state = 'start';
             $this->set();
             return;
@@ -561,7 +561,7 @@ if ($things === true) {return true;}
             return;
         }
 
-        $this->thing->choice->Choose('start');
+        $this->chooseChoice('start');
         $this->state = 'start';
         $this->set();
     }
@@ -649,8 +649,8 @@ if ($things === true) {return true;}
             $state = $this->state;
         }
 
-        $this->thing->choice->Create('channel', $this->node_list, $state);
-        $this->choices = $this->thing->choice->makeLinks($state);
+        $this->createChoice('channel', $this->node_list, $state);
+        $this->choices = $this->linksChoice($state);
         $this->thing_report['choices'] = $this->choices;
     }
 

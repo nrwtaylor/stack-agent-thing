@@ -143,13 +143,243 @@ class Place extends Agent
         }
     }
 
+    public function loadPlace($ngrams, $datum_projected = null) {
+
+        $place_times = [];
+
+        foreach ($ngrams as $j => $ngram) {
+            switch ($ngram) {
+
+                case 'amsterdam':
+                    $place_times["aa34"] = [
+                        "text" => 'amsterdam',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 52.3676,
+                        "longitude" => 4.9041,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["aa34"];
+                    }
+
+                    break;
+
+
+                case 'madrid':
+                    $place_times["1234"] = [
+                        "text" => 'madrid',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 36.7174,
+                        "longitude" => 4.413,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["1234"];
+                    }
+
+                    break;
+
+                case 'dublin':
+                    $place_times["ce34"] = [
+                        "text" => 'dublin',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 53.35014,
+                        "longitude" => -6.266155,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["ce34"];
+                    }
+
+                    break;
+
+                case 'vancouver':
+                    $place_times["abcd"] = [
+                        "text" => 'vancouver',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 49.2827,
+                        "longitude" => -123.1207,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["abcd"];
+                    }
+                    break;
+
+                case 'toronto':
+                    $place_times["11ab"] = [
+                        "text" => 'toronto',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 43.6529,
+                        "longitude" => -79.3849,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["11ab"];
+                    }
+
+                    break;
+
+                case 'new york':
+                    $place_times["12ab"] = [
+                        "text" => 'new york',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 40.6892,
+                        "longitude" => -74.0445,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["12ab"];
+                    }
+
+                    break;
+
+                case 'cape mudge lighthouse':
+                    $place_times["12ac"] = [
+                        "text" => 'cape mudge lighthouse',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 49.998556,
+                        "longitude" => -125.195528,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["12ac"];
+                    }
+
+                    break;
+// https://geohack.toolforge.org/geohack.php?pagename=Royal_Observatory,_Greenwich&params=51.4778_N_0.0014_W_
+                case 'greenwich observatory':
+                    $place_times["12ad"] = [
+                        "text" => 'greenwich observatory',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 51.4778,
+                        "longitude" => -0.0014,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["12ad"];
+                    }
+
+                    break;
+
+// https://www.google.com/search?q=dominion+observatory+lat+long&client=ubuntu&hs=kjd&channel=fs&ei=8LZLYvmcHK-s0PEPxpCm8Ak&ved=0ahUKEwj51LqB_fv2AhUvFjQIHUaICZ4Q4dUDCA0&uact=5&oq=dominion+observatory+lat+long&gs_lcp=Cgdnd3Mtd2l6EAMyBQghEKABMgUIIRCgATIFCCEQoAEyBQghEKABMgUIIRCgAToHCAAQRxCwAzoOCC4QgAQQsQMQxwEQowI6CAgAEIAEELEDOggILhCxAxCDAToICC4QgAQQ1AI6CwgAEIAEELEDEIMBOgsILhCABBDHARCjAjoNCC4QsQMQxwEQowIQQzoECAAQQzoLCC4QgAQQsQMQgwE6CAguEIAEELEDOgoILhDHARCvARBDOgYIABAKEEM6CgguELEDENQCEEM6BAguEEM6BwgAELEDEEM6BwguELEDEEM6CwguEIAEEMcBEK8BOgUIABCRAjoICAAQsQMQyQM6BQgAEIAEOhEILhCABBCxAxCDARDHARCvAToFCC4QgAQ6CwguEIAEEMcBENEDOgYIABAWEB5KBAhBGABKBAhGGABQpARY_Tpgnz1oAXABeACAAZMFiAG_MpIBCzAuMi40LjEuNC41mAEAoAEByAEIwAEB&sclient=gws-wiz
+                case 'dominion observatory':
+                    $place_times["12af"] = [
+                        "text" => 'dominion observatory',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 45.3936,
+                        "longitude" => -75.7144,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["12af"];
+                    }
+
+                    break;
+
+// https://en.wikipedia.org/wiki/Brockton_Point_Lighthouse
+                case 'brockton point lighthouse':
+                    $place_times["12bf"] = [
+                        "text" => 'brockton point lighthouse',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 49.300917,
+                        "longitude" => -123.117018,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["12bf"];
+                    }
+
+                    break;
+
+// https://cdnc.ucr.edu/?a=d&d=SFC19110910.2.43.7&
+// https://books.google.ca/books?id=qfTu-wAQAO8C&pg=PA143&lpg=PA143&dq=%22mare+island+observatory%22+latitude+longitude&source=bl&ots=lNCBamPF9R&sig=ACfU3U3YRTpMQYuU7Le1_8ZERWfu391uhQ&hl=en&sa=X&ved=2ahUKEwiav8GC__v2AhVTOH0KHW3RAYsQ6AF6BAgIEAM#v=onepage&q=%22mare%20island%20observatory%22%20latitude%20longitude&f=false
+// Poition of observatory Lat. 38 05'59" north 122 15'15" west, in time 9h 09m 01*.2 W"
+                case 'mare island observatory':
+                    $place_times["13bf"] = [
+                        "text" => 'mare island observatory',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 38.09972,
+                        "longitude" => -122.2542,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["13bf"];
+                    }
+
+                    break;
+
+                case 'gonzales point':
+                    $place_times["14bf"] = [
+                        "text" => 'gonzales point',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 48.41,
+                        "longitude" => -123.33,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["13bf"];
+                    }
+
+                    break;
+
+
+
+                // 51.05011
+                case 'calgary':
+                    $place_times["698f"] = [
+                        "text" => 'calgary',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 51.05011,
+                        "longitude" => -114.08529,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["698f"];
+                    }
+
+                    break;
+
+                case 'ottawa':
+                    $place_times["12ac"] = [
+                        "text" => 'ottawa',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 45.41117,
+                        "longitude" => -75.69812,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["12ac"];
+                    }
+
+                    break;
+
+                case 'montreal':
+                    $place_times["12ad"] = [
+                        "text" => 'montreal',
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 45.50884,
+                        "longitude" => -73.58781,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["12ad"];
+                    }
+
+                    break;
+
+                default:
+
+
+            }
+}
+return $place_times;
+    }
+
     function nextCode()
     {
         $place_code_candidate = null;
 
         $alpha_agent = new A4($this->thing, "a4");
         //        $place_code_candidate = $this->thing->nuuid;
-        $place_code_candidate = $alpha_agent->alpha;
+        $place_code_candidate = $alpha_agent->a4;
 
         foreach ($this->places as $place) {
             $existing_place_code = strtolower($place['code']);
@@ -161,7 +391,7 @@ class Place extends Agent
 
                 $alpha_agent = new A4($this->thing, "a4");
                 //       $place_code_candidate = $this->thing->nuuid;
-                $place_code_candidate = $alpha_agent->alpha;
+                $place_code_candidate = $alpha_agent->a4;
 
                 //                $place_code_candidate = $this->thing->nuuid;
             }

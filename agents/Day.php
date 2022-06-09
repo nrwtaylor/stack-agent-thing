@@ -46,8 +46,6 @@ class Day extends Agent
 
         $this->node_list = ["day" => ["day", "year", "uuid"]];
 
-        //$this->current_time = $this->thing->time();
-
         $this->projected_time = $this->current_time;
 
         // Get some stuff from the stack which will be helpful.
@@ -87,11 +85,15 @@ class Day extends Agent
         $this->default_prime_meridian_offset = 0;
         $this->default_julian_correlation["mesoamerican"] = 584283; //GMT
 
-        $this->initDay();
+        // dev factor up to agent
+        if (!isset($this->day)) {
+            $this->initDay();
+        }
     }
 
     public function initDay()
     {
+        $this->day = false;
         $this->time_agent = new Time($this->thing, "time");
         $this->working_datum = $this->time_agent->datumTime(
             $this->projected_time
@@ -169,6 +171,19 @@ class Day extends Agent
             "Kumk'u" => ["granary"],
             "Wayeb'" => ["five unlucky days"],
         ];
+
+        $this->day_solar_milestones = [
+            //"night"=> "night",
+            "astronomical twilight begin" => "astronomical twilight",
+            "nautical twilight begin" => "nautical twilight",
+            "civil twilight begin" => "civil twilight",
+            "sunrise" => "day",
+            "transit" => "day",
+            "sunset" => "civil twilight",
+            "civil twilight end" => "nautical twilight",
+            "nautical twilight end" => "astronomical twilight",
+            "astronomical twilight end" => "night",
+        ];
     }
 
     public function formatDay($text = null)
@@ -186,19 +201,6 @@ class Day extends Agent
 
     public function runDay($text = null)
     {
-        /*
-        $longitude_agent = new Longitude($this->thing, "longitude");
-
-        // Cannot calculate local time without knowing longitude.
-        if ($longitude_agent->longitude === false) {
-            $this->response .= "Longitude not known. ";
-        }
-
-        $longitude = $longitude_agent->longitude;
-
-        $latitude_agent = new Latitude($this->thing, "latitude");
-        $latitude = $latitude_agent->latitude;
-*/
         if ($this->latitude === false or strtolower($this->latitude) == "z") {
             $this->response .= "Latitude not known. ";
         }
@@ -208,31 +210,51 @@ class Day extends Agent
         }
 
         $latitude = (float) $this->latitude;
-        $longitude = (float) $this->latitude;
+        $longitude = (float) $this->longitude;
 
         $timestamp_epoch = (float) $this->timestampEpoch($text);
-        $solar_array = date_sun_info($timestamp_epoch, $latitude, $longitude);
-        $this->solar_array = $solar_array;
-        //$this->timestamp_epoch = $timestamp_epoch;
 
-        $arr = [
-            //"night"=> "night",
-            "astronomical twilight begin" => "astronomical twilight",
-            "nautical twilight begin" => "nautical twilight",
-            "civil twilight begin" => "civil twilight",
-            "sunrise" => "day",
-            "transit" => "day",
-            "sunset" => "civil twilight",
-            "civil twilight end" => "nautical twilight",
-            "nautical twilight end" => "astronomical twilight",
-            "astronomical twilight end" => "night",
-        ];
+        // dev
+        // Make this call for the primary place from the list of places.
 
-        $this->day_solar_milestones = $arr;
+        // Com
+
+        $milestones = $this->milestonesDay(
+            $timestamp_epoch,
+            $latitude,
+            $longitude
+        );
+
+        $this->day_time = $milestones["day_time"];
+        $this->message = $milestones["message"];
+        $this->twilights = $milestones["twilights"];
+    }
+
+function textTwilight($text) {
+
+return trim(str_replace(["begin","end","twilight"], '', $text));
+
+}
+
+    public function milestonesDay($timestamp_epoch, $latitude, $longitude)
+    {
+        $flag_start_twilight = false;
+        $match = false;
+
+        $datum_current_time = new \DateTime();
+        $timestamp_current_time = $datum_current_time->getTimestamp();
 
         $message = "";
         $count = 0;
+        $twilight_text = "";
+        $start_twilight_texts = "";
+        $end_twilight_texts = "";
+
+        $start_twilight_times = "";
+        $end_twilight_times = "";
+
         foreach (range(0, 1, 1) as $period_index) {
+            $index = 0;
             foreach ($this->day_solar_milestones as $period => $epoch) {
                 // The datum returned is when this event will happen
                 // as a DateTime (datum) object.
@@ -242,59 +264,147 @@ class Day extends Agent
                     $period_index * (60 * 60 * 24);
 
                 $t = $this->projected_time;
-
                 $e = strtotime($t);
 
                 $datum_projected = new \DateTime();
                 $datum_projected->setTimestamp($period_timestamp);
+                if (isset($this->timezone)) {
+                    $timezone = new \DateTimeZone($this->timezone);
+                    $datum_projected->setTimezone($timezone);
+                }
+
                 $datum = $this->twilightDay($period, $datum_projected);
                 if ($datum === false) {
                     continue;
                 }
+
                 if ($period_timestamp < $e) {
                     continue;
                 }
 
-                if ($count == 0) {
-                    $message .=
-                        $period . " " . $datum->format("Y/m/d G:i:s") . " ";
+                if (
+                    str_contains(strtolower($period), "twilight") and
+                    str_contains(strtolower($period), "begin")
+                ) {
+if ($flag_start_twilight == false) {
+$message .= "start twilight ";
+}
+
+                    $flag_start_twilight = true;
                 } else {
-                    $message .= $period . " " . $datum->format("G:i:s") . " ";
+                    $flag_start_twilight = false;
                 }
 
-                    if (!isset($this->twilights)) {
-                        $this->twilights = [];
-                    }
-                    $this->twilights[$period] = [
-                        "text" => ucwords(strtolower($period)),
-                        "time" => $datum->format("G:i:s"),
-                    ];
+                if (
+                    str_contains(strtolower($period), "twilight") and
+                    str_contains(strtolower($period), "end")
+                ) {
+if ($flag_end_twilight == false) {
+$message .= "end twilight ";
+}
+                    $flag_end_twilight = true;
+                } else {
+                    $flag_end_twilight = false;
+                }
 
+                $t = $period;
+                //$t = "";
+                /*
+                if ($count == 0 or $index == 0) {
+                    //   $message .=
+                    //       $period . " " . $datum->format("Y/m/d G:i:s") . " ";
+                    $message .=
+                        $t . " " . $datum->format("Y/m/d G:i") . " ";
+                } else {
+                    //                    $message .= $period . " " . $datum->format("G:i:s") . " ";
+
+
+
+
+                    $message .= $t . " " . $datum->format("G:i") . " ";
+
+
+
+}
+*/
+
+                if ($flag_start_twilight != false) {
+                    $start_twilight_texts .= $this->textTwilight($period) . "/";
+                    $start_twilight_times .= $datum->format("G:i") . "/";
+                } else {
+                    //$t .= $twilight_texts;
+                    //$t .= $twilight_times;
+                    //$twilight_times = "";
+                }
+
+                if ($flag_start_twilight == false) {
+                    $message .=
+                        $start_twilight_texts . " " . $start_twilight_times;
+
+                    $start_twilight_texts = "";
+                    $start_twilight_times = "";
+                }
+
+                if ($flag_end_twilight != false) {
+                    $end_twilight_texts .= $this->textTwilight($period) . "/";
+                    $end_twilight_times .= $datum->format("G:i") . "/";
+                } else {
+                    //$t .= $twilight_texts;
+                    //$t .= $twilight_times;
+                    //$twilight_times = "";
+                }
+
+                if ($flag_end_twilight == false) {
+                    $message .= $end_twilight_texts . " " . $end_twilight_times;
+
+                    $end_twilight_texts = "";
+                    $end_twilight_times = "";
+                }
+
+                //$t = $start_twilight_texts . " " . $start_twilight_times;
+
+                if ($count == 0 or $index == 0) {
+                    //   $message .=
+                    //       $period . " " . $datum->format("Y/m/d G:i:s") . " ";
+                    //$message .= $datum->format("Y/m/d") . " " . $t;
+                    $message .= " " .$datum->format("Y/m/d") . " ";
+
+
+                } else {
+                    //                    $message .= $period . " " . $datum->format("G:i:s") . " ";
+
+
+if (str_contains(strtolower($period), 'twilight') !== true) {
+                     $message .= $period . " " . $datum->format("G:i") . " ";
+}
+
+                }
+
+                if (!isset($twilights)) {
+                    $twilights = [];
+                }
+                $twilights[$period] = [
+                    "text" => ucwords(strtolower($period)),
+                    "time" => $datum->format("G:i:s"),
+                ];
 
                 $count += 1;
-                $match = false;
+                $index += 1;
+                //$match = false;
                 $variable_text = str_replace(" ", "_", $period);
-                if (
-                    $match === false and
-                    $this->solarDay($datum_projected)[$variable_text] <
-                        $timestamp_epoch
-                ) {
-/*
-                    if (!isset($this->twilights)) {
-                        $this->twilights = [];
-                    }
-                    $this->twilights[$period] = [
-                        "text" => ucwords(strtolower($period)),
-                        "time" => $datum->format("G:i:s"),
-                    ];
-*/
-                    //
-                    //                if ($this->solar_array[$variable_text] < $timestamp_epoch) {
+
+                $solar_day_timestamp = $this->solarDay(
+                    $datum_projected,
+                    $latitude,
+                    $longitude
+                )[$variable_text];
+
+                if ($solar_day_timestamp < $timestamp_current_time) {
                     $time_of_day = $period;
-                    $match = true;
                 }
             }
         }
+
         $day_time = "night";
         if (
             isset($time_of_day) and
@@ -302,7 +412,6 @@ class Day extends Agent
         ) {
             $day_time = $this->day_solar_milestones[$time_of_day];
         }
-
         $tz = $datum_projected->getTimezone();
         $message .= $tz->getName();
 
@@ -310,12 +419,35 @@ class Day extends Agent
             isset($this->day_twilight_flag) and
             $this->day_twilight_flag == "on"
         ) {
-            $this->message = strtoupper($day_time) . " " . $message;
+            $message = strtoupper($day_time) . " " . $message;
         } else {
-            $this->message = strtoupper($day_time);
+            $message = strtoupper($day_time);
         }
 
-        $this->day_time = $day_time;
+// Tidy up spaces and slashes
+
+$message = str_replace("   ", " ", $message);
+$message = str_replace("  ", " ", $message);
+
+$message = str_replace("/ ", " ", $message);
+$message = str_replace(" /", " ", $message);
+
+$message = str_replace("start twilight", "twilight", $message);
+$message = str_replace("end twilight", "twilight", $message);
+
+$message = str_replace("twilight twilight", "twilight", $message);
+$message = str_replace("twilight", "", $message);
+
+
+
+
+        $response = [
+            "day_time" => $day_time,
+            "message" => $message,
+            "twilights" => $twilights,
+        ];
+
+        return $response;
     }
 
     public function timestampEpoch($text = null)
@@ -366,6 +498,15 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
 
 */
 
+        /*
+
+$ agent day twilight
+DAY | astronomical twilight | ASTRONOMICAL TWILIGHT astronomical twilight begin 2022/03/30 5:01 nautical twilight begin 5:42 civil twilight begin 6:20 sunrise 6:52 transit 13:16 sunset 19:40 civil twilight end 20:12 nautical twilight end 20:51 astronomical twilight end 21:32 astronomical twilight begin 2022/03/31 4:59 nautical twilight begin 5:40 civil twilight begin 6:18 sunrise 6:50 transit 13:16 sunset 19:42 civil twilight end 20:14 nautical twilight end 20:53 astronomical twilight end 21:33 America/Los_Angeles 
+PHP 1,439ms 1c9a8a92-1e64-4bca-aa59-1d4c83feb6ea
+X b943 a867 Added to stack.
+
+
+*/
         //        $timestamp_epoch = time();
 
         if ($text != null and is_string($text)) {
@@ -384,29 +525,31 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         return $timestamp_epoch;
     }
 
-    public function solarDay($text = null)
+    public function makePollInterval()
     {
-        /*
-        $timestamp_epoch = time();
+        $this->thing_report["poll_interval"] = ["minimum" => 60];
+    }
 
-        if ($text != null and is_string($text)) {
-            $timestamp_epoch = strtotime($text);
-        }
-
-        if (is_a($text, "DateTime")) {
-            $timestamp_epoch = $text->getTimestamp();
-        }
-*/
+    public function solarDay($text = null, $latitude = null, $longitude = null)
+    {
         $timestamp_epoch = (int) $this->timestampEpoch($text);
-        $latitude = (float) $this->latitude;
-        $longitude = (float) $this->longitude;
+        if ($latitude == null) {
+            $latitude = (float) $this->latitude;
+        }
+        if ($longitude == null) {
+            $longitude = (float) $this->longitude;
+        }
         $solar_array = date_sun_info($timestamp_epoch, $latitude, $longitude);
 
         return $solar_array;
     }
 
-    public function twilightDay($text, $datum = null)
-    {
+    public function twilightDay(
+        $text,
+        $datum = null,
+        $latitude = null,
+        $longitude = null
+    ) {
         if ($text == "night") {
             $text = "astronomical twilight begin";
         }
@@ -423,15 +566,18 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
             $working_datum = $datum;
         }
 
-        $s = $this->solarDay($working_datum)[$variable_text];
+        $s = $this->solarDay($working_datum, $latitude, $longitude)[
+            $variable_text
+        ];
 
         if ($s === true) {
             return false;
         } // No event.
 
         $seconds_to_event =
-            $this->solarDay($working_datum)[$variable_text] -
-            $this->timestamp_epoch;
+            $this->solarDay($working_datum, $latitude, $longitude)[
+                $variable_text
+            ] - $this->timestamp_epoch;
 
         if ($seconds_to_event < 0) {
             $working_datum->sub(
@@ -479,6 +625,9 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
      */
     function getWhatis($input)
     {
+        if ($input == null) {
+            return;
+        }
         $whatis = "day";
         $whatIWant = $input;
         if (($pos = strpos(strtolower($input), $whatis . " is")) !== false) {
@@ -526,7 +675,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         $this->thing->flagGreen();
 
         $this->makeChoices();
-
+        $this->makePollInterval();
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report["info"] = $message_thing->thing_report["info"];
@@ -575,7 +724,9 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         $gmt_julian_day_number =
             $this->default_julian_correlation["mesoamerican"];
 
-        $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
+        $days_since_correlation = intval(
+            $julian_day_number - $gmt_julian_day_number
+        );
 
         // https://sudonull.com/post/158842-Ancient-Mayan-calendar-how-to-calculate-the-date
         $t1 = ($days_since_correlation + 19) % 20;
@@ -597,7 +748,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         return $t1_text . " " . $t2;
     }
 
-    public function lordofthenightDay()
+    public function correlationDays()
     {
         $julian_day_number = $this->julianDay();
 
@@ -608,7 +759,27 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         $gmt_julian_day_number =
             $this->default_julian_correlation["mesoamerican"];
 
+        $days_since_correlation = intval(
+            $julian_day_number - $gmt_julian_day_number
+        );
+        return $days_since_correlation;
+    }
+
+    public function lordofthenightDay()
+    {
+        /*
+        $julian_day_number = $this->julianDay();
+
+        // Today, 5 December 2020 (UTC), in the Long Count is 13.0.8.1.6 (using GMT correlation).
+        // https://en.wikipedia.org/wiki/Mesoamerican_Long_Count_calendar
+        //$gmt_julian_day_number = 584283;
+
+        $gmt_julian_day_number =
+            $this->default_julian_correlation["mesoamerican"];
+
         $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
+*/
+        $days_since_correlation = $this->correlationDays();
 
         $g = (($days_since_correlation + 8) % 9) + 1;
 
@@ -617,6 +788,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
 
     public function haabDay()
     {
+        /*
         $julian_day_number = $this->julianDay();
 
         // Today, 5 December 2020 (UTC), in the Long Count is 13.0.8.1.6 (using GMT correlation).
@@ -626,7 +798,9 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         $gmt_julian_day_number =
             $this->default_julian_correlation["mesoamerican"];
 
-        $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
+        $days_since_correlation = intval($julian_day_number - $gmt_julian_day_number);
+*/
+        $days_since_correlation = $this->correlationDays();
 
         $months = $this->haab_months;
 
@@ -734,7 +908,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         if ($wheels == null) {
             return true;
         }
-
+        /*
         $julian_day_number = $this->julianDay();
 
         // Today, 5 December 2020 (UTC), in the Long Count is 13.0.8.1.6 (using GMT correlation).
@@ -745,6 +919,8 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
             $this->default_julian_correlation["mesoamerican"];
 
         $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
+*/
+        $days_since_correlation = $this->correlationDays();
 
         //$gmt_plus_two_julian_day_number = $gmt_julian_day_number + 2;
 
@@ -783,6 +959,14 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
                 "";
         }
 
+        if (
+          isset($this->day_week_flag) and
+            $this->day_week_flag == "on"
+        ) {
+        $web .= $this->formatDay($this->datestringDay($this->dateline));
+        $web .= "<br>";
+}
+
         $days = [];
         if (isset($this->days)) {
             $days = $this->days;
@@ -795,12 +979,13 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
             $sms .= " | " . $day_text;
         }
 */
+/*
         $day_text = "Merp.";
         if (isset($this->day_time)) {
             $day_time_text = $this->day_time;
             $sms .= " | " . $day_time_text;
         }
-
+*/
         $sms .= " | " . $this->message . " " . $this->response;
         $this->sms_message = $sms;
         $this->thing_report["sms"] = $sms;
@@ -816,16 +1001,17 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         $uuid = $this->uuid;
 
         $message .=
-            "Keep on stacking.\n\n<p>" .
+            "Thank you.\n\n<p>" .
             $this->web_prefix .
             "thing/$uuid/day.png\n \n\n<br> ";
+        /*
         $message .=
             '<img src="' .
             $this->web_prefix .
             "thing/" .
             $uuid .
             '/day.png" alt="day" height="92" width="92">';
-
+*/
         $this->thing_report["message"] = $message;
     }
 
@@ -852,6 +1038,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
      */
     public function getDay()
     {
+        /*
         $longitude_agent = new Longitude($this->thing, "longitude");
 
         // Cannot calculate local time without knowing longitude.
@@ -861,51 +1048,25 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
 
         $this->longitude = $longitude_agent->longitude;
 
+
         $latitude_agent = new Latitude($this->thing, "latitude");
         $this->latitude = $latitude_agent->latitude;
-    }
-
-    /**
-     *
-     */
-    public function deprecate_initDay()
-    {
-        $this->number_agent = new Number($this->thing, "number");
+*/
     }
 
     public function run()
     {
-        $this->runDay();
+        //  $this->runDay();
     }
 
-    public function datestringDay($datum)
+    public function textDay()
     {
-        $date_string =
-            $datum["year"] .
-            "-" .
-            str_pad($datum["month"], 2, "0", STR_PAD_LEFT) .
-            "-" .
-            str_pad($datum["day_number"], 2, "0", STR_PAD_LEFT);
-
-        return $date_string;
+        return $this->textHtml($this->snippetDay());
     }
-    /**
-     *
-     */
-    public function makeWeb()
-    {
-        $link = $this->web_prefix . "thing/" . $this->uuid . "/day.pdf";
-        $this->node_list = ["day" => ["day"]];
 
+    public function snippetDay()
+    {
         $web = "";
-
-        $thing = new Thing(null);
-        $thing->Create("token", $this->from, "calendar-page-token");
-
-        $token_handler = new Token($thing, "calendar-page-token");
-        $token_handler->itemToken["calendar-page"];
-        $web .= $token_handler->web_token["calendar-page"];
-        $web .= "<br>";
 
         if (
             isset($this->day_mesoamerican_flag) and
@@ -922,8 +1083,15 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         }
 
         $web .= $this->formatDay($this->datestringDay($this->dateline));
-
         $web .= "<br>";
+
+        if (count($this->place_times) > 0) {
+            $place_time = reset($this->place_times);
+            //$web .= strtoupper($place_time["text"]);
+            $web .= "VANCOUVER";
+            $web .= "<br>";
+        }
+
         $latitude_text = $this->formatLatitude($this->latitude);
         $longitude_text = $this->formatLongitude($this->longitude);
         $web .= $latitude_text . " " . $longitude_text;
@@ -954,10 +1122,30 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
                 $web .= strtoupper($day_time_text);
             }
         }
+        return $web;
+    }
 
-        //}
-        $web .= "<p>";
+    public function datestringDay($datum)
+    {
+        $date_string =
+            $datum["year"] .
+            "-" .
+            str_pad($datum["month"], 2, "0", STR_PAD_LEFT) .
+            "-" .
+            str_pad($datum["day_number"], 2, "0", STR_PAD_LEFT);
 
+        return $date_string;
+    }
+    /**
+     *
+     */
+    public function makeWeb()
+    {
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/day.pdf";
+        $this->node_list = ["day" => ["day"]];
+
+        $web = "";
+        $web .= $this->snippetDay();
         /*
                 $this->itemToken($item_slug);
                 $web .= $this->web_token[$item_slug];
@@ -1058,75 +1246,13 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
             $canvas_size_x = 164;
             $canvas_size_y = 164;
         }
+
         $this->image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
-        //$this->image = imagecreatetruecolor(164, 164);
 
-        $this->white = imagecolorallocate($this->image, 255, 255, 255);
-        $this->black = imagecolorallocate($this->image, 0, 0, 0);
-        $this->red = imagecolorallocate($this->image, 255, 0, 0);
-        $this->green = imagecolorallocate($this->image, 0, 255, 0);
-        $this->grey = imagecolorallocate($this->image, 128, 128, 128);
-
-        // For Vancouver Pride 2018
-
-        // https://en.wikipedia.org/wiki/Rainbow_flag
-        // https://en.wikipedia.org/wiki/Rainbow_flag_(LGBT_movement)
-        // https://www.schemecolor.com/lgbt-flag-colors.php
-
-        $this->electric_red = imagecolorallocate($this->image, 231, 0, 0);
-        $this->dark_orange = imagecolorallocate($this->image, 255, 140, 0);
-        $this->canary_yellow = imagecolorallocate($this->image, 255, 239, 0);
-        $this->la_salle_green = imagecolorallocate($this->image, 0, 129, 31);
-        $this->blue = imagecolorallocate($this->image, 0, 68, 255);
-        $this->patriarch = imagecolorallocate($this->image, 118, 0, 137);
-
-        $this->flag_red = imagecolorallocate($this->image, 231, 0, 0);
-        $this->flag_orange = imagecolorallocate($this->image, 255, 140, 0);
-        $this->flag_yellow = imagecolorallocate($this->image, 255, 239, 0);
-        $this->flag_green = imagecolorallocate($this->image, 0, 129, 31);
-        $this->flag_blue = imagecolorallocate($this->image, 0, 68, 255);
-        // Indigo https://www.rapidtables.com/web/color/purple-color.html
-        $this->flag_indigo = imagecolorallocate($this->image, 75, 0, 130);
-        $this->flag_violet = imagecolorallocate($this->image, 118, 0, 137);
-        $this->flag_grey = $this->grey;
-
-        $this->indigo = imagecolorallocate($this->image, 75, 0, 130);
-
-        $this->ice_green = imagecolorallocate($this->image, 126, 217, 195);
-        $this->blue_ice = imagecolorallocate($this->image, 111, 122, 159);
-        $this->artic_ice = imagecolorallocate($this->image, 195, 203, 217);
-        $this->ice_cold = imagecolorallocate($this->image, 165, 242, 243);
-        $this->white_ice = imagecolorallocate($this->image, 225, 231, 228);
-
-        $this->ice_color_palette = [
-            $this->ice_green,
-            $this->blue_ice,
-            $this->artic_ice,
-            $this->ice_cold,
-            $this->white_ice,
-        ];
-
-        // Patriarch as a color name.
-        // https://www.schemecolor.com/lgbt-flag-colors.php
-        $this->color_palette = [
-            $this->electric_red,
-            $this->dark_orange,
-            $this->canary_yellow,
-            $this->la_salle_green,
-            $this->blue,
-            $this->patriarch,
-        ];
-
-        $this->flag_color_palette = [
-            $this->flag_red,
-            $this->flag_orange,
-            $this->flag_yellow,
-            $this->flag_green,
-            $this->flag_blue,
-            $this->flag_indigo,
-            $this->flag_violet,
-            $this->flag_grey,
-        ];
+        // dev
+        $this->colours_agent = new Colours($this->thing, "colours");
+        $this->colours_agent->image = $this->image;
+        $this->colours_agent->getColours();
 
         imagefilledrectangle(
             $this->image,
@@ -1134,7 +1260,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
             0,
             $canvas_size_x,
             $canvas_size_y,
-            $this->white
+            $this->colours_agent->white
         );
 
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
@@ -1263,13 +1389,14 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
                 0,
                 $width_slice * $i,
                 $canvas_size_y,
-                $this->black
+                $this->colours_agent->black
             );
         }
     }
     // Not sure about this pattern.
     // But I need a dot to represent a day.
     public function drawDot(
+        $image,
         $text,
         $angle,
         $radius,
@@ -1278,7 +1405,8 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         $colour = null
     ) {
         if ($colour == null) {
-            $colour = $this->black;
+            $colour = $this->colours_agent->black;
+            //$colour = $this->colours_agent->yellow;
         }
         // angle in degrees
         //imagesetthickness($this->image, 5);
@@ -1292,17 +1420,44 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         //foreach (range(0, 24 - 1, 1) as $i) {
         $x_dot = ($radius + $offset) * cos($angle_radians + $this->init_angle);
         $y_dot = ($radius + $offset) * sin($angle_radians + $this->init_angle);
-
+        /*
         imagearc(
             $this->image,
-            $this->center_x + $x_dot,
-            $this->center_y + $y_dot,
-            2 * $size,
-            2 * $size,
+            round(intval($this->center_x + $x_dot)),
+            round(intval($this->center_y + $y_dot)),
+            round(intval(2 * $size)),
+            round(intval(2 * $size)),
             0,
             360,
             $colour
         );
+*/
+        imagefilledellipse(
+            $this->image,
+            round(intval($this->center_x + $x_dot)),
+            round(intval($this->center_y + $y_dot)),
+            round(intval(1.4 * $size)),
+            round(intval(1.4 * $size)),
+            $colour
+        );
+        $length = 8;
+        $start_offset = 18;
+        $t = 7;
+        foreach ([0, 1, 2, 3, 4, 5, 6, 7] as $i) {
+            $this->drawTick(
+                null,
+                $i * (360 / 8) + $angle,
+                $start_offset,
+                $length,
+                0,
+                $colour,
+                $t,
+                $this->center_x + $x_dot,
+                $this->center_y + $y_dot
+            );
+        }
+
+        return $this->image;
     }
     // And then to build Day agent
     public function extractHour($text = null)
@@ -1405,8 +1560,8 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         if ($size == null) {
             $size = $this->size;
         }
-        $border = 100;
-        $size = 1000 - $border;
+        $border = 120;
+        $size = 0.985 * (1000 - $border);
 
         if (isset($this->canvas_size_x)) {
             $canvas_size_x = $this->canvas_size_x;
@@ -1439,31 +1594,87 @@ We mostly agree on that it seems.
 */
 
         foreach (range(0, 24 - 1, 1) as $i) {
-            $this->drawTick(null, $i * (360 / 24), 50, $size - 100, 0);
+            // Show watch breaks thicker.
+            $t = 1;
+            $colour = $this->colours_agent->black;
+            $start_offset = 200;
+            //            $length = $size - 50 - $start_offset;
 
-            //$x_pt = $size * cos($angle * $i + $this->init_angle);
-            //$y_pt = $size * sin($angle * $i + $this->init_angle);
-            /*
-            imageline(
-                $this->image,
-                $center_x + $x_pt,
-                $center_y + $y_pt,
-                $center_x + $x_pt,
-                $center_y + $y_pt,
-                $this->black
+            $length = $size - 50 - $start_offset;
+
+            if (
+                $i == 0 ||
+                $i == 4 ||
+                $i == 8 ||
+                $i == 12 ||
+                $i == 16 ||
+                $i == 18 ||
+                $i == 20 ||
+                $i == 24
+            ) {
+                $t = 1;
+                $colour = $this->colours_agent->black;
+                $start_offset = 50;
+                $length = $size - 50 - $start_offset - 90;
+
+                $font_size = 18;
+                $angle = ($i * 360) / 24;
+                $radius = 750;
+                $offset = 0;
+                if ($i > 12) {
+                    $radius = 810;
+                }
+
+                $x_start =
+                    ($radius + $offset) *
+                    cos(($angle / 180) * pi() + $this->init_angle);
+                $y_start =
+                    ($radius + $offset) *
+                    sin(($angle / 180) * pi() + $this->init_angle);
+
+                $line_offset = 10;
+
+                $x_offset =
+                    $line_offset *
+                    cos(($angle / 180) * pi() + $this->init_angle + pi() / 2);
+                $y_offset =
+                    $line_offset *
+                    sin(($angle / 180) * pi() + $this->init_angle + pi() / 2);
+
+                $str_length = 4;
+                $num = $i * 100;
+                $str = substr("0000{$num}", -$str_length);
+
+                if ($i > 12) {
+                    $angle = $angle + 180;
+                    $x_offset = -$x_offset;
+                    $y_offset = -$y_offset;
+                }
+
+                imagettftext(
+                    $this->image,
+                    $font_size,
+                    -1 * ($angle - 90),
+                    round($center_x + $x_start + $x_offset),
+                    round($center_y + $y_start + $y_offset),
+                    $this->colours_agent->grey,
+                    $this->default_font,
+                    $str
+                );
+            }
+
+            $this->drawTick(
+                null,
+                $i * (360 / 24),
+                $start_offset,
+                $length,
+                0,
+                $colour,
+                $t
             );
-*/
-            /*
-            imageline(
-                $this->image,
-                $center_x,
-                $center_y,
-                $center_x + $x_pt,
-                $center_y + $y_pt,
-                $this->black
-            );
-*/
         }
+
+        imagesetthickness($this->image, 1);
 
         $radius = $size;
 
@@ -1496,10 +1707,18 @@ Now for projected time
         $sunFlag = $this->isToday();
 
         if ($sunFlag) {
-            $dot_offset = 30;
+            $dot_offset = +23.5;
             $dot_size = 20;
 
-            $this->drawDot(null, $day_degrees, $radius, $dot_size, $dot_offset);
+            $this->image = $this->drawDot(
+                $this->image,
+                null,
+                $day_degrees,
+                $radius,
+                $dot_size,
+                $dot_offset,
+                $this->colours_agent->grey
+            );
         }
 
         /*
@@ -1520,88 +1739,209 @@ Now draw the twilight.
         $datum_projected = new \DateTime();
         $datum_projected->setTimestamp($period_timestamp);
 
-        $a = $this->solarDay($datum_projected);
-        foreach ($a as $period_name => $period) {
-            $period_timestamp = $this->working_datum->getTimestamp();
-
-            $datum_projected = new \DateTime();
-            $datum_projected->setTimestamp($period_timestamp);
-
-            $datum = $this->twilightDay($period_name, $datum_projected);
-            if ($datum === false) {
-                continue;
-            }
-            $t = $datum->format("G:i:s");
-            // dev?
-
-            $parts = explode(":", $t);
-            $angle =
-                (($parts[0] * 60 * 60 + $parts[1] * 60 + $parts[2]) /
-                    (24 * 60 * 60)) *
-                360;
-            imagesetthickness($this->image, 2);
-            //if ($period_name == "sunset" or $period_name == "sunrise") {
-            //    imagesetthickness($this->image, 7);
-            //}
-            if (strpos($period_name, "astronomical") !== false) {
-                $arc[] = $angle;
-                imagesetthickness($this->image, 7);
-            }
-
-            if (strpos($period_name, "sunrise") !== false) {
-                $arc_day[] = $angle;
-                $colour = $this->blue;
-                imagesetthickness($this->image, 7);
-            }
-
-            if (strpos($period_name, "sunset") !== false) {
-                $arc_day[] = $angle;
-                $colour = $this->blue;
-                imagesetthickness($this->image, 7);
-            }
-
-            $offset = 0;
-            $this->drawTick($text, $angle, $radius, $length, $offset, $colour);
-            $colour = $this->black;
-        }
-
         imagesetthickness($this->image, 3);
 
         imagearc(
             $this->image,
-            $center_x,
-            $center_y,
-            2 * $size,
-            2 * $size,
+            round($center_x),
+            round($center_y),
+            round(2 * $size),
+            round(2 * $size),
             0,
             360,
-            $this->black
+            $this->colours_agent->black
         );
 
-        imagesetthickness($this->image, 7);
+        // HERE
+        /*
+        $place_times = [];
+        $place_times["abcd"] = [
+            "datum_projected" => $datum_projected,
+            "latitude" => 49.2827,
+            "longitude" => -123.1207,
+        ];
+        $place_times["12ab"] = [
+            "datum_projected" => $datum_projected,
+            "latitude" => 40.6892,
+            "longitude" => -74.0445,
+        ];
+        $place_times["1234"] = [
+            "datum_projected" => $datum_projected,
+            "latitude" => 36.7174,
+            "longitude" => 4.413,
+        ];
+*/
+        $place_times = $this->place_times;
+        $count = 0;
+        $step_width = 50;
+        foreach ($place_times as $i => $place_time) {
+            $latitude = $place_time["latitude"];
+            $longitude = $place_time["longitude"];
 
-        if (isset($arc[0]) and isset($arc[1])) {
+            $a = $this->solarDay($datum_projected, $latitude, $longitude);
+
+            $arc_day[$i] = [];
+            $arc[$i] = [];
+            foreach ($a as $period_name => $period) {
+                $period_timestamp = $this->working_datum->getTimestamp();
+
+                $datum_projected = new \DateTime();
+                $datum_projected->setTimestamp($period_timestamp);
+
+                $datum = $this->twilightDay(
+                    $period_name,
+                    $datum_projected,
+                    $latitude,
+                    $longitude
+                );
+                if ($datum === false) {
+                    continue;
+                }
+                $t = $datum->format("G:i:s");
+                // dev?
+
+                $parts = explode(":", $t);
+                $angle =
+                    (($parts[0] * 60 * 60 + $parts[1] * 60 + $parts[2]) /
+                        (24 * 60 * 60)) *
+                    360;
+                imagesetthickness($this->image, 2);
+                //if ($period_name == "sunset" or $period_name == "sunrise") {
+                //    imagesetthickness($this->image, 7);
+                //}
+                //$arc[$i] = [];
+                //$arc_day[$i] = [];
+                if (strpos($period_name, "astronomical") !== false) {
+                    $arc[$i][] = $angle;
+                    imagesetthickness($this->image, 7);
+                }
+
+                if (strpos($period_name, "sunrise") !== false) {
+                    $arc_day[$i][] = $angle;
+
+                    $colour = $this->colours_agent->blue;
+                    imagesetthickness($this->image, 3);
+                }
+
+                if (strpos($period_name, "sunset") !== false) {
+                    $arc_day[$i][] = $angle;
+                    $colour = $this->colours_agent->blue;
+                    imagesetthickness($this->image, 3);
+                }
+
+                $offset = 0;
+                $this->drawTick(
+                    $text,
+                    $angle,
+                    $radius + $count * $step_width,
+                    $length,
+                    $offset,
+                    $colour
+                );
+                $colour = $this->colours_agent->black;
+            }
+
+            imagesetthickness($this->image, 7);
+
+            if (isset($arc[$i][0]) and isset($arc[$i][1])) {
+                imagearc(
+                    $this->image,
+                    round($center_x),
+                    round($center_y),
+                    round(2 * $size + $count * ($step_width * 2)),
+                    round(2 * $size + $count * ($step_width * 2)),
+                    round($arc[$i][1] + ($this->init_angle * 180) / pi()),
+                    round($arc[$i][0] + ($this->init_angle * 180) / pi()),
+                    $this->colours_agent->black
+                );
+            }
+
+            imagesetthickness($this->image, 3);
+
             imagearc(
                 $this->image,
-                $center_x,
-                $center_y,
-                2 * $size,
-                2 * $size,
-                $arc[1] + ($this->init_angle * 180) / pi(),
-                $arc[0] + ($this->init_angle * 180) / pi(),
-                $this->black
+                round($center_x),
+                round($center_y),
+                round(2 * $size + $count * ($step_width * 2)),
+                round(2 * $size + $count * ($step_width * 2)),
+                round($arc_day[$i][0] + ($this->init_angle * 180) / pi()),
+                round($arc_day[$i][1] + ($this->init_angle * 180) / pi()),
+                $this->colours_agent->blue
+                //$arc[1] + ($this->init_angle * 180) / pi(),
+                //$arc[0] + ($this->init_angle * 180) / pi(),
+                //$this->colours_agent->black
             );
+
+            //imagettftext($this->image, 14, 45, 50, 50, $this->colours_agent->black, $this->default_font, "P");
+            $this->circleLabel(
+                strtoupper($place_time["text"]),
+                $size,
+                $count,
+                $this->colours_agent->grey
+            );
+            $count += 1;
         }
+        /*
         imagearc(
             $this->image,
-            $center_x,
-            $center_y,
+            intval($center_x),
+            intval($center_y),
             2 * $size,
             2 * $size,
             $arc_day[0] + ($this->init_angle * 180) / pi(),
             $arc_day[1] + ($this->init_angle * 180) / pi(),
-            $this->blue
+            $this->colours_agent->blue
         );
+*/
+    }
+
+    public function circleLabel($text, $size, $index, $colour)
+    {
+        $font_size = 20;
+        // Draw out the state
+
+        //      $size = null;
+        //      if ($size == null) {
+        //          $size = $this->size;
+        //      }
+        //      $border = 120;
+        //      $size = 1000 - $border;
+
+        if (isset($this->canvas_size_x)) {
+            $canvas_size_x = $this->canvas_size_x;
+            $canvas_size_y = $this->canvas_size_y;
+        } else {
+            $canvas_size_x = $this->default_canvas_size_x;
+            $canvas_size_y = $this->default_canvas_size_y;
+        }
+
+        $center_x = $canvas_size_x / 2;
+        $center_y = $canvas_size_y / 2;
+
+        $radius = $size + 10;
+        $offset = $index * 50;
+
+        $letters = str_split($text);
+        foreach ($letters as $i => $letter) {
+            $angle = $i * 2;
+            $x_start =
+                ($radius + $offset) *
+                cos(($angle / 180) * pi() + $this->init_angle);
+            $y_start =
+                ($radius + $offset) *
+                sin(($angle / 180) * pi() + $this->init_angle);
+
+            imagettftext(
+                $this->image,
+                $font_size,
+                -1 * $angle,
+                round($center_x + $x_start),
+                round($center_y + $y_start),
+                $colour,
+                $this->default_font,
+                $letter
+            );
+        }
     }
 
     public function get()
@@ -1614,6 +1954,7 @@ Now draw the twilight.
         }
 
         $this->getDay();
+        $this->getWhatis($this->input);
     }
 
     public function drawTick(
@@ -1622,21 +1963,31 @@ Now draw the twilight.
         $radius,
         $length,
         $offset = 0,
-        $colour = null
+        $colour = null,
+        $thickness = null,
+        $center_x = null,
+        $center_y = null
     ) {
         if ($colour == null) {
-            $colour = $this->black;
+            $colour = $this->colours_agent->black;
         }
-        // angle in degrees
-        //imagesetthickness($this->image, 5);
-        //$init_angle = (-1 * pi()) / 2;
-        //$angle = (2 * 3.14159) / 24;
-        //$x_pt =  230;
-        //$y_pt = 230;
 
+        if ($center_x == null) {
+            $center_x = $this->center_x;
+        }
+
+        if ($center_y == null) {
+            $center_y = $this->center_y;
+        }
+
+        if ($thickness != null) {
+            //       $thickness = 1;
+            //   }
+
+            imagesetthickness($this->image, $thickness);
+        }
         $angle_radians = ($angle / 180) * pi();
 
-        //foreach (range(0, 24 - 1, 1) as $i) {
         $x_start =
             ($radius + $offset) * cos($angle_radians + $this->init_angle);
         $y_start =
@@ -1651,12 +2002,46 @@ Now draw the twilight.
 
         imageline(
             $this->image,
-            $this->center_x + $x_start,
-            $this->center_y + $y_start,
-            $this->center_x + $x_end,
-            $this->center_y + $y_end,
+            round($center_x + $x_start, 0),
+            round($center_y + $y_start, 0),
+            round($center_x + $x_end, 0),
+            round($center_y + $y_end, 0),
             $colour
         );
+    }
+
+    public function pdfDay($pdf)
+    {
+        try {
+            $this->getNuuid();
+            $pdf->Image($this->PNG_embed, 7, 30, 200, 200, "PNG");
+
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetXY(1, 1);
+
+            $pdf->SetFont("Helvetica", "", 26);
+            //            $this->txt = "" . $this->whatis . ""; // Pure uuid.
+
+            $pdf->SetXY(140, 7);
+            $this->getWhatis($this->subject);
+
+            $text = $this->deSlug($this->whatis);
+            $line_height = 20;
+            $pdf->MultiCell(150, $line_height, $text, 0);
+
+            $pdf->SetFont("Helvetica", "", 14);
+            $text = $this->textDay();
+            $pdf->SetXY(7, 7);
+            //$this->getWhatis($this->subject);
+
+            //$text = $this->whatis;
+            $line_height = 20;
+            $pdf->MultiCell(150, $line_height, $text, 0);
+        } catch (Exception $e) {
+            $this->thing->console("Caught exception: ", $e->getMessage(), "\n");
+        }
+
+        return $pdf;
     }
     /**
      *
@@ -1664,6 +2049,7 @@ Now draw the twilight.
      */
     public function makePDF()
     {
+        $image = null;
         if (
             $this->default_pdf_page_template === null or
             !file_exists($this->default_pdf_page_template)
@@ -1672,11 +2058,14 @@ Now draw the twilight.
             return $this->thing_report["pdf"];
         }
 
-        $this->getWhatis($this->subject);
+        //        $this->getWhatis($this->subject);
+        // prod March 16 2022
+        //$pdf_handler = new Pdf($this->thing, "pdf");
+        $pdf = new Fpdi\Fpdi();
+
         try {
             // initiate FPDI
-            $pdf = new Fpdi\Fpdi();
-
+            //$pdf = $pdf_handler->pdf;
             $pdf->setSourceFile($this->default_pdf_page_template);
             $pdf->SetFont("Helvetica", "", 10);
 
@@ -1685,110 +2074,29 @@ Now draw the twilight.
 
             $pdf->addPage($s["orientation"], $s);
             $pdf->useTemplate($tplidx1);
-            /*
-            if (isset($this->hextile_PNG)) {
-                $top_x = -6;
-                $top_y = 11;
-
-                $pdf->Image(
-                    $this->hextile_PNG,
-                    $top_x,
-                    $top_y,
-                    -300,
-                    -300,
-                    'PNG'
-                );
-            }
-*/
-            $this->getNuuid();
-            //$pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
-            $pdf->Image($this->PNG_embed, 7, 30, 200, 200, "PNG");
-
-            $pdf->SetTextColor(0, 0, 0);
-            $pdf->SetXY(1, 1);
-/*
-            $pdf->SetFont("Helvetica", "", 26);
-            $this->txt = "" . $this->whatis . ""; // Pure uuid.
-
-            $pdf->SetXY(140, 7);
-            $text = $this->whatis;
-            $line_height = 20;
-            $pdf->MultiCell(150, $line_height, $text, 0);
-*/
-            if (isset($this->hextile_PNG)) {
-                $top_x = -6;
-                $top_y = 11;
-
-                $pdf->Image(
-                    $this->hextile_PNG,
-                    $top_x,
-                    $top_y,
-                    -300,
-                    -300,
-                    "PNG"
-                );
-            }
+            $this->pdfDay($pdf);
 
             // Page 2
             $tplidx2 = $pdf->importPage(2);
-
             $pdf->addPage($s["orientation"], $s);
-
             $pdf->useTemplate($tplidx2, 0, 0);
+
             // Generate some content for page 2
+            $pdf = $this->pdfImpressum($pdf);
 
-            $pdf->SetFont("Helvetica", "", 10);
-            $this->txt = "" . $this->uuid . ""; // Pure uuid.
-
-            $link = $this->web_prefix . "thing/" . $this->uuid . "/day";
-
-            $this->getQuickresponse($link);
-            $pdf->Image($this->quick_response_png, 175, 5, 30, 30, "PNG");
-
-            //$pdf->Link(175,5,30,30, $link);
-
-            $pdf->SetTextColor(0, 0, 0);
-
-            $pdf->SetXY(15, 7);
-
-            $line_height = 4;
-
-            $t = $this->thing_report["sms"];
-
-            $t = str_replace(" | ", "\n", $t);
-
-            $pdf->MultiCell(150, $line_height, $t, 0);
-
-            //$pdf->Link(15,7,150,10, $link);
-
-            $y = $pdf->GetY() + 0.95;
-            $pdf->SetXY(15, $y);
-            $text = "v0.0.1";
-            $pdf->MultiCell(
-                150,
-                $line_height,
-                $this->agent_name . " " . $text,
-                0,
-                "L"
-            );
-
-            $y = $pdf->GetY() + 0.95;
-
-            $pdf->SetXY(15, $y);
-            $text =
-                "Pre-printed text and graphics (c) 2020 " . $this->entity_name;
-            $pdf->MultiCell(150, $line_height, $text, 0, "L");
-
+            /*
             // Good until?
             $text = $this->timestampDay();
             $pdf->SetXY(175, 35);
             $pdf->MultiCell(30, $line_height, $text, 0, "L");
-
-            $image = $pdf->Output("", "S");
-            $this->thing_report["pdf"] = $image;
+*/
+            // http://fpdf.org/en/doc/output.htm
+            $image = $pdf->Output("S");
         } catch (Exception $e) {
             $this->thing->console("Caught exception: ", $e->getMessage(), "\n");
         }
+
+        $this->thing_report["pdf"] = $image;
 
         return $this->thing_report["pdf"];
     }
@@ -2013,6 +2321,14 @@ Now draw the twilight.
         return false;
     }
 
+    function compareMid($a, $b)
+    {
+        if ($a["latitude"] == $b["latitude"]) {
+            return 0;
+        }
+        return $a["latitude"] < $b["latitude"] ? -1 : 1;
+    }
+
     /**
      *
      */
@@ -2020,13 +2336,76 @@ Now draw the twilight.
     {
         $i = str_replace("-", " ", $this->input);
 
+        $tokens = explode(" ", $i);
+
+        $place_times = [];
+
+        $expand_places_input = $this->input;
+
+        $expand_places_input = str_replace(
+            "tmlr",
+            "vancouver new york madrid",
+            $expand_places_input
+        );
+
+        $expand_places_input = str_replace(
+            "canada places",
+            "vancouver toronto calgary montreal ottawa",
+            $expand_places_input
+        );
+        $expand_places_input = str_replace(
+            "places",
+            "vancouver new york madrid",
+            $expand_places_input
+        );
+
+        //$ngrams = $this->extractNgrams($this->input);
+
+        $ngrams = $this->extractNgrams($expand_places_input);
+
+        $period_index = 0;
+        $period_timestamp =
+            $this->working_datum->getTimestamp() +
+            $period_index * (60 * 60 * 24);
+
+        $datum_projected = new \DateTime();
+        $datum_projected->setTimestamp($period_timestamp);
+
+        $place_times = $this->loadPlace($ngrams, $datum_projected);
+
+        if (count($place_times) == 0) {
+            $place_times = $this->loadPlace(["vancouver"], $datum_projected);
+        }
+
+        //foreach($place_times as $i=>$place_time) {
+
+        //$place_times[$i]['datum_projected'] = $datum_projected;
+
+        //}
+
+        usort($place_times, function ($first_place, $a) {
+            return $first_place["longitude"] + 720 <=> $a["longitude"] + 720;
+        });
+
+        $this->place_times = $place_times;
+
+        $timezones = [];
+        foreach ($tokens as $j => $token) {
+            $timezone = $this->extractTimezone($token);
+            if ($timezone === true or $timezone === false) {
+                continue;
+            }
+            $timezones[] = $timezone;
+        }
+
+        if (count($timezones) == 1) {
+            $this->timezone = $timezones[0];
+        }
+
         $dateline = $this->extractDateline($i);
         if (
-            !(
-                $dateline["year"] === false and
-                $dateline["month"] === false and
-                $dateline["day_number"] === false
-            )
+            !//                $dateline["year"] === false and // comes through as 2021
+            ($dateline["month"] === false and $dateline["day_number"] === false)
         ) {
             $date_string =
                 $dateline["year"] .
@@ -2034,7 +2413,6 @@ Now draw the twilight.
                 str_pad($dateline["month"], 2, "0", STR_PAD_LEFT) .
                 "-" .
                 str_pad($dateline["day_number"], 2, "0", STR_PAD_LEFT);
-
             $this->projected_time = strtotime($date_string);
 
             $this->working_datum = $this->time_agent->datumTime($date_string);
@@ -2053,11 +2431,25 @@ Now draw the twilight.
         }
         $longitude = $this->extractLongitude($i);
         $latitude = $this->extractLatitude($i);
+
         if ($longitude !== false) {
             $this->longitude = $longitude;
+        } else {
+            $longitude_agent = new Longitude($this->thing, "longitude");
+
+            // Cannot calculate local time without knowing longitude.
+            if ($longitude_agent->longitude === false) {
+                $this->response .= "Longitude not known. ";
+            }
+
+            $this->longitude = $longitude_agent->longitude;
         }
+
         if ($latitude !== false) {
             $this->latitude = $latitude;
+        } else {
+            $latitude_agent = new Latitude($this->thing, "latitude");
+            $this->latitude = $latitude_agent->latitude;
         }
 
         $this->type = "wedge";
@@ -2068,6 +2460,7 @@ Now draw the twilight.
         }
 
         if ($input == "day") {
+            $this->runDay();
             return;
         }
 
@@ -2096,6 +2489,7 @@ Now draw the twilight.
                 $this->size = 4;
                 $this->lattice_size = 40;
                 $this->response .= "Made a day. ";
+                $this->runDay();
                 return;
             }
         }
@@ -2112,6 +2506,7 @@ Now draw the twilight.
                 "transit",
                 "noon",
             ],
+            "week" => ["week"],
         ];
         $dedash_input = str_replace("-", " ", $input);
         $this->flagAgent($indicators, $dedash_input);
@@ -2137,5 +2532,6 @@ Now draw the twilight.
         }
 
         $this->getDay();
+        $this->runDay();
     }
 }

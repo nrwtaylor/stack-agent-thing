@@ -866,7 +866,7 @@ class Radiorelay extends Agent
                 " - " .
                 $this->thing->nuuid .
                 " - " .
-                $this->thing->thing->created_at;
+                $this->thing->created_at;
 
             $togo = $this->thing->human_time($this->time_remaining);
             $web .= " - " . $togo . " remaining.<br>";
@@ -875,7 +875,7 @@ class Radiorelay extends Agent
         $web .= "<p>";
 
         $ago = $this->thing->human_time(
-            time() - strtotime($this->thing->thing->created_at)
+            time() - strtotime($this->thing->created_at)
         );
         $web .= "This radiogram was created about " . $ago . " ago. ";
 
@@ -991,7 +991,7 @@ class Radiorelay extends Agent
 
         if ($this->qr_code_state == "on") {
             $text =
-                "Inject generated at " . $this->thing->thing->created_at . ".";
+                "Inject generated at " . $this->thing->created_at . ".";
             $pdf->SetXY(130, 10);
             $pdf->Write(0, $text);
 

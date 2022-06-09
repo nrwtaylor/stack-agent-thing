@@ -51,6 +51,15 @@ class Signal extends Agent
 
     public function lastSignal()
     {
+        if (!isset($this->signals)) {
+            $this->getSignals();
+        }
+
+$uuid = null;
+if (isset($this->signals[0])) {
+        $uuid = $this->signals[0]['uuid'];
+}
+        $this->getSignalbyUuid($uuid);
     }
 
     public function nextSignal()
@@ -61,10 +70,9 @@ class Signal extends Agent
     {
     }
 
-
     public function respondResponse()
     {
-/*
+        /*
         $this->thing->flagGreen();
 
         $this->thing_report["info"] =
@@ -75,7 +83,6 @@ class Signal extends Agent
         $this->makeInfo();
         $this->thing->flagGreen();
 
-
         //$this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['txt'] = $this->sms_message;
@@ -83,7 +90,6 @@ class Signal extends Agent
         $message_thing = new Message($this->thing, $this->thing_report);
         $thing_report['info'] = $message_thing->thing_report['info'];
     }
-
 
     public function set()
     {
@@ -162,12 +168,13 @@ class Signal extends Agent
             $this->response .= "No channel name. ";
         }
         $this->getSignal();
-
-if (!isset($this->signals)) {return true;}
+        //$this->getSignals();
+        if (!isset($this->signals)) {
+            return true;
+        }
 
         foreach ($this->signals as $i => $signal) {
             if ($signal['uuid'] == $this->signal_thing->uuid) {
-
                 $this->signal_thing->state = $signal['state'];
                 return;
             }
@@ -302,20 +309,12 @@ if (!isset($this->signals)) {return true;}
 
     function setSignal($text = null)
     {
-        if (!isset($this->signal_thing)) {
+        if ((!isset($this->signal_thing)) or ($this->signal_thing === false)) {
             return true;
         }
 
-        $this->signal_thing->Write(
-            ["signal", "state"],
-            $this->signal['state']
-        );
-
-        $this->signal_thing->Write(
-            ["signal", "text"],
-            $this->signal['text']
-        );
-
+        $this->signal_thing->Write(["signal", "state"], $this->signal['state']);
+        $this->signal_thing->Write(["signal", "text"], $this->signal['text']);
         $this->signal_thing->Write(
             ["signal", "refreshed_at"],
             $this->current_time
@@ -484,10 +483,10 @@ if (!isset($this->signals)) {return true;}
             $t = $this->getSignalbyId($text);
             return;
         }
-
-if (!isset($this->thing->thing->variables)) {
-$this->response .= 'No stack found. ';
-return true;}
+        if (!isset($this->thing->thing->variables)) {
+            $this->response .= 'No stack found. ';
+            return true;
+        }
 
         if (
             isset(
@@ -538,7 +537,6 @@ return true;}
         }
 
         foreach ($this->signals as $i => $signal) {
-
             if (isset($signal['uuid'])) {
                 $flag = $this->getSignalbyUuid($signal['uuid']);
                 return;
@@ -562,6 +560,7 @@ return true;}
         $this->signals = [];
 
         $things = $this->getThings('signal');
+
         if ($things === null) {
             return;
         }
@@ -600,7 +599,6 @@ return true;}
 
                     $signal["uuid"] = $uuid;
                     $signal["id"] = $this->idSignal($uuid);
-
                     $this->signals[] = $signal;
                     $this->signalid_list[] = $uuid;
                 }
@@ -612,7 +610,6 @@ return true;}
             $refreshed_at[$key] = $row['refreshed_at'];
         }
         array_multisort($refreshed_at, SORT_DESC, $this->signals);
-
         return [$this->signalid_list, $this->signals];
     }
 
@@ -627,7 +624,6 @@ return true;}
     {
         $web = null;
         if (isset($this->signal_thing)) {
-
             $web = "";
             $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br><p>';
             $web .= "<p>";
@@ -769,19 +765,17 @@ return true;}
         if (isset($this->signal_thing->uuid)) {
             if ($this->signal_thing->uuid == $this->uuid) {
                 $web .=
-                "The FORGET button will delete this SIGNAL ID " .
-                $id_text .
-                ". There is no undo.<br>";
+                    "The FORGET button will delete this SIGNAL ID " .
+                    $id_text .
+                    ". There is no undo.<br>";
             } else {
                 $web .=
-                "The FORGET button will not delete this SIGNAL ID " .
-                $id_text .
-                ". The SIGNAL will persist in the text CHANNEL. Text SIGNAL THING LINK for a forgettable link.";
+                    "The FORGET button will not delete this SIGNAL ID " .
+                    $id_text .
+                    ". The SIGNAL will persist in the text CHANNEL. Text SIGNAL THING LINK for a forgettable link.";
             }
         } else {
-
             $web .= "There are no signals. Text NEW SIGNAL to create a signal.";
-
         }
 
         $this->info = $web;
@@ -944,7 +938,6 @@ return true;}
         if ($this->show_link == 'on') {
             $sms_message .= " " . $this->link;
         }
-
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
     }
@@ -1010,10 +1003,10 @@ return true;}
                 $color = $this->{'signal_' . $state};
             }
         }
-$signal_id = "X";
-if (isset($this->signal_thing->uuid)) {
-        $signal_id = $this->signal_thing->uuid;
-}
+        $signal_id = "X";
+        if (isset($this->signal_thing->uuid)) {
+            $signal_id = $this->signal_thing->uuid;
+        }
         $signal_nuuid = strtoupper(substr($signal_id, 0, 4));
         $signal_id = $this->idSignal($signal_id);
 
@@ -1064,8 +1057,7 @@ if (isset($this->signal_thing->uuid)) {
                 );
             }
         } else {
-
-/*
+            /*
             $flag_nuuid = "X";
             if (isset($this->flag->nuuid)) {
                 $flag_nuuid = $this->flag_nuuid;
@@ -1244,7 +1236,6 @@ if (isset($this->signal_thing->uuid)) {
         $this->thing_report['jpeg'] = $agent->JPEG;
     }
 
-
     public function readSignal()
     {
     }
@@ -1273,11 +1264,10 @@ if (isset($this->signal_thing->uuid)) {
         ];
 
         $input = $this->input;
-
         $prior_uuid = null;
 
-//        $pieces = explode(" ", strtolower($input));
-//        $input = strtolower($this->subject);
+        //        $pieces = explode(" ", strtolower($input));
+        //        $input = strtolower($this->subject);
 
         $ngram_agent = new Ngram($this->thing, "ngram");
         $pieces = [];
@@ -1290,11 +1280,13 @@ if (isset($this->signal_thing->uuid)) {
 
         if (count($pieces) == 1) {
             if ($input == $this->keyword) {
+                $this->lastSignal();
                 //$this->response .= "Got the current signal. ";
                 return;
             }
 
             if ($input == 'signals') {
+                $this->getSignals();
                 $this->response .= "Got active signals. ";
                 return;
             }

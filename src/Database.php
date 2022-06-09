@@ -34,7 +34,6 @@ class Database
     //public function init()
     function __construct($thing = null, $agent_input = null)
     {
-        //$agent_input = $this->agent_input;
         $uuid = $agent_input["uuid"];
         $nom_from = $agent_input["from"];
         $to = isset($agent_input["to"]) ? $agent_input["to"] : null;
@@ -101,11 +100,13 @@ class Database
         $this->stacks = [
             "mysql" => ["infrastructure" => "mysql"],
             "mongo" => ["infrastructure" => "mongo"],
+            "memcached" => ["infrastructure" => "memcached"],
             "memory" => ["infrastructure" => "memory"],
         ];
         if (isset($settings["settings"]["stacks"])) {
             $this->stacks = $settings["settings"]["stacks"];
         }
+
         $this->web_prefix = $settings["settings"]["stack"]["web_prefix"];
         $this->state = $settings["settings"]["stack"]["state"];
 
@@ -246,6 +247,7 @@ class Database
             "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
 
         try {
+            //$handler = new $agent_namespace_name($this->thing, $this->agent_input);
             $handler = new $agent_namespace_name(null, $this->agent_input);
 
             $handler->uuid = $this->uuid;
@@ -377,24 +379,34 @@ class Database
      * @param unknown $field_text
      * @param unknown $string_text
      */
-    public function writeField($field_text, $string_text)
+    public function writeField($field_text, $string_text, $uuid = null)
     {
         foreach (
             $this->active_stacks
             as $active_service_name => $active_service
         ) {
             if ($active_service_name == "mysql") {
-                $this->stack_handlers["mysql"]->writeField(
+                $r = $this->stack_handlers["mysql"]->writeField(
                     $field_text,
                     $string_text
                 );
             }
-            /*
-        if ($active_service == "mongo") {
-            $key = $this->stack_handlers["mongo"]->setMongo($key, $value);
-            if ($key === true) {return true;}
-        }
+            if ($active_service_name == "memcached") {
+                $key = $this->stack_handlers["memcached"]->writeField(
+                    $field_text,
+                    $string_text
+                );
+                //if ($key === true) {return true;}
+            }
 
+            if ($active_service_name == "mongo") {
+                $key = $this->stack_handlers["mongo"]->writeMongo(
+                    $field_text,
+                    $string_text
+                );
+                //if ($key === true) {return true;}
+            }
+            /*
         if ($active_service == "memory") {
             $memory = $this->stack_handlers["memory"]->set($key, $value);
 
@@ -456,26 +468,41 @@ class Database
     {
         foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
             $stack_infrastructure = $stack_descriptor["infrastructure"];
-
             if ($stack_infrastructure == "mysql") {
-                $response = $this->stack_handler->createMysql($subject, $to);
+                $response = $this->stack_handlers["mysql"]->createMysql(
+                    $subject,
+                    $to
+                );
                 $this->available_stacks["mysql"]["response"] = $response;
             }
 
             if ($stack_infrastructure == "memory") {
-                $response = $this->stack_handler->createMemory($subject, $to);
+                $response = $this->stack_handlers["memory"]->createMemory(
+                    $subject,
+                    $to
+                );
+                $this->available_stacks["memory"]["response"] = $response;
+            }
+
+            if ($stack_infrastructure == "mongo") {
+                $response = $this->stack_handlers["mongo"]->createMongo(
+                    $subject,
+                    $to
+                );
                 $this->available_stacks["memory"]["response"] = $response;
             }
         }
 
         foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
-            if ($stack_descriptor["response"] === true) {
+            if (
+                isset($stack_descriptor["response"]) and
+                $stack_descriptor["response"] === true
+            ) {
                 return true;
             }
         }
 
         return false;
-        //return $response;
     }
 
     /**
@@ -491,18 +518,38 @@ class Database
 
         // Get first available.
 
-        $thing = false;
+        //        $thing = false;
+        $thing = [];
         foreach ($this->available_stacks as $stack_name => $stack) {
             switch ($stack["infrastructure"]) {
                 case "mysql":
-                    $thing = $this->stack_handlers[
+                    $thing["mysql"] = $this->stack_handlers[
                         $stack["infrastructure"]
                     ]->getMysql();
 
-                    if ($thing !== false and $thing !== true) {
-                        break 2;
-                    }
+                    //          if ($thing['mysql'] !== false and $thing['mysql'] !== true) {
+                    //              break 2;
+                    //          }
 
+                    //if ($thing === false) {$thing = $thing['mysql'];}
+                    break;
+                case "memcached":
+                    $thing["memcached"] = $this->stack_handlers[
+                        $stack["infrastructure"]
+                    ]->getMemcached($this->uuid);
+                    break;
+
+                case "mongo":
+                    $thing["mongo"] = $this->stack_handlers[
+                        $stack["infrastructure"]
+                    ]->getMongo($this->uuid);
+                    break;
+
+                //                    if ($thing !== false and $thing !== true) {
+                //                        break 2;
+                //                   }
+
+                /*
                 case "mongo":
                     break;
                 case "memory":
@@ -513,14 +560,14 @@ class Database
                     if ($thing !== false and $thing !== true) {
                         break 2;
                     }
-
+*/
                 /*
                     if ($thing !== false) {
                         //$thing = new Thing(null);
                         //$thing->created_at = null;
                         //$thing->nom_to = null;
                         //$thing->nom_from = null;
-                        //$thing->task = "empty task";
+              c          //$thing->task = "empty task";
                         //$thing->variables = json_encode($t, true);
                         //$thing->settings = null;
                         break;
@@ -531,6 +578,24 @@ class Database
             }
         }
 
+        // dev decide which thing is most authorative.
+        // merge?
+        $thing = $thing["mysql"];
+
+        /*
+if (is_array($thing)) {
+
+if (count($thing) == 0) {
+$thing = false;
+}
+
+if (count($thing) >= 1) {
+$thcing = $thing[array_key_first($thing)];
+}
+
+
+}
+*/
         $thingreport = [
             "thing" => $thing,
             "info" =>
@@ -630,13 +695,15 @@ class Database
         return $thing_report;
     }
 
-function isValidMd5($md5 ='') {
-  return strlen($md5) == 32 && ctype_xdigit($md5);
-}
+    function isValidMd5($md5 = "")
+    {
+        return strlen($md5) == 32 && ctype_xdigit($md5);
+    }
 
-function isValidSha256($sha256 ='') {
-  return strlen($sha256) == 64 && ctype_xdigit($sha256);
-}
+    function isValidSha256($sha256 = "")
+    {
+        return strlen($sha256) == 64 && ctype_xdigit($sha256);
+    }
 
     /**
      *
@@ -646,11 +713,11 @@ function isValidSha256($sha256 ='') {
      * @return unknown
      */
     public function variableSearch(
+        $path,
         $value,
         $max = null,
         $string_in_string = false
     ) {
-
         //        $thing = false;
         /*
         $thing_report = [];
@@ -680,12 +747,14 @@ return $thing_report;
             $max = 3;
         }
         $max = (int) $max;
-        $user_search = $this->from;
 
-//$hash_user_search = $user_search;
-//} else {
+        $user_search = $this->from;
         $hash_user_search = hash($this->hash_algorithm, $user_search);
 
+        $hash_user_search = $user_search;
+        if (!$this->isValidSha256($user_search)) {
+            $hash_user_search = hash($this->hash_algorithm, $user_search);
+        }
         // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
         if ($string_in_string === true) {
             $value = "%$value%"; // Value to search for in Variables
@@ -697,7 +766,7 @@ return $thing_report;
             //                "SELECT * FROM stack FORCE INDEX (created_at_nom_from) WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
             //            $query =
-              //              "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+            //              "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
             if ($this->hash_state == "off") {
                 $query =
@@ -708,7 +777,6 @@ return $thing_report;
                 $query =
                     "SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
             }
-
             //           $query =
             //                "(SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) UNION ALL (SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) ORDER BY created_at DESC LIMIT :max";
             //$value = "+$value"; // Value to search for in Variables
@@ -1245,8 +1313,6 @@ return $thing_report;
         // This will need to be a public Stack variable.
 
         // Double-UU intentionally.
-
-        return;
     }
 
     /**

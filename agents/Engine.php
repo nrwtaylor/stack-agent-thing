@@ -126,9 +126,11 @@ class Engine extends Agent
         $web .= 'This Thing said it heard, "' . $this->subject . '".<br>';
         $web .= $this->sms_message . "<br>";
 
-        $received_at = strtotime($this->thing->thing->created_at);
+        $received_at = strtotime($this->thing->created_at);
         $ago = $this->thing->human_time(time() - $received_at);
         $web .= "About " . $ago . " ago.";
+
+
 
         $web .= "<br>";
         $this->thing_report['web'] = $web;

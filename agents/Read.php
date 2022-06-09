@@ -198,9 +198,17 @@ class Read extends Agent
                     }
                 }
         }
+
         // Test
         $this->do_not_cache = false; // False = allow caching
-        return $this->contents;
+
+$response = ['do_not_index'=>$this->do_not_index,
+'do_not_cache'=>$this->do_not_cache,
+'contents'=>$this->contents,
+'sentences'=>$this->sentences];
+
+ //       return $this->contents;
+return $response;
     }
 
     function copyrightRead($html)

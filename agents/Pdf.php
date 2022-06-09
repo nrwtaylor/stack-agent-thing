@@ -6,6 +6,8 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
+use setasign\Fpdi;
+
 class Pdf extends Agent
 {
     function init()
@@ -27,6 +29,15 @@ class Pdf extends Agent
 					array('useful', 'useful?'),
 				'start b'=>array('helpful','helpful?')
 					);
+
+        try {
+        $this->pdf = new Fpdi\Fpdi();
+        } catch (Exception $e) {
+            $this->thing->console("Caught exception: ", $e->getMessage(), "\n");
+        }
+
+
+
   	}
 
     public function run()

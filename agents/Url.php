@@ -67,11 +67,7 @@ class Url extends Agent
         $web = "<b>URL Agent</b><br><p>";
         $web .= "<p>";
 
-        if (
-            isset($this->urls) and
-            is_array($this->urls) and
-            count($this->urls) > 0
-        ) {
+        if (isset($this->urls) and is_array($this->urls) and count($this->urls) > 0) {
             $web .= "<b>COLLECTED URLS</b><br><p>";
             $web .= "<ul>";
             //$urls = array_unique($this->urls);
@@ -283,45 +279,6 @@ class Url extends Agent
         $this->thing_report["help"] = "This reads a web resource.";
     }
 
-    public function patternUrls($text = null)
-    {
-        if ($text == null) {
-            return true;
-        }
-
-        /*
-        $pattern =
-            '/\b(https?|ftp|file:\/\/)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
-
-        $pattern =
-            '/\b(https?|ftp|file:\/\/)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
-*/
-        $pattern =
-            '/\b(https?|ftp|file:\/\/)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
-
-        // This is more permissive than RFC3986.
-        // It does not pass merp@localhost
-        // It does     pass merp@192.168.7.3
-        // It does     pass @gmail.com
-
-        // It recognizes strings that have urls in them. Without spaces.
-
-        // https://stackoverflow.com/questions/17105977/can-i-use-an-at-sign-in-the-path-part-of->
-        preg_match_all($pattern, $text, $match);
-        if (!isset($urls)) {
-            $urls = [];
-        }
-        $urls = array_merge($urls, $match[0]);
-
-        //        $pattern =
-        //            '/\b(https?|ftp|file:\/\/)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
-
-        if (count($urls) == 0) {
-            return false;
-        }
-        return $urls;
-    }
-
     public function extractUrls($text = null)
     {
         if ($text == null) {
@@ -337,77 +294,17 @@ class Url extends Agent
         $pattern =
             '/\b(https?|ftp|file:\/\/)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
 
-        // This is more permissive than RFC3986.
-        // It does not pass merp@localhost
-        // It does     pass merp@192.168.7.3
-        // It does     pass @gmail.com
-
-        // It recognizes strings that have urls in them. Without spaces.
-        // Real world urls have these things - ampersands.
-
-        // https://stackoverflow.com/questions/17105977/can-i-use-an-at-sign-in-the-path-part-of-an-url
-
         preg_match_all($pattern, $text, $match);
-        //        if (!isset($urls)) {
-        $urls = [];
-        //        }
-
-        //var_dump($urls);
-        //exit();
-        $text_variants = [];
-        $text_variants[] = $text;
-
-        //generalDelimsUrl
-        $explode_delimiters = ["@"];
-
-        foreach ($explode_delimiters as $i => $delimiter_character) {
-            $text_variants = array_merge(
-                $text_variants,
-                explode($delimiter_character, $text)
-            );
+        if (!isset($urls)) {
+            $urls = [];
         }
 
-        //$urls = [];
-        foreach ($text_variants as $i => $text_variant) {
-            $pattern_urls = $this->patternUrls($text_variant);
-if ($pattern_urls == null) {continue;}
-            if ($urls == null) {
-                $urls = [];
-            }
-// test
-if ($pattern_urls === true) {continue;}
-if ($pattern_urls === false) {continue;}
-
-            $urls = array_merge($urls, $pattern_urls);
-
-            // Now need to check whether each of these is a Url.
-            // Slower. Dev do this in one hit in regex?
-        }
-        // If there are @ signs.
-
-        // First reduce the job.
-
-        //$urls = array_merge($urls, $match[0]);
+        $urls = array_merge($urls, $match[0]);
         $urls = array_unique($urls);
 
         // TEST
         foreach ($urls as $i => $url) {
-            $p = $this->containsAtsign($url);
-
-            if ($p === true) {
-                //            if (($this->patternUrls($url) === false) or ($this->patternUrls($url) === true)) {
-                //if (strtotime($url) !== false) {
-                unset($urls[$i]);
-                continue;
-            }
-
-            // 12.000kHz is not a URL
-            $tokens = explode(".", $url);
-            if (count($tokens) === 4) {
-                continue;
-            } // expect URL format four tokens
-
-            if (count($tokens) === 2 and is_numeric($tokens[0])) {
+            if (strtotime($url) !== false) {
                 unset($urls[$i]);
                 continue;
             }
@@ -416,8 +313,14 @@ if ($pattern_urls === false) {continue;}
                 unset($urls[$i]);
                 continue;
             }
-        }
 
+            // 12.000kHz is not a URL
+            $tokens = explode(".", $url);
+            if (count($tokens) === 2 and is_numeric($tokens[0])) {
+                unset($urls[$i]);
+                continue;
+            }
+        }
         // Deal with spaces
         $urls = $this->filterUrls($urls);
         // TODO: Test.
@@ -428,24 +331,6 @@ if ($pattern_urls === false) {continue;}
             }
         }
         return $urls;
-    }
-
-    public function generalDelimsUrl($url = null)
-    {
-        // https://www.rfc-editor.org/rfc/rfc3986
-        // ":" / "/" / "?" / "#" / "[" / "]" / "@" general delims
-
-        // https://www.rfc-editor.org/rfc/rfc3986#section-2.2
-        $text = '":" / "/" / "?" / "#" / "[" / "]" / "@"';
-        $parts = explode('"', $text);
-        //
-        //
-
-        // ugly
-
-        //
-
-        return [":", "/", "?", "#", "[", "]", "@"];
     }
 
     public function isUrl($text)
@@ -529,13 +414,16 @@ if ($pattern_urls === false) {continue;}
                 strlen($str_pattern)
             );
         }
-
+/*
         if (!isset($this->thing->quote_handler)) {
             $this->thing->quote_handler = new Quote($this->thing, "quote");
         }
         $filtered_input = $this->thing->quote_handler->stripQuotes(
             $filtered_input
         );
+*/
+$filtered_input = $this->stripQuotes($filtered_input);
+
 
         //        $filtered_input = $this->stripQuotes($filtered_input);
 

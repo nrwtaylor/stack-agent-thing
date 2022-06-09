@@ -237,7 +237,15 @@ class Callsign extends Agent
 
         // See if a headcode record exists.
         $findagent_thing = new Findagent($this->thing, 'callsign');
-        $count = count($findagent_thing->thing_report['things']);
+
+        $things = $findagent_thing->thing_report['things'];
+
+        if ($things === true) {
+            return [$this->callsign_list, $this->callsigns];
+        }
+
+        $count = count($things);
+
         $this->thing->log(
             'Agent "Callsign" found ' .
                 count($findagent_thing->thing_report['things']) .

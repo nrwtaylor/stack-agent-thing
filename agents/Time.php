@@ -24,6 +24,9 @@ class Time extends Agent
      */
     function init()
     {
+
+        $this->time_terse_flag = "on";
+
         $this->agent_name = "time";
         $this->test = "Development code";
 
@@ -62,9 +65,25 @@ class Time extends Agent
     function makeSMS()
     {
         $this->node_list = ["time" => ["time"]];
-        $m = strtoupper($this->agent_name) . " | " . $this->response;
-        $this->sms_message = $m;
-        $this->thing_report["sms"] = $m;
+        $sms = strtoupper($this->agent_name) . " | ";
+
+        if (
+            isset($this->time_terse_flag) and
+            $this->time_terse_flag == "on"
+        ) {
+if (isset($this->message)) {
+            $sms .= $this->message;
+} else {
+$sms .= "No message. ";
+}
+        } else {
+            $sms .= $this->response;
+        }
+
+
+
+        $this->sms_message = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     /**
@@ -107,10 +126,9 @@ class Time extends Agent
      * @param unknown $text (optional)
      * @return unknown
      */
-    public function textTime($text = null)
+    public function textTime($text)
     {
         $timestamp = strtotime($text);
-
         $new_date_format = date("m/d H:i", $timestamp);
         return $new_date_format;
     }
@@ -149,13 +167,24 @@ class Time extends Agent
         if ($text == null) {
             $text = $this->getTime();
         }
+
         $m = "Could not get a time.";
         if ($this->isDateValid($text)) {
             $m = "Time check from stack server " . $this->web_prefix . ". ";
 
             $datum = $this->datumTime($text);
+
+                $this->message =
+                    $datum->format("l") .
+                    " " .
+                    $datum->format("d/m/Y H:i") .
+                    ".";
+
+
+            $this->datum = $datum;
             if ($datum !== false) {
                 $this->text = $datum->format("H:i");
+
                 $m .=
                     "In the timezone " .
                     $this->time_zone .
@@ -176,11 +205,56 @@ class Time extends Agent
             $datum = true;
         }
 
+        /*
+Is there a time provided in the query?
+*/
+
+        if (isset($this->projected_datum)) {
+            $d = $this->projected_datum;
+            $d->setTimezone(new \DateTimeZone($this->default_time_zone));
+            $this->text = $d->format("H:i");
+            $m =
+                "In the timezone " .
+                $this->default_time_zone .
+                ", it will be " .
+                $d->format("l") .
+                " " .
+                $d->format("d/m/Y, H:i:s") .
+                ". ";
+        }
+
         $this->response .= $m;
+
         $this->time_message = $this->response;
 
         return $datum;
     }
+
+    // dev needs this to send response.
+    // Review Response agent.
+
+    public function respondResponse()
+    {
+        // Thing actions
+        $this->thing->flagGreen();
+        // Generate email response.
+
+        $choices = false;
+        $this->thing_report["choices"] = $choices;
+
+        $this->thing_report["email"] = $this->sms_message;
+        //$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        $this->thing_report["txt"] = $this->sms_message;
+
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
+        }
+
+        $this->thing_report["help"] = "This reads a web resource.";
+    }
+
+
 
     function humanTime($text = null)
     {
@@ -189,6 +263,8 @@ class Time extends Agent
         }
         if ($this->isDateValid($text)) {
             $datum = $this->datumTime($text);
+            $this->datum = $datum;
+
             if ($datum !== false) {
                 //$this->text = $datum->format('H:i');
                 $text =
@@ -322,8 +398,10 @@ class Time extends Agent
         if (strtolower($time_zone) == "lmt") {
             $this->lmtTime($text);
 
-            $this->datum = false; // Signal no external datum found.
-            return $this->datum;
+            //           $this->datum = false; // Signal no external datum found.
+            //           return $this->datum;
+            $datum = false;
+            return $datum;
         }
 
         if ($text == null) {
@@ -342,8 +420,10 @@ class Time extends Agent
         }
 
         if ($this->time_zone == "lmt") {
-            $this->datum = false;
-            return $this->datum;
+            //  $this->datum = false;
+            // return $this->datum;
+            $datum = false;
+            return $datum;
         }
 
         $datum = null;
@@ -355,7 +435,7 @@ class Time extends Agent
             $datum->setTimezone(new \DateTimeZone($this->time_zone));
         }
 
-        $this->datum = $datum;
+        //        $this->datum = $datum;
         return $datum;
     }
 
@@ -397,7 +477,23 @@ class Time extends Agent
             $this->time_zone = $timezone;
         }
 
+        /*
+
+Is there a clocktime in the string?
+If so compute the time in the stack timezne.
+
+*/
+
+        $t = $this->extractClocktime($this->filtered_input);
+        if ($t !== null) {
+            $this->projected_datum = $this->datumTime(
+                implode(":", $t),
+                $this->time_zone
+            );
+        }
+
         $this->doTime();
+
         return false;
     }
 }

@@ -38,7 +38,7 @@ class Transit extends Agent  {
             "start" => array("stop 1" => array("stop 2", "stop 1"), "stop 3"),
             "stop 3"
         );
-        $this->thing->choice->load('train');
+        $this->loadChoice('train');
 
         $this->keywords = array(
             'run',
@@ -53,20 +53,14 @@ class Transit extends Agent  {
             'green'
         );
 
-        //                'block' => array('default run_time'=>'105',
-        //                                'negative_time'=>'yes'),
-
         $this->current_time = $this->thing->time();
 
-        //$this->default_run_time = $this->thing->container['api']['train']['default run_time'];
-        //$this->negative_time = $this->thing->container['api']['train']['negative_time'];
         $this->default_run_time = $this->current_time;
         $this->negative_time = true;
 
         $this->default_agency = "translink";
         if (isset($this->thing->container['api']['transit']['agency'])) {
            $this->default_agency = $this->thing->container['api']['transit']['agency'];
-
         }
 
         $this->stop = "X";
@@ -75,15 +69,12 @@ class Transit extends Agent  {
 
         //        $this->variables_agent = new Variables($this->thing, "variables " . $default_train_name . " " . $this->from);
 
-
-
         $this->current_time = $this->thing->time();
 
         $this->thing_report['help'] = 'This is a bus with people on it.';
 
         $this->state = 'X';
         $this->requested_state = 'X';
-
 
         $this->thing->log(
             'running on Thing ' .
@@ -107,7 +98,6 @@ class Transit extends Agent  {
 
         $this->thing_report['log'] = $this->thing->log;
     }
-
 
     /**
      *
@@ -155,10 +145,6 @@ class Transit extends Agent  {
             $this->refreshed_at
         );
 
-        //        $this->thing->choice->save('train', $this->state);
-        //        $this->state = $requested_state;
-
-//        $this->refreshed_at = $this->current_time;
 
     }
 
@@ -281,8 +267,8 @@ class Transit extends Agent  {
 
         $test_message .= '<br>' . $this->sms_message;
 
-        $test_message .=
-            '<br>Current node: ' . $this->thing->choice->current_node;
+//        $test_message .=
+//            '<br>Current node: ' . $this->thing->choice->current_node;
         $this->thing_report['snippet'] = $test_message;
 
     }
@@ -292,8 +278,8 @@ class Transit extends Agent  {
         $this->node_list = array("transit"=>null);
 
 
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "transit");
-        $this->choices = $this->thing->choice->makeLinks('transit');
+        $this->createChoice($this->agent_name, $this->node_list, "transit");
+        $this->choices = $this->linksChoice('transit');
 
         $this->thing_report['choices'] = $this->choices;
 

@@ -44,9 +44,9 @@ class Jarvis extends Agent
     {
     }
 
-    public function get()
-    {
-    }
+//    public function get()
+//    {
+//    }
 
     public function set()
     {
@@ -55,11 +55,11 @@ class Jarvis extends Agent
             $this->requested_agent
         );
 
-        $time_string = $this->thing->time();
-        $this->thing->Write(
-            ["jarvis", "refreshed_at"],
-            $time_string
-        );
+//        $time_string = $this->thing->time();
+//        $this->thing->Write(
+//            ["jarvis", "refreshed_at"],
+//            $time_string
+//        );
     }
 
     /**
@@ -96,7 +96,7 @@ class Jarvis extends Agent
     {
         // Thing actions
         $this->thing->flagGreen();
-
+/*
         $this->thing->choice->Create(
             $this->agent_name,
             $this->node_list,
@@ -104,6 +104,7 @@ class Jarvis extends Agent
         );
         $choices = $this->thing->choice->makeLinks("start");
         $this->thing_report["choices"] = $choices;
+*/
 
         $this->sms_message = "JARVIS | " . $this->sms_message . " | REPLY HELP";
         $this->thing_report["sms"] = $this->sms_message;

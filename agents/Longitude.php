@@ -20,36 +20,36 @@ class Longitude extends Agent
         $this->doLongitude();
     }
 
-    public function formatLongitude($text = null, $pattern = null) {
+    public function formatLongitude($text = null, $pattern = null)
+    {
+        if ($text == null) {
+            return null;
+        }
 
-        if ($text == null) {return null;}
-
-$sign = "E";
-if ($text > 0) {$sign = "E";} else {$sign = "W";
-$text = abs($text);}
-//$arr = $this->dmsDegree($text);
-if (is_numeric($text)) {return $text . $sign;}
-
-
+        $sign = "E";
+        if ($text > 0) {
+            $sign = "E";
+        } else {
+            $sign = "W";
+            $text = abs($text);
+        }
+        //$arr = $this->dmsDegree($text);
+        if (is_numeric($text)) {
+            return $text . $sign;
+        }
 
         return $text;
     }
 
-
     public function doLongitude()
     {
         if ($this->agent_input == null) {
-            $array = ["board", "longitude", "meridian"];
-            $k = array_rand($array);
-            $v = $array[$k];
+
+            $response = "Got longitude. ";
 
             if (!is_numeric($this->longitude)) {
                 $response = "No longitude available. ";
             }
-
-            //            if ($this->longitude !== false) {
-            //                $response = "Longitude is " . $this->longitude .". ";
-            //            }
 
             $this->message = $response; // mewsage?
         } else {
@@ -101,7 +101,6 @@ if (is_numeric($text)) {return $text . $sign;}
         $message_thing = new Message($this->thing, $this->thing_report);
         $thing_report["info"] = $message_thing->thing_report["info"];
 
-        //return $this->thing_report;
     }
 
     function makeSMS()
@@ -144,66 +143,78 @@ if (is_numeric($text)) {return $text . $sign;}
 
         foreach ($tokens as $i => $token) {
             $sign = +1;
-            $last_character = strtolower(substr(trim($text), -1));
+            $last_character = strtolower(substr(trim($token), -1));
             $text_token = $token;
             if ($last_character == "w" or $last_character == "e") {
+
                 if ($last_character == "w") {
                     $sign = -1;
                 }
                 if ($last_character == "e") {
                     $sign = +1;
                 }
-                $text_token = mb_substr($token, 0, -1);
-            }
 
-            if (is_numeric($text_token)) {
-                $longitudes[] = $sign * $text_token;
+                $text_token = mb_substr($token, 0, -1);
+
+                if (is_numeric($text_token)) {
+                    $longitudes[] = $sign * $text_token;
+                }
             }
         }
         $nmea_response = $this->readNMEA($text);
 
-        if (
-            isset($nmea_response["current_longitude"]) and
-            isset($nmea_response["current_longitude_east_west"])
-        ) {
-            if (
-                strtolower($nmea_response["current_longitude_east_west"]) == "e"
-            ) {
-                $sign = +1;
-            }
-            if (
-                strtolower($nmea_response["current_longitude_east_west"]) == "w"
-            ) {
-                $sign = -1;
-            }
-            $longitude = $nmea_response["current_longitude"] * $sign;
-            $longitudes[] = $longitude;
-        }
+        if ($nmea_response !== true) {
 
-        if (
-            isset($nmea_response["longitude"]) and
-            isset($nmea_response["longitude_east_west"])
-        ) {
-            if (strtolower($nmea_response["longitude_east_west"]) == "e") {
-                $sign = +1;
+            if (
+                isset($nmea_response["current_longitude"]) and
+                isset($nmea_response["current_longitude_east_west"])
+            ) {
+                if (
+                    strtolower($nmea_response["current_longitude_east_west"]) ==
+                    "e"
+                ) {
+                    $sign = +1;
+                }
+                if (
+                    strtolower($nmea_response["current_longitude_east_west"]) ==
+                    "w"
+                ) {
+                    $sign = -1;
+                }
+                $longitude = $nmea_response["current_longitude"] * $sign;
+                $longitudes[] = $longitude;
             }
-            if (strtolower($nmea_response["longitude_east_west"]) == "w") {
-                $sign = -1;
+
+            if (
+                isset($nmea_response["longitude"]) and
+                isset($nmea_response["longitude_east_west"])
+            ) {
+                if (strtolower($nmea_response["longitude_east_west"]) == "e") {
+                    $sign = +1;
+                }
+                if (strtolower($nmea_response["longitude_east_west"]) == "w") {
+                    $sign = -1;
+                }
+                $longitude = $nmea_response["longitude"] * $sign;
+                $longitudes[] = $longitude;
             }
-            $longitude = $nmea_response["longitude"] * $sign;
-            $longitudes[] = $longitude;
         }
 
         if (count($longitudes) == 1) {
             $longitude = $longitudes[0];
         }
+
         return $longitude;
     }
 
     public function readSubject()
     {
         $input = $this->input;
-        $this->extractLongitude($input);
+        $longitude = $this->extractLongitude($input);
+        if ($longitude !== false) {
+            $this->longitude = $longitude;
+        }
+
         return false;
     }
 }

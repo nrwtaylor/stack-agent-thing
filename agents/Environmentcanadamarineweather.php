@@ -7,6 +7,7 @@ class EnvironmentCanadaMarineWeather extends Agent
 
     function init()
     {
+        $this->environmentcanadamarineweather_terse_flag = "on";
     }
 
     function run()
@@ -16,9 +17,11 @@ class EnvironmentCanadaMarineWeather extends Agent
 
     public function set()
     {
-        $this->thing->Write(["environmentcanadamarineweather", "refreshed_at"], $this->current_time);
+        $this->thing->Write(
+            ["environmentcanadamarineweather", "refreshed_at"],
+            $this->current_time
+        );
     }
-
 
     public function doEnvironmentCanadaMarineWeather()
     {
@@ -61,7 +64,10 @@ class EnvironmentCanadaMarineWeather extends Agent
                 "footer" => $footer,
             ];
         }
-        $this->message = $messages[0]["text"];
+
+        $this->message = $this->textEnvironmentcanadamarineweather(
+            $messages[0]["text"]
+        );
 
         /*
         if ($this->agent_input == null) {
@@ -77,6 +83,12 @@ class EnvironmentCanadaMarineWeather extends Agent
             $this->message = $this->agent_input;
         }
 */
+    }
+
+    public function textEnvironmentcanadamarineweather($text)
+    {
+        $parts = explode("Systems position.", $text);
+        return trim($parts[1]);
     }
 
     public function respondResponse()
@@ -97,14 +109,18 @@ class EnvironmentCanadaMarineWeather extends Agent
 
     function makeSMS()
     {
-        $this->sms_message =
-            strtoupper($this->agent_name) .
-            " | " .
-            "" .
-            $this->message .
-            " " .
-            $this->response;
-        $this->thing_report["sms"] = $this->sms_message;
+        $sms =
+            strtoupper($this->agent_name) . " | " . "" . $this->message . " ";
+
+        if (
+            isset($this->environmentcanadamarineweather_terse_flag) and
+            $this->environmentcanadamarineweather_terse_flag == "on"
+        ) {
+        } else {
+            $sms .= $this->response;
+        }
+        $this->sms_message = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     public function readSubject()

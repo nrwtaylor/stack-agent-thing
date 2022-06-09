@@ -152,12 +152,12 @@ class Poll extends Agent
     {
         //$this->node_list = array("poll"=>$this->responses);
         // Make buttons
-        $this->thing->choice->Create(
+        $this->createChoice(
             $this->agent_name,
             $this->node_list,
             "poll"
         );
-        $choices = $this->thing->choice->makeLinks("poll");
+        $choices = $this->linksChoice("poll");
 
         $this->thing_report["choices"] = $choices;
     }

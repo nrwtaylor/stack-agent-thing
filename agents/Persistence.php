@@ -31,7 +31,7 @@ class Persistence extends Agent
 
         if ($this->remember_status == true) {
             $this->thing->log(
-                '<pre> Agent "Persistence" found a record flagged for Remember </pre>'
+                'found a record flagged for Remember.'
             );
             //$this->setRemember();
         } else {
@@ -91,16 +91,16 @@ class Persistence extends Agent
 
         $this->thing->flagGreen();
 
-        $from = $this->from;
-        $to = $this->to;
+//        $from = $this->from;
+//        $to = $this->to;
 
-        $subject = $this->subject;
+//        $subject = $this->subject;
 
         // Now passed by Thing object
-        $uuid = $this->uuid;
-        $sqlresponse = "yes";
+//        $uuid = $this->uuid;
+//        $sqlresponse = "yes";
 
-        $message = "Thank you $from this was PERSISTENCE";
+//        $message = "Thank you $from this was PERSISTENCE";
 
         $this->sms_message = "PERSISTENCE | ";
         $this->sms_message .=
@@ -120,11 +120,10 @@ class Persistence extends Agent
 
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
-        $this->makeWeb();
+//        $this->makeWeb();
 
-        $this->thing_report['thing'] = $this->thing->thing;
+//        $this->thing_report['thing'] = $this->thing->thing;
 
-        return;
     }
 
     public function makeWeb()
@@ -164,7 +163,5 @@ class Persistence extends Agent
 
     public function readSubject()
     {
-        $status = true;
-        return $status;
     }
 }

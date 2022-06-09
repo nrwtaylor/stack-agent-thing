@@ -37,7 +37,7 @@ class Roll extends Agent
      */
     public function get()
     {
-        $this->current_time = $this->thing->time();
+//        $this->current_time = $this->thing->time();
 
         // Borrow this from iching
         $time_string = $this->thing->Read([
@@ -188,7 +188,7 @@ class Roll extends Agent
             "web"
         );
         $choices = $this->thing->choice->makeLinks("web");
-
+//$choices = false;
         $text = "off";
         if ($text == "on") {
             if (isset($this->thing_report["pngs"])) {
@@ -838,7 +838,6 @@ class Roll extends Agent
                 $input = $temp_thing->translated_input;
             }
 */
-
 $input = $this->input;
 
             $n = substr_count($input, "roll");

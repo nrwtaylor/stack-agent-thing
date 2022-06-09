@@ -3,13 +3,13 @@ namespace Nrwtaylor\StackAgentThing;
 
 ini_set("allow_url_fopen", 1);
 
-class Account
+class ThingAccount
 {
     public $var = "hello";
 
     function __construct($uuid, $account_uuid, $account_name)
     {
-        $this->json = new Json($uuid);
+        $this->json = new ThingJson($uuid);
 
         $settings = require $GLOBALS["stack_path"] . "private/settings.php";
 
@@ -31,7 +31,7 @@ class Account
         $this->account_uuid = $account_uuid;
         //$this->state = true;
 
-        $this->choice = new \Nrwtaylor\StackAgentThing\Choice($this->uuid);
+        $this->choice = new \Nrwtaylor\StackAgentThing\ThingChoice($this->uuid);
         $this->node_list = [
             // choice
             "open" => ["credit", "debit", "close"], // only states available

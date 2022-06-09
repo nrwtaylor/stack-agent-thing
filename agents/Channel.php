@@ -23,10 +23,11 @@ class Channel extends Agent
             $channel_name = $this->channel_name;
         }
 
-        $this->thing->Write(
-            ["channel", "refreshed_at"],
-            $this->thing->time()
-        );
+
+//        $this->thing->Write(
+//            ["channel", "refreshed_at"],
+//            $this->thing->time()
+//        );
         $this->thing->Write(["channel", "name"], $channel_name);
     }
 

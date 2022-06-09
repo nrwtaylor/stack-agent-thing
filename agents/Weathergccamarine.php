@@ -10,6 +10,8 @@ class Weathergccamarine extends Agent
 
     function init()
     {
+        $this->weathergccamarine_terse_flag = "on";
+
     }
 
     function run()
@@ -163,14 +165,18 @@ class Weathergccamarine extends Agent
 
     function makeSMS()
     {
-        $this->sms_message =
-            strtoupper($this->agent_name) .
-            " | " .
-            "" .
-            $this->message .
-            " " .
-            $this->response;
-        $this->thing_report["sms"] = $this->sms_message;
+        $sms =
+            strtoupper($this->agent_name) . " | " . "" . $this->message . " ";
+
+        if (
+            isset($this->weathergccamarine_terse_flag) and
+            $this->weathergccamarine_terse_flag == "on"
+        ) {
+        } else {
+            $sms .= $this->response;
+        }
+        $this->sms_message = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     public function readSubject()

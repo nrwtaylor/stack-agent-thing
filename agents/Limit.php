@@ -49,7 +49,7 @@ if (!isset($this->limit_tokens)) {$this->limit_tokens = $this->last_limit_tokens
     {
 if (!isset($this->limit_tokens)) {return;}
 
-        $this->variables_agent->setVariable("tokens", $this->limit_tokens);
+        //$this->variables_agent->setVariable("tokens", $this->limit_tokens);
         $this->variables_agent->setVariable(
             "refreshed_at",
             $this->current_time

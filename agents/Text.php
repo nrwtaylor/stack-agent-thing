@@ -16,8 +16,9 @@ class Text extends Agent
 {
     public $var = "hello";
 
-    public function getNgrams($input, $n = 3)
+    public function getNgrams($input, $n = 3, $delimiter = null)
     {
+        if ($delimiter == null) {$delimiter = "";}
         if (!isset($this->ngrams)) {
             $this->ngrams = [];
         }
@@ -28,7 +29,7 @@ class Text extends Agent
             if ($key < count($words) - ($n - 1)) {
                 $ngram = "";
                 for ($i = 0; $i < $n; $i++) {
-                    $ngram .= " " . $words[$key + $i];
+                    $ngram .= " " . $words[$key + $i] . $delimiter;
                 }
                 $ngrams[] = trim($this->trimAlpha($ngram));
             }
@@ -36,6 +37,23 @@ class Text extends Agent
 
         return $ngrams;
     }
+
+public function ngramsText($text = null, $min_gram_limit = 2, $max_gram_limit = 4, $delimiter = null)
+    {
+        if ($delimiter == null) {$delimiter = "";}
+        // See if there is an agent with the first workd
+//        $arr = explode(" ", trim($text));
+        $agents = [];
+$arr = [];
+foreach( range($min_gram_limit, $max_gram_limit,1) as $number) {
+        $bigrams = $this->getNgrams($text, $number, $delimiter);
+
+        $arr = array_merge($arr, $bigrams);
+}
+
+        return $arr;
+    }
+
 
     public function trimAlpha($text)
     {

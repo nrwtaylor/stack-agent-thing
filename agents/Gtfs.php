@@ -859,12 +859,6 @@ class Gtfs extends Agent
      */
     function nextGtfs($file_name, $selector_array = null)
     {
-        /*
-        if (!isset($this->mem_cached)) {$this->getMemcached();
-           $matches = $this->mem_cached->get('gtfs-translink');
-           $this->thing->log("found memcached gtfs-translink store.");
-        }
-*/
 
         $this->thing->log("nextGtfs " . $file_name . " ");
         $split_time = $this->thing->elapsed_runtime();

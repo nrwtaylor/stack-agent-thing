@@ -153,6 +153,12 @@ class Colour extends Agent
             $this->colour_names = $this->loadColours();
         }
 
+if ($this->colour_names === true) {
+$this->response .= "Stack not colour-enabled. ";
+return false;
+
+}
+
         foreach ($this->colour_names as $slug => $colour_array) {
             if (strtolower($text) === strtolower($colour_array["name"])) {
                 return $colour_array;
@@ -166,6 +172,8 @@ class Colour extends Agent
         if (!isset($this->colour_names)) {
             $this->colour_names = $this->loadColours();
         }
+
+        if ($this->colour_names === true) {return true;}
 
         $closest_distance = 1e99;
 
@@ -283,6 +291,7 @@ class Colour extends Agent
 
     public function readSubject()
     {
+//$this->score = 1000;
         $input = $this->input;
         $filtered_input = $this->assert(strtolower($input));
         if ($filtered_input != "") {
@@ -304,7 +313,7 @@ class Colour extends Agent
                         $x["hex"] .
                         "). ";
                 }
-
+$this->score = 100;
                 $this->colour = $x;
             }
 
@@ -318,6 +327,7 @@ class Colour extends Agent
                     $colour["hex"] .
                     "). ";
                 $this->colour = $colour;
+$this->score = 100;
             } else {
                 // See if there is a valid response
 
@@ -366,13 +376,20 @@ class Colour extends Agent
                 // If the text isn't an agent.
                 if ($colour === false and !$this->isAgent($filtered_input)) {
                     $colour = $this->closesttextColour($filtered_input);
-                    if ($colour != null) {
+if ($colour === true) {
+$this->response .= "Could not load colour file. ";
+$this->score = 0;
+} else if ($colour === null) {
+$this->score = 0;
+} else {
+//                    if ($colour != null) {
                         $this->response .=
                             "Saw " .
                             $colour["name"] .
                             " might be a close match colour (" .
                             $colour["hex"] .
                             "). ";
+$this->score = 100;
                     }
                 }
                 $this->colour = $colour;

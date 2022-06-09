@@ -1,20 +1,20 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set("display_startup_errors", 1);
-ini_set("display_errors", 1);
+ini_set('display_startup_errors', 1);
+ini_set('display_errors', 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
 class Atsign extends Agent
 {
-    public $var = "hello";
+    public $var = 'hello';
 
     function init()
     {
-        $this->thing_report["help"] =
-            "Text AT SIGN < A web link> to add a link to this list.";
+        $this->thing_report['help'] =
+            'Text AT SIGN < A web link> to add a link to this list.';
     }
 
     function run()
@@ -23,7 +23,10 @@ class Atsign extends Agent
 
     public function set()
     {
-        $this->thing->Write(["atsign", "refreshed_at"], $this->thing->time());
+        $this->thing->Write(
+            ["atsign", "refreshed_at"],
+            $this->thing->time()
+        );
     }
 
     function get()
@@ -33,12 +36,12 @@ class Atsign extends Agent
     public function makeChoices()
     {
         $choices = false;
-        $this->thing_report["choices"] = $choices;
+        $this->thing_report['choices'] = $choices;
     }
 
     public function makeTxt()
     {
-        $this->thing_report["txt"] = "No text retrieved.";
+        $this->thing_report['txt'] = "No text retrieved.";
     }
 
     function makeWeb()
@@ -52,27 +55,27 @@ class Atsign extends Agent
             $web .= "<b>COLLECTED AT SIGNS</b><br><p>";
             $web .= "<ul>";
 
-            $tempArr = array_unique(array_column($this->atsigns, "atsign"));
+            $tempArr = array_unique(array_column($this->atsigns, 'atsign'));
             $atsigns = array_intersect_key($this->atsigns, $tempArr);
 
             foreach ($atsigns as $i => $atsign_array) {
-                $atsign = $atsign_array["atsign"];
+                $atsign = $atsign_array['atsign'];
 
                 $atsign_link =
                     $this->web_prefix .
                     "thing/" .
-                    $atsign_array["uuid"] .
+                    $atsign_array['uuid'] .
                     "/forget";
                 $html_link = "[" . '<a href="' . $atsign_link . '">forget</a>]';
 
                 if (stripos($atsign, "://") !== false) {
-                    $link = '<a href="' . $atsign . '">' . $atsign . "</a>";
+                    $link = '<a href="' . $atsign . '">' . $atsign . '</a>';
                     $web .= "<li>" . $link . " " . $html_link . "<br>";
 
                     continue;
                 } elseif (stripos($atsign, ":/") !== false) {
-                    $link = '<a href="' . $atsign . '">' . $atsign . "</a>";
-                    $try_link = "[Try " . str_replace(":/", "://", $link) . "]";
+                    $link = '<a href="' . $atsign . '">' . $atsign . '</a>';
+                    $try_link = '[Try ' . str_replace(":/", "://", $link) . ']';
                     $web .= "<li>" . $link . " " . $try_link . "<br>";
 
                     continue;
@@ -83,14 +86,14 @@ class Atsign extends Agent
                         '">' .
                         "https://" .
                         $atsign .
-                        "</a>";
+                        '</a>';
 
                     $web .=
                         "<li>" .
                         $atsign .
-                        " [" .
+                        ' [' .
                         $link .
-                        "]" .
+                        ']' .
                         $html_link .
                         "<br>";
                     continue;
@@ -104,9 +107,9 @@ class Atsign extends Agent
             $web .= "<p>";
         }
         $web .= "<b>HELP</b><br><p>";
-        $web .= $this->thing_report["help"];
+        $web .= $this->thing_report['help'];
 
-        $this->thing_report["web"] = $web;
+        $this->thing_report['web'] = $web;
     }
 
     function makeSMS()
@@ -125,7 +128,7 @@ class Atsign extends Agent
         } else {
             $atsigns_text = "";
 
-            foreach ($this->atsigns as $i => $atsign) {
+            foreach ($this->atsigns as $i=>$atsign) {
                 $atsigns_text .= $atsign . " ";
             }
             $atsigns_text = trim($atsigns_text);
@@ -133,7 +136,7 @@ class Atsign extends Agent
 
         $sms_message .= " | " . $atsigns_text;
 
-        $this->thing_report["sms"] = $sms_message;
+        $this->thing_report['sms'] = $sms_message;
         $this->sms_message = $sms_message;
     }
 
@@ -152,9 +155,10 @@ class Atsign extends Agent
     {
         $atsigns = [];
 
-        $findagent_thing = new Findagent($this->thing, "atsign");
+        $findagent_thing = new Findagent($this->thing, 'atsign');
 
-        $things = isset($thing_report["things"]) ? $thing_report["things"] : [];
+        $things = isset($thing_report["things"]) ? $thing_report['things'] : [];
+
 
         if (!is_array($things)) {
             return;
@@ -163,18 +167,21 @@ class Atsign extends Agent
         $count = count($things);
 
         if ($count > 0) {
-            foreach (array_reverse($things) as $thing_object) {
-                $uuid = $thing_object["uuid"];
-                $variables_json = $thing_object["variables"];
+            foreach (
+                array_reverse($things)
+                as $thing_object
+            ) {
+                $uuid = $thing_object['uuid'];
+                $variables_json = $thing_object['variables'];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
                 $age =
                     strtotime($this->thing->time()) -
-                    strtotime($thing_object["created_at"]);
+                    strtotime($thing_object['created_at']);
 
-                if (isset($variables["atsign"])) {
+                if (isset($variables['atsign'])) {
                     $task_atsigns = $this->extractAtsigns(
-                        $thing_object["task"]
+                        $thing_object['task']
                     );
                     if ($task_atsigns === true) {
                         continue;
@@ -187,6 +194,7 @@ class Atsign extends Agent
                     //    "atsign" => implode(" ", $task_atsigns),
                     //    "uuid" => $thing_object['uuid'],
                     //];
+
 
                     $atsign = implode(" ", $task_atsigns);
                     $atsigns = array_merge($atsigns, $task_atsigns);
@@ -246,25 +254,13 @@ class Atsign extends Agent
 
         $this->thing->flagGreen();
 
-        $this->thing_report["email"] = $this->sms_message;
-        $this->thing_report["message"] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        $this->thing_report['email'] = $this->sms_message;
+        $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
 
-        $this->thing_report["info"] = $message_thing->thing_report["info"];
-        $this->thing_report["help"] = "This reads a web resource.";
-    }
-
-    public function containsAtsign($text = null)
-    {
-        if ($text == null) {
-            return false;
-        }
-
-        if (strpos($text, "@") !== false) {
-            return true;
-        }
-        return false;
+        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report['help'] = 'This reads a web resource.';
     }
 
     public function extractAtsigns($text = null)
@@ -273,8 +269,8 @@ class Atsign extends Agent
             return true;
         }
 
-        $text = str_replace("atsign is", "", $text);
-        $text = str_replace("atsign", "", $text);
+        $text = str_replace('atsign is', '', $text);
+        $text = str_replace('atsign', '', $text);
         $text = trim($text);
 
         // https://stackoverflow.com/questions/1812883/preg-match-all-words-start-with-an
@@ -283,9 +279,9 @@ class Atsign extends Agent
         if (!isset($atsigns)) {
             $atsigns = [];
         }
+
         $atsigns = array_merge($atsigns, $match[0]);
         $atsigns = array_unique($atsigns);
-
         // Deal with spaces
         $atsigns = $this->filterAtsigns($atsigns);
 
@@ -295,6 +291,7 @@ class Atsign extends Agent
     public function hasAtsign($text = null)
     {
         $atsigns = $this->extractAtsigns($text);
+
         // No @ signs found.
         if ($atsigns === true) {
             return false;
@@ -354,8 +351,8 @@ class Atsign extends Agent
         //$input = $this->assert($this->input);
 
         $string = $input;
-        $str_pattern = "atsign";
-        $str_replacement = "";
+        $str_pattern = 'atsign';
+        $str_replacement = '';
         $filtered_input = $input;
         if (strpos($string, $str_pattern) !== false) {
             $occurrence = strpos($string, $str_pattern);
@@ -369,7 +366,7 @@ class Atsign extends Agent
 
         $input = trim($filtered_input);
 
-        if ($input == "") {
+        if ($input == '') {
             $this->getAtsign();
             return;
         }
@@ -386,12 +383,12 @@ class Atsign extends Agent
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == "atsign") {
+            if ($input == 'atsign') {
                 $this->getAtsign();
                 return;
             }
 
-            if ($input == "read") {
+            if ($input == 'read') {
                 return;
             }
         }

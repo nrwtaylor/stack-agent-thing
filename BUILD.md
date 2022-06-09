@@ -72,6 +72,12 @@ Configure `my.cnf`
 ```
 innodb_buffer_pool_size=1G
 ```
+innodb_buffer_pool_size=1G
+```
+myisamchk --silent --force --fast --update-state \
+--key_buffer_size=512M --sort_buffer_size=512M \
+--read_buffer_size=4M --write_buffer_size=4M \
+/var/lib/mysql/stack_db/stack
 
 ## 3. Setup PHP
 3 cont. Install PHP extensions
@@ -888,3 +894,45 @@ PHP-FPM
 sudo apt-get update
 sudo apt-get install php-fpm
 ```
+
+## Notes
+
+https://stackoverflow.com/questions/62524355/unable-to-start-mysql-server-control-process-exited-with-error-code
+
+sudo chmod -R u+rwx /etc/mysql/
+sudo chown -R mysql.mysql /etc/mysql/
+
+$ sudo apt-get purge mongodb-*
+$ sudo apt-get install -y mongodb-org
+$ composer require mongodb/mongodb
+
+$ sudo pecl install mongodb
+extension=mongodb.so > php.ini
+$ https://docs.mongodb.com/drivers/php/
+
+http://gearman.org/getting-started/
+$ tar xzf gearmand-X.Y.tar.gz
+$ cd gearmand-X.Y
+$ ./configure
+$ make
+$ make install
+
+
+http://pecl.php.net/get/gearman-2.1.0.tgz
+
+tar xzf gearman-X.Y.tgz
+cd gearman-X.Y
+phpize
+./configure
+make
+make install
+
+The following line will need to be added to all php.ini files, usually located in /etc/php.
+
+extension="gearman.so"
+
+The module should now be usable by all PHP interfaces. To test using the PHP command line interface, create gearman_version.php with the following contents:
+
+<?php
+print gearman_version() . "\n";
+?>

@@ -49,8 +49,10 @@ class Sentence extends Agent
             return true;
         }
 
-        $alphanumeric_agent = new Alphanumeric($this->thing, "alphanumeric");
-        $slug = $alphanumeric_agent->filterAlphanumeric($text);
+//        $alphanumeric_agent = new Alphanumeric($this->thing, "alphanumeric");
+//        $slug = $alphanumeric_agent->filterAlphanumeric($text);
+
+$slug = $this->filterAlphanumeric($text);
 
         $despaced_slug = preg_replace("/\s+/", " ", $slug);
         $slug = str_replace(" ", "-", $despaced_slug);
