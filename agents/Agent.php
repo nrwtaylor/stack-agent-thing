@@ -688,8 +688,10 @@ public function __set($name, $value) {
         $this->makeJPEGs();
 
         $this->makeSMS();
-
+$this->makeDiscord();
         //var_dump($this->error);
+//$bracket_agent = new Url($this->thing, 'url');
+
 
         if (isset($this->error) and $this->error != "" and $this->error != null) {
            $sms = $this->thing_report['sms'];
@@ -839,6 +841,28 @@ $this->thing_report['image_url'] = $this->image_url;
                 }
             }
         }
+/*
+//$this->makeDiscord();
+$d = "";
+if ((!isset($this->thing_report['discord'])) and (isset($this->thing_report['sms']))) {
+//$this->thing_report['discord'] = $bracket_agent->bracketUrl($this->thing_report['sms'] );
+$d = $this->thing_report['sms'];
+}
+
+if (isset($this->thing_report['discord']))  {
+//$this->thing_report['discord'] = $bracket_agent->bracketUrl($this->thing_report['sms'] );
+$d = $this->thing_report['discord'];
+}
+
+
+//$url_agent = new Url($this->thing, 'url');
+//var_dump($d);
+//$d = $this->bracketUrl($d);
+$this->thing_report['discord'] =$d;
+
+
+*/
+//$this->discordAgent($d);
 
 $this->makeThingreport();
 
@@ -877,6 +901,19 @@ $this->makeThingreport();
         $this->thing->log("completed make.");
     }
 
+public function discordAgent($text = null) {
+if (!isset($this->thing->url_handler)) {
+$this->thing->url_handler = new Url($this->thing, 'url');
+}
+$this->thing->url_handler->bracketUrl($text);
+return;
+}
+
+public function makeDiscord() {
+
+//$this->discord_message = $this->sms_message . "y";
+//$this->thing_report['discord'] = $this->discord_message;
+}
     /**
      *
      */

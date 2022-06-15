@@ -229,6 +229,22 @@ class Url extends Agent
         return $restored_text;
     }
 
+    public function bracketUrl($text)
+    {
+        //return $text;
+        $urls = $this->extractUrls($text);
+
+        if ($urls === true) {
+            return $text;
+        }
+        foreach ($urls as $i => $url) {
+            $link = "<" . $url . ">";
+            $text = str_replace($url, $link, $text);
+        }
+        $restored_text = $text;
+        return $restored_text;
+    }
+
     public function filterUrls($urls = null)
     {
         if (!is_array($urls)) {
@@ -370,13 +386,19 @@ class Url extends Agent
         //$urls = [];
         foreach ($text_variants as $i => $text_variant) {
             $pattern_urls = $this->patternUrls($text_variant);
-if ($pattern_urls == null) {continue;}
+            if ($pattern_urls == null) {
+                continue;
+            }
             if ($urls == null) {
                 $urls = [];
             }
-// test
-if ($pattern_urls === true) {continue;}
-if ($pattern_urls === false) {continue;}
+            // test
+            if ($pattern_urls === true) {
+                continue;
+            }
+            if ($pattern_urls === false) {
+                continue;
+            }
 
             $urls = array_merge($urls, $pattern_urls);
 
