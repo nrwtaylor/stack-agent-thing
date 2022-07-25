@@ -697,6 +697,56 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
      */
     public function generateHTML($raw_message, $choices = null)
     {
+        $info =
+            '<tr>
+    <td valign="top" style=" font-size: 16px; text-align: left; border-top: 1px #dddddd solid;">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody>
+            <tr>
+                <td valign="middle" style="padding:12px 15px 20px 15px;">
+                    <div style="color: #999999; font-family: \'Helvetica Neue\', Arial, sans-serif; font-size: 12px; line-height: 17px; text-align: left">
+                        Stackr is not yet available for iOS or Android.
+                    </div>
+                </td>
+                <td width="280">
+                    <div style="line-height: 17px; padding: 12px 0 20px 0; text-align: right">
+                        <a href="' .
+            $this->web_prefix .
+            '"><img width="92" height="30" src="' .
+            $this->web_prefix .
+            'Apple_store.png"/></a> <a href="' .
+            $this->web_prefix .
+            '"><img width="92" height="30" src="' .
+            $this->web_prefix .
+            'Google_store.png"/></a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </td>
+</tr>';
+
+        $info =
+            '<tr>
+    <td valign="top" style=" font-size: 16px; text-align: left; border-top: 1px #dddddd solid;">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody>
+            <tr>
+                <td valign="middle" style="padding:12px 15px 20px 15px;">
+                    <div style="color: #999999; font-family: \'Helvetica Neue\', Arial, sans-serif; font-size: 12px; line-height: 17px; text-align: left">
+                        Stackr is not yet available for iOS or Android.
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+</td>
+</tr>
+';
+
+$info = '';
+
         $html_button_set = $choices["button"];
         if ($choices == null) {
             $html_button_set = "";
@@ -816,37 +866,8 @@ Hi,
             $choices["button"] .
             '
 </td>
-</tr>
-
-                        <tr>
-    <td valign="top" style=" font-size: 16px; text-align: left; border-top: 1px #dddddd solid;">
-        <table border="0" cellpadding="0" cellspacing="0" width="100%">
-            <tbody>
-            <tr>
-                <td valign="middle" style="padding:12px 15px 20px 15px;">
-                    <div style="color: #999999; font-family: \'Helvetica Neue\', Arial, sans-serif; font-size: 12px; line-height: 17px; text-align: left">
-                        Stackr is not yet available for iOS or Android.
-                    </div>
-                </td>
-                <td width="280">
-                    <div style="line-height: 17px; padding: 12px 0 20px 0; text-align: right">
-                        <a href="' .
-            $this->web_prefix .
-            '"><img width="92" height="30" src="' .
-            $this->web_prefix .
-            'Apple_store.png"/></a> <a href="' .
-            $this->web_prefix .
-            '"><img width="92" height="30" src="' .
-            $this->web_prefix .
-            'Google_store.png"/></a>
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </td>
-</tr>
-<tr>
+</tr>' . $info .
+'<tr>
 <td height="20">
 </td>
 </tr>
