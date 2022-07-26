@@ -507,7 +507,14 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
         if (!isset($this->choices)) {
             $this->makeChoices();
         }
-
+/*
+        if (!isset($this->pdf)) {
+            $makepdf_agent = new Makepdf($this->thing, $this->thing_report);
+            $pdf = $makepdf_agent->pdf;
+            //$this->makePdf();
+            $this->thing_report["pdf"] = $pdf;
+        }
+*/
         //new
         $this->thing_report["choices"] = $this->choices;
         $makeemail_agent = new Makeemail($this->thing, $this->thing_report);
@@ -542,20 +549,6 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
             $this->message = false;
         }
 
-        if (isset($input["pdf"])) {
-            $this->pdf = $input['pdf'];
-        } else {
-            $this->pdf = null;
-        }
-
-
-        if (isset($input["agent"])) {
-            $this->agent = $input['agent'];
-        } else {
-            $this->agent = null;
-        }
-
-
         if (!isset($input["message"])) {
             if (!is_array($input)) {
                 $this->message = $input;
@@ -564,6 +557,12 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
             }
         } else {
             $this->message = $input["message"];
+        }
+
+        if (isset($input["pdf"])) {
+            $this->pdf = $input['pdf'];
+        } else {
+            $this->pdf = null;
         }
 
         if (!isset($input["choices"])) {
@@ -711,8 +710,7 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
      */
     public function generateHTML($raw_message, $choices = null)
     {
-
-       $info =
+        $info =
             '<tr>
     <td valign="top" style=" font-size: 16px; text-align: left; border-top: 1px #dddddd solid;">
         <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -760,8 +758,6 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
 ';
         // This is the active code. Not makeemail.
         $info = "";
-
-
 
         $html_button_set = $choices["button"];
         if ($choices == null) {
@@ -882,8 +878,9 @@ Hi,
             $choices["button"] .
             '
 </td>
-</tr>' . $info .
-'<tr>
+</tr>' .
+            $info .
+            '<tr>
 <td height="20">
 </td>
 </tr>
@@ -948,7 +945,7 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
         $message = strip_tags($raw_message);
         $message .= strip_tags($this->mail_regulatory);
         $message .= strip_tags($this->unsubscribe);
-
+        //$message .= $this->pdf;
         return $message;
     }
 
@@ -1001,7 +998,6 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
         //Plain text body
         $message .= $this->generateText($raw_message) . "\r\n";
 
-
         if (strpos($this->from, "@winlink.org") !== false) {
         } else {
             $message .= "--PHP-alt-" . $boundary . "\r\n";
@@ -1017,20 +1013,14 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
 
         if ((isset($this->pdf)) and ($this->pdf !== null)) {
             // fetch pdf
-//            $pdfLocation =
+            $pdfLocation =
                 "/var/www/html/stackr.ca/resources/snowflake/bubble.pdf"; // file location
-            $pdfName = "document.pdf"; // pdf file name recipient will get
-//if ((isset($this->agent)) and ($this->agent !== null)) {
-
-//$pdfName = $this->agent . ".pdf";
-//}
+            $pdfName = "pdf-file.pdf"; // pdf file name recipient will get
             $filetype = "application/pdf"; // type
 
-//            $file = fopen($pdfLocation, "rb");
-//            $data = fread($file, filesize($pdfLocation));
-
-$data = $this->pdf;
-//            fclose($file);
+            $file = fopen($pdfLocation, "rb");
+            $data = fread($file, filesize($pdfLocation));
+            fclose($file);
             $pdf = chunk_split(base64_encode($data));
 
             // attach pdf to email
@@ -1049,8 +1039,20 @@ $data = $this->pdf;
                 "--PHP-alt-" .
                 $boundary;
         }
+*/
+        /*
+        if ($this->thing_report['pdf'] !== false) {
+            $message .= "--PHP-alt-" . $boundary . "\r\n";
+            $message .= "Content-type: text/html;charset=utf-8\r\n";
+            $message .= "Content-Transfer-Encoding: quoted-printable\r\n";
+$c =       quoted_printable_encode(
+                    $this->generateHTML($raw_message, $choices)
+                );
 
-
+            //Html body
+            $message .= $c . "\r\n";
+        }
+*/
 
         //$message .= "--PHP-alt-" . $boundary . "\r\n";
         //$attachment = chunk_split(base64_encode(file_get_contents('attachment.zip')));

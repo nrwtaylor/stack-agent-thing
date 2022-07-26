@@ -1918,6 +1918,11 @@ $indicators = [
 $this->flagAgent($indicators, $this->subject);
 
         $this->readFrom();
+
+/*
+Agent input read?
+*/
+
         $this->readSubject();
         // read the current agent.
         if (
@@ -2438,6 +2443,14 @@ if ($pid == -1) {
         // to specific Identities.
 
         $agent_input_text = $this->agent_input;
+
+        if (stripos($this->agent_input, "unsubscribe") !== false) {
+            $this->thing->log("created a Usermanager agent.");
+            $usermanager_thing = new Unsubscribe($this->thing);
+            $this->thing_report = $usermanager_thing->thing_report;
+            return $this->thing_report;
+        }
+
 
         if (is_array($this->agent_input)) {
             $agent_input_text = "";
@@ -3096,6 +3109,14 @@ $flag = true;
             $this->thing_report = $usermanager_thing->thing_report;
             return $this->thing_report;
         }
+
+        if (strpos($input, "unsubscribe") !== false) {
+            $this->thing->log("Agent created a Usermanager agent.");
+            $handler = new Unsubscribe($this->thing);
+            $this->thing_report = $handler->thing_report;
+            return $this->thing_report;
+        }
+
 
         $this->getLink();
         if (
