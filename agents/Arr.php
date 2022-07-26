@@ -127,6 +127,27 @@ return $temp_variable;
         return $web;
     }
 
+public function filterFieldsArr($climate_data_points, $filter_array = null) {
+
+$filtered_data_points = array_filter($climate_data_points, function($value) use ($filter_array) {
+
+$filter_month = $filter_array['month'];
+$filter_day = $filter_array['day'];
+
+  $month = str_replace('"', '', $value['Month']);
+  $day = str_replace('"', '', $value['Day']);
+  $time_stamp = str_replace('"', '', $value['Time (LST)']);
+
+$filter_time_stamp = $filter_array['time_stamp'];
+
+
+
+  return $month == $filter_month and $day == $filter_day and $time_stamp == $filter_time_stamp;  
+});
+
+return $filtered_data_points;
+
+}
     public function filterArr(array $array, $search_words)
     {
         $filtered_array = [];

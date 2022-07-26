@@ -144,6 +144,20 @@ class Douglas extends Agent
         $this->contents_zip = $contents;
     }
 
+    function makeMessage()
+    {
+        $response_text = "No response.";
+        if ($this->response != "") {
+            $response_text = $this->response;
+        }
+
+        $message = $response_text . "<br>";
+        $uuid = $this->uuid;
+        $message .= "<p>" . $this->web_prefix . "thing/$uuid/douglas\n \n\n<br> ";
+        $this->thing_report["message"] = $message;
+    }
+
+
     public function makeZip()
     {
         $this->thing_report["zip"] = $this->contents_zip;
@@ -242,6 +256,7 @@ class Douglas extends Agent
     public function makeWeb()
     {
         $web = "";
+        $web .= "Radiogram package generator ran.<br>";
         if (!isset($this->zip_error) or $this->zip_error !== true) {
             $link = $this->web_prefix . "thing/" . $this->uuid . "/douglas.zip";
             $this->node_list = ["douglas" => ["douglas"]];

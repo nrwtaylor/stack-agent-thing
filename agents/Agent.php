@@ -13,6 +13,9 @@ ini_set("display_errors", 1);
 error_reporting(-1);
 
 define("MAX_EXECUTION_TIME", 2); # seconds
+
+# 7 June 2022 i woz here
+
 class Agent
 {
     public $input;
@@ -2284,7 +2287,6 @@ if ($pid == -1) {
                 //                    $agents[] = $agent_class_name;
                 $agents[$agent_class_name] = $agent_package;
             }
-
             $agents_tested[$agent_class_name] = true;
 
             // 3rd way
@@ -2298,6 +2300,17 @@ if ($pid == -1) {
                 //                    $agents[] = $agent_class_name;
                 $agents[$agent_class_name] = $agent_package;
             }
+
+//4th way
+
+// But easier for now to name the agents in single snake case.
+
+//var_dump($keyword);
+//$words = $this->dePortmanteau($keyword);
+//var_dump($words);
+//exit();
+
+
         }
         //  }
         restore_error_handler();
@@ -2509,8 +2522,8 @@ if ($pid == -1) {
         }
         $text = trim($text, "-");
 
+        // Check for hits on calls from a specific agent.
         $this->hits = $librex_agent->getHits($text);
-
         if ($this->hits != null) {
             foreach ($this->hits as $i => $hit) {
                 $agent_hit = trim(explode(",", $hit)[0]);
@@ -2533,7 +2546,6 @@ if ($pid == -1) {
                 }
             }
         }
-
         // Does this agent provide a text response.
         $this->responsiveAgents($this->agents);
 

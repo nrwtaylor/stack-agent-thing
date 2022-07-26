@@ -4,8 +4,8 @@ use Nrwtaylor\StackAgentThing;
 #echo __DIR__;
 #require '../vendor/autoload.php';
 #require_once __DIR__ . '/vendor/autoload.php';
-require "/var/www/stackr.test/vendor/autoload.php";
-
+#require "/var/www/stackr.test/vendor/autoload.php";
+require "/var/www/html/stackr.ca/vendor/autoload.php";
 // Set $development true to run a standard email through emailhandler.php
 // when called from the command line with
 // /usr/bin/php -q <path>/src/emailhandler.php

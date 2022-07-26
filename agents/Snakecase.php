@@ -1,9 +1,9 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-class ClimateData extends Agent
+class SnakeCase extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
@@ -11,17 +11,17 @@ class ClimateData extends Agent
 
     function run()
     {
-        $this->doClimateData();
+        $this->doSnakeCase();
     }
 
-    public function doClimateData()
+    public function doSnakeCase()
     {
         if ($this->agent_input == null) {
-            $array = array('miao', 'miaou', 'hiss', 'prrr', 'grrr');
+            $array = ["miao", "miaou", "hiss", "prrr", "grrr"];
             $k = array_rand($array);
             $v = $array[$k];
 
-            $response = "CLIMATE DATA | " . strtolower($v) . ".";
+            $response = "SNAKE CASE | " . strtolower($v) . ".";
 
             $this->cat_message = $response; // mewsage?
         } else {
@@ -36,7 +36,7 @@ class ClimateData extends Agent
     }
 
     // -----------------------
-/*
+    /*
     public function respondResponse()
     {
         $this->thing->flagGreen();
@@ -55,20 +55,22 @@ class ClimateData extends Agent
 */
     function makeSMS()
     {
-        $this->node_list = array("cat" => array("cat", "dog"));
+        $this->node_list = ["cat" => ["cat", "dog"]];
         $this->sms_message = "" . $this->cat_message;
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     function makeChoices()
     {
-        $this->thing->choice->Create('channel', $this->node_list, "cat");
-        $choices = $this->thing->choice->makeLinks('cat');
-        $this->thing_report['choices'] = $choices;
+        $this->thing->choice->Create("channel", $this->node_list, "cat");
+        $choices = $this->thing->choice->makeLinks("cat");
+        $this->thing_report["choices"] = $choices;
     }
 
     public function readSubject()
     {
+$words = $this->wordsPortmanteau($this->input, true);
+var_dump("SnakeCase", $words);
         return false;
     }
 }
