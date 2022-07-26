@@ -125,6 +125,20 @@ class Discord extends Agent
     //   {
     //   }
 
+public function makeDiscord() {
+//if (!isset($this->sms_message)) {return true;}
+if (!isset($this->sms_message)) {$this->makeSMS();}
+
+$d = $this->sms_message;
+
+$d .= "x";
+
+$this->discord_message = $d;
+$this->thing_report['discord'] = $d;
+
+
+}
+
     public function testDiscord()
     {
 $this->sendDiscord("merp",'edna:#general@edna.discord');
@@ -165,6 +179,10 @@ if (isset($other['png'])) {$png = $other['png'];}
             "webhook",
         ]);
 
+
+///
+
+///
         $datagram = [
             "to" => $bot_webhook,
             "from" => $bot_name,
