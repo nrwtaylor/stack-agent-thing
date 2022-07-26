@@ -543,18 +543,22 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
         }
 
         if (isset($input["pdf"])) {
-            $this->pdf = $input['pdf'];
+            $this->pdf = $input["pdf"];
         } else {
             $this->pdf = null;
         }
 
+        if (isset($input["zip"])) {
+            $this->zip = $input["zip"];
+        } else {
+            $this->zip = null;
+        }
 
         if (isset($input["agent"])) {
-            $this->agent = $input['agent'];
+            $this->agent = $input["agent"];
         } else {
             $this->agent = null;
         }
-
 
         if (!isset($input["message"])) {
             if (!is_array($input)) {
@@ -711,8 +715,7 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
      */
     public function generateHTML($raw_message, $choices = null)
     {
-
-       $info =
+        $info =
             '<tr>
     <td valign="top" style=" font-size: 16px; text-align: left; border-top: 1px #dddddd solid;">
         <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -760,8 +763,6 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
 ';
         // This is the active code. Not makeemail.
         $info = "";
-
-
 
         $html_button_set = $choices["button"];
         if ($choices == null) {
@@ -882,8 +883,9 @@ Hi,
             $choices["button"] .
             '
 </td>
-</tr>' . $info .
-'<tr>
+</tr>' .
+            $info .
+            '<tr>
 <td height="20">
 </td>
 </tr>
@@ -1001,7 +1003,6 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
         //Plain text body
         $message .= $this->generateText($raw_message) . "\r\n";
 
-
         if (strpos($this->from, "@winlink.org") !== false) {
         } else {
             $message .= "--PHP-alt-" . $boundary . "\r\n";
@@ -1015,22 +1016,22 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
                 ) . "\r\n";
         }
 
-        if ((isset($this->pdf)) and ($this->pdf !== null)) {
+        if (isset($this->pdf) and $this->pdf !== null) {
             // fetch pdf
-//            $pdfLocation =
-                "/var/www/html/stackr.ca/resources/snowflake/bubble.pdf"; // file location
+            //            $pdfLocation =
+//            "/var/www/html/stackr.ca/resources/snowflake/bubble.pdf"; // file location
             $pdfName = "document.pdf"; // pdf file name recipient will get
-//if ((isset($this->agent)) and ($this->agent !== null)) {
+            //if ((isset($this->agent)) and ($this->agent !== null)) {
 
-//$pdfName = $this->agent . ".pdf";
-//}
+            //$pdfName = $this->agent . ".pdf";
+            //}
             $filetype = "application/pdf"; // type
 
-//            $file = fopen($pdfLocation, "rb");
-//            $data = fread($file, filesize($pdfLocation));
+            //            $file = fopen($pdfLocation, "rb");
+            //            $data = fread($file, filesize($pdfLocation));
 
-$data = $this->pdf;
-//            fclose($file);
+            $data = $this->pdf;
+            //            fclose($file);
             $pdf = chunk_split(base64_encode($data));
 
             // attach pdf to email
@@ -1049,17 +1050,29 @@ $data = $this->pdf;
                 "--PHP-alt-" .
                 $boundary;
         }
+// https://www.daniweb.com/programming/web-development/threads/397249/send-email-with-attachment
+        if (isset($this->zip) and $this->zip !== null) {
+            $eol = "\r\n";
 
+            $message .= "--PHP-alt-" . $boundary . "\r\n";
+            $attachment = chunk_split(
+                base64_encode(file_get_contents("/tmp/attachment.zip"))
+            );
+$attachment = chunk_split(base64_encode($this->zip));
 
+            //$attachment = "Meep";
+            //$message .= "--PHP-mixed-" . $boundary;
+            $message .= "Content-Type: application/zip; ";
+            $message .= 'name="attachment.zip"' . $eol;
+            $message .= "Content-Transfer-Encoding: base64" . $eol;
+            $message .= "Content-Disposition: attachment; ";
+            $message .= 'name="attachment.zip"' . $eol . $eol;
 
-        //$message .= "--PHP-alt-" . $boundary . "\r\n";
-        //$attachment = chunk_split(base64_encode(file_get_contents('attachment.zip')));
-        //$attachment = "Meep";
-        //$message .= "--PHP-mixed-" . $boundary;
-        //$message .= 'Content-Type: application/zip; name="attachment.zip"';
-        //$message .= "Content-Transfer-Encoding: base64";
-        //$message .= 'Content-Disposition: attachment ';
-        //$message .= $attachment;
+            $message .= $attachment;
+            $message .= $eol;
+            $message .= "--PHP-alt-" . $boundary . $eol;
+
+        }
 
         $message .= "--PHP-mixed-" . $boundary . "--";
 
