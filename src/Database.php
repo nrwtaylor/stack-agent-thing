@@ -42,7 +42,7 @@ class Database
 
         if ($uuid == null) {
             if (isset($thing->uuid)) {
-                var_dump("Database __construct uuid " . $thing->uuid);
+                //var_dump("Database __construct uuid " . $thing->uuid);
                 $uuid = $thing->uuid;
             }
         }
@@ -58,7 +58,7 @@ class Database
 
         if ($nom_from == null) {
             if (isset($thing->from)) {
-                var_dump("Database __construct thing from " . $thing->from);
+                //var_dump("Database __construct thing from " . $thing->from);
                 $nom_from = $thing->from;
             }
         }
@@ -323,13 +323,13 @@ if (isset($this->stack_handlers[$candidate_service_name])) {continue;}
             if (isset($stack["user"])) {
                 $handler->user = $stack["user"];
             }
-var_dump("Database connectDatabase " . $agent_namespace_name . "connected");
+//var_dump("Database connectDatabase " . $agent_namespace_name . "connected");
             return $handler;
         } catch (\Throwable $t) {
-           var_dump($t->getMessage());
+           //var_dump($t->getMessage());
 
         } catch (\Error $ex) {
-           var_dump($e->getMessage());
+           //var_dump($e->getMessage());
 
         }
 
@@ -479,12 +479,12 @@ var_dump("Database connectDatabase " . $agent_namespace_name . "connected");
             as $active_service_name => $active_service
         ) {
             if ($active_service_name == "mysql") {
-var_dump("writeDatabase saw mysql active service");
+//var_dump("writeDatabase saw mysql active service");
                 $r = $this->stack_handlers["mysql"]->writeMysql(
                     $field_text,
                     $array
                 );
-
+/*
                 var_dump(
                     "write Mysql uuid " .
                         $this->stack_handlers['mysql']->uuid .
@@ -492,12 +492,14 @@ var_dump("writeDatabase saw mysql active service");
                         $r
                 );
                 var_dump($this->stack_handlers['mysql']->error);
+*/
             }
             if ($active_service_name == "memcached") {
                 $key = $this->stack_handlers["memcached"]->writeMemcached(
                     $field_text,
                     $array
                 );
+/*
                 var_dump(
                     "write Memcached uuid " .
                         $this->stack_handlers['memcached']->uuid .
@@ -505,7 +507,7 @@ var_dump("writeDatabase saw mysql active service");
                         $key
                 );
                 var_dump($this->stack_handlers['memcached']->error);
-
+*/
                 //if ($key === true) {return true;}
             }
 
@@ -514,6 +516,7 @@ var_dump("writeDatabase saw mysql active service");
                     $field_text,
                     $array
                 );
+/*
                 var_dump(
                     "write Memory uuid " .
                         $this->stack_handlers['memory']->uuid .
@@ -521,6 +524,7 @@ var_dump("writeDatabase saw mysql active service");
                         $key
                 );
                 var_dump($this->stack_handlers['memory']->error);
+*/
                 //if ($key === true) {return true;}
             }
 
@@ -529,6 +533,7 @@ var_dump("writeDatabase saw mysql active service");
                     $field_text,
                     $array
                 );
+/*
                 var_dump(
                     "write Mongo uuid " .
                         $this->stack_handlers['mongo']->uuid .
@@ -536,6 +541,7 @@ var_dump("writeDatabase saw mysql active service");
                         $key
                 );
                 var_dump($this->stack_handlers['mongo']->error);
+*/
             }
         }
     }
@@ -571,7 +577,7 @@ var_dump("writeDatabase saw mysql active service");
             // I think I should also do
             $this->$field = $this->thing->$field;
 
-var_dump("Database readField field this thing", $field, $this->thing->$field);
+//var_dump("Database readField field this thing", $field, $this->thing->$field);
 
             return $this->thing->$field;
         } else {
@@ -628,7 +634,7 @@ var_dump("Database readField field this thing", $field, $this->thing->$field);
                 $this->available_stacks["mongo"]["uuid"] = $uuid;
             }
         }
-        var_dump($this->available_stacks);
+        //var_dump($this->available_stacks);
         // Test for at least one valid response.
         // Either true or a uuid.
         // dev stack handlers to respond with uuids (not true).

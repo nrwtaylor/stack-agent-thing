@@ -27,6 +27,7 @@ class Agent
      */
     function __construct(Thing $thing = null, $input = null)
     {
+        set_error_handler([$this, "ignore_errors"]);
 
         $this->error = null;
         $this->status = 'loading';
@@ -4151,6 +4152,12 @@ echo "TRUE";
                 $this->mylog($error, "fatal");
         }
     }
+
+
+function ignore_errors($errno, $errstr, $errfile, $errline){
+    // Optional error processing
+    return true;
+}
 
     function mylog($error, $errlvl)
     {

@@ -149,11 +149,15 @@ class Thing
         //set_error_handler(array($this, "exception_error_handler"));
         try {
             $this->getThing($uuid);
-if (isset($this->db)) {var_dump("Thing database connected.");} else {var_dump("Problem with thing database");}
+if (isset($this->db)) {
+//var_dump("Thing database connected.");
+} else {
+//var_dump("Problem with thing database");
+}
         } catch (\Exception $e) {
             $this->error = "No Thing to get";
             $this->log("No Thing to get.");
-var_dump($e->getMessage());
+//var_dump($e->getMessage());
             // Fail quietly. There was no Thing to get.
             $this->log(
                 'Caught exception: ',
@@ -684,7 +688,7 @@ And review Agent variables.
             $value = false;
         }
 
-        var_dump("Thing Read value ", $value);
+        //var_dump("Thing Read value ", $value);
         return $value;
     }
 
