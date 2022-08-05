@@ -78,9 +78,21 @@ class Forget extends Agent
     }
 
     public function makeMessage() {
-        $this->thing_report['message'] = "message";
+        $this->thing_report['message'] = "Forgot Thing " . $this->uuid . ". " . $this->response;
+    }
+
+    public function makeInfo() {
+        $this->info = "This is the command to FORGET a THING.";
+        $this->thing_report['info'] = $this->info;
+    }
+
+    public function makeHelp() {
+        $this->help = "Once a THING is forgotten it is gone.";
+        $this->thing_report['help'] = $this->help;
 
     }
+
+
 
     public function makeResponse() {
        $this->response = "It is gone. ";
@@ -101,12 +113,10 @@ class Forget extends Agent
         );
         $choices = $this->thing->choice->makeLinks('web');
 
-        $web = "Forgot Thing " + $this->uuid + ". It is gone.<br>";
+        $web = "Forgot Thing " . $this->uuid . ". It is gone.<br>";
 
-        $web .= "<br>";
-
-        $ago = $this->thing->human_time(time() - $this->refreshed_at);
-        $web .= "Forgot about " . $ago . " ago.";
+        $ago = $this->thing->human_time(time() - $this->created_at);
+        $web .= "It was instantiated " . $ago . " ago.";
 
         $web .= "<br>";
 
