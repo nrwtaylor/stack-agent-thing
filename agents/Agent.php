@@ -12,6 +12,10 @@ ini_set("display_startup_errors", 1);
 ini_set("display_errors", 1);
 error_reporting(-1);
 
+ini_set("display_startup_errors", 0);
+ini_set("display_errors", 0);
+error_reporting(0);
+
 define("MAX_EXECUTION_TIME", 2); # seconds
 class Agent
 {
@@ -2906,9 +2910,17 @@ $flag = true;
             $burst_age_limit = 900; //s
             $similiarness_limit = 90;
 
+if (($this->current_time === null) or ($this->thing->burst_handler->burst_time === null)) {
+
+$burst_age = 0;
+
+} else {
+
             $burst_age =
                 strtotime($this->current_time) -
                 strtotime($this->thing->burst_handler->burst_time);
+}
+
             if ($burst_age < 0) {
                 $burst_age = 0;
             }
