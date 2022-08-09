@@ -2448,7 +2448,7 @@ if ($pid == -1) {
 
         $agent_input_text = $this->agent_input;
 
-        if (stripos($this->agent_input, "unsubscribe") !== false) {
+        if (($this->agent_input !== null)  and (stripos($this->agent_input, "unsubscribe") !== false)) {
             $this->thing->log("created a Usermanager agent.");
             $usermanager_thing = new Unsubscribe($this->thing);
             $this->thing_report = $usermanager_thing->thing_report;
@@ -2732,8 +2732,11 @@ $flag = true;
         $input = $atsign_agent->stripAtsigns($input);
         // Basically if the agent input directly matches an agent name
         // Then run it.
-        // So look hear to generalize that.
+        // So look hear to generalize that
+$text = "";
+if ($agent_input_text !== null) {
         $text = urldecode($agent_input_text);
+}
         //$text = urldecode($input);
         $text = strtolower($text);
         //$arr = explode(' ', trim($text));
