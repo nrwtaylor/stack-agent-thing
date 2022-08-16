@@ -34,7 +34,12 @@ class Database
     //public function init()
     function __construct($thing = null, $agent_input = null)
     {
+//var_dump("__construct saw " . $thing->bananas);
+if ($thing == null) {
+  $thing =  new \stdClass();
+}
         $this->thing = $thing;
+
         $uuid = null;
         if (isset($agent_input['uuid'])) {
             $uuid = $agent_input["uuid"];
@@ -468,6 +473,7 @@ if (isset($this->stack_handlers[$candidate_service_name])) {continue;}
     public function writeDatabase($field_text, $array, $uuid = null)
     {
         if ($array == null) {
+//            $this->thing->log("writeDatabase received null array.");
             return true;
         }
 //var_dump("Database writeDatabase array", $array); 
@@ -480,6 +486,7 @@ if (isset($this->stack_handlers[$candidate_service_name])) {continue;}
         ) {
             if ($active_service_name == "mysql") {
 //var_dump("writeDatabase saw mysql active service");
+//$this->thing->log("writeDatabase saw mysql active service");
                 $r = $this->stack_handlers["mysql"]->writeMysql(
                     $field_text,
                     $array
@@ -1048,7 +1055,7 @@ return $thing_report;
 
 $conditioned_things = [];
 foreach($things as $i=>$thing) {
-
+var_dump($this->stack_handlers);
 $conditioned_things[] = $this->stack_handlers['mysql']->thingMysql($thing);
 }
 

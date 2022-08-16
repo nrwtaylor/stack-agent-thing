@@ -2026,7 +2026,12 @@ public function __set($name, $value) {
             $this->{"read" . $this->agent_class_name}($text);
         }
 
-        $this->thing->log("read input " . $this->input . ".");
+$input = $this->input;
+if (is_array($input)) {
+$input = "array";
+}
+
+        $this->thing->log("read input " . $input . ".");
         $this->thing->log("read completed.");
     }
 
@@ -3649,7 +3654,7 @@ echo "TRUE";
                     continue;
                 }
 
-                $variables = $thing->account["stack"]->json->array_data;
+                $variables = $thing->account["stack"]->variables->array_data;
 
                 // Check
                 if (!isset($variables[strtolower($entity_name)])) {

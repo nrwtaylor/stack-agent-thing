@@ -26,6 +26,7 @@ class Thing
 
     public function __construct($uuid, $test_message = null)
     {
+$this->bananas = "hello";
         //declare(ticks=1);
 
         //$resource_path = "/var/www/stackr.test/resources/debug";
@@ -151,9 +152,10 @@ class Thing
             $this->getThing($uuid);
 if (isset($this->db)) {
 //var_dump("Thing database connected.");
-} else {
+//} else {
 //var_dump("Problem with thing database");
-}
+//}
+$this->log("Thing database connected.");} else {$this->log("Problem with thing database");}
         } catch (\Exception $e) {
             $this->error = "No Thing to get";
             $this->log("No Thing to get.");
@@ -212,24 +214,17 @@ if (isset($this->db)) {
         $this->log("Thing " . $t . " de-instantiated.");
     }
 
+    
+
     public function getThing($uuid = null)
     {
+        $this->log("getThing ". $uuid);
         if (null === $uuid) {
-            // ONLY PLACE IN STACK WHERE UUIDs ARE ASSIGNED
-            //
-            // ---
-            // THIS IS CORE TECHNOLOGY.  THE SELECTION OF THE UUID GENERATOR IS
-            // CRITICAL.  INTENTIONALLY LEFT OPEN AS CHAR(34) DB FIELD.
 
- //           $this->uuid = $this->getUUid();
- //           $this->nuuid = substr($this->uuid, 0, 4);
- 
-            // Thing must always have a uuid. Unique to the stack.
             $this->uuid = (string) Uuid::uuid4();
-            // May as wll compute the nuuid here.
             $this->nuuid = substr($this->uuid, 0, 4);
 
-            $this->log("Thing made a UUID.");
+            $this->log("Thing made a UUID." . $this->uuid);
 
             // And then we pull out some Thing related svariables and settings.
 /*
@@ -258,34 +253,14 @@ if (isset($this->db)) {
             // The settings file can make Thing set up a specific Thing account.
             $this->thing_account = $this->container['thing']['thing_account'];
 
-            // I'm still working on what the difference between the two really
-            // is.  Settings determine the functioning of the Thing.
-            // Variables are stuff that can be lost when the Thing
-            // deinstantiates.
-
-            // Variable overflow is challenging. See VARIABLES.
-
-            // Can't call db here, can only call it when $from is known.
-
-//            $this->json = new ThingJson($this, $this->uuid);
-
-// Causes inf loop.
-//$this->array_handler = new \Nrwtaylor\StackAgentThing\Arr($this, 'arr');
-
             $this->log("JSON connector made.");
             $this->log("Made a thing from null.");
-
-            // Testing this as of 15 June 2018.  Not used by framework yet.
-            $this->json = new ThingJson($this, $this->uuid);
-            $this->json->setField("variables");
-
 
             $this->variables = new ThingJson($this, $this->uuid);
             $this->variables->setField("variables");
 
             $this->associations = new ThingJson($this, $this->uuid);
             $this->associations->setField("associations");
-
 
             $this->choice = new ThingChoice($this, $this->uuid, $this->from);
 
@@ -323,9 +298,6 @@ if (isset($this->db)) {
             $this->log("Thing made a db connector.");
             // Provide handler for Json translation from/to MySQL.
             $this->log('Thing Create uuid '.$this->uuid);
-
-            $this->json = new ThingJson($this, $this->uuid);
-            $this->json->setField("variables");
 
 
             // This is a placeholder for refactoring the Thing variables
@@ -558,23 +530,6 @@ if (isset($this->db)) {
 
         $this->variables = new ThingJson($this, $this->uuid);
 
-        /*
-
-        if ($query == true) {
-            $this->sqlresponse = "New record created successfully.";
-            $this->to = $to;
-            $this->from = $from;
-            $this->subject = $subject;
-            $message0['500 words'] .= $this->sqlresponse;
-        } else {
-            //$error = $query->errorInfo();
-            //$this->sqlresponse = "Error: " . $sql . "<br>" . $query->errorInfo();
-            $this->sqlresponse = "Error: " . implode(":", $query->errorInfo());
-            $message0['50 words'] .= $this->sqlresponse;
-//return $this->Get();
-            //return false;
-        }
-*/
         // Create new accounts.  Still under development as of 25 April.
         // Credit and debit records testing pass.
 
@@ -664,18 +619,25 @@ And review Agent variables.
 
     public function Read($path, $field = null)
     {
+if (!isset($this->db)) {
+$this->log("Read did not see a database connection.");
+return;
+return true;
+}
+
+
         if ($field == null) {
             $field = 'variables';
         }
         $this->log(
             "Thing Read uuid " . $this->uuid . " path " .
-            implode(">", $path));
+            implode(">", $path), 'INFORMATION');
 
         $array_data = $this->db->readField($field);
 
         if ($array_data == false) {
             //var_dump("Thing Read array_data " . $array_data);
-
+            $this->log('No array_data returnd.');
             return false;
         }
 
@@ -714,7 +676,10 @@ And review Agent variables.
 
         $last_write = $this->db->writeDatabase("variables", $array_data);
 
+
+$bytes_written = mb_strlen(serialize((array)$array_data), '8bit');
 //        var_dump("Thing Write array data", $array_data);
+$this->log("Thing Write " . $bytes_written . " bytes");
     }
 
     public function loadAccounts()
@@ -994,7 +959,7 @@ echo "Previous uuid got " . ($prior_uuid) . "\n";
             $thing = $thingreport['thing'];
         }
 
-        $this->log("loaded thing " . $this->nuuid . " from db.");
+        $this->log("loaded thing " . $this->db->uuid . " from db.");
 
         if ($thing == false) {
             // Returned thing is false.

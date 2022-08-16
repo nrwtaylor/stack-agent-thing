@@ -90,6 +90,17 @@ class Slug extends Agent
 */ 
    }
 
+public function slugifySlug($text = null) {
+
+        if ($text == null) {
+            return true;
+        }
+
+        $text = $this->filterAlphanumeric($text);
+        $slug = str_replace(' ', "-", $text);
+        return $slug;
+    }
+
    public function pdfSlug($token) {
 
      $pdf_slug = $this->web_prefix . $token . '.pdf';

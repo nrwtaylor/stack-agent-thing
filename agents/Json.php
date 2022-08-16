@@ -55,7 +55,7 @@ class Json
         // $this->db = new Database(null, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
 
         // new Database(false, ...) creates a read-only thing.
-        $this->db = new Database(null, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
+        $this->db = new Database($thing, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
         $this->array_data = array();
         $this->json_data = '{}';
 

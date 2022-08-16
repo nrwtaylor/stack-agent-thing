@@ -395,7 +395,7 @@ $this->thing->variables_thing = $this->variables_thing;
         }
 
 
-        $variables = $this->variables_thing->account["stack"]->json->array_data;
+        $variables = $this->variables_thing->account["stack"]->variables->array_data;
 
 
 
@@ -536,12 +536,12 @@ $this->thing->variables_thing = $this->variables_thing;
         // Here we are addressing a fundamental size limitation of any one thing to store all of an identitities variables
         // Especially when those variables have lots of unique identifiers.
 
-        if ($this->variables_thing->json->write_fail_count > 0) {
+        if ($this->variables_thing->variables->write_fail_count > 0) {
             $this->thing->log(
                 "overflow " .
-                    $this->variables_thing->json->size_overflow .
+                    $this->variables_thing->variables->size_overflow .
                     " write_fail_count " .
-                    $this->variables_thing->json->write_fail_count .
+                    $this->variables_thing->variables->write_fail_count .
                     "."
             );
             $this->thing->log(
@@ -563,12 +563,12 @@ $this->thing->variables_thing = $this->variables_thing;
             $value
         );
 
-        if ($this->variables_thing->json->write_fail_count > 0) {
+        if ($this->variables_thing->variables->write_fail_count > 0) {
             $this->thing->log(
                 "overflow " .
-                    $this->thing->json->size_overflow .
+                    $this->thing->variables->size_overflow .
                     " write_fail_count " .
-                    $this->thing->json->write_fail_count .
+                    $this->thing->variables->write_fail_count .
                     "."
             );
             $this->thing->log(

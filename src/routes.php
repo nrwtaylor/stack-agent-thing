@@ -1028,7 +1028,7 @@ if (in_array($ext_name,['jpg','jfif','jfif-tbnl','jpe','jpeg','jpg'])) {$ext_nam
                 // OK - Done all we can.
                 // So now need to create a Thing.
 
-                $web_thing->db = new Database(null, ['uuid'=>$web_thing->uuid, 'from'=>"null"]);
+                //$web_thing->db = new Database(null, ['uuid'=>$web_thing->uuid, 'from'=>"null"]);
 
                 try {
                     $agent_namespace_name =
