@@ -260,10 +260,10 @@ class Nuuid extends Agent
             // imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $number);
             imagettftext(
                 $this->image,
-                int($size),
-                int($angle),
-                int($width / 2 - $bb_width / 2),
-                int($height / 2 + $bb_height / 2),
+                intval($size),
+                intval($angle),
+                intval($width / 2 - $bb_width / 2),
+                intval($height / 2 + $bb_height / 2),
                 $this->grey,
                 $font,
                 $text

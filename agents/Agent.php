@@ -2554,6 +2554,8 @@ $flag = true;
             if ($to_repeat !== null) {
                 $this->sendDiscord($this->subject, $to_repeat);
             }
+            // No response
+            return;
         }
 
 

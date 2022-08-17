@@ -57,7 +57,8 @@ class A4 extends Agent
      */
     public function makeA4()
     {
-        if (ctype_alpha($this->a4)) {
+
+        if ((!is_bool($this->a4)) and (ctype_alpha($this->a4))) {
             $this->response = "Read this four-character alpha sequence.";
             return;
         }

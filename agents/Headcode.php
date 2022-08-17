@@ -792,8 +792,8 @@ if (file_exists($font)) {
             $image,
             $size,
             $angle,
-            int($width / 2 - $bb_width / 2),
-            int($height / 2 + $bb_height / 2),
+            intval($width / 2 - $bb_width / 2),
+            intval($height / 2 + $bb_height / 2),
             $grey,
             $font,
             $text
