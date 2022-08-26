@@ -239,8 +239,8 @@ if ($things === true) {return true;}
         $this->getAvailable();
         $this->getEndat();
 
-        $this->block_thing->json->setField("associations");
-        $this->associations = $this->block_thing->json->readVariable(["agent"]);
+        //$this->block_thing->json->setField("associations");
+        $this->associations = $this->block_thing->Read(["agent"], 'associations');
 
         if ($this->associations != false) {
             foreach ($this->associations as $association_uuid) {

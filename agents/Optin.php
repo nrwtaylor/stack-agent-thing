@@ -154,8 +154,7 @@ $web = "";
         // which explains what stackr is and asks either
         // for a reply to the email, or to send an email to opt-in@<email postfix>.
 
-        $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             [$this->agent_name, "opt-in", "received_at"],
             date("Y-m-d H:i:s")
         );

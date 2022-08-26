@@ -22,7 +22,7 @@ class Json
      * @param unknown $uuid
      * @return unknown
      */
-    function __construct($uuid)
+    function __construct($thing = null, $uuid = null)
     {
         $this->start_time = microtime(true);
         //        $settings = require 'settings.php';
@@ -163,6 +163,7 @@ class Json
      */
     public function jsontoArray($json_data = null)
     {
+        var_dump("Json jsontoArray called");
         if ($json_data == null) {
             $json_data = $this->json_data;
         }
@@ -171,7 +172,7 @@ class Json
 
         if ($array_data == false) {
             $this->array_data = false;
-            return;
+            return false;
         }
 
         if (is_string($array_data)) {
@@ -188,6 +189,16 @@ class Json
         $this->array_data = $array_data;
 
         return $array_data;
+    }
+
+    public function arrayJson($arr) {
+
+        $json_data = json_encode(
+            $arr,
+            JSON_PRESERVE_ZERO_FRACTION
+        );
+        return $json_data;
+
     }
 
     /**
@@ -553,16 +564,27 @@ return true;
 
             return false;
         } else {
+var_dump("Json Write pre-write");
+
             //$this->thing_array[$this->field] = $this->json_data;
             if ($this->write_on_destruct) {
                 //$this->thing_array[] = array("field"=>$this->field,"data"=>$this->json_data);
                 //$this->write_field_list[] = $this->field;
             } else {
-                $this->last_write = $this->db->writeField(
+/*
+                $this->last_write = $this->db->writeDatabase(
                     $this->field,
                     $this->json_data
                 );
+*/
+                $this->last_write = $this->db->writeDatabase(
+                    $this->field,
+                    $this->array_data
+                );
+
+
             }
+var_dump("Json Write performed");
             return true;
         }
         return;
@@ -574,10 +596,10 @@ return true;
      */
     function read()
     {
-        $this->json_data = $this->db->readField($this->field);
+        $this->array_data = $this->db->readField($this->field);
         //        if ($this->json_data == null) {$this->initField();}
-
-        $array = $this->jsontoArray();
+var_dump("Json read", $this->array_data);
+        //$array = $this->jsontoArray();
         $array = $this->array_data;
 
         return $array;

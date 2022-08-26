@@ -1253,6 +1253,14 @@ class Month extends Agent
         return false;
     }
 
+    public function textMonth($dateline = null) {
+
+        if ($dateline == null) {$dateline = $this->dateline;}
+
+        $t = $this->formatMonth($this->datestringMonth($dateline));
+        return $t;
+    }
+
     /**
      *
      */

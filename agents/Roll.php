@@ -72,7 +72,7 @@ class Roll extends Agent
     {
         $this->thing->flagGreen();
 
-        $this->makeChoices();
+       // $this->makeChoices();
 
         $this->thing_report["info"] = "This rolls a dice.  See
 				https:\\codegolf.stackexchange.com/questions/25416/roll-dungeons-and-dragons-dice";
@@ -116,6 +116,20 @@ class Roll extends Agent
         $json = [$this->roll, $r];
 
         $this->thing_report["json"] = $json;
+    }
+
+    public function makeLink() {
+
+            $link =
+                $this->web_prefix .
+                "thing/" .
+                $this->uuid .
+                "/roll";
+
+        $this->link = $link;
+        $this->thing_report["link"] = $link;
+
+
     }
 
     /**
@@ -182,13 +196,16 @@ class Roll extends Agent
 
         $this->node_list = ["roll" => ["roll", "card"]];
         // Make buttons
+/*
         $this->thing->choice->Create(
             $this->agent_name,
             $this->node_list,
             "web"
         );
         $choices = $this->thing->choice->makeLinks("web");
-//$choices = false;
+*/
+$this->makeChoices();
+
         $text = "off";
         if ($text == "on") {
             if (isset($this->thing_report["pngs"])) {

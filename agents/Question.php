@@ -136,6 +136,22 @@ class Question extends Agent
     {
     }
 
+    public function hasQuestion($text) {
+
+        $pattern = "/\?/";
+
+        if (preg_match($pattern, $text)) {
+            // returns true with ? mark
+            $this->thing->log(
+                "found a question mark and created a Question agent",
+                "INFORMATION"
+            );
+            return true;
+        }
+        return false;
+
+    }
+
     public function readSubject()
     {
         $this->response = null;

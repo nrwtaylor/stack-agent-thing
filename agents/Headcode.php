@@ -244,8 +244,10 @@ class Headcode extends Agent
             //            $thing= new Thing($uuid);
             //            $variables = $thing->account['stack']->json->array_data;
 
-            $variables_json = $thing_object["variables"];
-            $variables = $this->thing->json->jsontoArray($variables_json);
+         //   $variables_json = $thing_object["variables"];
+         //   $variables = $this->thing->json->jsontoArray($variables_json);
+
+            $variables = $thing_object["variables"];
 
             if (isset($variables["headcode"])) {
                 $head_code = $variables["headcode"]["head_code"];

@@ -125,14 +125,35 @@ class Discord extends Agent
     //   {
     //   }
 
+public function makeDiscord() {
+//if (!isset($this->sms_message)) {return true;}
+if (!isset($this->sms_message)) {$this->makeSMS();}
+
+$d = $this->sms_message;
+
+$d .= "x";
+
+$this->discord_message = $d;
+$this->thing_report['discord'] = $d;
+
+
+}
+
     public function testDiscord()
     {
 $this->sendDiscord("merp",'edna:#general@edna.discord');
 
     }
 
-    public function sendDiscord($text, $to)
+    public function sendDiscord($text, $to, $other = null)
     {
+$image_url = null;
+if (isset($other['image_url'])) {$image_url = $other['image_url'];}
+
+$png = null;
+if (isset($other['png'])) {$png = $other['png'];}
+
+
         //$to = "kokopelli:#general@kaiju.discord"; // for testing
         $bot_name = $to;
 
@@ -158,10 +179,16 @@ $this->sendDiscord("merp",'edna:#general@edna.discord');
             "webhook",
         ]);
 
+
+///
+
+///
         $datagram = [
             "to" => $bot_webhook,
             "from" => $bot_name,
             "subject" => $text,
+            "image_url"=>$image_url,
+            "png"=>$png,
         ];
 
         $this->webhookDiscord($datagram);
@@ -197,6 +224,26 @@ $this->sendDiscord("merp",'edna:#general@edna.discord');
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 
+// https://stackoverflow.com/questions/69576744/how-can-i-post-base64-image-data-to-a-discord-webhook-without-using-discord-js
+
+$m = [
+                "content" => $msg,
+                "username" => $from,
+                "avatar_url" => $avatar,
+            ];
+
+// This works. But as an embed.
+//$m['embeds'] = [["image"=>["url"=>"https://stackr.ca/pixel_sml.png"]]];
+//$m['embeds'] = [["image"=>["url"=>$datagram['image_url']]]];
+// This doesn't
+//$m['files'] =["https://stackr.ca/pixel_sml.png"];
+
+// This doesn't either.
+//$m['file'] => curl_file_create($this->PNG_embed, 'image/png');
+//$m['file'] => curl_file_create($datagram['png'], 'image/png');
+
+//PNG_embed
+/*
         curl_setopt(
             $curl,
             CURLOPT_POSTFIELDS,
@@ -204,8 +251,16 @@ $this->sendDiscord("merp",'edna:#general@edna.discord');
                 "content" => $msg,
                 "username" => $from,
                 "avatar_url" => $avatar,
+"embeds"=>[["image"=>["url"=>"https://stackr.ca/pixel_sml.png"]]]
             ])
         );
+*/
+        curl_setopt(
+            $curl,
+            CURLOPT_POSTFIELDS,
+            json_encode($m)
+        );
+
 
         $output = json_decode(curl_exec($curl), true);
 
@@ -418,6 +473,12 @@ $this->sendDiscord("merp",'edna:#general@edna.discord');
     // Not tested.
     function getDiscord()
     {
+
+if ($this->thing->thing === false) {
+//$this->body = null;
+return;
+}
+
         $bodies = json_decode($this->thing->thing->message0, true);
 if ($bodies == null) {
 $this->body = null;

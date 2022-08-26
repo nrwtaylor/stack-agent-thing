@@ -43,7 +43,7 @@ return;
 
         $this->keywords = array('forex');
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
 
         $this->api_key = $this->thing->container['api']['1forge'];

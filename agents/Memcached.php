@@ -28,14 +28,18 @@ class Memcached extends Agent
     }
 
     // dev
-    public function writeField($field_text, $string_json)
+    public function writeMemcached($field_text, $arr)
     {
+        if (!isset($this->write_fail_count)) {
+            $this->write_fail_count = 0;
+        }
+
         // Hmmm
         // Ugly but do this for now.
-        $j = new ThingJson($this->uuid);
-        $j->jsontoarrayJson($string_json);
-        $data = $j->jsontoarrayJson($string_json);
-
+        //        $j = new Json(null, $this->uuid);
+        //        $j->jsontoarrayJson($string_json);
+        //        $data = $j->jsontoarrayJson($string_json);
+        $data = $arr;
         $data = ['variables' => $data];
 
         // dev develop associations.
@@ -61,6 +65,13 @@ class Memcached extends Agent
         }
 
         $existing = $this->mem_cached->get($this->uuid);
+
+        if ($existing == false) {
+            $this->errorMemcached("Existing uuid not found on write request.");
+            $this->write_fail_count += 1;
+            return false;
+        }
+
         $d = $data;
         if (is_array($existing)) {
             $d = array_replace_recursive($existing, $data);
@@ -68,11 +79,107 @@ class Memcached extends Agent
 
         // In development
 
-        $this->mem_cached->set($this->uuid, $d);
+        $response = $this->mem_cached->set($this->uuid, $d);
+
+        if ($response === true) {
+            var_dump("Memcached write OK " . $this->uuid);
+            return $this->uuid;
+        }
+
+        $this->errorMemcached("Write request not successful.");
+        $this->write_fail_count += 1;
+        return true;
     }
 
-    public function getMemcached($uuid)
+    public function createMemcached($subject, $to)
     {
+        //        if (!$this->isReadyMongo()) {
+        //            return true;
+        //        }
+
+        // Cannot create a thing on the stack with a specific uuid.
+        // That's the rule.
+
+        // Enforce that here. And in setMongo.
+
+        if (!isset($this->response)) {
+            $this->response = "";
+        }
+
+        $task = $subject;
+        $nom_from = $this->from;
+
+        // dev test
+        //$this->hash_algorithm = 'sha256';
+        $hash_nom_from = hash($this->hash_algorithm, $nom_from);
+
+        if ($this->hash_state == "off") {
+            $hash_nom_from = $nom_from;
+        }
+        $nom_to = $to;
+
+        $stamp = new Stamp(null, "stamp");
+        $created_at = $stamp->zuluStamp();
+
+        $sha256 = new SHA256(null, "sha256");
+        $o = $sha256->isSHA256($nom_from);
+        if ($o == true and $this->hash_state == "on") {
+            $from = $nom_from;
+        } else {
+            $from = $hash_nom_from;
+        }
+
+        $thing = [
+            "task" => $subject,
+            "nom_from" => $from,
+            "nom_to" => $this->to,
+            "created_at" => $created_at,
+            "variables" => null,
+        ];
+
+        // dev
+        $uuid = Uuid::createUuid();
+        /*
+        if (isset($this->thing)) {
+            if ($this->thing == null) {
+                $t = new Thing(null);
+                $uuid = $t->uuid;
+            } else {
+                $uuid = $this->thing->getUUid();
+            }
+        }
+
+        if (!isset($this->thing)) {
+            $t = new Thing(null);
+            $uuid = $t->uuid;
+        }
+*/
+        $thing['uuid'] = $uuid;
+
+        try {
+            //$result = $this->collection->insertOne($thing);
+            $result = $this->mem_cached->set($uuid, $thing);
+        } catch (\Throwable $t) {
+            $this->errorMongo($t->getMessage());
+            return true;
+        } catch (\Error $ex) {
+            $this->errorMongo($ex->getMessage());
+            return true;
+        }
+
+        // dev Test for successful insertion of new record.
+
+        // setMongo returns the key
+        //        $key_uuid = $this->setMongo(null, $thing); // null creates a new uuid
+        return $uuid;
+    }
+
+    public function getMemcached($uuid = null)
+    {
+        if ($uuid == null) {
+            $uuid = $this->uuid;
+        }
+
         $t = $this->mem_cached->get($uuid);
         //var_dump($t);
         return $t;

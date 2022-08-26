@@ -36,9 +36,9 @@ class Arr extends Agent
     {
         $this->thing->flagGreen();
 
-        $this->thing_report["info"] = "This agent handles HTML.";
+        $this->thing_report["info"] = "This agent handles Arrays.";
         $this->thing_report["help"] =
-            "This is about recognizing and processing HTML.";
+            "This is about recognizing and processing Arrays.";
 
         $this->thing_report["message"] = $this->sms_message;
         $this->thing_report["txt"] = $this->sms_message;
@@ -127,6 +127,27 @@ return $temp_variable;
         return $web;
     }
 
+public function filterFieldsArr($climate_data_points, $filter_array = null) {
+
+$filtered_data_points = array_filter($climate_data_points, function($value) use ($filter_array) {
+
+$filter_month = $filter_array['month'];
+$filter_day = $filter_array['day'];
+
+  $month = str_replace('"', '', $value['Month']);
+  $day = str_replace('"', '', $value['Day']);
+  $time_stamp = str_replace('"', '', $value['Time (LST)']);
+
+$filter_time_stamp = $filter_array['time_stamp'];
+
+
+
+  return $month == $filter_month and $day == $filter_day and $time_stamp == $filter_time_stamp;  
+});
+
+return $filtered_data_points;
+
+}
     public function filterArr(array $array, $search_words)
     {
         $filtered_array = [];
@@ -164,6 +185,64 @@ return $temp_variable;
         }
         return $flat;
     }
+
+    /**
+     *
+     * @param unknown $json_data (optional)
+     * @return unknown
+     */
+    public function jsonArr($json_data = null)
+    {
+var_dump("Arr jsonArr");
+        $array_data = json_decode($json_data, true);
+
+        if ($array_data == false) {
+            return false;
+        }
+
+        if (is_string($array_data)) {
+            $array_data = ['text'=>$array_data];
+        }
+
+/*
+        foreach ($array_data as $key => $value) {
+            if ($key != "") {
+                $this->{$key} = $value;
+            }
+        }
+*/
+        return $array_data;
+    }
+
+
+    private function setPathValueArr(&$arr, $path, $value)
+    {
+if (!is_array($arr)) {return true;}
+        // we need references as we will modify the first parameter
+        $dest = &$arr;
+if ($dest == null) {
+$dest =[];
+}
+//var_dump($dest);
+//return null;}
+        $finalKey = array_pop($path);
+        foreach ($path as $key) {
+            $dest = &$dest[$key];
+        }
+
+        if (is_array($finalKey)) {
+           throw new Exception('Array received as path.');
+           return true;
+        }
+if (is_string($dest)) {
+return true;
+// dev 5 November 2021
+}
+        $dest[$finalKey] = $value;
+    }
+
+
+
 
     public function readSubject()
     {

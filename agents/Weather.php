@@ -623,7 +623,7 @@ $age = strtotime($this->timestampTime($this->current_datum)) - strtotime($this->
         $sms_message .= ((isset($this->place)) ? strtoupper($this->place) . " " : null);
         $sms_message .= "| ";
         $sms_message .= trim($this->response);
-        $sms_message .= " | link " . $this->link;
+        $sms_message .= " | link " . '' . $this->link . '';
         $sms_message .= " | source Environment Canada";
 
         $agent = new Clocktime($this->thing, $this->forecast_timestamp_time);
@@ -634,11 +634,47 @@ $age = strtotime($this->timestampTime($this->current_datum)) - strtotime($this->
             ":" .
             str_pad($agent->minute, 2, "0", STR_PAD_LEFT);
 
+
         // devstack - a conditioning algorithm.  In Sms.php?
         $sms_message = str_replace("°C", "C", $sms_message);
 
         $this->sms_message = $sms_message;
         $this->thing_report["sms"] = $sms_message;
+    }
+
+    public function makeDiscord($text = null) {
+
+        if (!isset($this->response) or $this->response == null) {
+            $this->response =
+                $this->current_conditions . " > " . $this->forecast_conditions;
+        }
+
+        $sms_message = "WEATHER ";
+        $sms_message .= ((isset($this->place)) ? strtoupper($this->place) . " " : null);
+        $sms_message .= "\n";
+        $sms_message .= trim($this->response);
+        $sms_message .= "\n";
+$sms_message .= "" . '<' . $this->link . '>';
+$sms_message .= "\n";
+        $sms_message .= "source Environment Canada";
+//$sms_message .= " " . $this->update;
+$sms_message .= " " . $this->forecast_timestamp_time;
+//        $agent = new Clocktime($this->thing, $this->forecast_timestamp_time);
+/*
+        $sms_message .=
+            " " .
+            str_pad($agent->hour, 2, "0", STR_PAD_LEFT) .
+            ":" .
+            str_pad($agent->minute, 2, "0", STR_PAD_LEFT);
+
+
+        // devstack - a conditioning algorithm.  In Sms.php?
+        $sms_message = str_replace("°C", "C", $sms_message);
+*/
+
+        $this->discord_message = $sms_message;
+        $this->thing_report["discord"] = $sms_message;
+
     }
 
     /**

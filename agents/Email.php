@@ -90,23 +90,14 @@ class Email
         $this->node_list = ["email" => ["email"]];
 
         // Borrow this from iching
-        $time_string = $this->thing->Read([
-            "email",
-            "refreshed_at",
-        ]);
+        $time_string = $this->thing->Read(["email", "refreshed_at"]);
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->Write(
-                ["email", "refreshed_at"],
-                $time_string
-            );
+            $this->thing->Write(["email", "refreshed_at"], $time_string);
         }
 
-        $this->email_count = $this->thing->Read([
-            "email",
-            "count",
-        ]);
+        $this->email_count = $this->thing->Read(["email", "count"]);
 
         if ($this->email_count == false) {
             $this->email_count = 0;
@@ -158,19 +149,19 @@ class Email
         return;
     }
 
-    public function isEmail($text) {
-       $meta = $this->metaEmail($text);
-$is_email = true;
-if (!isset($meta['from'])) {
-$is_email = false;
-}
+    public function isEmail($text)
+    {
+        $meta = $this->metaEmail($text);
+        $is_email = true;
+        if (!isset($meta["from"])) {
+            $is_email = false;
+        }
 
-if (!isset($meta['subject'])) {
-$is_email = false;
-}
+        if (!isset($meta["subject"])) {
+            $is_email = false;
+        }
 
-
-       return $is_email;
+        return $is_email;
     }
 
     public function metaEmail($text)
@@ -188,7 +179,13 @@ $is_email = false;
         $received = $message->getHeaderValue("Received");
         $date = $message->getHeaderValue("Date");
 
-        $meta = ["from"=>$from, "subject"=>$subject, "sent"=>$sent, "received"=>$received, "date"=>$date];
+        $meta = [
+            "from" => $from,
+            "subject" => $subject,
+            "sent" => $sent,
+            "received" => $received,
+            "date" => $date,
+        ];
 
         return $meta;
     }
@@ -398,7 +395,7 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
 
         // Generate email response.
         $to = $this->from;
-        $from = $this->to;
+        $from = $this->to . $this->mail_postfix;
 
         if ($this->message != null) {
             $test_message = $this->message;
@@ -431,7 +428,10 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
 
         $this->thing_report["info"] = 'Agent "Email" did not send an email.';
 
-        if ( (isset($this->thing->account)) and (isset($this->thing->account['stack'])) ) {
+        if (
+            isset($this->thing->account) and
+            isset($this->thing->account["stack"])
+        ) {
             if (
                 $this->thing->account["stack"]->balance["amount"] >= $this->cost
             ) {
@@ -542,6 +542,24 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
             $this->message = false;
         }
 
+        if (isset($input["pdf"])) {
+            $this->pdf = $input["pdf"];
+        } else {
+            $this->pdf = null;
+        }
+
+        if (isset($input["zip"])) {
+            $this->zip = $input["zip"];
+        } else {
+            $this->zip = null;
+        }
+
+        if (isset($input["agent"])) {
+            $this->agent = $input["agent"];
+        } else {
+            $this->agent = null;
+        }
+
         if (!isset($input["message"])) {
             if (!is_array($input)) {
                 $this->message = $input;
@@ -617,7 +635,14 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
             );
             $donotsend = true;
         }
-        $subject = $this->mail_prefix . " " . $subject;
+        //        $subject = $this->mail_prefix . " " . $subject;
+        if (
+            isset($this->mail_prefix) and
+            is_string($this->mail_prefix) and
+            $this->mail_prefix != ""
+        ) {
+            $subject = $this->mail_prefix . " " . $subject;
+        }
 
         if (
             strpos(strtolower($subject), strtolower("Stack record: ")) !== false
@@ -690,6 +715,55 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
      */
     public function generateHTML($raw_message, $choices = null)
     {
+        $info =
+            '<tr>
+    <td valign="top" style=" font-size: 16px; text-align: left; border-top: 1px #dddddd solid;">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody>
+            <tr>
+                <td valign="middle" style="padding:12px 15px 20px 15px;">
+                    <div style="color: #999999; font-family: \'Helvetica Neue\', Arial, sans-serif; font-size: 12px; line-height: 17px; text-align: left">
+                        Stackr is not yet available for iOS or Android.
+                    </div>
+                </td>
+                <td width="280">
+                    <div style="line-height: 17px; padding: 12px 0 20px 0; text-align: right">
+                        <a href="' .
+            $this->web_prefix .
+            '"><img width="92" height="30" src="' .
+            $this->web_prefix .
+            'Apple_store.png"/></a> <a href="' .
+            $this->web_prefix .
+            '"><img width="92" height="30" src="' .
+            $this->web_prefix .
+            'Google_store.png"/></a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </td>
+</tr>';
+
+        $info = '<tr>
+    <td valign="top" style=" font-size: 16px; text-align: left; border-top: 1px #dddddd solid;">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody>
+            <tr>
+                <td valign="middle" style="padding:12px 15px 20px 15px;">
+                    <div style="color: #999999; font-family: \'Helvetica Neue\', Arial, sans-serif; font-size: 12px; line-height: 17px; text-align: left">
+                        Stackr is not yet available for iOS or Android.
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+</td>
+</tr>
+';
+        // This is the active code. Not makeemail.
+        $info = "";
+
         $html_button_set = $choices["button"];
         if ($choices == null) {
             $html_button_set = "";
@@ -809,37 +883,9 @@ Hi,
             $choices["button"] .
             '
 </td>
-</tr>
-
-                        <tr>
-    <td valign="top" style=" font-size: 16px; text-align: left; border-top: 1px #dddddd solid;">
-        <table border="0" cellpadding="0" cellspacing="0" width="100%">
-            <tbody>
-            <tr>
-                <td valign="middle" style="padding:12px 15px 20px 15px;">
-                    <div style="color: #999999; font-family: \'Helvetica Neue\', Arial, sans-serif; font-size: 12px; line-height: 17px; text-align: left">
-                        Stackr is not yet available for iOS or Android.
-                    </div>
-                </td>
-                <td width="280">
-                    <div style="line-height: 17px; padding: 12px 0 20px 0; text-align: right">
-                        <a href="' .
-            $this->web_prefix .
-            '"><img width="92" height="30" src="' .
-            $this->web_prefix .
-            'Apple_store.png"/></a> <a href="' .
-            $this->web_prefix .
-            '"><img width="92" height="30" src="' .
-            $this->web_prefix .
-            'Google_store.png"/></a>
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </td>
-</tr>
-<tr>
+</tr>' .
+            $info .
+            '<tr>
 <td height="20">
 </td>
 </tr>
@@ -917,7 +963,8 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
      */
     function generateMultipart($from, $raw_message, $choices = null)
     {
-        $from = $this->robot_name . $this->mail_postfix;
+        //        $from = $this->robot_name . $this->mail_postfix;
+        //   $from = $from . $this->mail_postfix;
 
         // useful in dev - to create the same message received by email.
         $this->generateHTML($raw_message, $choices);
@@ -969,14 +1016,63 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
                 ) . "\r\n";
         }
 
-        //$message .= "--PHP-alt-" . $boundary . "\r\n";
-        //$attachment = chunk_split(base64_encode(file_get_contents('attachment.zip')));
-        //$attachment = "Meep";
-        //$message .= "--PHP-mixed-" . $boundary;
-        //$message .= 'Content-Type: application/zip; name="attachment.zip"';
-        //$message .= "Content-Transfer-Encoding: base64";
-        //$message .= 'Content-Disposition: attachment ';
-        //$message .= $attachment;
+        if (isset($this->pdf) and $this->pdf !== null) {
+            // fetch pdf
+            //            $pdfLocation =
+//            "/var/www/html/stackr.ca/resources/snowflake/bubble.pdf"; // file location
+            $pdfName = "document.pdf"; // pdf file name recipient will get
+            //if ((isset($this->agent)) and ($this->agent !== null)) {
+
+            //$pdfName = $this->agent . ".pdf";
+            //}
+            $filetype = "application/pdf"; // type
+
+            //            $file = fopen($pdfLocation, "rb");
+            //            $data = fread($file, filesize($pdfLocation));
+
+            $data = $this->pdf;
+            //            fclose($file);
+            $pdf = chunk_split(base64_encode($data));
+
+            // attach pdf to email
+            $eol = "\r\n";
+            $message .=
+                "--PHP-alt-" .
+                $boundary .
+                "\r\n" .
+                "Content-Type: $filetype;$eol" .
+                " name=\"$pdfName\"$eol" .
+                "Content-Disposition: attachment;$eol" .
+                " filename=\"$pdfName\"$eol" .
+                "Content-Transfer-Encoding: base64$eol$eol" .
+                $pdf .
+                $eol .
+                "--PHP-alt-" .
+                $boundary;
+        }
+// https://www.daniweb.com/programming/web-development/threads/397249/send-email-with-attachment
+        if (isset($this->zip) and $this->zip !== null) {
+            $eol = "\r\n";
+
+            $message .= "--PHP-alt-" . $boundary . "\r\n";
+            $attachment = chunk_split(
+                base64_encode(file_get_contents("/tmp/attachment.zip"))
+            );
+$attachment = chunk_split(base64_encode($this->zip));
+
+            //$attachment = "Meep";
+            //$message .= "--PHP-mixed-" . $boundary;
+            $message .= "Content-Type: application/zip; ";
+            $message .= 'name="attachment.zip"' . $eol;
+            $message .= "Content-Transfer-Encoding: base64" . $eol;
+            $message .= "Content-Disposition: attachment; ";
+            $message .= 'name="attachment.zip"' . $eol . $eol;
+
+            $message .= $attachment;
+            $message .= $eol;
+            $message .= "--PHP-alt-" . $boundary . $eol;
+
+        }
 
         $message .= "--PHP-mixed-" . $boundary . "--";
 
@@ -1002,7 +1098,8 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
         $choices = null
     ) {
         //    $from = $from .$this->mail_postfix;
-        $from = $this->robot_name . $this->mail_postfix;
+        //      $from = $this->robot_name . $this->mail_postfix;
+        //     $from = $from . $this->mail_postfix;
 
         //https://webdesign.tutsplus.com/articles/build-an-html-email-template-from-scratch--webdesign-12770
 

@@ -145,9 +145,9 @@ class Sms
         //  if ($input == null) {$input = $this->body;}
 
         $this->thing->db->setFrom($this->from);
+        $this->thing->Write(["sms"], $input, 'message0');
 
-        $this->thing->json->setField("message0");
-        $this->thing->json->writeVariable(["sms"], $input);
+
     }
 
     public function getClient()

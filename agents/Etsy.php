@@ -113,8 +113,8 @@ class Etsy extends Agent
 
         $this->thing->db->setFrom($this->from);
 
-        $this->thing->json->setField("message1");
-        $this->thing->json->writeVariable(["ebay"], $text);
+        $this->thing->Write(["etsy"], $text, 'message1');
+
 
         $this->response .= $request . " - " . $log_text . " ";
     }
@@ -361,7 +361,7 @@ class Etsy extends Agent
             $this->items = array_merge($this->items, $items);
         }
 
-        // This is where we choose the best return from eBay.
+        // This is where we choose the best return from Etsy.
         $this->item = null;
         if (isset($this->items[0])) {
             $this->item = $this->items[0];

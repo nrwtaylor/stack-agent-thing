@@ -152,8 +152,8 @@ class Ebay extends Agent
 
         $this->thing->db->setFrom($this->from);
 
-        $this->thing->json->setField("message0");
-        $this->thing->json->writeVariable(["ebay"], $response);
+        $this->thing->Write(["ebay"], $response, 'message0');
+
     }
 
     function getEbay()
@@ -162,8 +162,7 @@ class Ebay extends Agent
 
         $this->thing->db->setFrom($this->from);
 
-        $this->thing->json->setField("message0");
-        $response = $this->thing->json->readVariable(["ebay"]);
+        $response = $this->thing->Read(["ebay"], 'message0');
 
         //                $this->variablesGet();
 
@@ -280,8 +279,7 @@ class Ebay extends Agent
 
         $this->thing->db->setFrom($this->from);
 
-        $this->thing->json->setField("message1");
-        $this->thing->json->writeVariable(["ebay"], $text);
+        $this->thing->Write(["ebay"], $text, 'message1');
 
         $this->flag = "red";
         $this->response .= "Logging " . $request . " " . $log_text . ". ";
@@ -337,11 +335,13 @@ class Ebay extends Agent
         }
 
         // Log to the created error Thing.
-        $thing->json->writeVariable(["ebay", "state"], $this->state);
-        $thing->json->writeVariable(
+        $thing->Write(["ebay", "state"], $this->state);
+        $thing->Write(
             ["ebay", "refreshed_at"],
             $this->current_time
         );
+
+
     }
 
     function eBayGetSingle($ItemID)

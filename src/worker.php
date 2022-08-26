@@ -343,9 +343,12 @@ echo "Saw " . $manager_handler->queued_jobs . " jobs. worker dropped this job " 
     echo "worker wrote message to thing\n";
 
     $thing->db->setFrom($thing->from);
-
+/*
     $thing->json->setField("message0");
     $thing->json->writeVariable(["msg"], $arr);
+*/
+    $thing->Write(["msg"], $arr, 'message0');
+
 
     if ($do_not_respond == false) {
         echo "worker call agent\n";

@@ -20,10 +20,11 @@ class ThingChoice
      * @param unknown $uuid
      * @return unknown
      */
-    function __construct($uuid, $nom_from = null)
+    function __construct($thing, $uuid, $nom_from = null)
     {
-        $this->json = new ThingJson($uuid);
+        //$this->json = new ThingJson(null, $uuid);
 
+        $this->thing = $thing;
         $this->uuid = $uuid;
 
         $this->from = $nom_from;
@@ -175,16 +176,23 @@ class ThingChoice
         // Since Thing has control of which, this is satisfactory in terms of
         // over-writes of the $uuid record.
 
-        $this->json->setField("settings");
+//        $this->json->setField("settings");
 
         // Pretty hacky here with the 0.  This is because of how
         // PHP does the json -> php array conversion and back.
         // Seems to work consistently.  So working on it being the
         // simplest solution.  For now.
+/*
         $this->node_list = $this->json->readVariable([
             "choice",
             $this->name,
             0,
+        ]);
+*/
+        $this->node_list = $this->thing->Read([
+            "choice",
+            $this->name,
+            0, 'settings'
         ]);
 
         return $this->node_list;
@@ -204,8 +212,12 @@ class ThingChoice
             $state_map = $this->node_list;
         }
 
-        $this->json->setField("settings");
-        $this->json->writeVariable(["choice", $this->name], [$state_map]);
+//        $this->json->setField("settings");
+//        $this->json->writeVariable(["choice", $this->name], [$state_map]);
+
+        $this->thing->Write(["choice", $this->name], [$state_map], 'settings');
+
+
         $this->node_list = $state_map;
 
         return true;
@@ -229,12 +241,19 @@ class ThingChoice
         if ($variable == null) {
             $variable = $this->name;
         }
-
+/*
         $this->json->setField("variables");
         $this->current_node = $this->json->readVariable([
             $this->uuid,
             $variable,
         ]);
+*/
+        $this->current_node = $this->thing->Read([
+            $this->uuid,
+            $variable,
+        ], 'variables');
+
+
 
         // If the variable is not found return false.  Otherwise, return
         // the found state.
@@ -259,9 +278,13 @@ class ThingChoice
         if ($variable == null) {
             $variable = $this->name;
         }
-
+/*
         $this->json->setField("variables");
         $this->json->writeVariable([$this->uuid, $variable], $value);
+*/
+        $this->thing->Write([$this->uuid, $variable], $value, 'variables');
+
+
     }
 
     /**

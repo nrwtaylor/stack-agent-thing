@@ -2353,11 +2353,38 @@ Now draw the twilight.
             "vancouver toronto calgary montreal ottawa",
             $expand_places_input
         );
+
+        $expand_places_input = str_replace(
+            "canada",
+            "st johns churchill vancouver",
+            $expand_places_input
+        );
+
+
         $expand_places_input = str_replace(
             "places",
             "vancouver new york madrid",
             $expand_places_input
         );
+
+        $expand_places_input = str_replace(
+            "day twilight",
+            " ",
+            $expand_places_input
+        );
+
+        $expand_places_input = str_replace(
+            "twilight",
+            " ",
+            $expand_places_input
+        );
+
+        $expand_places_input = str_replace(
+            "day",
+            " ",
+            $expand_places_input
+        );
+
 
         //$ngrams = $this->extractNgrams($this->input);
 

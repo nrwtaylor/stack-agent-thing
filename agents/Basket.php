@@ -375,7 +375,8 @@ $this->assertIs("basket");
 
         $this->thing->console("getting a list of items in basket " . $this->basket_thing->nuuid . ".\n");
 
-        $this->items = json_decode($this->basket_thing->thing->associations);
+//        $this->items = json_decode($this->basket_thing->thing->associations);
+        $this->items = $this->basket_thing->associations;
 
 
         // Try some other things.
@@ -441,8 +442,8 @@ $this->thing->console( "Putin basket " . $picnic_uuid . "\n");
         }
 $this->thing->console("Putin basket " . $picnic_uuid . "\n");
 
-        $this->basket_thing->json->setField("associations");
-        $this->basket_thing->json->pushStream($picnic_uuid);
+        //$this->basket_thing->associations->setField("associations");
+        $this->basket_thing->associations->pushStream($picnic_uuid);
 
         $picnic_nuuid = substr($picnic_uuid, 0, 4);
 
@@ -483,9 +484,9 @@ $this->getItems();
 
             $this->thing->console("Dropping index " . $drop_index . ".\n");
 
-            $this->basket_thing->json->setField('associations');
+          //  $this->basket_thing->associations->setField('associations');
 
-            $this->basket_thing->json->popstream($drop_index);
+            $this->basket_thing->associations->popstream($drop_index);
             $this->inventoryBasket();
         }
 
@@ -500,8 +501,8 @@ $this->getItems();
         $pos = -1; // Last added
         $pos = 0; // First added
 
-        $this->basket_thing->json->setField('associations');
-        $this->basket_thing->json->popStream($pos);
+        //$this->basket_thing->associations->setField('associations');
+        $this->basket_thing->associations->popStream($pos);
 
 
     }

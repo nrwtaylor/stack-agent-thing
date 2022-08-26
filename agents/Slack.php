@@ -211,9 +211,8 @@ if (!isset($this->error_message)) {
         $this->thing->log('<pre> Agent "Slack" called eventSet()');
 
         $this->thing->db->setFrom($this->from);
+        $this->thing->Write(["slack"], $this->body, 'message0');
 
-        $this->thing->json->setField("message0");
-        $this->thing->json->writeVariable(["slack"], $this->body);
 
     }
 
@@ -223,8 +222,11 @@ if (!isset($this->error_message)) {
 
         $this->thing->db->setFrom($this->from);
 
-        $this->thing->json->setField("message0");
-        $this->body = $this->thing->json->readVariable(["slack"]);
+//        $this->thing->json->setField("message0");
+//        $this->body = $this->thing->json->readVariable(["slack"]);
+
+        $this->body = $this->thing->Read(["slack"], 'message0');
+
 
         $this->variablesGet();
 
@@ -263,11 +265,18 @@ if (!isset($this->error_message)) {
 
         $test_message = $this->makeMessage("command");
 
-        $this->thing->json->setField("message0");
-        $this->response_url = $this->thing->json->readVariable([
+//        $this->thing->json->setField("message0");
+//        $this->response_url = $this->thing->json->readVariable([
+//            "slack",
+//            "response_url",
+//        ]);
+
+
+        $this->response_url = $this->thing->Read([
             "slack",
             "response_url",
-        ]);
+        ], 'message0');
+
 
         if ($this->response_url != false) {
             $this->chat_webhookResponse(null, $test_message);
@@ -487,8 +496,6 @@ curl_setopt($slack_call, CURLOPT_HTTPHEADER, array(
 
     function chat_postMessage($to, $message = null)
     {
-        //$this->thing->json->setField("message1");
-        //$this->thing->json->writeVariable( array("test") , $to . $message  );
 
         //echo "chat_postMessage";
         //https://api.slack.com/methods/chat.postMessage
@@ -577,10 +584,10 @@ $data = http_build_query($message);
         ob_start();
         $test = ob_get_clean();
 
-        $this->thing->json->setField("message1");
-        $this->thing->json->writeVariable(
+        //$this->thing->json->setField("message1");
+        $this->thing->Write(
             ["debug"],
-            "char_postMessage" . " " . $to . " " . $test . " " . $url
+            "char_postMessage" . " " . $to . " " . $test . " " . $url, 'message1'
         );
 
         if ($response->ok) {

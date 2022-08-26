@@ -112,8 +112,8 @@ class Amazon extends Agent
 
         $this->thing->db->setFrom($this->from);
 
-        $this->thing->json->setField("message1");
-        $this->thing->json->writeVariable(["ebay"], $text);
+        $this->thing->Write(["amazon"], $text, 'message1');
+
 
         $this->response .= $request . " - " . $log_text . " ";
     }

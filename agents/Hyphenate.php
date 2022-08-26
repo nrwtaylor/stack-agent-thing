@@ -104,11 +104,12 @@ class Hyphenate extends Agent
 
     function set()
     {
-        $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["hyphenate", "received_at"],
             $this->thing->time()
         );
+
+
     }
 
     /**

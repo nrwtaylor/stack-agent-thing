@@ -18,6 +18,10 @@ class Portmanteau extends Agent
     {
     }
 
+    function wordsPortmanteau($text = null, $words_flag = true) {
+       return $this->getWords($text, $words_flag);
+    }
+
     /**
      *
      * @param unknown $message (optional)
@@ -26,10 +30,9 @@ class Portmanteau extends Agent
     {
         $words = [];
         $portmanteau = str_replace(" ","",$text);
+        $word_agent = new Word($this->thing, "word");
+
         if ($words_flag == true) {
-
-            $word_agent = new Word($this->thing, "word");
-
             $tokens = explode(" ",$text);
 
 //            while (strlen($text) > 0) {

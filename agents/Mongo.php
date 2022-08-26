@@ -7,7 +7,7 @@ class Mongo extends Agent
 {
     public $var = "hello";
 
-    function init()
+    public function init()
     {
         $this->hash_state = "off";
         if (isset($settings["settings"]["stack"]["hash"])) {
@@ -19,7 +19,7 @@ class Mongo extends Agent
             $this->hash_algorithm =
                 $settings["settings"]["stack"]["hash_algorithm"];
         }
-
+        $this->status = null;
         $this->initMongo();
     }
 
@@ -28,28 +28,28 @@ class Mongo extends Agent
         $this->mongo_test_flag = "off";
         $path =
             "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
-
         try {
             $client = new \MongoDB\Client($path);
             $this->db = $client;
             $this->collection = $this->db->stack_db->things;
+            $this->statusMongo('ready');
         } catch (\Throwable $t) {
-            $this->error = "Could not connect to MySQL database";
             $this->errorMongo($t->getMessage());
-            $this->collection = true;
         } catch (\Error $ex) {
             $this->errorMongo($ex->getMessage());
-
-            $this->error = "Could not connect to MySQL database";
-            $this->collection = true;
         }
     }
 
     public function errorMongo($text = null)
     {
+        var_dump("error" . $text);
         if ($text == null) {
             return;
         }
+        $this->statusMongo('error');
+        //var_dump("error: " . $text);
+        $this->error = $text;
+
         if (!isset($this->response)) {
             $this->response = "";
         }
@@ -59,100 +59,142 @@ class Mongo extends Agent
     // Useful later for matching in variables
     // https://groups.google.com/g/mongodb-user/c/lv8XbtAkS4w?pli=1
 
+    public function statusMongo($text = null)
+    {
+        if ($text != null) {
+            $this->status = $text;
+        }
+        return $this->status;
+    }
+
+    public function isReadyMongo()
+    {
+        if (isset($this->status) and $this->status == 'ready') {
+            return true;
+        }
+        return false;
+    }
+
     public function priorMongo()
     {
         $nom_from = $this->from;
-
-        $things = $this->collection->find(["from" => $nom_from]);
-        foreach ($things as $object_key => $thing) {
-            echo $thing["uuid"] .
-                " " .
-                (isset($thing["created_at"])
-                    ? $thing["created_at"]
-                    : "No created stamp") .
-                " " .
-                $thing["from"] .
-                " " .
-                $thing["subject"] .
-                "\n";
+        if (!$this->isReadyMongo()) {
+            return;
         }
+
+        $things = $this->collection->find(["nom_from" => $nom_from]);
+
+        foreach ($things as $object_key => $thing) {
+            $conditioned_things[$thing['uuid']] = $thing;
+        }
+
+        usort($conditioned_things, function ($first, $second) {
+            // dev Allow null fields in sort.
+            if ($first['created_at'] == null) {
+                return +1;
+            }
+            if ($second['created_at'] == null) {
+                return -1;
+            }
+
+            return strtotime($first['created_at']) -
+                strtotime($second['created_at']);
+        });
+        $obj = $conditioned_things[0];
+
+        $arr = (array) $obj;
+        unset($arr['_id']);
+        return $arr;
     }
 
     public function testMongo()
     {
+        $test_result = "NOT OK";
+        $test_response = "Test started. ";
         if ($this->mongo_test_flag != "on") {
+            $test_response .= "Test flag not on";
+            $this->response .= $test_response;
             return;
         }
-        if ($this->db === true) {
-            $this->response .= "Mongo not available. No test performed. ";
+
+        if (!$this->isReadyMongo()) {
+            $test_response .= "Mongo not ready. ";
+            $this->response .= $test_response;
             return;
         }
 
-        $this->createMongo("test create mongo", "mongo");
+        $test_create_uuid = $this->createMongo("test create mongo", "mongo");
+        $test_response .= "Created Mongo thing . " . $test_create_uuid . ". ";
+        $prior_thing = $this->priorMongo();
+        $test_response .=
+            "Got prior thing " .
+            $prior_thing['uuid'] .
+            " " .
+            $prior_thing['subject'] .
+            ". ";
+        // Test will fail if this uuid does not exist in database.
 
-        $this->priorMongo();
-
-        $uuid = "5282cdc9-8252-4bd6-9d03-e1e0c0cec927";
-
+        $uuid = $test_create_uuid;
         $thing = [
-            "uuid" => $this->uuid,
-            "subject" => $this->subject,
-            "from" => $this->from,
-            "to" => $this->to,
+            //            "uuid" => $uuid,
+            "task" => $this->subject,
+            "nom_from" => $this->from,
+            "nom_to" => $this->to,
             "settings" => null,
             "variables" => null,
         ];
-        $result = $this->collection->insertOne($thing);
 
-        if (!isset($this->response)) {
-            $this->response = "";
-        }
-        $this->response .= "Inserted with Object ID '{$result->getInsertedId()}'. ";
+        $result = $this->setMongo($uuid, $thing);
 
         $value = $this->getMongo($uuid);
+        $subject = $value['subject'];
 
-        $this->response .= "Got value for key " . $uuid . ". ";
+        $test_response .= "Got value '{$subject}' for uuid " . $uuid . ". ";
 
-        $condition = ["_id" => $uuid];
-
+        // Now try with a dynamically got uuid
         // Dev review how this works.
+
+        $uuid = $this->createMongo($this->subject, $this->from);
+        $test_response .= "createMongo created record for " . $uuid . ". ";
+
+        $result = $this->getMongo($uuid);
+
         $result = $this->setMongo($uuid, [$thing]);
-        $result = $this->setMongo(null, [$thing]);
-
-        $result = $this->findMongo(["subject" => "mongo"]);
-
-        $this->response .= "Found " . count($result) . " things. ";
-
-        foreach ($result as $entry) {
-            //            echo $entry["_id"], ": ", $entry["subject"], "\n";
-        }
 
         // For testing
-        $this->forgetMongo("609b5994088b47714d648172");
+        $this->forgetMongo($uuid);
+
+        // Test find
+        $result = $this->findMongo(["subject" => "mongo"]);
+        $test_response .= "Found " . count($result) . " things. ";
+
+        $this->test_response = $test_response;
+        $this->test_result = $test_result;
+        $this->response .= $test_response . "Test result: " . $test_result;
     }
 
-    // dev
-
-    // START HERE
-    public function writeMongo($field_text, $string_json)
+    public function writeMongo($field_text, $arr)
     {
+        if (!isset($this->write_fail_count)) {
+            $this->write_fail_count = 0;
+        }
+
+        if (!$this->isReadyMongo()) {
+            $this->write_fail_count += 1;
+            return true;
+        }
+
         $existing = $this->getMongo($this->uuid);
         //$variables = $existing['variables'];
         // Hmmm
         // Ugly but do this for now.
-        $j = new ThingJson($this->uuid);
-        $j->jsontoarrayJson($string_json);
-        $data = $j->jsontoarrayJson($string_json);
-        //        $this->setValueFromPath($this->array_data, $var_path, $value);
-        //        $this->arraytoJson();
-        //        $t = $this->write();
-
-        //         $this->setValueFromPath($this->array_data, $var_path, $value);
-
+        //     $j = new Json(null, $this->uuid);
+        //     $j->jsontoarrayJson($string_json);
+        //     $data = $j->jsontoarrayJson($string_json);
+        $data = $arr;
         $data = ["variables" => $data];
 
         // dev develop associations.
-        //$associations = null;
         if (isset($this->associations)) {
             $data["associations"] = $this->associations;
         }
@@ -174,14 +216,27 @@ class Mongo extends Agent
         }
 
         $existing = $this->getMongo($this->uuid);
+        if ($existing == false) {
+            $this->errorMongo("Existing uuid not found on write request.");
+            return false;
+        }
+
         $d = $data;
         if (is_array($existing)) {
             $d = array_replace_recursive($existing, $data);
         }
-
+        //var_dump("u", $this->uuid);
+        //var_dump("e", $d);
         // In development
-        //$this->db->set($this->uuid, $d);
-        $this->setMongo($this->uuid, $d);
+        $uuid = $this->setMongo($this->uuid, $d);
+        if ($uuid == true) {
+            $this->write_fail_count += 1;
+            return true;
+        }
+
+        var_dump("Mongo write " . $uuid);
+
+        return $uuid;
     }
 
     function run()
@@ -195,42 +250,40 @@ class Mongo extends Agent
     // use memcache model for get.
     public function getMongo($text = null)
     {
-        //if ($this->collection === true) {return true;}
+        // Get mongo key by uuid.
+        if (!$this->isReadyMongo()) {
+            return;
+        }
 
-        //var_dump("getMongo");
         $result = null;
-        //$this->collection = true;
         try {
-            $result = $this->collection->findOne(["_id" => $text]);
+            $result = $this->collection->findOne(["uuid" => $text]);
+            // $result = $this->collection->findOne(["_id" => $text]);
         } catch (\Throwable $t) {
-            //var_dump($t->getMessage());
-            //exit();
-            $this->error = "Could not connect to MySQL database";
             $this->errorMongo($t->getMessage());
-            $this->collection = true;
         } catch (\Error $ex) {
-            //var_dump($ex->getMessage());
-            //exit();
-
             $this->errorMongo($ex->getMessage());
-
-            $this->error = "Could not connect to MySQL database";
-            $this->collection = true;
         }
 
-        //        $result = $this->collection->findOne(["_id" => $text]);
         if ($result == null) {
-            return true;
+            return false;
         }
-        return iterator_to_array($result);
+        $thing = iterator_to_array($result);
+        unset($thing['_id']);
+        return $thing;
+        //        return iterator_to_array($result);
     }
-
-    // BETTER TO START here.
 
     public function createMongo($subject, $to)
     {
+        if (!$this->isReadyMongo()) {
+            return true;
+        }
+
         // Cannot create a thing on the stack with a specific uuid.
         // That's the rule.
+
+        // Enforce that here. And in setMongo.
 
         if (!isset($this->response)) {
             $this->response = "";
@@ -259,32 +312,71 @@ class Mongo extends Agent
             $from = $hash_nom_from;
         }
 
-        //$this->response .= "Created a Mongo Thing. ";
-
         $thing = [
-            //            "uuid" => $this->uuid,
-            "subject" => $subject,
-            "from" => $from,
-            "to" => $this->to,
+            "task" => $subject,
+            "nom_from" => $from,
+            "nom_to" => $this->to,
             "created_at" => $created_at,
             "variables" => null,
         ];
 
+        // dev
+        $uuid = Uuid::createUuid();
+
         /*
-        $a= $this->setMongo($this->uuid, [
-            'from' => $from,
-            'to' => $nom_to,
-            'task' => $task,
-            'created_at'=>$created_at
-        ]);
+        if (isset($this->thing)) {
+            if ($this->thing == null) {
+                $t = new Thing(null);
+                $uuid = $t->uuid;
+            } else {
+                $uuid = $this->thing->getUUid();
+            }
+        }
+
+        if (!isset($this->thing)) {
+            $t = new Thing(null);
+            $uuid = $t->uuid;
+        }
 */
-        $a = $this->setMongo(null, $thing); // null creates a new uuid
-        return $a;
+        $thing['uuid'] = $uuid;
+
+        try {
+            $result = $this->collection->insertOne($thing);
+        } catch (\Throwable $t) {
+            $this->errorMongo($t->getMessage());
+            return true;
+        } catch (\Error $ex) {
+            $this->errorMongo($ex->getMessage());
+            return true;
+        }
+
+        // dev Test for successful insertion of new record.
+
+        // setMongo returns the key
+        //        $key_uuid = $this->setMongo(null, $thing); // null creates a new uuid
+        return $uuid;
     }
 
     // use memcache model for set.
     public function setMongo($key = null, $variable = null)
     {
+        if (!$this->isReadyMongo()) {
+            return true;
+        }
+
+        if (isset($variable['uuid'])) {
+            if ($variable['uuid'] != $key and $key != null) {
+                $this->errorMongo(
+                    "Thing update requested with inconsistent uuids."
+                );
+                return true;
+            }
+
+            if ($key == null) {
+                $key = $variable['uuid'];
+            }
+        }
+
         // Stack rule.
         // You can not create a specific uuid on the stack.
 
@@ -296,12 +388,12 @@ class Mongo extends Agent
                 return true;
             }
         }
+
         // Create random uuid key if none provided.
         if ($key == null) {
             // Because thing is the only plae uuids are made.
             $t = new Thing(null);
             $key = $t->uuid;
-
             //$key = $uuid->randomUuid();
             //            $key = $this->thing->getUUid();
 
@@ -319,54 +411,56 @@ class Mongo extends Agent
             $variable = ['task'=>$task, 'nom_from'=>$from, 'nom_to'=>$to, 'variables'=>$variable];
 */
         }
-        //var_dump("uuid", $this->uuid);
-        //var_dump("key", $key);
         $condition = ["uuid" => $key];
-
-        //$condition = ["_id" => $key];
 
         $value = $variable;
         if (is_array($variable) and isset($variable[0])) {
             $value = $variable[0];
         }
+        $value['uuid'] = $key;
 
         try {
             $result = $this->collection->updateOne($condition, [
                 '$set' => $value,
             ]);
         } catch (\Throwable $t) {
-            $this->error = "Could not connect to Mongo database";
             $this->errorMongo($t->getMessage());
-            $this->collection = true;
+            return true;
         } catch (\Error $ex) {
             $this->errorMongo($ex->getMessage());
-
-            $this->error = "Could not connect to Mongo database";
-            $this->collection = true;
+            return true;
         }
-
         return $key;
     }
 
     // Delete by key.
-    public function forgetMongo($key = null)
+    public function forgetMongo($uuid = null)
     {
-        if ($this->collection === true) {
-            return true;
-        }
-        if ($key == null) {
+        if (!$this->isReadyMongo()) {
             return true;
         }
 
-        $condition = ["_id" => $key];
+        if ($uuid == null) {
+            return true;
+        }
+
+        $condition = ["uuid" => $key];
 
         $result = $this->collection->deleteOne($condition);
         $count = $result->getDeletedCount();
-        return $result;
+        $this->response .= "Deleted " . $count . " thing. ";
+        if ($count == 1) {
+            return true;
+        }
+        return false;
     }
 
     public function findMongo($arr)
     {
+        if (!$this->isReadyMongo()) {
+            return true;
+        }
+
         // example
         // [ '_id' => $uuid ]
         $result = $this->collection->find($arr);
@@ -379,26 +473,35 @@ class Mongo extends Agent
         return $arr;
     }
 
+    /**
+     *
+     * @return unknown
+     */
     public function respondResponse()
     {
         $this->thing->flagGreen();
 
-        $this->thing_report["info"] =
-            "This is an agent to manage Mongo database calls.";
-        $this->thing_report["help"] = "Not yet user facing.";
-
-        $this->thing_report["message"] = $this->sms_message;
-        $this->thing_report["txt"] = $this->sms_message;
+        $this->thing_report["email"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report["info"] = $message_thing->thing_report["info"];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
+
+        $this->thing_report["keyword"] = "mongo";
+        $this->thing_report["help"] = "Mongo database handler.";
     }
 
     function makeSMS()
     {
         $this->node_list = ["mongo" => ["mongo"]];
 
-        $sms = "MONGO | " . $this->response;
+        $text_response = $this->response;
+
+        //        $empty_agent = new _Empty($this->thing, "empty");
+        //        if ($empty_agent->isEmpty($this->response)) {
+        //            $text_response = "Mongo connector responded. ";
+        //        }
+
+        $sms = "MONGO | " . $text_response;
 
         $this->sms_message = $sms;
         $this->thing_report["sms"] = $sms;
@@ -407,13 +510,33 @@ class Mongo extends Agent
     public function readSubject()
     {
         $input = $this->assert($this->input);
+        $uuid = $this->extractUuid($input);
+
         if ($input == "test") {
             $this->mongo_test_flag = "on";
             $this->testMongo();
         }
 
         if ($input == "prior") {
-            $this->priorMongo();
+            $prior_thing = $this->priorMongo();
+            $this->response .=
+                "Got prior thing " .
+                $prior_thing['uuid'] .
+                " " .
+                $prior_thing['subject'] .
+                ". ";
+        }
+
+        if ($this->hasText($input, 'get')) {
+            //    if ($input == "get") {
+            $thing = $this->getMongo($uuid);
+            $this->response .=
+                "Got thing " . $uuid . " " . $thing['subject'] . ". ";
+        }
+        if ($this->hasText($input, 'create')) {
+            //    if ($input == "create") {
+            $create_mongo_uuid = $this->createMongo("foo", "bar");
+            $this->response .= "Created " . $create_mongo_uuid . ". ";
         }
     }
 }

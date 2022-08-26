@@ -347,9 +347,8 @@ class Stripe extends Agent
                 $this->thing->log('<pre> Agent "Slack" called eventSet()');
 
                 $this->thing->db->setFrom($this->from);
+                $this->thing->Write(["stripe"], $input, 'message0');
 
-                $this->thing->json->setField("message0");
-                $this->thing->json->writeVariable(["stripe"], $input);
             }
         }
     }
@@ -429,8 +428,7 @@ class Stripe extends Agent
 
         $this->thing->db->setFrom($this->from);
 
-        $this->thing->json->setField("message1");
-        $this->thing->json->writeVariable(["stripe"], $text);
+        $this->thing->Write(["stripe"], $text, 'message1');
 
         $this->flag = "red";
         $this->response .= "Logging " . $request . " " . $log_text . ". ";
@@ -486,8 +484,8 @@ class Stripe extends Agent
         }
 
         // Log to the created error Thing.
-        $thing->json->writeVariable(["stripe", "state"], $this->state);
-        $thing->json->writeVariable(
+        $thing->Write(["stripe", "state"], $this->state);
+        $thing->Write(
             ["stripe", "refreshed_at"],
             $this->current_time
         );

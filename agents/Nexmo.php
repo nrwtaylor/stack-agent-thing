@@ -83,8 +83,7 @@ class Nexmo
 
         $this->thing->db->setFrom($this->from);
 
-        $this->thing->json->setField("message0");
-        $this->thing->json->writeVariable(["nexmo"], $input);
+        $this->thing->Write(["nexmo"], $input, 'message0');
 
     }
 

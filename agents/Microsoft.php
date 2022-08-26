@@ -39,8 +39,9 @@ class Microsoft extends Agent
 
         $this->thing->db->setFrom($this->from);
 
-        $this->thing->json->setField("message0");
-        $this->thing->json->writeVariable(["microsoft"], $input);
+        $this->thing->Write(["microsoft"], $input, 'message0');
+
+
     }
 
     function getResponseurl()
@@ -399,10 +400,6 @@ Content-Type: application/json
 
         // Check HTTP return code, too; might be something else than 200
         $httpReturnCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        //$this->thing->json->setField("message1");
-        //$this->thing->json->writeVariable(["microsoft"], $jsonData);
-
 
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 

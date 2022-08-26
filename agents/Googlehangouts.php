@@ -70,8 +70,9 @@ class GoogleHangouts
 
         $this->thing->db->setFrom($this->from);
 
-        $this->thing->json->setField("message0");
-        $this->thing->json->writeVariable( array("google") , $input  );
+        $this->thing->Write( array("google") , $input, 'message0'  );
+
+
     }
 
     public function getClient()

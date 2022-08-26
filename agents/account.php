@@ -146,7 +146,7 @@ class Clerk {
 			}
 
 
-		$this->thing->json->writeVariable(array("account","number"),  $new_number);
+		$this->thing->Write(array("account","number"),  $new_number);
 
 
 		$this->thing->flagGreen();
