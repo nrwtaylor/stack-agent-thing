@@ -158,10 +158,14 @@ class Agent
         $this->thing->log("running on Thing " . $this->thing->nuuid . ".");
 
         $this->resource_path = $GLOBALS["stack_path"] . "resources/";
-        $this->agents_path = $GLOBALS["stack_path"] . "agents/";
+        //$this->agents_path = $GLOBALS["stack_path"] . "agents/";
+        //$this->agents_path =
+        //    $GLOBALS["stack_path"] .
+        //    "vendor/nrwtaylor/stack-agent-thing/agents/";
+
+        // Refactor to use local path per composer. Review.
         $this->agents_path =
-            $GLOBALS["stack_path"] .
-            "vendor/nrwtaylor/stack-agent-thing/agents/";
+            __DIR__ . "/";
 
         if (
             isset($this->thing->container["api"][strtolower($this->agent_name)])
@@ -2250,7 +2254,6 @@ if ($pid == -1) {
                 $this->variantsAgent($keyword, "")
             );
         }
-
         //        foreach (["", "s", "es"] as $postfix_variant) {
         foreach ($agent_names as $keyword) {
             // Don't allow agent to be recognized
@@ -2402,7 +2405,6 @@ if ($pid == -1) {
             );
             $this->thing->console($j["agent_name"] . " " . $j["score"] . "\n");
         }
-
     }
 
     // Take a piece of returned text,
