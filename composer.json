@@ -1,13 +1,12 @@
 {
     "name": "nrwtaylor/stack-agent-thing",
-    "version": "0.3.0",
     "description": "Stack Agent Thing framework",
     "require": {
         "slim/slim": "^3.0",
-        "slim/php-view": "*",
-        "ramsey/uuid": "^3.7",
+        "slim/php-view": "^3.0",
+        "ramsey/uuid": "^4.3",
         "monolog/monolog": "^1.23",
-        "hyperthese/php-serial": "*",
+        "hyperthese/php-serial": "^1.0",
         "linkorb/tty": "dev-master",
         "setasign/fpdi-fpdf": "^2.0",
         "endroid/qr-code": "^4",
@@ -24,7 +23,6 @@
     },
     "autoload": {
         "psr-4": {"Nrwtaylor\\StackAgentThing\\": ["src/", "agents/"]}
-
     },
     "minimum-stability": "dev",
     "prefer-stable": true
