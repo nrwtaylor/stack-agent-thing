@@ -528,7 +528,7 @@ $transducers[$i]['sensor_id'] = $sensor_id;
 
         $SVs = [];
 
-        $SVs[1] = [
+        $SVs[$SV_PRN_number[1]] = [
             "SV_PRN_number" => $SV_PRN_number[1],
             "elevation_in_degrees" => $elevation_in_degrees[1],
             "azimuth_degrees_from_true_north" =>
@@ -545,7 +545,7 @@ $transducers[$i]['sensor_id'] = $sensor_id;
             $azimuth_degrees_from_true_north[2] = $parts[10];
             $SNR[2] = $parts[11];
 
-            $SVs[2] = [
+            $SVs[$SV_PRN_number[2]] = [
                 "SV_PRN_number" => $SV_PRN_number[2],
                 "elevation_in_degrees" => $elevation_in_degrees[2],
                 "azimuth_degrees_from_true_north" =>
@@ -562,7 +562,7 @@ $transducers[$i]['sensor_id'] = $sensor_id;
             $azimuth_degrees_from_true_north[3] = $parts[14];
             $SNR[3] = $parts[15];
 
-            $SVs[3] = [
+            $SVs[$SV_PRN_number[3]] = [
                 "SV_PRN_number" => $SV_PRN_number[3],
                 "elevation_in_degrees" => $elevation_in_degrees[3],
                 "azimuth_degrees_from_true_north" =>
@@ -579,7 +579,7 @@ $transducers[$i]['sensor_id'] = $sensor_id;
             $azimuth_degrees_from_true_north[4] = $parts[18];
             $SNR[4] = $parts[19];
 
-            $SVs[4] = [
+            $SVs[$SV_PRN_number[4]] = [
                 "SV_PRN_number" => $SV_PRN_number[4],
                 "elevation_in_degrees" => $elevation_in_degrees[4],
                 "azimuth_degrees_from_true_north" =>
