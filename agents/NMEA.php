@@ -202,6 +202,39 @@ return $sensor_id;
         return $apb;
     }
 
+/*
+
+$THROT,0.0,A*3A
+$HCHDT,343.2,T*2F
+
+*/
+    public function rotNMEA($text)
+    {
+        $parts = $this->explodeNMEA($text);
+        $rate_of_turn = $parts[1];
+        $data_validity = $parts[2];
+
+        $rot = [
+            "rate_of_turn" => $rate_of_turn,
+            "data_validity" => $data_validity,
+        ];
+        return $rot;
+    }
+
+    public function hdtNMEA($text)
+    {
+        $parts = $this->explodeNMEA($text);
+        $heading_in_degrees = $parts[1];
+        $true_north = $parts[2];
+
+        $hdt = [
+            "heading_in_degrees" => $heading_in_degrees,
+            "true_north" => $true_north,
+        ];
+        return $hdt;
+    }
+
+
     // XTE - Cross-Track Error, Measured
     public function xteNMEA($text)
     {
