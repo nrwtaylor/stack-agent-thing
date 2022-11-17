@@ -1654,6 +1654,7 @@ continue;
     public function readShip($text = null)
     {
 $unrecognized_sentences = [];
+$this->text = $text;
         // Handle a NMEA string
         if ($text === null) {
             return null;

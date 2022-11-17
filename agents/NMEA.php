@@ -224,14 +224,57 @@ $HCHDT,343.2,T*2F
     public function hdtNMEA($text)
     {
         $parts = $this->explodeNMEA($text);
-        $heading_in_degrees = $parts[1];
+        $true_heading_in_degrees = $parts[1];
         $true_north = $parts[2];
 
         $hdt = [
-            "heading_in_degrees" => $heading_in_degrees,
+            "true_heading_in_degrees" => $true_heading_in_degrees,
             "true_north" => $true_north,
         ];
         return $hdt;
+    }
+
+
+    public function hdmNMEA($text)
+    {
+        $parts = $this->explodeNMEA($text);
+        $magnetic_heading_in_degrees = $parts[1];
+        $magnetic_north = $parts[2];
+
+        $hdm = [
+            "magnetic_heading_in_degrees" => $magnetic_heading_in_degrees,
+            "magnetic_north" => $magnetic_north,
+        ];
+        return $hdm;
+    }
+
+
+    public function hdgNMEA($text)
+    {
+/*
+
+$--HDG,x.x,x.x,a,x.x,a*hh<CRLF>
+
+The two dashes can be almost anything (often HS for heading sensor), most units reading in data do not bother checking. The first x.x is the magnetic heading, the second the magnetic deviation with the a being E/W and the third the magnetic variation with the a as E/W.
+https://forums.ybw.com/index.php?threads/nmea-hdg-syntax-error.88883/
+*/
+        $parts = $this->explodeNMEA($text);
+        $magnetic_heading_in_degrees = $parts[1];
+        $magnetic_deviation_in_degrees = $parts[2];
+        $magnetic_deviation_east_west = $parts[3];
+
+        $magnetic_variation_in_degrees = $parts[4];
+        $magnetic_variation_east_west = $parts[5];
+
+
+        $hdg = [
+            "magnetic_heading_in_degrees" => $magnetic_heading_in_degrees,
+            "magnetic_deviation_in_degrees" => $magnetic_deviation_in_degrees,
+            "magnetic_deviation_east_west" => $magnetic_deviation_east_west,
+            "magnetic_variation_in_degrees" => $magnetic_variation_in_degrees,
+            "magnetic_variation_east_west" => $magnetic_variation_east_west,
+        ];
+        return $hdg;
     }
 
 
