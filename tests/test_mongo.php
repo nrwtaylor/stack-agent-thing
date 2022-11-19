@@ -2,7 +2,6 @@
 namespace Nrwtaylor\StackAgentThing;
 require '/var/www/stackr.test/vendor/autoload.php';
 
-
 //http://project-stack.dev:8080/stackfunctest.php
 
 ini_set('display_startup_errors', 1);
