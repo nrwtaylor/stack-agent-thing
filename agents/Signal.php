@@ -359,7 +359,7 @@ if (isset($this->signals[0])) {
             return true;
         }
 
-        $signal = $this->thing->json->jsontoArray($thing->thing->variables)[
+        $signal = $this->thing->variables->jsontoArray($thing->thing->variables)[
             'signal'
         ];
 
@@ -396,7 +396,7 @@ if (isset($this->signals[0])) {
 
         $this->signal_thing = new Thing($uuid);
 
-        $signal = $this->thing->json->jsontoArray(
+        $signal = $this->thing->variables->jsontoArray(
             $this->signal_thing->thing->variables
         )['signal'];
 
@@ -490,13 +490,13 @@ if (isset($this->signals[0])) {
 
         if (
             isset(
-                $this->thing->json->jsontoArray($this->thing->thing->variables)[
+                $this->thing->variables->jsontoArray($this->thing->thing->variables)[
                     'signal'
                 ]
             )
         ) {
             // First is there a signal in this thing.
-            $signal = $this->thing->json->jsontoArray(
+            $signal = $this->thing->variables->jsontoArray(
                 $this->thing->thing->variables
             )['signal'];
 

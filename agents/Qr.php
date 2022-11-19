@@ -41,7 +41,12 @@ class Qr extends Agent
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->Write(["qr", "refreshed_at"], $time_string);
+
+            $this->thing->Write(
+                ["qr", "refreshed_at"],
+                $time_string
+            );
+
         }
 
         $this->refreshed_at = strtotime($time_string);
@@ -64,7 +69,11 @@ class Qr extends Agent
     }
 */
 
-    function extractQr($input)
+    function extractQr($input) {
+        return extractQuickresponse($input);
+
+    }
+    function extractQuickresponse($input)
     {
         if (!isset($this->quick_responses)) {
             $this->quick_responses = [];

@@ -118,7 +118,7 @@ class Mysql extends Agent
         // https://stackoverflow.com/questions/6263443/pdo-connection-test/6263868#6263868
         try {
             $pdo = new PDO(
-                "mysql:host=" . $this->host . ";dbname=" . $this->dbname,
+                "mysql:host=" . $this->host . ";dbname=" . $this->dbname . ";charset=utf8",
                 $this->user,
                 $this->pass
             );

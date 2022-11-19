@@ -544,7 +544,7 @@ $this->log("Thing database connected.");} else {$this->log("Problem with thing d
 
         // Kind of ugly.  But I guess this isn't Python.  And null
         // accounts can't be allowed.
-        if ($this->stack_account != null) {
+        if ((isset($this->stack_account)) and ($this->stack_account != null)) {
             $this->newAccount(
                 $this->stack_uuid,
                 $this->stack_account['account_name'],
@@ -552,7 +552,7 @@ $this->log("Thing database connected.");} else {$this->log("Problem with thing d
             );
         }
 
-        if ($this->thing_account != null) {
+        if ((isset($this->stack_account)) and ($this->thing_account != null)) {
             $this->newAccount(
                 $this->uuid,
                 $this->thing_account['account_name'],

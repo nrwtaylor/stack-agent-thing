@@ -849,16 +849,18 @@ public function __set($name, $value) {
 
         $this->makeSMS();
 
-        if (
-            isset($this->error) and
-            $this->error != "" and
-            $this->error != null
-        ) {
-            $sms = $this->thing_report["sms"];
-            $this->sms_message = $sms . " " . $this->error;
-            $this->thing_report["sms"] = $sms . " " . $this->error;
-        }
         $this->thing->log("completed make of sms channel.");
+
+$this->makeDiscord();
+        //var_dump($this->error);
+        //$bracket_agent = new Url($this->thing, 'url');
+
+
+        if (isset($this->error) and $this->error != "" and $this->error != null) {
+           $sms = $this->thing_report['sms'];
+           $this->sms_message = $sms . " " . $this->error;
+           $this->thing_report['sms'] = $sms . " " . $this->error;
+        }
 
         // Snippet might be used by web.
         // So run it first.
@@ -875,7 +877,7 @@ public function __set($name, $value) {
         $this->makeJson();
 
         // Explore adding in INFO and HELP to web response.
-        $dev_agents = ["response", "help", "info", "sms", "message"];
+        $dev_agents = ["response", "help", "info", "sms", "message","link"];
         $prod_agents = ["response", "help", "info"];
 
         $agents = $dev_agents;
@@ -905,6 +907,15 @@ public function __set($name, $value) {
                 // dev stack filter out repeated agent web reports
                 $needle = "<b>" . strtoupper($agent_name) . "</b>";
                 if (strpos($this->thing_report["web"], $needle) !== false) {
+                    continue;
+                }
+
+                if (strtolower($agent_name) =='link') {
+                $web .= "<b>" . strtoupper($agent_name) . "</b><p>";
+
+                    $web .= '<a href="' . $this->thing_report[$agent_name] .'">'. $this->thing_report[$agent_name]. "</a>";
+                $web .= "<p>";
+
                     continue;
                 }
 
@@ -998,6 +1009,28 @@ public function __set($name, $value) {
                 }
             }
         }
+/*
+//$this->makeDiscord();
+$d = "";
+if ((!isset($this->thing_report['discord'])) and (isset($this->thing_report['sms']))) {
+//$this->thing_report['discord'] = $bracket_agent->bracketUrl($this->thing_report['sms'] );
+$d = $this->thing_report['sms'];
+}
+
+if (isset($this->thing_report['discord']))  {
+//$this->thing_report['discord'] = $bracket_agent->bracketUrl($this->thing_report['sms'] );
+$d = $this->thing_report['discord'];
+}
+
+
+//$url_agent = new Url($this->thing, 'url');
+//var_dump($d);
+//$d = $this->bracketUrl($d);
+$this->thing_report['discord'] =$d;
+
+
+*/
+//$this->discordAgent($d);
 
         $this->makeThingreport();
 
@@ -1034,6 +1067,19 @@ public function __set($name, $value) {
         }
     }
 
+public function discordAgent($text = null) {
+if (!isset($this->thing->url_handler)) {
+$this->thing->url_handler = new Url($this->thing, 'url');
+}
+$this->thing->url_handler->bracketUrl($text);
+return;
+}
+
+public function makeDiscord() {
+
+//$this->discord_message = $this->sms_message . "y";
+//$this->thing_report['discord'] = $this->discord_message;
+}
     /**
      *
      */
@@ -1658,21 +1704,41 @@ public function __set($name, $value) {
         }
     }
 
+
+    // Dev __call recognise snake case
+    public function firstLetterCapitalise($text) {
+       return ucfirst($text);
+    }
+
     /**
      *
      */
     public function makeInfo()
     {
+
         if (!isset($this->thing_report["info"])) {
             if (isset($this->info)) {
-                $this->thing_report["info"] = $this->info;
+                $info = $this->firstLetterCapitalise($this->info);
+                $this->thing_report["info"] = $info;
                 return;
             }
 
             $info = $this->info();
+
             $this->thing_report["info"] = $info;
             $this->info = $info;
         }
+
+        if (isset($this->thing_report['info'])) {
+
+           $info = $this->thing_report['info'];
+        }
+
+        $info = $this->firstLetterCapitalise($info);
+
+$this->info = $info;
+$this->thing_report['info'] = $info;
+
     }
 
     public function info()
@@ -1783,6 +1849,7 @@ public function __set($name, $value) {
                 $this->message = $this->thing_report['sms'];
             }
         }
+
     }
     /**
      *
@@ -1988,7 +2055,6 @@ public function __set($name, $value) {
         if (isset($this->translated_input)) {
             $text = $this->translated_input;
         }
-
         switch (true) {
             case isset($this->input):
                 break;
@@ -2509,6 +2575,7 @@ if ($pid == -1) {
         } else {
             $arr = $this->ngramsText($agent_input_text);
         }
+
         // Does this agent have code.
         $this->validateAgents($arr);
 
@@ -2556,7 +2623,6 @@ if ($pid == -1) {
         }
         // Does this agent provide a text response.
         $this->responsiveAgents($this->agents);
-
         foreach ($this->responsive_agents as $i => $responsive_agent) {
         }
 
@@ -2612,7 +2678,6 @@ if ($pid == -1) {
         // TODO recognize piped text from command line
 
         // subject and agent_input
-
         if ($this->agent_input == null) {
             $input = $this->to . " " . $this->subject;
         } else {
@@ -2631,7 +2696,6 @@ if ($pid == -1) {
                 $t = trim($t);
                 $button_agent = $t;
             }
-
             $agent_tokens = explode(" ", $this->agent_input);
             // Expect at least  tokens.
             // Get the last alpha tokens.
@@ -2641,16 +2705,21 @@ if ($pid == -1) {
                 //if (is_string($agent_token)) {
 
 $g = str_replace(" ", "", $agent_token);
+
+
 $g = str_replace("-", "", $g);
 
      if (ctype_alpha($g) === false) {
        //         if (ctype_alpha(str_replace(" ", "", $agent_token)) === false) {
+
+
                     break;
                 }
                 $selected_agent_tokens[] = $agent_token;
             }
-
+//exit();
             $token_agent = implode(" ", array_reverse($selected_agent_tokens));
+
             $agglutinated_token_agent = implode(
                 "",
                 array_reverse($selected_agent_tokens)
@@ -2683,7 +2752,6 @@ $g = str_replace("-", "", $g);
 if ("is ".$button_agent ." button" == $token_agent) {
 $flag = true;
 }
-
 
                 if ($flag === false) {
                     return false;
@@ -2754,7 +2822,6 @@ $flag = true;
 
         // See if this matches a stripe token
         if (!($n == false || $n == true)) {
-            // if ($n != false) {
             $temp_email = $this->thing->db->from;
             $this->thing->db->from = "stripe" . $this->mail_postfix;
 
@@ -3482,12 +3549,7 @@ echo "TRUE";
             return $b["score"] - $a["score"];
         });
 
-        //foreach($this->responsive_agents as $i=>$r) {
-        //$r['thing_report'] = null;
-        //}
         foreach ($this->responsive_agents as $i => $responsive_agent) {
-            //echo $responsive_agent['agent_name'] . " " . $responsive_agent['score'];
-            //echo "\n";
         }
 
         if (count($this->responsive_agents) > 0) {

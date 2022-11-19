@@ -183,7 +183,8 @@ function loadRoute($token)
 
         $this->thing->flagGreen();
 
-        $messacge_thing = new Message($this->thing, $this->thing_report);
+        $message_thing = new Message($this->thing, $this->thing_report);
+
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
         $this->thing_report['thing'] = $this->thing->thing;
@@ -226,7 +227,7 @@ function loadRoute($token)
     }
 
     public function getRoutes() {
-$allowed_endpoints = [];
+
         $allowed_endpoints = [];
         if ((isset($this->allowed_routes_resource)) and (file_exists($this->resource_path .
             $this->allowed_routes_resource))) {

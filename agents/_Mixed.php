@@ -29,6 +29,7 @@ return false;
 
     public function getNgrams($input, $n = 3, $delimiter = null) {
 if ($delimiter == null) {$delimiter = "";}
+
 if (!isset($this->ngrams)) {$this->ngrams = array();}
         $words = explode(' ', $input);
         $ngrams = array();
@@ -130,6 +131,7 @@ $this->thing_report['sms'] = "MIXED";
     {
 }
 
+
     public function get()
     {
         $time_string = $this->thing->Read(["mixed", "refreshed_at"]);
@@ -146,13 +148,6 @@ $this->thing_report['sms'] = "MIXED";
     {
         // Log which agent was requested ie Ebay.
         // And note the time.
-/*
-        $time_string = $this->thing->time();
-        $this->thing->Write(
-            array("mixed", "refreshed_at"),
-            $time_string
-        );
-*/
 
 /// ?
 //$place_agent thing = new Place($this->thing, $ngram);

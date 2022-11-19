@@ -64,21 +64,22 @@ class Uuid extends Agent
         $this->uuids = $arr;
         return $arr;
     }
+    public function randomUuid() {
+
+      return $this->thing->getUuid();
+
+    }
+
 
     public function isUuid($text = null) {
 
         if ($text == null) {return false;}
 
-$uuids = $this->extractUuids($text);
-//        if (!isset($this->uuids)) {$this->extractUuids($text);}
+        if (!isset($this->uuids)) {$this->extractUuids($text);}
 
-        if (count($uuids) != 1) {return false;} // Too many. Is not A uuid.
+        if (count($this->uuids) != 1) {return false;} // Too many. Is not A uuid.
 
-
-//        if (count($this->uuids) != 1) {return false;} // Too many. Is not A uuid.
-
-//        if (strtolower($this->uuids[0]) == strtolower($text)) {
-        if (strtolower($uuids[0]) == strtolower($text)) {
+        if (strtolower($this->uuids[0]) == strtolower($text)) {
 
             return true;
 
@@ -109,9 +110,10 @@ $uuids = $this->extractUuids($text);
 
     public function set()
     {
-        $this->thing->Write(
+        $this->thing->json->setField("variables");
+        $this->thing->json->writeVariable(
             ["uuid", "refreshed_at"],
-            $this->thing->time()
+            $this->thing->json->time()
         );
     }
 
@@ -125,11 +127,11 @@ $uuids = $this->extractUuids($text);
         if ($input == null) {
             $input = $this->input;
         }
-
-        $uuids = $this->extractUuids($input);
-
+        if (!isset($this->uuids)) {
+            $this->extractUuids($input);
+        }
         $stripped_input = $input;
-        foreach ($uuids as $i => $uuid) {
+        foreach ($this->uuids as $i => $uuid) {
             $stripped_input = str_replace(
                 strtolower($uuid),
                 " ",
@@ -243,7 +245,7 @@ $uuids = $this->extractUuids($text);
         $web .= "<br>";
         $web .= $this->readUuid() . "<br>";
             "CREATED AT " .
-            strtoupper(date('Y M d D H:m', strtotime($this->created_at))) .
+            strtoupper(date('Y M d D H:m', $this->created_at)) .
             "<br>";
 
         $this->thing_report['web'] = $web;

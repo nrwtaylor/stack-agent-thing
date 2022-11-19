@@ -97,7 +97,7 @@ class Etiquette extends Agent
             ) {
                 $uuid = $thing_object['uuid'];
                 $variables_json = $thing_object['variables'];
-                $variables = $this->thing->json->jsontoArray($variables_json);
+                $variables = $this->thing->variables->jsontoArray($variables_json);
 
                 $response = $rule_agent->readRule($thing_object['task']);
 
@@ -165,7 +165,7 @@ class Etiquette extends Agent
             ) {
                 $uuid = $thing_object['uuid'];
                 $variables_json = $thing_object['variables'];
-                $variables = $this->thing->json->jsontoArray($variables_json);
+                $variables = $this->thing->variables->jsontoArray($variables_json);
 
                 $age =
                     strtotime($this->thing->time()) -

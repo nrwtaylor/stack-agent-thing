@@ -169,7 +169,7 @@ class Ping extends Agent
      */
     public function makeSMS()
     {
-        $sms = strtoupper($this->agent_name) . " | ";
+        $sms = strtoupper($this->agent_name) . "xxx | ";
         //$sms = "PING | A message from this Identity pinged us.";
         if (!isset($this->ping) or $this->ping == null) {
             $sms .= $this->message . " ";

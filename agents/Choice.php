@@ -459,7 +459,6 @@ if (!isset($this->json)) {return true;}
         // Then flag the Thing green (which I think is the default state
         // out of Thing).
         $choice_thing->flagGreen();
-
         return $choice_thing->uuid;
     }
 
@@ -582,9 +581,6 @@ return $this->makeLinks($state);
 
         $choice_list = $this->makeChoices(); //25-26s // As of 27 Feb - 3,857 ms
         // As of 7 June 2018 897ms to 1,116ms on stackr.test
-
-        //echo number_format(round( (microtime(true) - $this->split_time)*1000 )) . "ms"; echo "<br>";
-
         if ($choice_list != false) {
             foreach ($choice_list as $item) {
                 //$url = "http://project-stack.dev:8080/public/thing/".$item['uuid']."/".$this->alphanumeric($item['choice']);
@@ -594,7 +590,6 @@ return $this->makeLinks($state);
 //                $thing = new Thing(null);
                 $slug_agent = new Slug(null, "slug");
                 $choice_slug = $slug_agent->getSlug($item["choice"]);
-
                 $url =
                     $this->web_prefix .
                     "thing/" .
