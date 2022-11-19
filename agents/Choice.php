@@ -23,7 +23,9 @@ class Choice extends Agent
     function init() {
  //   function __construct($uuid, $nom_from = null)
  //   {
-        $this->json = new Json(null, $this->uuid);
+//        $this->json = new Json($this->uuid);
+            $this->json = new Json(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
+
 //$this->thing->console("Choice init called.". "\n");
 //        $this->uuid = $uuid;
 

@@ -800,10 +800,14 @@ class Callsign extends Agent
         $web .= "<b>Callsign Agent</b><br>";
         $web .= "<p>";
         $callsigns = $this->callsigns;
+
+if ($callsigns != null) {
+
         foreach ($callsigns as $key => $row) {
             $score[$key] = $row["score"];
         }
-        array_multisort($score, SORT_DESC, $callsigns);
+
+        array_multisort($callsigns, SORT_DESC, $score);
 
         foreach ($callsigns as $i => $callsign) {
             $web .= $callsign["callsign"];
@@ -814,13 +818,8 @@ class Callsign extends Agent
             $web .= "[" . $callsign["score"] . "]";
             $web .= "<br />";
         }
-        /*
-        $web .= "</a>";
-        $web .= "<br>";
-        $web .= '<b>Callsign Agent</b><br>';
-        $web .= "<p>";
-        $web .= "No web response available.";
-*/
+}
+
         $this->web_message = $web;
         $this->thing_report["web"] = $web;
     }

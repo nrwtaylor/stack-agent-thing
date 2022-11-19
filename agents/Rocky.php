@@ -440,6 +440,8 @@ class Rocky extends Agent
     {
         $this->getMessages();
 
+if (!is_array($this->messages)) {return;}
+
         if ($this->inject == false) {
             $this->num = array_rand($this->messages);
             $this->inject = $this->bank . "-" . $this->num;

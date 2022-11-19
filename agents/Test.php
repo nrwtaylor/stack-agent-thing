@@ -197,6 +197,10 @@ class Test extends Agent
         $this->agentsTest();
         $files = $this->agents;
 
+        if ($files == null) {
+$this->response .= "Agent did not get a test.";
+return true;}
+
         $file = $files[array_rand($files)];
 
         $tokens = explode(".", $file);
@@ -379,8 +383,8 @@ class Test extends Agent
     {
         $input = $this->input;
         if ($input == "test") {
-            $this->randomTest();
-            $this->response .= "Ran a random test. ";
+            $res = $this->randomTest();
+            if ($res !== true) {$this->response .= "Ran a random test. ";}
             return;
         }
 

@@ -84,26 +84,15 @@ mysql: ## Set up MySQL
 php: ## Set up PHP extensions
 	@echo "===== Setting up PHP ==============="
 	sudo apt-get --assume-yes install -f php-mbstring
-	sudo apt-get --assume-yes install -f php7.2-xml
+	sudo apt-get --assume-yes install -f php-xml
 	sudo apt-get --assume-yes install -f php-intl
-	sudo apt-get --assume-yes install -f php7.2-bcmath
+	sudo apt-get --assume-yes install -f php-bcmath
 	#	sudo apt install php7.0-gd
-	sudo apt-get --assume-yes install -f php7.2-gd
+	sudo apt-get --assume-yes install -f php-gd
 	sudo apt-get --assume-yes  install -f php-curl
 	sudo apt-get --assume-yes install -f php-fpm
 	sudo service apache2 restart
 
-php7-4: ## Set up PHP extensions - bleeding edge
-	@echo "===== Setting up PHP 7.4 ==============="
-	sudo apt-get --assume-yes install -f php-mbstring
-	sudo apt-get --assume-yes install -f php7.4-xml
-	sudo apt-get --assume-yes install -f php-intl
-	sudo apt-get --assume-yes install -f php7.4-bcmath
-	#   sudo apt install php7.0-gd
-	sudo apt-get --assume-yes install -f php7.4-gd
-	sudo apt-get --assume-yes  install -f php-curl
-	sudo apt-get --assume-yes install -f php-fpm
-	sudo service apache2 restart
 
 apachefiling: ## Create and assemble filing for Agent and Apache2 server
 	@echo "===== Creating filesystem for Apache2 server ==============="

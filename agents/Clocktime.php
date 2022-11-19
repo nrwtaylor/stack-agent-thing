@@ -45,6 +45,7 @@ class Clocktime extends Agent
             $this->thing,
             "variables clocktime " . $this->from
         );
+
     }
 
     function makeClocktime($input = null)

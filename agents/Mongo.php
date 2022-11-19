@@ -9,6 +9,12 @@ class Mongo extends Agent
 
     public function init()
     {
+
+
+$this->extension_loaded = extension_loaded("mongodb") ? "loaded" : "not loaded";
+$this->version = phpversion('mongodb');
+
+$this->response .= $this->extension_loaded . " " . $this->version .". ";
         $this->hash_state = "off";
         if (isset($settings["settings"]["stack"]["hash"])) {
             $this->hash_state = $settings["settings"]["stack"]["hash"];
@@ -28,15 +34,24 @@ class Mongo extends Agent
         $this->mongo_test_flag = "off";
         $path =
             "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
+
+if (isset($this->db)) {return;}
+
         try {
-            $client = new \MongoDB\Client($path);
+//            $client = new \MongoDB\Client($path);
+            $client = new \MongoDB\Driver\Manager($path);
             $this->db = $client;
             $this->collection = $this->db->stack_db->things;
             $this->statusMongo('ready');
+            $this->response .= "Connected to Mongo database. ";
         } catch (\Throwable $t) {
+
+            $this->error = 'Could not connect to Mongo database';
             $this->errorMongo($t->getMessage());
         } catch (\Error $ex) {
             $this->errorMongo($ex->getMessage());
+            $this->error = 'Could not connect to Mongo database';
+            $this->collection = true;
         }
     }
 
@@ -117,6 +132,11 @@ class Mongo extends Agent
             return;
         }
 
+        if ($this->db === true) {
+            $this->response .= "Mongo not available. No test performed. ";
+            return;
+        }
+
         if (!$this->isReadyMongo()) {
             $test_response .= "Mongo not ready. ";
             $this->response .= $test_response;
@@ -185,6 +205,7 @@ class Mongo extends Agent
         }
 
         $existing = $this->getMongo($this->uuid);
+var_dump("existing", $existing);
         //$variables = $existing['variables'];
         // Hmmm
         // Ugly but do this for now.
@@ -193,6 +214,19 @@ class Mongo extends Agent
         //     $data = $j->jsontoarrayJson($string_json);
         $data = $arr;
         $data = ["variables" => $data];
+
+// whitefox incoming
+
+        $j = new ThingJson($this->uuid);
+var_dump("string_json", $string_json);
+        $j->jsontoarrayJson($string_json);
+        $data = $j->jsontoarrayJson($string_json);
+//        $this->setValueFromPath($this->array_data, $var_path, $value);
+//        $this->arraytoJson();
+//        $t = $this->write();
+
+
+//         $this->setValueFromPath($this->array_data, $var_path, $value);
 
         // dev develop associations.
         if (isset($this->associations)) {
@@ -225,8 +259,7 @@ class Mongo extends Agent
         if (is_array($existing)) {
             $d = array_replace_recursive($existing, $data);
         }
-        //var_dump("u", $this->uuid);
-        //var_dump("e", $d);
+
         // In development
         $uuid = $this->setMongo($this->uuid, $d);
         if ($uuid == true) {
@@ -255,18 +288,20 @@ class Mongo extends Agent
             return;
         }
 
-        $result = null;
-        try {
-            $result = $this->collection->findOne(["uuid" => $text]);
-            // $result = $this->collection->findOne(["_id" => $text]);
+$result = null;
+try {
+        $result = $this->collection->findOne(["_id" => $text]);
         } catch (\Throwable $t) {
+           $this->error = 'Could not connect to Mongo database';
             $this->errorMongo($t->getMessage());
         } catch (\Error $ex) {
-            $this->errorMongo($ex->getMessage());
-        }
 
+            $this->errorMongo($ex->getMessage());
+
+            $this->error = 'Could not connect to Mongo database';
+        }
         if ($result == null) {
-            return false;
+            return true;
         }
         $thing = iterator_to_array($result);
         unset($thing['_id']);
@@ -360,6 +395,7 @@ class Mongo extends Agent
     // use memcache model for set.
     public function setMongo($key = null, $variable = null)
     {
+
         if (!$this->isReadyMongo()) {
             return true;
         }
@@ -382,7 +418,15 @@ class Mongo extends Agent
 
         // If a uuid key is provided, check if it exists.
 
-        if ($this->isUuid($key) and $key !== null) {
+//        if ($this->isUuid($key) and $key !== null) {
+
+        $value = $variable;
+        if ((is_array($variable)) and (isset($variable[0]))) {
+            $value = $variable[0];
+        }
+
+
+        if (($this->isUuid($key)) and ($key !== null)) {
             $m = $this->getMongo($key);
             if ($m === true) {
                 return true;
@@ -391,11 +435,15 @@ class Mongo extends Agent
 
         // Create random uuid key if none provided.
         if ($key == null) {
-            // Because thing is the only plae uuids are made.
-            $t = new Thing(null);
-            $key = $t->uuid;
-            //$key = $uuid->randomUuid();
-            //            $key = $this->thing->getUUid();
+$t = new Thing(null);
+$key = $t->uuid;
+
+       $result = $this->collection->insertOne(["_id"=>$key, "test"=>$value]);
+
+return $key;
+
+//$key = $uuid->randomUuid();
+//            $key = $this->thing->getUUid();
 
             /*
             $uuid = $this->uuid;
@@ -426,8 +474,15 @@ class Mongo extends Agent
         } catch (\Throwable $t) {
             $this->errorMongo($t->getMessage());
             return true;
+        } catch (\Throwable $t) {
+            $this->error = 'Could not connect to Mongo database';
+            $this->errorMongo($t->getMessage());
+            return true;
         } catch (\Error $ex) {
+            var_dump("setMongo error", $ex);
             $this->errorMongo($ex->getMessage());
+
+            $this->error = 'Could not connect to Mongo database';
             return true;
         }
         return $key;
@@ -436,7 +491,9 @@ class Mongo extends Agent
     // Delete by key.
     public function forgetMongo($uuid = null)
     {
-        if (!$this->isReadyMongo()) {
+        if (!$this->isReadyMongo()) {return true;}
+//if ($this->collection === true) {return true;}
+        if ($key == null) {
             return true;
         }
 
@@ -479,6 +536,8 @@ class Mongo extends Agent
      */
     public function respondResponse()
     {
+var_dump("respondResponse Mongo");
+
         $this->thing->flagGreen();
 
         $this->thing_report["email"] = $this->sms_message;
@@ -509,6 +568,7 @@ class Mongo extends Agent
 
     public function readSubject()
     {
+var_dump("readSubject Mongo");
         $input = $this->assert($this->input);
         $uuid = $this->extractUuid($input);
 

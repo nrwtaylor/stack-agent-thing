@@ -225,6 +225,11 @@ class Picanic extends Agent
     {
         $this->getCards();
 
+        if ($this->card_list == null) {
+            $this->response .= "Could not get cards. ";
+            return;
+        }
+
         if ($this->nom == false or $this->suit == false) {
             $this->card = $this->card_list[array_rand($this->card_list)];
 

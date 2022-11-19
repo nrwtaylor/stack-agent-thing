@@ -13,7 +13,6 @@ ini_set("display_errors", 1);
 error_reporting(-1);
 
 define("MAX_EXECUTION_TIME", 2); # seconds
-
 # 7 June 2022 i woz here
 
 class Agent
@@ -30,7 +29,7 @@ class Agent
         set_error_handler([$this, "ignore_errors"]);
 
         $this->error = null;
-        $this->status = 'loading';
+        $this->status = "loading";
 
         //        if ($thing == false) {
         //           $thing = new Thing(false);
@@ -50,7 +49,16 @@ class Agent
         }
 
         if ($thing == null) {
-            $thing = new Thing(null);
+            $uuid = null;
+            if ($input !== null and is_array($input)) {
+                $uuid = $input["uuid"];
+                $nom_from = $input["from"];
+                $to = isset($input["to"]) ? $input["to"] : null;
+                $subject = isset($input["subject"]) ? $input["subject"] : null;
+            }
+
+            $thing = new Thing($uuid);
+            //           $thing = new Thing(null);
         }
 
         // Start the thing timer.
@@ -164,8 +172,7 @@ class Agent
         //    "vendor/nrwtaylor/stack-agent-thing/agents/";
 
         // Refactor to use local path per composer. Review.
-        $this->agents_path =
-            __DIR__ . "/";
+        $this->agents_path = __DIR__ . "/";
 
         if (
             isset($this->thing->container["api"][strtolower($this->agent_name)])
@@ -351,7 +358,7 @@ class Agent
             return;
         }
 
-        $this->statusMysql('error');
+        $this->statusMysql("error");
         $this->error = $text;
 
         if (!isset($this->response)) {
@@ -370,12 +377,11 @@ class Agent
 
     public function isReadyAgent()
     {
-        if (isset($this->status) and $this->status == 'ready') {
+        if (isset($this->status) and $this->status == "ready") {
             return true;
         }
         return false;
     }
-
 
     public function variantsAgent(
         $agent_class_name,
@@ -654,18 +660,17 @@ public function __set($name, $value) {
                 as $thing_object
             ) {
                 $uuid = $thing_object["uuid"];
-        //        $variables_json = $thing_object["variables"];
-        //        $variables = $this->thing->json->jsontoArray($variables_json);
+                //        $variables_json = $thing_object["variables"];
+                //        $variables = $this->thing->json->jsontoArray($variables_json);
 
                 $variables = $thing_object["variables"];
 
+                //    $associations_json = $thing_object["associations"];
+                //    $associations = $this->thing->json->jsontoArray(
+                //        $associations_json
+                //    );
 
-            //    $associations_json = $thing_object["associations"];
-            //    $associations = $this->thing->json->jsontoArray(
-            //        $associations_json
-            //    );
-
-    $associations = $thing_object["associations"];
+                $associations = $thing_object["associations"];
 
                 //$thing = new \stdClass();
                 $thing = new Thing(null);
@@ -726,11 +731,10 @@ public function __set($name, $value) {
                 as $thing_object
             ) {
                 $uuid = $thing_object["uuid"];
-//                $variables_json = $thing_object["variables"];
-//                $variables = $this->thing->json->jsontoArray($variables_json);
+                //                $variables_json = $thing_object["variables"];
+                //                $variables = $this->thing->json->jsontoArray($variables_json);
 
                 $variables = $thing_object["variables"];
-
 
                 $variables_array[$uuid] = $variables;
             }
@@ -851,15 +855,18 @@ public function __set($name, $value) {
 
         $this->thing->log("completed make of sms channel.");
 
-$this->makeDiscord();
+        $this->makeDiscord();
         //var_dump($this->error);
         //$bracket_agent = new Url($this->thing, 'url');
 
-
-        if (isset($this->error) and $this->error != "" and $this->error != null) {
-           $sms = $this->thing_report['sms'];
-           $this->sms_message = $sms . " " . $this->error;
-           $this->thing_report['sms'] = $sms . " " . $this->error;
+        if (
+            isset($this->error) and
+            $this->error != "" and
+            $this->error != null
+        ) {
+            $sms = $this->thing_report["sms"];
+            $this->sms_message = $sms . " " . $this->error;
+            $this->thing_report["sms"] = $sms . " " . $this->error;
         }
 
         // Snippet might be used by web.
@@ -877,7 +884,7 @@ $this->makeDiscord();
         $this->makeJson();
 
         // Explore adding in INFO and HELP to web response.
-        $dev_agents = ["response", "help", "info", "sms", "message","link"];
+        $dev_agents = ["response", "help", "info", "sms", "message", "link"];
         $prod_agents = ["response", "help", "info"];
 
         $agents = $dev_agents;
@@ -910,11 +917,16 @@ $this->makeDiscord();
                     continue;
                 }
 
-                if (strtolower($agent_name) =='link') {
-                $web .= "<b>" . strtoupper($agent_name) . "</b><p>";
+                if (strtolower($agent_name) == "link") {
+                    $web .= "<b>" . strtoupper($agent_name) . "</b><p>";
 
-                    $web .= '<a href="' . $this->thing_report[$agent_name] .'">'. $this->thing_report[$agent_name]. "</a>";
-                $web .= "<p>";
+                    $web .=
+                        '<a href="' .
+                        $this->thing_report[$agent_name] .
+                        '">' .
+                        $this->thing_report[$agent_name] .
+                        "</a>";
+                    $web .= "<p>";
 
                     continue;
                 }
@@ -1009,7 +1021,7 @@ $this->makeDiscord();
                 }
             }
         }
-/*
+        /*
 //$this->makeDiscord();
 $d = "";
 if ((!isset($this->thing_report['discord'])) and (isset($this->thing_report['sms']))) {
@@ -1030,7 +1042,7 @@ $this->thing_report['discord'] =$d;
 
 
 */
-//$this->discordAgent($d);
+        //$this->discordAgent($d);
 
         $this->makeThingreport();
 
@@ -1067,19 +1079,20 @@ $this->thing_report['discord'] =$d;
         }
     }
 
-public function discordAgent($text = null) {
-if (!isset($this->thing->url_handler)) {
-$this->thing->url_handler = new Url($this->thing, 'url');
-}
-$this->thing->url_handler->bracketUrl($text);
-return;
-}
+    public function discordAgent($text = null)
+    {
+        if (!isset($this->thing->url_handler)) {
+            $this->thing->url_handler = new Url($this->thing, "url");
+        }
+        $this->thing->url_handler->bracketUrl($text);
+        return;
+    }
 
-public function makeDiscord() {
-
-//$this->discord_message = $this->sms_message . "y";
-//$this->thing_report['discord'] = $this->discord_message;
-}
+    public function makeDiscord()
+    {
+        //$this->discord_message = $this->sms_message . "y";
+        //$this->thing_report['discord'] = $this->discord_message;
+    }
     /**
      *
      */
@@ -1499,7 +1512,9 @@ public function makeDiscord() {
 
         $previous_thing = new Thing($block_thing["uuid"]);
         $this->prior_thing = $previous_thing;
-        if (!isset($previous_thing->variables->array_data["message"]["agent"])) {
+        if (
+            !isset($previous_thing->variables->array_data["message"]["agent"])
+        ) {
             $this->prior_agent = "help";
         } else {
             $this->prior_agent =
@@ -1704,10 +1719,10 @@ public function makeDiscord() {
         }
     }
 
-
     // Dev __call recognise snake case
-    public function firstLetterCapitalise($text) {
-       return ucfirst($text);
+    public function firstLetterCapitalise($text)
+    {
+        return ucfirst($text);
     }
 
     /**
@@ -1715,7 +1730,6 @@ public function makeDiscord() {
      */
     public function makeInfo()
     {
-
         if (!isset($this->thing_report["info"])) {
             if (isset($this->info)) {
                 $info = $this->firstLetterCapitalise($this->info);
@@ -1729,16 +1743,14 @@ public function makeDiscord() {
             $this->info = $info;
         }
 
-        if (isset($this->thing_report['info'])) {
-
-           $info = $this->thing_report['info'];
+        if (isset($this->thing_report["info"])) {
+            $info = $this->thing_report["info"];
         }
 
         $info = $this->firstLetterCapitalise($info);
 
-$this->info = $info;
-$this->thing_report['info'] = $info;
-
+        $this->info = $info;
+        $this->thing_report["info"] = $info;
     }
 
     public function info()
@@ -1845,11 +1857,10 @@ $this->thing_report['info'] = $info;
     public function makeMessage()
     {
         if (!isset($this->message)) {
-            if (isset($this->thing_report['sms'])) {
-                $this->message = $this->thing_report['sms'];
+            if (isset($this->thing_report["sms"])) {
+                $this->message = $this->thing_report["sms"];
             }
         }
-
     }
     /**
      *
@@ -1904,11 +1915,10 @@ $this->thing_report['info'] = $info;
         $this->prior_agent = $prior_thing["thing"]->nom_to;
 
         $uuid = $prior_thing["thing"]->uuid;
-      //  $variables_json = $prior_thing["thing"]->variables;
-      //  $variables = $this->thing->json->jsontoArray($variables_json);
+        //  $variables_json = $prior_thing["thing"]->variables;
+        //  $variables = $this->thing->json->jsontoArray($variables_json);
 
         $variables = $prior_thing["thing"]->variables;
-
 
         $this->prior_variables = $variables;
     }
@@ -2096,10 +2106,10 @@ $this->thing_report['info'] = $info;
             $this->{"read" . $this->agent_class_name}($text);
         }
 
-$input = $this->input;
-if (is_array($input)) {
-$input = "array";
-}
+        $input = $this->input;
+        if (is_array($input)) {
+            $input = "array";
+        }
 
         $this->thing->log("read input " . $input . ".");
         $this->thing->log("read completed.");
@@ -2376,16 +2386,14 @@ if ($pid == -1) {
                 $agents[$agent_class_name] = $agent_package;
             }
 
-//4th way
+            //4th way
 
-// But easier for now to name the agents in single snake case.
+            // But easier for now to name the agents in single snake case.
 
-//var_dump($keyword);
-//$words = $this->dePortmanteau($keyword);
-//var_dump($words);
-//exit();
-
-
+            //var_dump($keyword);
+            //$words = $this->dePortmanteau($keyword);
+            //var_dump($words);
+            //exit();
         }
         //  }
         restore_error_handler();
@@ -2704,20 +2712,18 @@ if ($pid == -1) {
             foreach (array_reverse($agent_tokens) as $i => $agent_token) {
                 //if (is_string($agent_token)) {
 
-$g = str_replace(" ", "", $agent_token);
+                $g = str_replace(" ", "", $agent_token);
 
+                $g = str_replace("-", "", $g);
 
-$g = str_replace("-", "", $g);
-
-     if (ctype_alpha($g) === false) {
-       //         if (ctype_alpha(str_replace(" ", "", $agent_token)) === false) {
-
+                if (ctype_alpha($g) === false) {
+                    //         if (ctype_alpha(str_replace(" ", "", $agent_token)) === false) {
 
                     break;
                 }
                 $selected_agent_tokens[] = $agent_token;
             }
-//exit();
+            //exit();
             $token_agent = implode(" ", array_reverse($selected_agent_tokens));
 
             $agglutinated_token_agent = implode(
@@ -2749,9 +2755,9 @@ $g = str_replace("-", "", $g);
                     $flag = true;
                 }
 
-if ("is ".$button_agent ." button" == $token_agent) {
-$flag = true;
-}
+                if ("is " . $button_agent . " button" == $token_agent) {
+                    $flag = true;
+                }
 
                 if ($flag === false) {
                     return false;
@@ -4222,11 +4228,11 @@ echo "TRUE";
         }
     }
 
-
-function ignore_errors($errno, $errstr, $errfile, $errline){
-    // Optional error processing
-    return true;
-}
+    function ignore_errors($errno, $errstr, $errfile, $errline)
+    {
+        // Optional error processing
+        return true;
+    }
 
     function mylog($error, $errlvl)
     {
