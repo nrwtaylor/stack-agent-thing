@@ -2271,7 +2271,6 @@ if ($pid == -1) {
 
         }
 
-
     }
 
     public function scoreAgent($text, $matched_characters = null)
@@ -2344,7 +2343,9 @@ if ($pid == -1) {
             $agent_input_text = "";
         }
 
-        $arr = $this->ngramsText($input);
+        $deslugged_input = $this->deSlug($input);
+
+        $arr = $this->ngramsText($deslugged_input);
         // Added this March 6, 2018.  Testing.
 
         if ($this->agent_input == null) {
@@ -2400,7 +2401,6 @@ if ($pid == -1) {
                 }
             }
         }
-
         // Does this agent provide a text response.
         $this->responsiveAgents($this->agents);
         foreach ($this->responsive_agents as $i => $responsive_agent) {
