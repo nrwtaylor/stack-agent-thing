@@ -309,7 +309,7 @@ return $response;
                 }
 
                 $variables_json = $thing_object["variables"];
-                $variables = $this->thing->json->jsontoArray($variables_json);
+                $variables = $this->thing->variables->jsontoArray($variables_json);
 
                 $response = $this->readRead($thing_object["task"]);
                 // This can be refactered I think with a call to the empty thing function.

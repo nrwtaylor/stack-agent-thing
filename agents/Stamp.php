@@ -52,7 +52,7 @@ class Stamp extends Agent
     {
         if (isset($this->stamp) and $this->stamp != false) {return;}
         $stamp_text = "";
-        $stamps = ['juliett', 'zulu', 'nuuid', 'utc', 'time', 'uuid'];
+        $stamps = ['juliett', 'zulu', 'posix', 'nuuid', 'utc', 'time', 'uuid'];
 
         usort($stamps, function ($a, $b) {
             return strlen($b) <=> strlen($a);
@@ -134,6 +134,33 @@ class Stamp extends Agent
 
         return $zulustamp;
     }
+
+
+    function posixStamp($input = null)
+    {
+        $time_agent = new Time($this->thing, "time");
+
+        $time_zone = "UTC";
+        if ($time_zone !== false and $time_zone !== true) {
+            $time_agent->time_zone = $time_zone;
+        }
+        $this->response .=
+            "Returns the current " . $time_agent->time_zone . " stamp.";
+
+        $time_agent->doTime();
+
+        $this->default_time_zone = $time_agent->default_time_zone;
+        $this->time_zone = $time_zone;
+//        $zulustamp = "posix" . $time_agent->timestampTime();
+        $zulustamp = $time_agent->posixTime();
+
+
+//        $zulustamp = substr_replace($zulustamp, "T", 10, 1);
+//        $zulustamp = substr_replace($zulustamp, "Z", 19, 1);
+
+        return $zulustamp;
+    }
+
 
     function juliettStamp($input = null)
     {

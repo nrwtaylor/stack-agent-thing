@@ -11,35 +11,36 @@ ini_set("allow_url_fopen", 1);
 
 class Json extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      *
      * @param unknown $uuid
      * @return unknown
      */
-public function init()
+    public function init()
     {
         $this->start_time = microtime(true);
         //        $settings = require 'settings.php';
-     //   $settings = require($GLOBALS['stack_path'] . "private/settings.php");
-   //     $this->container = new \Slim\Container($settings);
+        //   $settings = require($GLOBALS['stack_path'] . "private/settings.php");
+        //     $this->container = new \Slim\Container($settings);
 
-//        $this->mail_postfix = $settings['settings']['stack']['mail_postfix'];
+        //        $this->mail_postfix = $settings['settings']['stack']['mail_postfix'];
 
-  //      $this->container['stack'] = function ($c) {
-    //        $db = $c['settings']['stack'];
-      //      return $db;
-//        };
+        //      $this->container['stack'] = function ($c) {
+        //        $db = $c['settings']['stack'];
+        //      return $db;
+        //        };
 
         $this->size_overflow = false;
         $this->write_fail_count = 0;
 
         //$this->char_max = $this->container['stack']['char_max'];
         $char_max_default = 4000;
-        $this->char_max = $this->settingsAgent(["stack", "char_max"], $char_max_default);
-
-
+        $this->char_max = $this->settingsAgent(
+            ["stack", "char_max"],
+            $char_max_default
+        );
 
         $this->write_on_destruct = false;
 
@@ -55,14 +56,17 @@ public function init()
         // $this->db = new Database(null, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
 
         // new Database(false, ...) creates a read-only thing.
-        $this->db = new Database($thing, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
+        $this->db = new Database($thing, [
+            "uuid" => $uuid,
+            "from" => "refactorout" . $this->mail_postfix,
+        ]);
 
-        $this->array_data = array();
-        $this->json_data = '{}';
+        $this->array_data = [];
+        $this->json_data = "{}";
 
         $this->field = null;
         //        $this->write_field_list = array();
-        $this->thing_array = array();
+        $this->thing_array = [];
         // Temporary hack of sorts.
         $this->uuid = $uuid;
     }
@@ -153,8 +157,17 @@ public function init()
         $this->write();
     }
 
-    public function jsontoarrayJson($json_data = null) {
-       return $this->jsontoArray($json_data);
+    // Aliasing this command.
+    // Several times.
+
+    public function toArray($json_data = null)
+    {
+        return $this->jsontoArray($json_data);
+    }
+
+    public function jsontoarrayJson($json_data = null)
+    {
+        return $this->jsontoArray($json_data);
     }
 
     /**
@@ -166,8 +179,8 @@ public function init()
     {
         var_dump("Json jsontoArray called");
         if ($json_data == null) {
-            if ( (isset($this->json_data)) and (is_array($this->json_data)) ) {
-            $json_data = $this->json_data;
+            if (isset($this->json_data) and is_array($this->json_data)) {
+                $json_data = $this->json_data;
             }
         }
 
@@ -179,9 +192,8 @@ public function init()
         }
 
         if (is_string($array_data)) {
-            $array_data = ['text'=>$array_data];
+            $array_data = ["text" => $array_data];
         }
-
 
         foreach ($array_data as $key => $value) {
             if ($key != "") {
@@ -194,14 +206,21 @@ public function init()
         return $array_data;
     }
 
-    public function arrayJson($arr) {
+    // Also a variety of aliases here too.
 
-        $json_data = json_encode(
-            $arr,
-            JSON_PRESERVE_ZERO_FRACTION
-        );
+    public function toJson($arr = null)
+    {
+        if ($arr == null) {
+            return arraytoJson();
+        }
+
+        return arrayJson($arr);
+    }
+
+    public function arrayJson($arr)
+    {
+        $json_data = json_encode($arr, JSON_PRESERVE_ZERO_FRACTION);
         return $json_data;
-
     }
 
     /**
@@ -251,7 +270,7 @@ public function init()
     {
         // I guess this is appropriate.  A default 'agent' fingers
         // the thing and then identifies posterior associations.
-        $arr = array("agent" => array());
+        $arr = ["agent" => []];
         $this->setArray($arr);
     }
 
@@ -270,7 +289,7 @@ public function init()
 
         unset($this->array_data[$stream_id][$pos]);
 
-        $this->array_data = array_map('array_values', $this->array_data);
+        $this->array_data = array_map("array_values", $this->array_data);
         $this->setArray($this->array_data);
     }
 
@@ -314,13 +333,15 @@ public function init()
      */
     function pushStream($value, $pos = -1)
     {
-// dev
-//if ($this->array_data == null) {return;}
+        // dev
+        //if ($this->array_data == null) {return;}
 
         $this->setField($this->field);
 
         $stream_id = $this->idStream();
-if ($this->array_data[$stream_id] == null) {return;}
+        if ($this->array_data[$stream_id] == null) {
+            return;
+        }
 
         if ($pos == -1) {
             $pos = count($this->array_data[$stream_id]);
@@ -461,11 +482,11 @@ if ($this->array_data[$stream_id] == null) {return;}
         // we need references as we will modify the first parameter
         $dest = &$arr;
 
-if ($dest == null) {
-$dest =[];
-}
-//var_dump($dest);
-//return null;}
+        if ($dest == null) {
+            $dest = [];
+        }
+        //var_dump($dest);
+        //return null;}
 
         $finalKey = array_pop($path);
         foreach ($path as $key) {
@@ -473,13 +494,13 @@ $dest =[];
         }
 
         if (is_array($finalKey)) {
-           throw new Exception('Array received as path.');
-           return true;
+            throw new Exception("Array received as path.");
+            return true;
         }
-if (is_string($dest)) {
-return true;
-// dev 5 November 2021
-}
+        if (is_string($dest)) {
+            return true;
+            // dev 5 November 2021
+        }
         $dest[$finalKey] = $value;
     }
 
@@ -493,7 +514,7 @@ return true;
     private function recursive_array_search(
         $target_path,
         $haystack,
-        $var_path = array()
+        $var_path = []
     ) {
         // Pop off the first value of the array.
         $find = array_shift($target_path);
@@ -537,7 +558,6 @@ return true;
             return;
         }
         if (strlen($this->json_data) > $this->char_max) {
-
             // devstack what do you do here?
             // This is the place where Json borks when asked to save too much.
 
@@ -552,7 +572,11 @@ return true;
             $thing->Create(
                 null,
                 "human",
-                'Stack variables size exceeded ' . $this->uuid . " writing to field " . $this->field . "."
+                "Stack variables size exceeded " .
+                    $this->uuid .
+                    " writing to field " .
+                    $this->field .
+                    "."
             );
             $thing_agent = new Hey($thing);
 
@@ -560,20 +584,24 @@ return true;
 
             //            throw new \Error('Insufficient space in DB record ' . $this->uuid . ".");
             throw new \OverflowException(
-                'Overflow: Insufficient space in DB record ' . $this->uuid . " writing to field " . $this->field . "."
+                "Overflow: Insufficient space in DB record " .
+                    $this->uuid .
+                    " writing to field " .
+                    $this->field .
+                    "."
             );
             //            $this->overload_length = strlen($this->json_data) - $this->char_max;
 
             return false;
         } else {
-var_dump("Json Write pre-write");
+            var_dump("Json Write pre-write");
 
             //$this->thing_array[$this->field] = $this->json_data;
             if ($this->write_on_destruct) {
                 //$this->thing_array[] = array("field"=>$this->field,"data"=>$this->json_data);
                 //$this->write_field_list[] = $this->field;
             } else {
-/*
+                /*
                 $this->last_write = $this->db->writeDatabase(
                     $this->field,
                     $this->json_data
@@ -583,10 +611,8 @@ var_dump("Json Write pre-write");
                     $this->field,
                     $this->array_data
                 );
-
-
             }
-var_dump("Json Write performed");
+            var_dump("Json Write performed");
             return true;
         }
         return;
@@ -598,19 +624,19 @@ var_dump("Json Write performed");
      */
     function read($variable = null)
     {
-$array = null;
+        $array = null;
 
-if ((isset($this->db)) and ($this->db != null)) {
-        $this->json_data = $this->db->readField($this->field);
+        if (isset($this->db) and $this->db != null) {
+            $this->json_data = $this->db->readField($this->field);
 
-        // Whitefox introduces setting json data.
-        // Also set array data and test.
-        $this->array_data = $this->json_data;
+            // Whitefox introduces setting json data.
+            // Also set array data and test.
+            $this->array_data = $this->json_data;
 
-        //        if ($this->json_data == null) {$this->initField();}
-        //$array = $this->jsontoArray();
-        $array = $this->array_data;
-}
+            //        if ($this->json_data == null) {$this->initField();}
+            //$array = $this->jsontoArray();
+            $array = $this->array_data;
+        }
         return $array;
     }
 }

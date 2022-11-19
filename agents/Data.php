@@ -38,7 +38,7 @@ class Data extends Agent
      * @param unknown $variable
      * @return unknown
      */
-    function isData($variable)
+    public function isData($variable)
     {
         if ($variable !== false and $variable !== true and $variable != null) {
             return true;

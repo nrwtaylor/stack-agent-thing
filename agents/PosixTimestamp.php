@@ -7,11 +7,12 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class PosixTime extends Agent
+class PosixTimestamp extends Agent
 {
     public $var = "hello";
     function init()
     {
+
         $this->keywords = [
             "millis",
             "milli",
@@ -58,7 +59,10 @@ class PosixTime extends Agent
                 break;
             }
             $this->extractPosixTimestamp($line);
-            if (isset($this->posix_timestamp) and $this->posix_timestamp != null) {
+            if (
+                isset($this->posix_timestamp) and
+                $this->posix_timestamp != null
+            ) {
                 $line .
                     "<br>" .
                     "posix-timestamp " .
@@ -75,22 +79,31 @@ class PosixTime extends Agent
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->Write(["posix-timestamp", "refreshed_at"], $time_string);
+            $this->thing->Write(
+                ["posix-timestamp", "refreshed_at"],
+                $time_string
+            );
         }
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->posix_timestamp = $this->thing->Read(["posix-timestamp", "timestamp"]);
+        $this->posix_timestamp = $this->thing->Read([
+            "posix-timestamp",
+            "timestamp",
+        ]);
     }
 
     public function set()
     {
         if ($this->posix_timestamp != false) {
-            $this->thing->Write(["posix-timestamp", "timestamp"], $this->timestamp);
+            $this->thing->Write(
+                ["posix-timestamp", "timestamp"],
+                $this->posix_timestamp
+            );
         }
     }
 
-    function validTimestamp(string $date, string $format = "Y-m-d"): bool
+    function validPosixTimestamp(string $date, string $format = "Y-m-d"): bool
     {
         $dateObj = \DateTime::createFromFormat($format, $date);
         return $dateObj && $dateObj->format($format) == $date;
@@ -121,10 +134,10 @@ class PosixTime extends Agent
             return false;
         }
 
-        if ($this->validTimestamp($text, "Y-m-d\TH:i:s\J") === true) {
+        if ($this->validPosixTimestamp($text, "Y-m-d\TH:i:s\J") === true) {
             return true;
         }
-        if ($this->validTimestamp($text, "Y-m-d\TH:i:s\Z") === true) {
+        if ($this->validPosixTimestamp($text, "Y-m-d\TH:i:s\Z") === true) {
             return true;
         }
 
@@ -139,13 +152,13 @@ class PosixTime extends Agent
                 return $token;
             }
 
-            if ($this->validTimestamp($token, "Y-m-d") === true) {
+            if ($this->validPosixTimestamp($token, "Y-m-d") === true) {
                 return $token;
             }
 
             if (isset($tokens[$i + 1])) {
                 if (
-                    $this->validTimestamp(
+                    $this->validPosixTimestamp(
                         $token . " " . $tokens[$i + 1],
                         "Y-m-d h:i:s"
                     ) === true
@@ -156,7 +169,7 @@ class PosixTime extends Agent
 
             if (isset($tokens[$i + 2])) {
                 if (
-                    $this->validTimestamp(
+                    $this->validPosixTimestamp(
                         $token . " " . $tokens[$i + 1] . " " . $tokens[$i + 2],
                         "Y m d"
                     ) === true
@@ -288,16 +301,6 @@ class PosixTime extends Agent
             $this->thing_report["info"] =
                 'Agent input was "' . $this->agent_input . '".';
         }
-
-    }
-
-    function isData($variable)
-    {
-        if ($variable !== false and $variable !== true and $variable != null) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     public function findPosixTimestamp($text = null)
@@ -317,7 +320,7 @@ class PosixTime extends Agent
         if (isset($this->thing_report["sms"])) {
             return;
         }
-        $sms = "POSIX TIME | " . $this->posix_timestamp;
+        $sms = "POSIX TIMESTAMP | " . $this->posix_timestamp;
         $this->sms_message = $sms;
         $this->thing_report["sms"] = $sms;
     }

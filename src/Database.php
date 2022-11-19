@@ -146,16 +146,14 @@ if ($thing == null) {
             $this->stacks = $settings["settings"]["stacks"];
         }
 
-
-
 //test
 //        $this->stacks = [
 //            "mysql" => ["infrastructure" => "mysql"],
 //        ];
 
-unset($this->stacks['memory']);
-unset($this->stacks['memcached']);
-unset($this->stacks['mongo']);
+//unset($this->stacks['memory']);
+//unset($this->stacks['memcached']);
+//unset($this->stacks['mongo']);
 
 
 
@@ -182,7 +180,6 @@ unset($this->stacks['mongo']);
         $this->stack_handlers = [];
 
         $this->candidate_stacks = $this->stacks;
-
         foreach (
             $this->candidate_stacks
             as $candidate_service_name => $candidate_service
@@ -190,10 +187,19 @@ unset($this->stacks['mongo']);
 if (isset($this->stack_handlers[$candidate_service_name])) {continue;}
             try {
                 $handler = $this->connectDatabase($candidate_service);
+
+
+var_dump("handler", $handler);
+
+
+
+var_dump("Database connectDatabase",$candidate_service, $handler !== true);
             } catch (\Throwable $t) {
 
-
+var_dump("__construct Throwable", $candidate_service, $t->getMessage());
             } catch (\Error $ex) {
+
+var_dump("__construct Error", $candidate_service, $ex->getMessage());
 
             }
 
@@ -300,11 +306,13 @@ if (isset($this->stack_handlers[$candidate_service_name])) {continue;}
     function connectDatabase($stack)
     {
         $agent_name = $stack["infrastructure"];
+
         $agent_class_name = ucwords($agent_name);
         $agent_namespace_name =
             "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
 
         try {
+var_dump("Database connectDatabase agent namespace name " . $agent_namespace_name);
             //$handler = new $agent_namespace_name($this->thing, $this->agent_input);
             $handler = new $agent_namespace_name($this->thing, $this->agent_input);
 
@@ -328,13 +336,13 @@ if (isset($this->stack_handlers[$candidate_service_name])) {continue;}
             if (isset($stack["user"])) {
                 $handler->user = $stack["user"];
             }
-//var_dump("Database connectDatabase " . $agent_namespace_name . "connected");
+var_dump("Database connectDatabase " . $agent_namespace_name . "connected");
             return $handler;
         } catch (\Throwable $t) {
-           //var_dump($t->getMessage());
+           var_dump($t->getMessage());
 
         } catch (\Error $ex) {
-           //var_dump($e->getMessage());
+           var_dump($e->getMessage());
 
         }
 
@@ -473,6 +481,8 @@ if (isset($this->stack_handlers[$candidate_service_name])) {continue;}
     public function writeDatabase($field_text, $array, $uuid = null)
     {
         if ($array == null) {
+var_dump("Database writeDatabase null array");
+
 //            $this->thing->log("writeDatabase received null array.");
             return true;
         }
@@ -577,7 +587,7 @@ if (isset($this->stack_handlers[$candidate_service_name])) {continue;}
     function readField($field)
     {
         $thingreport = $this->Get();
-//var_dump($thingreport);
+var_dump("Database readField thingreport", $thingreport);
 
         $this->thing = $thingreport["thing"];
         if (isset($this->thing->$field)) {
@@ -691,15 +701,16 @@ if (isset($this->stack_handlers[$candidate_service_name])) {continue;}
 
         //if ($uuid == null) {$uuid = $this->uuid;}
 
+
         if ($uuid == null) {
             $uuid = $this->uuid;
         }
+
 
         $thing = [];
         //var_dump("Database Get uuid " . $uuid);
         //$available_stacks = $this->available_stacks;
         //if (isset($this->responsive_stacks)) {$available_stacks = $this->responsive_stacks;}
-
         foreach ($this->available_stacks as $stack_name => $stack) {
             switch ($stack["infrastructure"]) {
                 case "mysql":
@@ -712,10 +723,10 @@ if (isset($this->stack_handlers[$candidate_service_name])) {continue;}
                         $result === false or
                         $result === true
                     ) {
-                        break;
+                        continue 2;
                     }
 
-                    //var_dump("Database Get mysql", $result);
+                    var_dump("Database Get mysql", $result);
                     $thing['mysql'] = $result;
                     break;
                 case "memcached":
@@ -727,9 +738,9 @@ if (isset($this->stack_handlers[$candidate_service_name])) {continue;}
                         $result === false or
                         $result === true
                     ) {
-                        break;
+                        continue 2;
                     }
-                    //var_dump("Database Get memcached", $result);
+                    var_dump("Database Get memcached", $result);
                     $thing['memcached'] = $result;
                     break;
 
@@ -742,9 +753,9 @@ if (isset($this->stack_handlers[$candidate_service_name])) {continue;}
                         $result === false or
                         $result === true
                     ) {
-                        break;
+                        continue 2;
                     }
-                    //var_dump("Database Get memory", $result);
+                    var_dump("Database Get memory", $result);
                     $thing['memory'] = $result;
 
                     break;
@@ -758,9 +769,9 @@ if (isset($this->stack_handlers[$candidate_service_name])) {continue;}
                         $result === false or
                         $result === true
                     ) {
-                        break;
+                        continue 2;
                     }
-                    //var_dump("Database Get mongo", $result);
+                    var_dump("Database Get mongo", $result);
                     $thing['mongo'] = $result;
 
                     break;

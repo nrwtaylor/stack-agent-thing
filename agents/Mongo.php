@@ -195,6 +195,7 @@ if (isset($this->db)) {return;}
 
     public function writeMongo($field_text, $arr)
     {
+var_dump("Mongo writeMongo");
         if (!isset($this->write_fail_count)) {
             $this->write_fail_count = 0;
         }
@@ -283,6 +284,7 @@ var_dump("string_json", $string_json);
     // use memcache model for get.
     public function getMongo($text = null)
     {
+var_dump("Mongo getMongo");
         // Get mongo key by uuid.
         if (!$this->isReadyMongo()) {
             return;
@@ -395,6 +397,7 @@ try {
     // use memcache model for set.
     public function setMongo($key = null, $variable = null)
     {
+var_dump("Mongo setMongo");
 
         if (!$this->isReadyMongo()) {
             return true;
@@ -593,6 +596,7 @@ var_dump("readSubject Mongo");
             $this->response .=
                 "Got thing " . $uuid . " " . $thing['subject'] . ". ";
         }
+
         if ($this->hasText($input, 'create')) {
             //    if ($input == "create") {
             $create_mongo_uuid = $this->createMongo("foo", "bar");

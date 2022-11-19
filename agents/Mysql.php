@@ -583,6 +583,7 @@ class Mysql extends Agent
 
     function getMysql($uuid = null)
     {
+var_dump("Mysql getMysql");
         // But we don't need to find, it because the UUID is randomly created.
         // Chance of collision super-super-small.
         // So just return the contents of thing.  false if it doesn't exist.

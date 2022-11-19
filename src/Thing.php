@@ -62,6 +62,7 @@ $this->bananas = "hello";
 
             // Try this, otherwise fail.
             $GLOBALS['stack_path'] = "/var/www/stackr.test/";
+
             //$GLOBALS['stack_path'] = "/var/www/html/stackr.ca/";
             //$GLOBALS['stack_path'] = $directory;
         }
@@ -670,9 +671,24 @@ return true;
         }
 
         $array_data = $this->db->readField($field);
-
+var_dump("Thing Write array_data", $array_data);
         $this->variables->setValueFromPath($array_data, $path, $value);
 //$this->array_handler->setPathValueArr($array_data, $path, $value);
+
+
+var_dump("Thing Write array_data", $array_data);
+
+
+
+// Get the local array data
+
+$array_data = $this->variables->array_data;
+var_dump($array_data);
+
+// Then merge this against what we just got from the stack.
+// Before writing it.
+// To do.
+
 
         $last_write = $this->db->writeDatabase("variables", $array_data);
 

@@ -224,6 +224,24 @@ Is there a time provided in the query?
         return $text;
     }
 
+    function posixTime($text = null)
+    {
+        if ($text == null) {
+            $text = $this->getTime();
+        }
+        if ($this->isDateValid($text)) {
+            $datum = $this->datumTime($text);
+            $this->datum = $datum;
+
+            if ($datum !== false) {
+                $text =$datum->format("U");
+           }
+
+        }
+        return $text;
+    }
+
+
     function getTime($text = null)
     {
         $timevalue = $text;

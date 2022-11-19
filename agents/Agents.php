@@ -26,9 +26,12 @@ class Agents extends Agent
 
         // Only use Stackr agents for now
         // Single source folder ensures uniqueness of N-grams
-        $dir    = $GLOBALS['stack_path'] . 'vendor/nrwtaylor/stack-agent-thing/agents';
-        $files = scandir($dir);
+//        $dir    = $GLOBALS['stack_path'] . 'vendor/nrwtaylor/stack-agent-thing/agents';
 
+//        $dir    = "/home/nick/codebase/stack-agent-thing-dev/". 'vendor/nrwtaylor/stack-agent-thing/agents';
+        $dir = "/home/nick/codebase/stack-agent-thing-dev/agents";
+
+        $files = scandir($dir);
         foreach ($files as $key=>$file) {
             if ($file[0] == "_") {continue;}
             if ( strtolower(substr($file, 0, 3)) == "dev") {continue;}

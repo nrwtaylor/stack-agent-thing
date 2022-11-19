@@ -344,7 +344,7 @@ class Bar extends Agent
 
         foreach ($things as $thing_object) {
             $variables_json = $thing_object["variables"];
-            $variables = $this->thing->json->jsontoArray($variables_json);
+            $variables = $this->thing->variables->jsontoArray($variables_json);
             if (isset($variables["bar"])) {
                 $bar_count = "X";
                 $refreshed_at = "X";
@@ -380,7 +380,7 @@ class Bar extends Agent
         $this->ticks_history = [];
         foreach ($things as $thing_object) {
             $variables_json = $thing_object["variables"];
-            $variables = $this->thing->json->jsontoArray($variables_json);
+            $variables = $this->thing->variables->jsontoArray($variables_json);
 
             if (isset($variables["tick"])) {
                 $tick_count = "X";

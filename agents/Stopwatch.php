@@ -142,9 +142,9 @@ class Stopwatch extends Agent
         }
 
         foreach (array_reverse($things) as $uuid => $thing) {
-            //            $uuid = $thing['uuid'];
+
                $variables_json = $thing['variables'];
-               $variables = $this->thing->json->jsontoArray($variables_json);
+               $variables = $this->thing->variables->jsontoArray($variables_json);
 
             if (!isset($variables["stopwatch"])) {
                 continue;
@@ -358,8 +358,7 @@ class Stopwatch extends Agent
         }
 
         foreach ($things as $uuid => $thing) {
-            //     $variables_json= $thing_object['variables'];
-            //     $variables = $this->thing->json->jsontoArray($variables_json);
+
             $variables = $thing->variables;
             if (isset($variables["stopwatch"])) {
                 $response_time = "X";

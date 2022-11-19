@@ -856,8 +856,6 @@ public function __set($name, $value) {
         $this->thing->log("completed make of sms channel.");
 
         $this->makeDiscord();
-        //var_dump($this->error);
-        //$bracket_agent = new Url($this->thing, 'url');
 
         if (
             isset($this->error) and
@@ -2330,6 +2328,17 @@ if ($pid == -1) {
                 $this->variantsAgent($keyword, "")
             );
         }
+
+//var_dump($arr);
+//var_dump($this->agents);
+
+$agents_handler = new Agents($thing, "agents");
+$agents_handler->getAgents();
+//var_dump($agents_handler->agents);
+//    function getAgents()
+
+
+
         //        foreach (["", "s", "es"] as $postfix_variant) {
         foreach ($agent_names as $keyword) {
             // Don't allow agent to be recognized
@@ -2351,6 +2360,9 @@ if ($pid == -1) {
             }
 
             $agent_class_name = str_replace("-", "", $agent_class_name);
+
+
+
 
             // Can probably do this quickly by loading path list into a variable
             // and looping, or a direct namespace check.
@@ -2374,8 +2386,30 @@ if ($pid == -1) {
             }
             $agents_tested[$agent_class_name] = true;
 
+
+// Another way
+// Get the list of available agents and check the against lowercase
+//var_dump("testing" . $agent_class_name);
+
+$found_needles = $this->matchingIKey($agent_class_name, $agents_handler->agents);
+
+// Take the first needle found.
+if ($found_needles and count($found_needles)>0) {$found_needle = $found_needles[0];
+
+                $agent_package = [$found_needle => null];
+                $agents[$agent_class_name] = $agent_package;
+            $agents_tested[$agent_class_name] = true;
+
+};
+
+
+
+
+
+
             // 3rd way
             $agent_class_name = strtoupper($keyword);
+
 
             // Can probably do this quickly by loading path list into a variable
             // and looping, or a direct namespace check.
@@ -2395,6 +2429,7 @@ if ($pid == -1) {
             //var_dump($words);
             //exit();
         }
+
         //  }
         restore_error_handler();
         $this->agents = $agents;
@@ -2411,9 +2446,9 @@ if ($pid == -1) {
             // word position and Bayes.  Agent scoring
             // But for now call the first agent found and
             // see where that consistency takes this.
-
             $agent_class_name = key($agent_package);
             $agent_input = null;
+
             if (isset($agent_package[$agent_class_name]["agent_input"])) {
                 $agent_input = $agent_package[$agent_class_name]["agent_input"];
             }
@@ -2427,10 +2462,14 @@ if ($pid == -1) {
             if (count($agents) > 1 and $agent_class_name == "Email") {
                 continue;
             }
+
             $temp_agent_handler = $this->getAgent(
                 $agent_class_name,
                 $agent_input
             );
+
+//var_dump($agent_class_name);
+
             if ($temp_agent_handler) {
                 $score = 1;
 
@@ -2448,6 +2487,7 @@ if ($pid == -1) {
                     "thing_report" => $this->thing_report,
                     "score" => $score,
                 ];
+
             }
         }
 
@@ -2471,7 +2511,6 @@ if ($pid == -1) {
         // For now just take the first match.
         // This allows for sophication in resolving multi agent responses.
         $this->responsive_agents = $responsive_agents;
-
         foreach ($this->responsive_agents as $i => $j) {
             $this->thing->log(
                 $j["agent_name"] . " " . $j["score"] . "\n",
@@ -2480,6 +2519,29 @@ if ($pid == -1) {
             $this->thing->console($j["agent_name"] . " " . $j["score"] . "\n");
         }
     }
+
+function array_ikey_exists($key, $haystack){
+    return array_key_exists(strtolower($key), array_change_key_case($haystack));    
+}
+
+
+function matchingIKey($key, $haystack) {
+  $needles = [];
+  foreach($haystack as $needle) {
+//var_dump($needle, $key);
+    if (strtolower($needle['name']) == strtolower($key)) {
+
+      $needles[] = $needle['name'];
+
+    }
+
+  }
+
+  if (count($needles) == 0) {return false;}
+
+  return $needles;
+
+}
 
     // Take a piece of returned text,
     // And score it to see how close it is to the provided input.
@@ -2583,7 +2645,6 @@ if ($pid == -1) {
         } else {
             $arr = $this->ngramsText($agent_input_text);
         }
-
         // Does this agent have code.
         $this->validateAgents($arr);
 
@@ -2632,6 +2693,7 @@ if ($pid == -1) {
         // Does this agent provide a text response.
         $this->responsiveAgents($this->agents);
         foreach ($this->responsive_agents as $i => $responsive_agent) {
+            $this->thing->log("responsive agents" . " " . $responsive_agent['score'] . " " . $responsive_agent['thing_report']['sms']);
         }
 
         return $this->responsive_agents;
@@ -3548,6 +3610,7 @@ echo "TRUE";
         );
 
         $arr = $this->extractAgents($input);
+
         $this->input = $input;
         // Sort and pick best scoring agent response.
 
@@ -3557,7 +3620,6 @@ echo "TRUE";
 
         foreach ($this->responsive_agents as $i => $responsive_agent) {
         }
-
         if (count($this->responsive_agents) > 0) {
             $this->thing_report = $this->responsive_agents[0]["thing_report"];
             return $this->thing_report;

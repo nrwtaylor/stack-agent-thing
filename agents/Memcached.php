@@ -176,6 +176,7 @@ class Memcached extends Agent
 
     public function getMemcached($uuid = null)
     {
+var_dump("Memcached getMemcached");
         if ($uuid == null) {
             $uuid = $this->uuid;
         }
