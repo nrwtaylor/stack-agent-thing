@@ -15,7 +15,7 @@ class Rocky extends Agent
 
     public function init()
     {
-        $this->node_list = ["rocky" => ["rocky", "charley", "nonsense"]];
+        $this->node_list = ["rocky" => ["rocky", "charley"]];
 
         $this->number = null;
         $this->unit = "";
@@ -233,7 +233,7 @@ class Rocky extends Agent
         $this->makeChoices();
 
         $this->thing_report["info"] = "This creates an exercise message.";
-        $this->thing_report["help"] = "Try CHARLEY. Or NONSENSE.";
+        $this->thing_report["help"] = "Try CHARLEY.";
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];

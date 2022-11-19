@@ -17,7 +17,7 @@ class Charley extends Agent
     {
         $this->test = "Development code";
 
-        $this->node_list = ["charley" => ["charley", "rocky", "nonsense"]];
+        $this->node_list = ["charley" => ["charley", "rocky"]];
 
         $this->unit = "FUEL";
         $this->getNuuid();
@@ -516,7 +516,7 @@ class Charley extends Agent
     {
         $link = $this->web_prefix . "thing/" . $this->uuid . "/charley";
 
-        $this->node_list = ["charley" => ["charley", "rocky", "nonsense"]];
+        $this->node_list = ["charley" => ["charley", "rocky"]];
 
         if (!isset($this->html_image)) {
             $this->makePNG();
