@@ -59,6 +59,31 @@ class Degree extends Agent
         return 1;
     }
 
+public function decimalToDegree($text)
+{
+
+// Converts decimal longitude / latitude to DMS
+// ( Degrees / minutes / seconds ) 
+
+// This is the piece of code which may appear to 
+// be inefficient, but to avoid issues with floating
+// point math we extract the integer part and the float
+// part by using a string function.
+
+    $dec = floatval($text);
+
+    $vars = explode(".",$dec);
+    $deg = $vars[0];
+    $tempma = "0.".$vars[1];
+
+    $tempma = $tempma * 3600;
+    $min = floor($tempma / 60);
+    $sec = $tempma - ($min*60);
+
+    $degrees_text = $deg . "°". $min. "'". round($sec,1) . '"';
+    return $degrees_text;
+}
+
 
     /**
      *
