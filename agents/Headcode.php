@@ -248,6 +248,7 @@ class Headcode extends Agent
             $variables = $this->thing->json->jsontoArray($variables_json);
 
             if (isset($variables["headcode"])) {
+if (!isset($variables['headcode']['head_code'])) {continue;}
                 $head_code = $variables["headcode"]["head_code"];
                 $refreshed_at = $variables["headcode"]["refreshed_at"];
 
