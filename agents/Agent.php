@@ -26,7 +26,7 @@ class Agent
      */
     function __construct(Thing $thing = null, $input = null)
     {
-        set_error_handler([$this, "ignore_errors"]);
+       set_error_handler([$this, "ignore_errors"]);
 
         $this->error = null;
         $this->status = "loading";
@@ -235,16 +235,16 @@ class Agent
            $this->newAccount(['name'=>'stack', 'amount'=>0]);
         }
 */
-
         $this->init();
-
         // read the current agent.
         if (method_exists($this, "init" . $this->agent_class_name)) {
             $this->{"init" . $this->agent_class_name}();
         }
+
         $this->thing->log("completed init.");
 
         $this->get();
+
         $this->thing->log("completed get.");
 
         try {
@@ -291,7 +291,7 @@ class Agent
             //$error_text =
             //    $t->getLine() . "---" . $t->getFile() . $t->getMessage();
             $error_text = $this->textError($t);
-            $this->thing->console($error_text . "\n");
+            $this->thing->console("Agent __construct Throwable " . $error_text . "\n");
             $this->thing->log($error_text, "ERROR");
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Exception $e) {
@@ -307,11 +307,10 @@ class Agent
                     " " .
                     $t->getTraceAsString()
             );
-            $this->thing->console($error_text . "\n");
+            $this->thing->console("Agent __construct Exception " . $error_text . "\n");
             $this->thing->log($error_text, "ERROR");
             // Executed only in PHP 5, will not be reached in PHP 7
         }
-
         if ($this->agent_input == null or $this->agent_input == "") {
             $this->respond();
         }
@@ -334,6 +333,8 @@ class Agent
         }
         $this->thing->log($a);
         $this->thing->log("__construct complete");
+
+
     }
 
     function __destruct()
@@ -615,10 +616,12 @@ public function __set($name, $value) {
         $agent_name = strtolower($this->agent_name);
         $time_string = $this->thing->Read([$agent_name, "refreshed_at"]);
 
-        if ($time_string == false) {
+        if (($time_string == false) or ($time_string == true)) {
             $time_string = $this->thing->time();
             $this->thing->Write([$agent_name, "refreshed_at"], $time_string);
         }
+
+
     }
 
     /**

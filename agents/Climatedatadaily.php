@@ -1,7 +1,7 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-class ClimateData extends Agent
+class ClimateDataDaily extends Agent
 {
     public $var = "hello";
 
@@ -9,42 +9,45 @@ class ClimateData extends Agent
     {
     }
 
-    function loadClimateData()
+    function loadClimateDataDaily()
     {
         //    $path = "climate-data-gcca-yvr";
 
         // This is the longest hourly dataset in British Columbia.
         // Dating back to the 1950s when records began at YVR Vancouver Airport.
         $path = "climate-data-gcca-yvr";
-        $number = "1108395";
+        $number = "1108447";
         $place = "BC";
 
         // Another place and another number for testing against.
         //        $place = "NT";
         //        $number = "2204100";
 
-        $static_resource = "en_climate_hourly_" . $place . "_" . $number . "_";
-        $static_postfix = "_P1H.csv";
+        $static_resource = "en_climate_daily_" . $place . "_" . $number . "_";
+        $static_postfix = "_P1D.csv";
         // 12-2022_P1H.csv
         $contents = "";
         $librex_agent = new Librex($this->thing, $contents);
         $index = 0;
-        $years = range(1950, 2022);
+        $years = range(1936, 2022);
         $months = range(1, 12);
         $climate_data_points = [];
         foreach ($years as $i => $year) {
-            foreach ($months as $j => $month) {
-                $padded_month = str_pad($month, 2, "0", STR_PAD_LEFT);
+//            foreach ($months as $j => $month) {
+//                $padded_month = str_pad($month, 2, "0", STR_PAD_LEFT);
                 $index += 1;
                 $resource =
                     $static_resource .
-                    $padded_month .
-                    "-" .
+       //             $padded_month .
+       //             "-" .
                     $year .
                     $static_postfix;
                 $this->thing->console("Loading file.");
                 $file = $this->resource_path . $path . "/" . $resource;
+//var_dump($file);
+//exit();
                 if (file_exists($file)) {
+
                     echo $file . "\n";
                     $contents = file_get_contents($file);
                     $librex_agent->getLibrex("unnamed-" . $index, $contents);
@@ -54,36 +57,41 @@ class ClimateData extends Agent
                     foreach ($lines as $i => $line) {
                         //echo $line. "\n";
                         // Transform weather record CSV headers to PHP object.
-                        // ﻿"Longitude (x)","Latitude (y)","Station Name","Climate ID","Date/Time (LST)","Year","Month","Day","Time (LST)","Temp (°C)","Temp Flag","Dew Point Temp (°C)","Dew Point Temp Flag","Rel Hum (%)","Rel Hum Flag","Wind Dir (10s deg)","Wind Dir Flag","Wind Spd (km/h)","Wind Spd Flag","Visibility (km)","Visibility Flag","Stn Press (kPa)","Stn Press Flag","Hmdx","Hmdx Flag","Wind Chill","Wind Chill Flag","Weather""
+
+                        //"Longitude (x)","Latitude (y)","Station Name","Climate ID","Date/Time","Year","Month","Day","Data Quality","Max Temp (°C)","Max Temp Flag","Min Temp (°C)","Min Temp Flag","Mean Temp (°C)","Mean Temp Flag","Heat Deg Days (°C)","Heat Deg Days Flag","Cool Deg Days (°C)","Cool Deg Days Flag","Total Rain (mm)","Total Rain Flag","Total Snow (cm)","Total Snow Flag","Total Precip (mm)","Total Precip Flag","Snow on Grnd (cm)","Snow on Grnd Flag","Dir of Max Gust (10s deg)","Dir of Max Gust Flag","Spd of Max Gust (km/h)","Spd of Max Gust Flag"
+
                         $field_names = [
                             "Longitude (x)",
                             "Latitude (y)",
                             "Station Name",
                             "Climate ID",
-                            "Date/Time (LST)",
+                            "Date/Time",
                             "Year",
                             "Month",
                             "Day",
-                            "Time (LST)",
-                            "Temp (°C)",
-                            "Temp Flag",
-                            "Dew Point Temp (°C)",
-                            "Dew Point Temp Flag",
-                            "Rel Hum (%)",
-                            "Rel Hum Flag",
-                            "Wind Dir (10s deg)",
-                            "Wind Dir Flag",
-                            "Wind Spd (km/h)",
-                            "Wind Spd Flag",
-                            "Visibility (km)",
-                            "Visibility Flag",
-                            "Stn Press (kPa)",
-                            "Stn Press Flag",
-                            "Hmdx",
-                            "Hmdx Flag",
-                            "Wind Chill",
-                            "Wind Chill Flag",
-                            "Weather",
+                            "Data Quality",
+                            "Max Temp (°C)",
+                            "Max Temp Flag",
+                            "Min Temp (°C)",
+                            "Min Temp Flag",
+                            "Mean Temp (°C)",
+                            "Mean Temp Flag",
+                            "Heat Deg Days (°C)",
+                            "Heat Deg Days Flag",
+                            "Cool Deg Days (°C)",
+                            "Cool Deg Days Flag",
+                            "Total Rain (mm)",
+                            "Total Rain Flag",
+                            "Total Snow (cm)",
+                            "Total Snow Flag",
+                            "Total Precip (mm)",
+                            "Total Precip Flag",
+                            "Snow on Grnd (cm)",
+                            "Snow on Grnd Flag",
+                            "Dir of Max Gust (10s deg)",
+                            "Dir of Max Gust Flag",
+                            "Spd of Max Gust (km/h)",
+                            "Spd of Max Gust Flag",
                         ];
 
                         $climate_array = $this->parseCsv($line, $field_names);
@@ -92,7 +100,7 @@ class ClimateData extends Agent
                 } else {
                     //                    echo "Does not exist.";
                 }
-            }
+ //           }
         }
         var_dump("loaded");
         $this->climate_data_points = $climate_data_points;
@@ -100,6 +108,8 @@ class ClimateData extends Agent
         //$day_points = [];
         //$points = [];
         $count = count($climate_data_points);
+//var_dump($count);
+//exit();
         foreach ($climate_data_points as $i => $j) {
             //var_dump($j);
             $year = intval(trim($j["Year"], "\""));
@@ -107,26 +117,32 @@ class ClimateData extends Agent
             $day = intval(trim($j["Day"], "\""));
             //var_dump($year, $month, $day);
 
-if ($year === 0) {continue;}
-if ($month === 0) {continue;}
-if ($day === 0) {continue;}
-//var_dump($year);
-//exit();
+            if ($year === 0) {
+                continue;
+            }
+            if ($month === 0) {
+                continue;
+            }
+            if ($day === 0) {
+                continue;
+            }
+            //var_dump($year);
+            //exit();
             $datetime1 = date_create("01-01-" . $year);
             $datetime2 = date_create($day . "-" . $month . "-" . $year);
             $interval = date_diff($datetime1, $datetime2);
 
-$days = intval($interval->format('%R%a'));
+            $days = intval($interval->format("%R%a"));
 
-     //       $days = 0;
+            //       $days = 0;
 
             //             $day_points[$days] = $j;
-            echo intval($i / $count * 100) . " " . $days . "\n";
+            echo intval(($i / $count) * 100) . " " . $days . "\n";
 
             $t = implode(",", $j) . "\r\n";
             //echo $t;
             file_put_contents(
-                "/tmp/climatedata-yvr-day-count-" . $days . ".csv",
+                "/tmp/climatedata-yvr-daily-day-count-" . $days . ".csv",
                 $t,
                 FILE_APPEND | LOCK_EX
             );
@@ -310,7 +326,7 @@ $days = intval($interval->format('%R%a'));
 
     public function doClimateData()
     {
-        $this->loadClimateData();
+        $this->loadClimateDataDaily();
         if ($this->agent_input == null) {
             //$array = ["miao", "miaou", "hiss", "prrr", "grrr"];
             $k = array_rand($array);

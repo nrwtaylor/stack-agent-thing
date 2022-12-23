@@ -620,9 +620,11 @@ And review Agent variables.
 
     public function Read($path, $field = null)
     {
+
+
 if (!isset($this->db)) {
 $this->log("Read did not see a database connection.");
-return;
+//return;
 return true;
 }
 
@@ -633,9 +635,7 @@ return true;
         $this->log(
             "Thing Read uuid " . $this->uuid . " path " .
             implode(">", $path), 'INFORMATION');
-
         $array_data = $this->db->readField($field);
-
         if ($array_data == false) {
             //var_dump("Thing Read array_data " . $array_data);
             $this->log('No array_data returnd.');
@@ -657,6 +657,15 @@ return true;
 
     public function Write($path, $value, $field = null)
     {
+
+
+/*
+        if (!isset($this->db)) {
+return true;
+        }
+*/
+
+
 /*
         var_dump(
             "Thing Write " . $this->uuid . " path " . $this->uuid . " path " ,
@@ -671,19 +680,19 @@ return true;
         }
 
         $array_data = $this->db->readField($field);
-var_dump("Thing Write array_data", $array_data);
+//var_dump("Thing Write array_data", $array_data);
         $this->variables->setValueFromPath($array_data, $path, $value);
 //$this->array_handler->setPathValueArr($array_data, $path, $value);
 
 
-var_dump("Thing Write array_data", $array_data);
+//var_dump("Thing Write array_data", $array_data);
 
 
 
 // Get the local array data
 
 $array_data = $this->variables->array_data;
-var_dump($array_data);
+//var_dump($array_data);
 
 // Then merge this against what we just got from the stack.
 // Before writing it.

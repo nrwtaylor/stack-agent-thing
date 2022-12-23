@@ -31,23 +31,21 @@ class Database
      * @param unknown $nom_from
      * @return unknown
      */
-    //public function init()
+
     function __construct($thing = null, $agent_input = null)
     {
-//var_dump("__construct saw " . $thing->bananas);
-if ($thing == null) {
-  $thing =  new \stdClass();
-}
+        if ($thing == null) {
+            $thing = new \stdClass();
+        }
         $this->thing = $thing;
 
         $uuid = null;
-        if (isset($agent_input['uuid'])) {
+        if (isset($agent_input["uuid"])) {
             $uuid = $agent_input["uuid"];
         }
 
         if ($uuid == null) {
             if (isset($thing->uuid)) {
-                //var_dump("Database __construct uuid " . $thing->uuid);
                 $uuid = $thing->uuid;
             }
         }
@@ -57,23 +55,20 @@ if ($thing == null) {
         }
 
         $nom_from = null;
-        if (isset($agent_input['from'])) {
+        if (isset($agent_input["from"])) {
             $nom_from = $agent_input["from"];
         }
 
         if ($nom_from == null) {
             if (isset($thing->from)) {
-                //var_dump("Database __construct thing from " . $thing->from);
                 $nom_from = $thing->from;
             }
         }
         // dev test
         if ($nom_from == null) {
-// yhash ?
-            $nom_from = 'hash_from_address_dev';
+            // yhash ?
+            $nom_from = "hash_from_address_dev";
         }
-
-
 
         $to = isset($agent_input["to"]) ? $agent_input["to"] : null;
         $subject = isset($agent_input["subject"])
@@ -146,16 +141,14 @@ if ($thing == null) {
             $this->stacks = $settings["settings"]["stacks"];
         }
 
-//test
-//        $this->stacks = [
-//            "mysql" => ["infrastructure" => "mysql"],
-//        ];
+        //test
+        //        $this->stacks = [
+        //            "mysql" => ["infrastructure" => "mysql"],
+        //        ];
 
-//unset($this->stacks['memory']);
-//unset($this->stacks['memcached']);
-//unset($this->stacks['mongo']);
-
-
+        //unset($this->stacks['memory']);
+        //unset($this->stacks['memcached']);
+        //unset($this->stacks['mongo']);
 
         $this->web_prefix = $settings["settings"]["stack"]["web_prefix"];
         $this->state = $settings["settings"]["stack"]["state"];
@@ -180,29 +173,31 @@ if ($thing == null) {
         $this->stack_handlers = [];
 
         $this->candidate_stacks = $this->stacks;
+
         foreach (
             $this->candidate_stacks
             as $candidate_service_name => $candidate_service
         ) {
-if (isset($this->stack_handlers[$candidate_service_name])) {continue;}
-            try {
-                $handler = $this->connectDatabase($candidate_service);
 
-
-var_dump("handler", $handler);
-
-
-
-var_dump("Database connectDatabase",$candidate_service, $handler !== true);
-            } catch (\Throwable $t) {
-
-var_dump("__construct Throwable", $candidate_service, $t->getMessage());
-            } catch (\Error $ex) {
-
-var_dump("__construct Error", $candidate_service, $ex->getMessage());
-
+            if (isset($this->stack_handlers[$candidate_service_name])) {
+                continue;
             }
 
+            try {
+                $handler = $this->connectDatabase($candidate_service);
+            } catch (\Throwable $t) {
+                var_dump(
+                    "__construct Throwable",
+                    $candidate_service,
+                    $t->getMessage()
+                );
+            } catch (\Error $ex) {
+                var_dump(
+                    "Database candidate stacks",
+                    $candidate_service_name,
+                    $candidate_service
+                );
+            }
             if ($handler !== true) {
                 $this->available_stacks[
                     $candidate_service_name
@@ -210,7 +205,7 @@ var_dump("__construct Error", $candidate_service, $ex->getMessage());
                 $this->stack_handlers[$candidate_service_name] = $handler;
             }
         }
-
+        //exit();
 
         $this->active_stacks = $this->available_stacks;
 
@@ -310,12 +305,13 @@ var_dump("__construct Error", $candidate_service, $ex->getMessage());
         $agent_class_name = ucwords($agent_name);
         $agent_namespace_name =
             "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
-
         try {
-var_dump("Database connectDatabase agent namespace name " . $agent_namespace_name);
+            //var_dump("Database connectDatabase agent namespace name " . $agent_namespace_name);
             //$handler = new $agent_namespace_name($this->thing, $this->agent_input);
-            $handler = new $agent_namespace_name($this->thing, $this->agent_input);
-
+            $handler = new $agent_namespace_name(
+                $this->thing,
+                $this->agent_input
+            );
             $handler->uuid = $this->uuid;
             $handler->from = $this->from;
             $handler->to = $this->to;
@@ -336,14 +332,16 @@ var_dump("Database connectDatabase agent namespace name " . $agent_namespace_nam
             if (isset($stack["user"])) {
                 $handler->user = $stack["user"];
             }
-var_dump("Database connectDatabase " . $agent_namespace_name . "connected");
+            //var_dump("Database connectDatabase " . $agent_namespace_name . "connected");
             return $handler;
         } catch (\Throwable $t) {
-           var_dump($t->getMessage());
-
+            var_dump(
+                "Database connectDatabase throwable",
+                $t,
+                $t->getMessage()
+            );
         } catch (\Error $ex) {
-           var_dump($e->getMessage());
-
+            var_dump("Database connectDatabase error", $e->getMessage());
         }
 
         return true;
@@ -455,7 +453,7 @@ var_dump("Database connectDatabase " . $agent_namespace_name . "connected");
         }
 
         if (is_string($array_data)) {
-            $array_data = ['text' => $array_data];
+            $array_data = ["text" => $array_data];
         }
 
         //        foreach ($array_data as $key => $value) {
@@ -481,27 +479,28 @@ var_dump("Database connectDatabase " . $agent_namespace_name . "connected");
     public function writeDatabase($field_text, $array, $uuid = null)
     {
         if ($array == null) {
-var_dump("Database writeDatabase null array");
-
-//            $this->thing->log("writeDatabase received null array.");
             return true;
         }
-//var_dump("Database writeDatabase array", $array); 
-        if (!isset($this->write_fail_count)) {$this->write_fail_count = 0;}
+
+        //var_dump("Database writeDatabase array", $array);
+        if (!isset($this->write_fail_count)) {
+            $this->write_fail_count = 0;
+        }
         //$array = $this->jsonArr($string_text);
         //$string_text = $this->arrayJson($array);
+
         foreach (
             $this->active_stacks
             as $active_service_name => $active_service
         ) {
             if ($active_service_name == "mysql") {
-//var_dump("writeDatabase saw mysql active service");
-//$this->thing->log("writeDatabase saw mysql active service");
+                //var_dump("writeDatabase saw mysql active service");
+                //$this->thing->log("writeDatabase saw mysql active service");
                 $r = $this->stack_handlers["mysql"]->writeMysql(
                     $field_text,
                     $array
                 );
-/*
+                /*
                 var_dump(
                     "write Mysql uuid " .
                         $this->stack_handlers['mysql']->uuid .
@@ -516,16 +515,6 @@ var_dump("Database writeDatabase null array");
                     $field_text,
                     $array
                 );
-/*
-                var_dump(
-                    "write Memcached uuid " .
-                        $this->stack_handlers['memcached']->uuid .
-                        " key " .
-                        $key
-                );
-                var_dump($this->stack_handlers['memcached']->error);
-*/
-                //if ($key === true) {return true;}
             }
 
             if ($active_service_name == "memory") {
@@ -533,24 +522,19 @@ var_dump("Database writeDatabase null array");
                     $field_text,
                     $array
                 );
-/*
-                var_dump(
-                    "write Memory uuid " .
-                        $this->stack_handlers['memory']->uuid .
-                        " key " .
-                        $key
-                );
-                var_dump($this->stack_handlers['memory']->error);
-*/
-                //if ($key === true) {return true;}
             }
 
             if ($active_service_name == "mongo") {
+                //var_dump("Database writeDatabase", $field_text, $array);
+
                 $key = $this->stack_handlers["mongo"]->writeMongo(
                     $field_text,
                     $array
                 );
-/*
+
+                var_dump("Database writeDatabase", $field_text, $array);
+
+                /*
                 var_dump(
                     "write Mongo uuid " .
                         $this->stack_handlers['mongo']->uuid .
@@ -587,14 +571,14 @@ var_dump("Database writeDatabase null array");
     function readField($field)
     {
         $thingreport = $this->Get();
-var_dump("Database readField thingreport", $thingreport);
+        var_dump("Database readField thingreport", $thingreport);
 
         $this->thing = $thingreport["thing"];
         if (isset($this->thing->$field)) {
             // I think I should also do
             $this->$field = $this->thing->$field;
 
-//var_dump("Database readField field this thing", $field, $this->thing->$field);
+            //var_dump("Database readField field this thing", $field, $this->thing->$field);
 
             return $this->thing->$field;
         } else {
@@ -651,7 +635,7 @@ var_dump("Database readField thingreport", $thingreport);
                 $this->available_stacks["mongo"]["uuid"] = $uuid;
             }
         }
-        //var_dump($this->available_stacks);
+
         // Test for at least one valid response.
         // Either true or a uuid.
         // dev stack handlers to respond with uuids (not true).
@@ -701,16 +685,12 @@ var_dump("Database readField thingreport", $thingreport);
 
         //if ($uuid == null) {$uuid = $this->uuid;}
 
-
         if ($uuid == null) {
             $uuid = $this->uuid;
         }
 
-
         $thing = [];
-        //var_dump("Database Get uuid " . $uuid);
-        //$available_stacks = $this->available_stacks;
-        //if (isset($this->responsive_stacks)) {$available_stacks = $this->responsive_stacks;}
+
         foreach ($this->available_stacks as $stack_name => $stack) {
             switch ($stack["infrastructure"]) {
                 case "mysql":
@@ -726,8 +706,7 @@ var_dump("Database readField thingreport", $thingreport);
                         continue 2;
                     }
 
-                    var_dump("Database Get mysql", $result);
-                    $thing['mysql'] = $result;
+                    $thing["mysql"] = $result;
                     break;
                 case "memcached":
                     $result = $this->stack_handlers[
@@ -740,8 +719,7 @@ var_dump("Database readField thingreport", $thingreport);
                     ) {
                         continue 2;
                     }
-                    var_dump("Database Get memcached", $result);
-                    $thing['memcached'] = $result;
+                    $thing["memcached"] = $result;
                     break;
 
                 case "memory":
@@ -755,8 +733,7 @@ var_dump("Database readField thingreport", $thingreport);
                     ) {
                         continue 2;
                     }
-                    var_dump("Database Get memory", $result);
-                    $thing['memory'] = $result;
+                    $thing["memory"] = $result;
 
                     break;
 
@@ -771,12 +748,13 @@ var_dump("Database readField thingreport", $thingreport);
                     ) {
                         continue 2;
                     }
-                    var_dump("Database Get mongo", $result);
-                    $thing['mongo'] = $result;
+                    $thing["mongo"] = $result;
 
                     break;
             }
         }
+
+        var_dump("Database Get() result", $uuid, $result);
 
         // There should only be one return with a matching uuid.
         // Because stacks cannot create a defined uuid.
@@ -810,28 +788,10 @@ var_dump("Database readField thingreport", $thingreport);
         }
 
         foreach ($candidate_things as $service => $t) {
-/*
-var_dump("candidate thing", $service, $t);
-            var_dump(
-                "Database Get candidate thing " . $service . " " . $t->uuid,
-                $t->nom_from,
-                $t->task,
-                $t->created_at
-            );
-*/
-            //if (!isset($t->created_at)) {
-            //var_dump($service);
-            //var_dump($t);
-            //exit();
-
-            //}
-
-            //var_dump($t);
         }
 
         $authorative_thing = false;
         if (is_array($candidate_things)) {
-            //var_dump("candidate_things", $candidate_things);
             if (count($candidate_things) == 0) {
                 $authorative_thing = false;
             }
@@ -847,18 +807,6 @@ var_dump("candidate thing", $service, $t);
                     $candidate_things[array_key_first($candidate_things)];
             }
         }
-//var_dump("Database thingreport");
-        //        $authorative_thing = $thing['mysql'];
-
-        //$authorative_thing = $thing['memory'];
-
-        /*
-$thing = (object) ["nom_to"=>$this->from,
-          "nom_from"=>$this->to,
-          "task"=>$this->subject,
-          "associations"=>null];
-$authorative_thing = $thing;
-*/
 
         $thingreport = [
             "thing" => $authorative_thing,
@@ -1064,18 +1012,17 @@ return $thing_report;
 
             $things = $sth->fetchAll();
 
-$conditioned_things = [];
-foreach($things as $i=>$thing) {
-var_dump($this->stack_handlers);
-$conditioned_things[] = $this->stack_handlers['mysql']->thingMysql($thing);
-}
+            $conditioned_things = [];
+            foreach ($things as $i => $thing) {
+                $conditioned_things[] = $this->stack_handlers[
+                    "mysql"
+                ]->thingMysql($thing);
+            }
 
             $thingreport["info"] =
                 'So here are Things with the variable you provided in \$variables. That\'s what you want';
             $thingreport["things"] = $conditioned_things;
         } catch (\PDOException $e) {
-            //var_dump($e->getMessage());
-            // echo "Error in PDO: ".$e->getMessage()."<br>";
             $thingreport["info"] = $e->getMessage();
             $thingreport["things"] = [];
         }

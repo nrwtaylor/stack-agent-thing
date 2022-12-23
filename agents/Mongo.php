@@ -206,7 +206,7 @@ var_dump("Mongo writeMongo");
         }
 
         $existing = $this->getMongo($this->uuid);
-var_dump("existing", $existing);
+var_dump("Mongo writeMongo existing", $existing);
         //$variables = $existing['variables'];
         // Hmmm
         // Ugly but do this for now.
@@ -219,7 +219,7 @@ var_dump("existing", $existing);
 // whitefox incoming
 
         $j = new ThingJson($this->uuid);
-var_dump("string_json", $string_json);
+var_dump("Mongo writeMongo string_json", $string_json);
         $j->jsontoarrayJson($string_json);
         $data = $j->jsontoarrayJson($string_json);
 //        $this->setValueFromPath($this->array_data, $var_path, $value);
@@ -273,6 +273,7 @@ var_dump("string_json", $string_json);
         return $uuid;
     }
 
+
     function run()
     {
     }
@@ -302,6 +303,9 @@ try {
 
             $this->error = 'Could not connect to Mongo database';
         }
+
+var_dump("Mongo getMongo result", $result);
+
         if ($result == null) {
             return true;
         }
@@ -313,6 +317,7 @@ try {
 
     public function createMongo($subject, $to)
     {
+var_dump("Mongo createMongo");
         if (!$this->isReadyMongo()) {
             return true;
         }
@@ -571,7 +576,6 @@ var_dump("respondResponse Mongo");
 
     public function readSubject()
     {
-var_dump("readSubject Mongo");
         $input = $this->assert($this->input);
         $uuid = $this->extractUuid($input);
 
@@ -579,7 +583,6 @@ var_dump("readSubject Mongo");
             $this->mongo_test_flag = "on";
             $this->testMongo();
         }
-
         if ($input == "prior") {
             $prior_thing = $this->priorMongo();
             $this->response .=
