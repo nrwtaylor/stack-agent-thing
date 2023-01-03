@@ -712,12 +712,15 @@ return true;
     {
         $this->getHeader();
         $matches = [];
+        $this->robot = null;
+
+if ($this->hits === null) {return $this->robot;}
+
         foreach ($this->hits as $i => $hit_string) {
             $matches[] = explode(" ", $hit_string)[0];
         }
 
         $matches = array_unique($matches);
-        $this->robot = null;
         if (count($matches) == 1) {
             $this->robot = $matches[0];
         }
