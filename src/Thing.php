@@ -894,6 +894,7 @@ if (isset($this->db)) {
             $this->from = null;
             $this->subject = null;
 */
+        } else if (is_array($thing)) {
         } else {
             // This just makes sure these four variables
             // are consistently available

@@ -1205,8 +1205,12 @@ class Kaiju extends Agent
         foreach ($parameters as $parameter => $text) {
             $this->drawGraph($parameter);
             $this->makePNG();
+
+
+if (isset($graph_image_embedded[$parameter])) {
             $graph_image_embedded[$parameter] =
                 $this->chart_agent->image_embedded;
+}
             $title[$parameter] = $text["text"];
         }
 
@@ -1242,9 +1246,13 @@ class Kaiju extends Agent
         }
         $web .= "<p>";
 
+        $ago = false;
+
+if (isset($this->thing-thing->created_at)) {
         $ago = $this->thing->human_time(
             time() - strtotime($this->thing->thing->created_at)
         );
+}
 
         if (isset($this->points)) {
             $txt = '<a href="' . $link . ".txt" . '">';
