@@ -1191,8 +1191,10 @@ class Kaiju extends Agent
         $link = $this->web_prefix . "thing/" . $this->uuid . "/kaiju";
 
         $this->drawGraph2();
+        $graph2_image_embedded = false;
+if ($this->chart_agent !== null) {
         $graph2_image_embedded = $this->chart_agent->image_embedded;
-
+}
         $this->makePNG();
 
         $this->calcDvdt();
@@ -1248,7 +1250,7 @@ if (isset($graph_image_embedded[$parameter])) {
 
         $ago = false;
 
-if (isset($this->thing-thing->created_at)) {
+if (null !== $this->thing-thing->created_at) {
         $ago = $this->thing->human_time(
             time() - strtotime($this->thing->thing->created_at)
         );

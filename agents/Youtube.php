@@ -21,6 +21,10 @@ class Youtube extends Agent
 
         $this->keywords = ["youtube", "search", "video"];
 
+        $this->sees = ["https://www.youtube.com/watch?v=jNQXAC9IVRw"];
+
+
+
         $this->api_key =
             $this->thing->container["api"]["google"]["youtube"]["api_key"];
 
@@ -211,7 +215,7 @@ class Youtube extends Agent
         $data = @file_get_contents($data_source);
 
         if ($data == false) {
-            $this->response .= "Could not ask Youtube.";
+            $this->response .= "Could not ask Youtube. ";
             //            $this->items_count = 0;
             return true;
             // Invalid query of some sort.
@@ -338,11 +342,13 @@ class Youtube extends Agent
     public function makeSMS()
     {
         $sms = "YOUTUBE";
+
         $items_count = 0;
         if (isset($this->items_count)) {
             $items_count = $this->items_count;
         }
 
+if ($this->items_count > 0) {
         switch ($this->items_count) {
             case 0:
                 $sms .= " | No definitions found.";
@@ -363,8 +369,9 @@ class Youtube extends Agent
                     }
                 }
         }
-
+}
         $sms .= " | " . $this->response;
+$sms .= implode(" ",$this->sees);
 
         // Really need to refactor this double :/
         $this->sms_message = $sms;
@@ -427,7 +434,7 @@ class Youtube extends Agent
         if (count($pieces) == 1) {
             if ($input == "youtube") {
                 //$this->search_words = null;
-                $this->response .= "Asked Youtube about nothing. ";
+//                $this->response .= "Asking Youtube about nothing. ";
                 return;
             }
         }

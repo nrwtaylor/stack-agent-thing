@@ -693,7 +693,6 @@ public function __set($name, $value) {
 
         $this->makeSMS();
 $this->makeDiscord();
-        //var_dump($this->error);
 //$bracket_agent = new Url($this->thing, 'url');
 
 
@@ -860,7 +859,6 @@ $d = $this->thing_report['discord'];
 
 
 //$url_agent = new Url($this->thing, 'url');
-//var_dump($d);
 //$d = $this->bracketUrl($d);
 $this->thing_report['discord'] =$d;
 
@@ -1465,7 +1463,6 @@ public function makeDiscord() {
     public function respond()
     {
 //if ($this->agent_name !== 'agent') {return;}
-//var_dump($this->agent_name);
         // Call the response agent
         $this->respondResponse();
     }
@@ -2710,6 +2707,39 @@ $flag = true;
             }
         }
 
+// For developer. Directly identify hosted routes.
+$route_handler = new Route($this->thing, "route");
+//$r = $route_handler->hasRoute($this->subject);
+
+//if (null != $route) {
+//$this->thing->log("Saw ROUTE for " .$input .".");
+//$this->thing_report = $route_handler->thing_report;
+//return $this->thing_report;
+
+//        }
+
+
+//$this->thing->log("Looking for pdfs against " . $input . ".");
+
+// Consider $input has to and subject haystacked.
+// To process a raw request.
+// Or need to maked the pdf extraction ignore start tokens.
+$pdf_handler = new Pdf($this->thing, "pdf");
+$pdf = $pdf_handler->extractPdf($this->subject);
+
+//        if (isset($pdf) and is_string($pdf)) {
+
+//$this->thing->log("Saw pdf ");
+if (null != $pdf) {
+$this->thing->log("Saw PDF for " .$input .".");
+$this->thing_report = $pdf_handler->thing_report;
+return $this->thing_report;
+
+        }
+
+
+
+
         // Check for recognizable robot strings.
         // like NMEA
 
@@ -3321,7 +3351,6 @@ $this->head_code = $headcode->head_code;
         );
 
 //$i = $this->stripAgent($input);
-//var_dump($input);
         $arr = $this->extractAgents($input);
         $this->input = $input;
 // Sort and pick best scoring agent response.
