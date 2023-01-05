@@ -135,9 +135,11 @@ class Pdf extends Agent
         // First check for slug matches.
 
         $link_uuids = $this->extractPdfs($this->input);
+
+//if ($link_uuids !== true) {
         $match = count($link_uuids);
         // Then check for thing matches.
-
+//}
         $block_things = [];
         // See if a block record exists.
         $findagent_thing = new Findagent($this->thing, "thing");
@@ -289,6 +291,7 @@ return true;
 
     public function extractPdfs($text)
     {
+if (strlen($text) <= 3) {return true;}
         $matches = [];
         $dir = "/var/www/pdf/";
         $files = scandir($dir);
@@ -321,6 +324,8 @@ return true;
     public function extractPdf($text)
     {
         $matches = $this->extractPdfs($text);
+if ($matches === true) {return false;}
+
         if (count($matches) == 0) {
             return false;
         }

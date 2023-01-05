@@ -2731,6 +2731,7 @@ $pdf = $pdf_handler->extractPdf($this->subject);
 
 //$this->thing->log("Saw pdf ");
 if (null != $pdf) {
+//$pdf_handler->makeLink();
 $this->thing->log("Saw PDF for " .$input .".");
 $this->thing_report = $pdf_handler->thing_report;
 return $this->thing_report;
