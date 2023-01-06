@@ -359,7 +359,9 @@ if (isset($this->thing->db)) {
             $this->flag
         );
 
-        $choices = $this->flag->thing->choice->makeLinks($this->flag);
+//        $choices = $this->flag->thing->choice->makeLinks($this->flag);
+        $choices = $this->thing->choice->makeLinks($this->flag);
+
         $this->thing_report['choices'] = $choices;
     }
 

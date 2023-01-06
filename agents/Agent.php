@@ -97,6 +97,9 @@ class Agent
             //            $quiet_thing = new Quiet($this->thing,"quiet on");
         }
 
+        $this->node_list = ["agent" => ["agent"]];
+
+
         //$is_email = $this->isEmail($input);
 
         // Get some stuff from the stack which will be helpful.
@@ -681,7 +684,7 @@ public function __set($name, $value) {
 
         $this->makeResponse();
         $this->makeInput();
-        //$this->makeChoices();
+        $this->makeChoices();
         $this->makeMessage();
         $this->makeChart();
 
