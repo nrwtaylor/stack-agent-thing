@@ -26,6 +26,10 @@ class Ping extends Agent
         // Instead.
 
         $this->url = $this->settingsAgent(["ping", "url"], "localhost");
+$this->ping_uuid = $this->settingsAgent(["ping", "uuid"]);
+$this->thing_report['ping']['uuid'] = $this->ping_uuid;
+$this->thing_report['ping']['test'] = 'test';
+
 
         $this->node_list = ["ping" => ["pong"]];
     }

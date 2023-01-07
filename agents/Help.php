@@ -54,7 +54,7 @@ class Help extends Agent
     public function getHelp()
     {
         if (!isset($this->prior_agent)) {
-            $this->help = "Did not get prior agent.";
+            $this->help = "Did not get prior agent. Contact us please.";
             return;
         }
 
@@ -211,6 +211,9 @@ class Help extends Agent
      */
     public function readSubject()
     {
+
+$this->response .= "Test.";
+
     }
 
     /**
