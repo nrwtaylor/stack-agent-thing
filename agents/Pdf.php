@@ -136,10 +136,10 @@ class Pdf extends Agent
 
         $link_uuids = $this->extractPdfs($this->input);
 
-//if ($link_uuids !== true) {
+        //if ($link_uuids !== true) {
         $match = count($link_uuids);
         // Then check for thing matches.
-//}
+        //}
         $block_things = [];
         // See if a block record exists.
         $findagent_thing = new Findagent($this->thing, "thing");
@@ -152,12 +152,12 @@ class Pdf extends Agent
             //if (!isset($agent_thing->thing_report["pdf"])) {
             //    $this->pdf_exists = false;
             //}
-if (isset($link_uuids[0])) {
-            $this->link_uuid = $link_uuids[0];
-            $this->response .= "Found pdf. ";
-            return $this->link_uuid;
-}
-return true;
+            if (isset($link_uuids[0])) {
+                $this->link_uuid = $link_uuids[0];
+                $this->response .= "Found pdf. ";
+                return $this->link_uuid;
+            }
+            return true;
 
             //            return true;
         }
@@ -280,7 +280,7 @@ return true;
         $web .= 'This Thing said it heard, "' . $this->subject . '".<br>';
         $web .= $this->sms_message . "<br>";
 
-        if (null != $this->thing->thing) {
+        if (null != $this->thing->thing or !is_array($this->thing->thing)) {
             $received_at = strtotime($this->thing->thing->created_at);
             $ago = $this->thing->human_time(time() - $received_at);
             $web .= "About " . $ago . " ago.";
@@ -291,7 +291,9 @@ return true;
 
     public function extractPdfs($text)
     {
-if (strlen($text) <= 3) {return true;}
+        if (strlen($text) <= 3) {
+            return true;
+        }
         $matches = [];
         $dir = "/var/www/pdf/";
         $files = scandir($dir);
@@ -324,7 +326,9 @@ if (strlen($text) <= 3) {return true;}
     public function extractPdf($text)
     {
         $matches = $this->extractPdfs($text);
-if ($matches === true) {return false;}
+        if ($matches === true) {
+            return false;
+        }
 
         if (count($matches) == 0) {
             return false;
