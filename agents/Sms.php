@@ -193,9 +193,11 @@ $this->logSms("merp");
 
         $this->thing_report['sms'] = "SMS | " . $test_message;
 
+$time_ago = true;
+if ($this->thing->thing->created !== null) {
         $received_at = strtotime($this->thing->thing->created_at);
         $time_ago = time() - $received_at;
-
+}
         // Don't send a message if there isn't enough balance,
         // the number of responses per message would be exceeded, or
         // if the message would be sent 'too late'.

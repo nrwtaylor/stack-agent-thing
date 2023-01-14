@@ -56,8 +56,6 @@ class Translink extends Agent
 
         // Allow for a new state tree to be introduced here.
         $this->node_list = ["start" => ["useful", "useful?"]];
-
-
     }
 
     /**
@@ -74,14 +72,12 @@ class Translink extends Agent
      */
     public function nullAction()
     {
-        $names = $this->thing->Write(
-            ["character", "action"],
-            "null"
-        );
+        $names = $this->thing->Write(["character", "action"], "null");
 
-        $this->message = "TRANSIT | Request not understood. | TEXT SYNTAX";
-        $this->sms_message = "TRANSIT | Request not understood. | TEXT SYNTAX";
-        $this->response .= "Request not understood. ";
+        $this->message =
+            "TRANSIT | Translink request not understood. | TEXT SYNTAX";
+        //$this->sms_message = "TRANSIT | Translink request not understood. | TEXT SYNTAX";
+        $this->response .= "Translink request not understood. ";
         return $this->message;
     }
 
@@ -184,7 +180,9 @@ class Translink extends Agent
         // Generate the next event
         $visible = "off";
         for (
-            $events = $this->gtfsTranslink("stop_times", ["stop_id" => $stop_id]);
+            $events = $this->gtfsTranslink("stop_times", [
+                "stop_id" => $stop_id,
+            ]);
             $events->valid();
             $events->next()
         ) {
@@ -289,7 +287,9 @@ class Translink extends Agent
         // Information for this stop.
         // Generate the next event
         for (
-            $trips = $this->gtfsTranslink("stop_times", ["stop_id" => $stop_id]);
+            $trips = $this->gtfsTranslink("stop_times", [
+                "stop_id" => $stop_id,
+            ]);
             $trips->valid();
             $trips->next()
         ) {
@@ -629,7 +629,6 @@ class Translink extends Agent
                 $i += 1;
             }
 
-
             if ($selector_array == null) {
                 yield $arr;
             }
@@ -637,7 +636,6 @@ class Translink extends Agent
             $match_count = 0;
             $match = true;
             foreach ($arr as $field_name => $field_value) {
-
                 // Look for all items in the selector_array matching
                 if ($selector_array == null) {
                     continue;
@@ -764,12 +762,8 @@ class Translink extends Agent
      */
     function helpTranslink()
     {
-        $this->sms_message = "TRANSIT";
-        //                      if (count($t) > 1) {$this->sms_message .= "ES";}
-        $this->sms_message .= " | ";
-        $this->sms_message .=
+        $this->response .=
             'Text the five-digit stop number for live Translink stop inforation. | For example, "51380". | ';
-        $this->sms_message .= "TEXT <5-digit stop number>";
         return;
     }
 
@@ -778,11 +772,7 @@ class Translink extends Agent
      */
     function syntaxTranslink()
     {
-        $this->sms_message = "TRANSIT";
-        //                      if (count($t) > 1) {$this->sms_message .= "ES";}
-        $this->sms_message .= " | ";
-        $this->sms_message .= 'Syntax: "51380". | ';
-        $this->sms_message .= "TEXT HELP";
+        $this->response .= 'Syntax: "51380". | ';
 
         return;
     }
@@ -796,7 +786,7 @@ class Translink extends Agent
     {
         $split_time = $this->thing->elapsed_runtime();
         //$this->thing->log('Agent "Translink". Start Translink API call. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
-
+        $stop_message = "";
         $this->stop = $stop;
         try {
             $file =
@@ -835,8 +825,7 @@ class Translink extends Agent
             $this->thing->console("Caught exception: ", $e->getMessage(), "\n");
             $this->error = $e;
             $web_input = false;
-            $this->sms_message = "Request not understood: " . $this->error;
-            $this->response = "Request not understood. ";
+            $this->response .= "Request not understood. ";
             return "Request not understood";
         }
 
@@ -873,7 +862,7 @@ class Translink extends Agent
         // Hacky here to be refactored.
         // Generate a special short SMS message
 
-        $this->sms_message = "";
+        //        $this->sms_message = "";
         $response = "";
 
         foreach ($t as $item) {
@@ -888,14 +877,14 @@ class Translink extends Agent
                 " | ";
         }
 
-        $this->sms_message = "NEXT BUS";
+        $stop_message = "NEXT BUS";
 
         if (is_array($t) and count($t) > 1) {
             //if (count($t) > 1) {
-            $this->sms_message .= "ES";
+            $stop_message .= "ES";
         }
 
-        $this->sms_message .= " | ";
+        $stop_message .= " | ";
 
         // Sometimes Translink return
         // a date in the time string.  Remove it.
@@ -910,19 +899,19 @@ class Translink extends Agent
 
         if (is_array($t) and count($t) == 0) {
             // if (count($t) == 0) {
-            $this->sms_message .=
+            $stop_message .=
                 "No information returned for stop " . $this->stop . " | ";
         } else {
-            $this->sms_message .= ucwords(strtolower($output));
+            $stop_message .= ucwords(strtolower($output));
         }
 
-        $this->sms_message .= "Source: Translink | ";
+        $stop_message .= "Source: Translink | ";
 
         $alert_agent = new Alert($this->thing, "alert");
         if ($alert_agent->flag == "red") {
-            $this->sms_message .= "TEXT ALERT";
+            $stop_message .= "TEXT ALERT";
         } else {
-            $this->sms_message .= "TEXT ?";
+            $stop_message .= "TEXT ?";
         }
 
         $this->thing->log(
@@ -930,6 +919,9 @@ class Translink extends Agent
                 number_format($this->thing->elapsed_runtime() - $split_time) .
                 "ms."
         );
+
+        $this->stop_message = $stop_message;
+        $this->response .= $stop_message;
 
         return $message;
     }
@@ -971,11 +963,11 @@ class Translink extends Agent
         }
 
         $message = "Here is some xml information" . $web_input;
-        $this->sms_message = "TRANSIT | Bus number service not implemented.";
+        //$this->sms_message = "TRANSIT | Bus number service not implemented.";
         $this->message =
             "A bus number was provided, but the agent cannot yet respond to this.";
 
-        $this->response = "Agent did not respond. ";
+        $this->response .= "Bus number service not implemented. ";
 
         return $message;
     }
@@ -1024,6 +1016,14 @@ class Translink extends Agent
         return $this->thing_report;
     }
 
+    public function makeSMS()
+    {
+        //$this->sms_message = "Test" . $this->subject;
+$sms = $this->response;
+$this->sms_message = $sms;
+        $this->thing_report["sms"] = $this->sms_message;
+    }
+
     /**
      *
      * @param unknown $phrase
@@ -1049,10 +1049,10 @@ class Translink extends Agent
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            $input = $this->subject;
-
-            if (ctype_alpha($this->subject[0]) == true) {
+            //            $input = $this->subject;
+           if (ctype_alpha($input[0]) == true) {
                 // Strip out first letter and process remaning 4 or 5 digit number
+
                 $input = substr($input, 1);
                 if (is_numeric($input) and strlen($input) == 4) {
                     $this->busTranslink($input);
@@ -1063,10 +1063,11 @@ class Translink extends Agent
                 }
 
                 if (is_numeric($input) and strlen($input) == 5) {
-                    $this->busTranslink($input);
+                    //$this->response .= "foo ".$input. " bar";
+                    //                    $this->busTranslink($input);
                     //                    return;
 
-                    return $this->busTranslink($input);
+                    return $this->stopTranslink($input);
 
                     //return $this->response;
                 }
@@ -1076,24 +1077,16 @@ class Translink extends Agent
                     return;
 
                     return $this->busTranslink($input);
-                    //return $this->response;
                 }
             }
-
-            if (is_numeric($this->subject) and strlen($input) == 5) {
+            if (is_numeric($input) and strlen($input) == 5) {
                 $this->stopTranslink($input);
                 return;
-
-                return $this->stopTranslink($input);
-                //return $this->response;
             }
 
-            if (is_numeric($this->subject) and strlen($input) == 4) {
+            if (is_numeric($input) and strlen($input) == 4) {
                 $this->busTranslink($input);
                 return;
-
-                return $this->busTranslink($input);
-                //return $this->response;
             }
 
             $this->response .= "Request not understood. ";
@@ -1109,7 +1102,8 @@ class Translink extends Agent
                                 $this->stop = false;
                                 return "Request not understood";
                             } else {
-                                $this->stop = $pieces[$key + 1];
+                                $this->stop = $this->extractNumber($input);
+                                //$pieces[$key + 1];
                                 $this->response .= $this->stopTranslink(
                                     $this->stop
                                 );

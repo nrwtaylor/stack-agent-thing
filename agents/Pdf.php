@@ -279,12 +279,16 @@ class Pdf extends Agent
         }
         $web .= 'This Thing said it heard, "' . $this->subject . '".<br>';
         $web .= $this->sms_message . "<br>";
-
+/*
         if (null != $this->thing->thing or !is_array($this->thing->thing)) {
+
+if (null != $this->thing->thing->created_at) {
             $received_at = strtotime($this->thing->thing->created_at);
             $ago = $this->thing->human_time(time() - $received_at);
             $web .= "About " . $ago . " ago.";
+}
         }
+*/
         $web .= "<br>";
         $this->thing_report["web"] = $web;
     }
