@@ -825,7 +825,7 @@ class Translink extends Agent
             $this->thing->console("Caught exception: ", $e->getMessage(), "\n");
             $this->error = $e;
             $web_input = false;
-            $this->response .= "Request not understood. ";
+            $this->response .= "Translink request not understood. ";
             return "Request not understood";
         }
 
@@ -1089,11 +1089,20 @@ $this->sms_message = $sms;
                 return;
             }
 
-            $this->response .= "Request not understood. ";
+            $this->response .= "Translink request not understood. ";
             //                        return "Request not understood";
         }
 
+$number = $this->extractNumber($input);
+            if (strlen($number) == 5) {
+                $this->stopTranslink($number);
+                return;
+            }
+
+
         foreach ($pieces as $key => $piece) {
+
+
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {

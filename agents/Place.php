@@ -1575,8 +1575,8 @@ $found = false;
                 $image,
                 $size,
                 $angle,
-                $width / 2 - $bb_width / 2,
-                $height / 2 + $bb_height / 2,
+                intval($width / 2 - $bb_width / 2),
+                intval($height / 2 + $bb_height / 2),
                 $grey,
                 $font,
                 $text
