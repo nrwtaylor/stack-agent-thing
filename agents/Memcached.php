@@ -21,6 +21,102 @@ class Memcached extends Agent
         $this->response .= "Set " . $text . ". ";
     }
 
+public function snapshotMemcached($datagram) {
+
+if ($datagram == null) {return true;}
+
+            $thing_report = [];
+
+            $thing_report["start_time"] = microtime(true);
+
+
+  $poll_interval = 120000;
+/*
+                if (
+                    isset($things[$datagram["from"]]) and
+                    isset($things[$datagram["from"]]["poll_interval"])
+                ) {
+                    //$poll_interval = 10008;
+                    $poll_interval =
+                        $things[$datagram["from"]]["poll_interval"];
+                }
+*/
+                $memory = null;
+
+                $uuid = $datagram["from"];
+
+                            $mem = new \Memcached("story-pool");
+                            $mem->addServer("127.0.0.1", 11211);
+
+                $prior_thing_report = $mem->get($uuid);
+
+                $prior_created_at = $prior_thing_report["thing"]["createdAt"];
+//                $diff = strtotime($created_at) - strtotime($prior_created_at);
+                //$diff = 9999;
+                $thing = [
+                    "uuid" => $uuid,
+                    "subject" => $datagram["subject"],
+                    "to" => $datagram["to"],
+                    "from" => $datagram["from"],
+                    "agentInput" => null,
+                    "createdAt" => $created_at,
+                ];
+
+                $memory = null;
+
+
+
+                $thing_report["snapshot"] = null;
+
+                if (isset($datagram["agent_input"])) {
+                    $thing_report["snapshot"] = $datagram["agent_input"];
+                }
+                if (isset($datagram["agentInput"])) {
+                    $thing_report["snapshot"] = $datagram["agentInput"];
+                }
+
+                if (isset($things[$uuid])) {
+                    if (isset($things[$uuid]["text"])) {
+                        $thing_report["text"] = $things[$uuid]["text"];
+                    }
+                }
+
+                $thing_report["end_time"] = microtime(true);
+
+                $thing_report["runtime"] =
+                    number_format(
+                        ($thing_report["end_time"] -
+                            $thing_report["start_time"]) *
+                            1000
+                    ) . "ms";
+                $thing_report["period"] = $diff;
+                $thing_report["requested_poll_interval"] = $poll_interval;
+
+                $thing_report["log"] = null;
+                /*
+                    "datagram" => [
+                        "text" => $deslug_agent_name,
+                        "agentInput" => null,
+                    ],
+                    "thing" => [
+                        "uuid" => $web_thing->uuid,
+                        "subject" => $web_thing->subject,
+                        "createdAt" => $web_thing->created_at,
+                    ],
+                    "thingReport" => $json,
+
+*/
+                $memory = [
+                    "uuid" => $uuid,
+                    "datagram" => ["text" => null, "agentInput" => $memory],
+                    "thing" => $thing,
+                    "thingReport" => $thing_report,
+                ];
+                $status = $mem->set($uuid, $memory);
+
+
+}
+
     public function makeSMS()
     {
         $this->sms = $this->response;

@@ -2554,6 +2554,10 @@ $flag = true;
             if ($to_repeat !== null) {
                 $this->sendDiscord($this->subject, $to_repeat);
             }
+
+// test 25 February 2023
+$snapshot_agent = new Snapshot($this->thing, "snapshot");
+
             // No response
             return;
         }
