@@ -119,13 +119,12 @@ class Snapshot extends Agent
             "from" => $uuid,
             "to" => $this->to,
             "created_at" => $created_at,
-            "agent_input" => [
-                $snap,
-                "text" => $this->nuuids[$nuuid]["text"],
-                //"x"=>$this->from, "y"=>$this->to,
-                //"t"=>$this->created_at
-            ],
+            "agent_input" => $snap,
         ];
+
+//                 "text" => $this->nuuids[$nuuid]["text"],
+
+
 
         $this->snapshotMemcached($datagram);
 

@@ -145,7 +145,7 @@ class Unit extends Agent
         $tokens = explode(
             " ",
             str_replace(
-                [",", "*", "(", ")", "[", "]", "!", "&", "and", "-"],
+                [",", "*", "(", ")", "[", "]", "!", "&", "and"],
                 "",
                 $input
             )
