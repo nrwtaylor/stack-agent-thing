@@ -210,6 +210,9 @@ class Agent
         if (method_exists($this, "init" . $this->agent_class_name)) {
             $this->{"init" . $this->agent_class_name}();
         }
+
+$this->thing_report['agent'] = strtolower($this->agent_class_name);
+
         $this->get();
 
         try {
@@ -343,6 +346,8 @@ return true;}
         if (isset($pieces[0])) {
             $function_primitive_name = $pieces[0];
         }
+//merp
+//$this->current_agent = $agent_name;
 
     //    $this->thing->log(
     //        "Check if " . $agent_name . " == " . $this->agent_name
@@ -1094,13 +1099,21 @@ public function makeDiscord() {
 
     public function makeAgent()
     {
+        if (!isset($this->thing_report["agent"])) {
+            $this->thing_report["agent"] = "agent";
+        }
+
+
+/*
         $this->currentAgent();
         $agent = "help";
         if (isset($this->current_agent)) {
             $agent = $this->current_agent;
 
-            $this->thing_report["agent"] = $agent;
+            $this->thing_report["agent"] = $agent ;
+//$this->thing_report["agent"] = $this->thing_report["agentx"];
         }
+*/
     }
 
     public function makeJson()
@@ -1293,6 +1306,7 @@ public function makeDiscord() {
             $this->current_agent =
                 $this->thing->json->array_data["message"]["agent"];
         }
+
         /*
         $this->link =
             $this->web_prefix .
@@ -1504,7 +1518,7 @@ public function makeDiscord() {
         if (isset($this->agent->link)) {
             $link = $this->agent->link;
         }
-
+/*
         if (isset($this->current_agent)) {
             $link =
                 $this->web_prefix .
@@ -1513,6 +1527,16 @@ public function makeDiscord() {
                 "/" .
                 strtolower($this->current_agent);
         }
+*/
+        if (isset($this->thing_report['agent'])) {
+            $link =
+                $this->web_prefix .
+                "thing/" .
+                $this->uuid .
+                "/" .
+                $this->thing_report['agent'];
+        }
+
 
         if (!isset($link) and isset($this->keyword)) {
             $link =
@@ -1520,12 +1544,13 @@ public function makeDiscord() {
                 "thing/" .
                 $this->uuid .
                 "/" .
-                $this->keyword;
+                trim($this->keyword);
         }
 
         if (!isset($link)) {
             $link = $this->web_prefix;
         }
+
 
         $this->link = $link;
         $this->thing_report["link"] = $link;
@@ -1600,7 +1625,7 @@ $this->thing_report['info'] = $info;
         if (isset($this->thing_report["sms"])) {
             $tokens = explode("|", $this->thing_report["sms"]);
             if (isset($tokens[0])) {
-                $keyword = strtolower($tokens[0]);
+                $keyword = trim(strtolower($tokens[0]));
             }
         }
 
@@ -4006,7 +4031,6 @@ usort($this->responsive_agents, function ($a, $b) {
         $this->thing_report["info"] = $message_thing->thing_report["info"];
         restore_exception_handler();
         $this->thing->log("fatal exception");
-        //$this->thing_report['sms'] = "Merp.";
         $this->thing->log($e);
         // do some erorr handling here, such as logging, emailing errors
         // to the webmaster, showing the user an error page etc
