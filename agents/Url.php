@@ -229,7 +229,7 @@ class Url extends Agent
         return $restored_text;
     }
 
-    public function bracketUrl($text)
+    public function bracketUrl($text, $bracket = null)
     {
         //return $text;
         $urls = $this->extractUrls($text);

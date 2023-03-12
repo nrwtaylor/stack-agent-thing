@@ -29,7 +29,7 @@ if ($datagram == null) {return true;}
 
             $thing_report["start_time"] = microtime(true);
 
-
+  $diff = 0;
   $poll_interval = 120000;
 /*
                 if (
@@ -50,7 +50,16 @@ if ($datagram == null) {return true;}
 
                 $prior_thing_report = $mem->get($uuid);
 
+$created_at = null;
+if (isset($datagram['createdAt'])) {
+  $created_at = $datagram['createdAt'];
+}
+
+$prior_created_at = null;
+if ($prior_thing_report != null) {
                 $prior_created_at = $prior_thing_report["thing"]["createdAt"];
+}
+
 //                $diff = strtotime($created_at) - strtotime($prior_created_at);
                 //$diff = 9999;
                 $thing = [
@@ -112,8 +121,8 @@ if ($datagram == null) {return true;}
                     "thing" => $thing,
                     "thingReport" => $thing_report,
                 ];
-                $status = $mem->set($uuid, $memory);
 
+                $status = $mem->set($uuid, $memory);
 
 }
 

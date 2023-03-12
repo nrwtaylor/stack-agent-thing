@@ -199,6 +199,20 @@ $cut_ngrams = [];
 
                     break;
 
+                case "felixstowe":
+                    $place_times["8597"] = [
+                        "text" => "felixstowe",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 51.9617,
+                        "longitude" => 1.3513,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["8597"];
+                    }
+
+                    break;
+
+
                 case "dublin":
                     $place_times["ce34"] = [
                         "text" => "dublin",

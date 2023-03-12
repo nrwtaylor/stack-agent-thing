@@ -217,6 +217,20 @@ $this->thing_report['agent'] = strtolower($this->agent_class_name);
 
         try {
             $this->read();
+
+/*
+//Something to write to txt log
+$text = $this->subject;
+$l = $text.
+        "-read-----------------------".PHP_EOL;
+//Save string to log, use FILE_APPEND to append.
+echo "current user: ".get_current_user();
+
+echo "script was executed under user: ".exec('whoami');
+file_put_contents('/tmp/log_'.date("j.n.Y").'.log', $l, FILE_APPEND);
+*/
+
+
             $this->run();
             $this->make();
 
@@ -290,11 +304,15 @@ $this->thing_report['agent'] = strtolower($this->agent_class_name);
             $this->thing->log("start test");
             $this->test();
         }
+
+
+
         $this->thing->log("__construct complete");
 
     }
 
 function __destruct() {
+
 
 }
 
@@ -488,6 +506,26 @@ public function __set($name, $value) {
        if ($this->agent_name == 'agent') {return;}
        if (!isset($this->{$this->agent_name})) {return true;}
        $this->thing->Write([$this->agent_name], $this->{$this->agent_name});
+
+
+$from = 'thing/' . $this->uuid . '/' . $this->agent_name;
+$t = $this->thing_report;
+$t['thing'] = null;
+$d = [
+                    "uuid" => $this->uuid,
+                    "subject" => $this->subject,
+                    "to" => "agent",
+                    "from" => $from,
+                    "agentInput" => $t,
+                    "createdAt" => $this->current_time,
+];
+
+//$t1= time();
+//$this->snapshotMemcached($d);
+//$t_delta = time()-$t1;
+
+//echo $this->agent_name . $t_delta . " " . $t1 . '/';
+
     }
 
     public function getThings($agent_name = null)
@@ -2464,6 +2502,19 @@ if ($pid == -1) {
             return;
         }
 
+//Something to write to txt log
+/*
+$text = $this->subject;
+$l = $text.
+        "-------------------------".PHP_EOL;
+//Save string to log, use FILE_APPEND to append.
+echo "current user: ".get_current_user();
+
+echo "script was executed under user: ".exec('whoami');
+file_put_contents('/tmp/log_'.date("j.n.Y").'.log', $l, FILE_APPEND);
+*/
+
+
         $this->thing->log('read subject "' . $this->subject . '".');
 
         $status = false;
@@ -2586,6 +2637,23 @@ $snapshot_agent = new Snapshot($this->thing, "snapshot");
             // No response
             return;
         }
+
+        if (substr($this->subject, 0, 5) == "START") {
+
+            //$to_repeat = $this->addressKaiju($this->from);
+$to_repeat ="kokopelli:#general@kaiju.discord";
+            if ($to_repeat !== null) {
+                $this->sendDiscord($this->subject, $to_repeat);
+            }
+
+// test 25 February 2023
+// test 10 March 2023
+$start_agent = new Start($this->thing, "start");
+$this->thing_report = $start_agent->thing_report;
+            // No response
+            return;
+        }
+
 
 
         // Dev test for robots
