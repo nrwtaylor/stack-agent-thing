@@ -186,17 +186,23 @@ class Database
             try {
                 $handler = $this->connectDatabase($candidate_service);
             } catch (\Throwable $t) {
+var_dump($this->textError($t));
+/*
                 var_dump(
                     "__construct Throwable",
                     $candidate_service,
                     $t->getMessage()
                 );
+*/
             } catch (\Error $ex) {
+var_dump($this->textError($ex));
+/*
                 var_dump(
                     "Database candidate stacks",
                     $candidate_service_name,
                     $candidate_service
                 );
+*/
             }
             if ($handler !== true) {
                 $this->available_stacks[
@@ -205,7 +211,6 @@ class Database
                 $this->stack_handlers[$candidate_service_name] = $handler;
             }
         }
-        //exit();
 
         $this->active_stacks = $this->available_stacks;
 
@@ -305,6 +310,7 @@ class Database
         $agent_class_name = ucwords($agent_name);
         $agent_namespace_name =
             "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
+var_dump($agent_class_name);
         try {
             //var_dump("Database connectDatabase agent namespace name " . $agent_namespace_name);
             //$handler = new $agent_namespace_name($this->thing, $this->agent_input);
@@ -332,18 +338,21 @@ class Database
             if (isset($stack["user"])) {
                 $handler->user = $stack["user"];
             }
-            //var_dump("Database connectDatabase " . $agent_namespace_name . "connected");
+
             return $handler;
         } catch (\Throwable $t) {
-            var_dump(
+//$this->textError($t);
+         
+   var_dump(
                 "Database connectDatabase throwable",
-                $t,
-                $t->getMessage()
+                $t->getMessage(),
+"merp"
             );
+
         } catch (\Error $ex) {
+//$this->textError($ex);
             var_dump("Database connectDatabase error", $e->getMessage());
         }
-
         return true;
     }
 

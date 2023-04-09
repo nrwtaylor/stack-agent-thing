@@ -215,8 +215,6 @@ $this->log("Thing database connected.");} else {$this->log("Problem with thing d
         $this->log("Thing " . $t . " de-instantiated.");
     }
 
-    
-
     public function getThing($uuid = null)
     {
         $this->log("getThing ". $uuid);
@@ -238,7 +236,6 @@ $this->log("Thing database connected.");} else {$this->log("Problem with thing d
                 'uuid' => $this->uuid,
                 'from' => null,
             ]);
-
 
 //            $this->db = new Database($this, null);
 
@@ -481,6 +478,7 @@ $this->log("Thing database connected.");} else {$this->log("Problem with thing d
         //Commented out 27 Feb 2018.  And it stopped creating mysql records.
         //$query = $this->db->Create($subject, $to); // 3s
 
+
         $query = $this->db->Create($subject, $to); // 3s
 
         $this->log("Create. Database create call completed.");
@@ -657,13 +655,16 @@ return true;
 
     public function Write($path, $value, $field = null)
     {
+var_dump("WRITE",$path, $value, $field, debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function']);
 
-
-/*
         if (!isset($this->db)) {
+//var_dump($this->db);
+//if ($this->db === null) {return;}
+//$this->getThing($this->uuid);
 return true;
+//exit();
         }
-*/
+
 
 
 /*
