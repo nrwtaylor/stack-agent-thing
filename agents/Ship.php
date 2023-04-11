@@ -1624,6 +1624,19 @@ return;
 // Otherwise normal.
 
         foreach ($variable_array as $variable_name => $variable_value) {
+
+if ($variable_name == 'SVs') {
+//$this->ship_thing->variables->snapshot->{$variable_name} = key($variable_value);
+foreach($variable_value as $SV_number => $SV_value) {
+
+if ($SV_number == null or $SV_number == "") {continue;}
+
+$this->ship_thing->variables->snapshot->{$variable_name}[$SV_number] = $SV_value;
+
+}
+continue;
+}
+
             $this->ship_thing->variables->snapshot->{$variable_name} = $variable_value;
         }
 
@@ -1641,6 +1654,9 @@ return;
     public function readShip($text = null)
     {
 $unrecognized_sentences = [];
+
+$this->text = $text;
+
         // Handle a NMEA string
         if ($text === null) {
             return null;

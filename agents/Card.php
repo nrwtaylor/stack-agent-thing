@@ -54,16 +54,27 @@ class Card extends Agent
         $this->current_time = $this->thing->time();
 
         // Borrow this from iching
+<<<<<<< HEAD
         $this->thing->variables->setField("variables");
         $time_string = $this->thing->variables->readVariable([
+=======
+        $this->thing->json->setField("variables");
+        $time_string = $this->thing->json->readVariable([
+>>>>>>> origin/kokopelli
             "card",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
+<<<<<<< HEAD
             $this->thing->variables->setField("variables");
             $time_string = $this->thing->variables->time();
             $this->thing->variables->writeVariable(
+=======
+            $this->thing->json->setField("variables");
+            $time_string = $this->thing->json->time();
+            $this->thing->json->writeVariable(
+>>>>>>> origin/kokopelli
                 ["card", "refreshed_at"],
                 $time_string
             );
@@ -72,6 +83,7 @@ class Card extends Agent
         $this->refreshed_at = strtotime($time_string);
 
         $this->nom = strtolower(
+<<<<<<< HEAD
             $this->thing->variables->readVariable(["card", "nom"])
         );
         $this->suit = $this->thing->variables->readVariable(["card", "suit"]);
@@ -80,6 +92,16 @@ class Card extends Agent
 
             $this->thing->variables->writeVariable(["card", "nom"], $this->nom);
             $this->thing->variables->writeVariable(["card", "suit"], $this->suit);
+=======
+            $this->thing->json->readVariable(["card", "nom"])
+        );
+        $this->suit = $this->thing->json->readVariable(["card", "suit"]);
+        if ($this->nom == false or $this->suit == false) {
+            $this->getCard();
+
+            $this->thing->json->writeVariable(["card", "nom"], $this->nom);
+            $this->thing->json->writeVariable(["card", "suit"], $this->suit);
+>>>>>>> origin/kokopelli
 
             $this->thing->log(
                 $this->agent_prefix . ' completed read.',

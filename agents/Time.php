@@ -24,6 +24,9 @@ class Time extends Agent
      */
     function init()
     {
+
+        $this->time_terse_flag = "on";
+
         $this->agent_name = "time";
         $this->test = "Development code";
 
@@ -62,9 +65,25 @@ class Time extends Agent
     function makeSMS()
     {
         $this->node_list = ["time" => ["time"]];
-        $m = strtoupper($this->agent_name) . " | " . $this->response;
-        $this->sms_message = $m;
-        $this->thing_report["sms"] = $m;
+        $sms = strtoupper($this->agent_name) . " | ";
+
+        if (
+            isset($this->time_terse_flag) and
+            $this->time_terse_flag == "on"
+        ) {
+if (isset($this->message)) {
+            $sms .= $this->message;
+} else {
+$sms .= "No message. ";
+}
+        } else {
+            $sms .= $this->response;
+        }
+
+
+
+        $this->sms_message = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     /**
@@ -154,9 +173,18 @@ class Time extends Agent
             $m = "Time check from stack server " . $this->web_prefix . ". ";
 
             $datum = $this->datumTime($text);
+
+                $this->message =
+                    $datum->format("l") .
+                    " " .
+                    $datum->format("d/m/Y H:i") .
+                    ".";
+
+
             $this->datum = $datum;
             if ($datum !== false) {
                 $this->text = $datum->format("H:i");
+
                 $m .=
                     "In the timezone " .
                     $this->time_zone .
@@ -201,6 +229,32 @@ Is there a time provided in the query?
 
         return $datum;
     }
+
+    // dev needs this to send response.
+    // Review Response agent.
+
+    public function respondResponse()
+    {
+        // Thing actions
+        $this->thing->flagGreen();
+        // Generate email response.
+
+        $choices = false;
+        $this->thing_report["choices"] = $choices;
+
+        $this->thing_report["email"] = $this->sms_message;
+        //$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        $this->thing_report["txt"] = $this->sms_message;
+
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
+        }
+
+        $this->thing_report["help"] = "This reads a web resource.";
+    }
+
+
 
     function humanTime($text = null)
     {

@@ -202,6 +202,82 @@ return $sensor_id;
         return $apb;
     }
 
+/*
+
+$THROT,0.0,A*3A
+$HCHDT,343.2,T*2F
+
+*/
+    public function rotNMEA($text)
+    {
+        $parts = $this->explodeNMEA($text);
+        $rate_of_turn = $parts[1];
+        $data_validity = $parts[2];
+
+        $rot = [
+            "rate_of_turn" => $rate_of_turn,
+            "data_validity" => $data_validity,
+        ];
+        return $rot;
+    }
+
+    public function hdtNMEA($text)
+    {
+        $parts = $this->explodeNMEA($text);
+        $true_heading_in_degrees = $parts[1];
+        $true_north = $parts[2];
+
+        $hdt = [
+            "true_heading_in_degrees" => $true_heading_in_degrees,
+            "true_north" => $true_north,
+        ];
+        return $hdt;
+    }
+
+
+    public function hdmNMEA($text)
+    {
+        $parts = $this->explodeNMEA($text);
+        $magnetic_heading_in_degrees = $parts[1];
+        $magnetic_north = $parts[2];
+
+        $hdm = [
+            "magnetic_heading_in_degrees" => $magnetic_heading_in_degrees,
+            "magnetic_north" => $magnetic_north,
+        ];
+        return $hdm;
+    }
+
+
+    public function hdgNMEA($text)
+    {
+/*
+
+$--HDG,x.x,x.x,a,x.x,a*hh<CRLF>
+
+The two dashes can be almost anything (often HS for heading sensor), most units reading in data do not bother checking. The first x.x is the magnetic heading, the second the magnetic deviation with the a being E/W and the third the magnetic variation with the a as E/W.
+https://forums.ybw.com/index.php?threads/nmea-hdg-syntax-error.88883/
+*/
+        $parts = $this->explodeNMEA($text);
+        $magnetic_heading_in_degrees = $parts[1];
+        $magnetic_deviation_in_degrees = $parts[2];
+        $magnetic_deviation_east_west = $parts[3];
+
+        $magnetic_variation_in_degrees = $parts[4];
+        $magnetic_variation_east_west = $parts[5];
+
+
+        $hdg = [
+            "magnetic_heading_in_degrees" => $magnetic_heading_in_degrees,
+            "magnetic_deviation_in_degrees" => $magnetic_deviation_in_degrees,
+            "magnetic_deviation_east_west" => $magnetic_deviation_east_west,
+            "magnetic_variation_in_degrees" => $magnetic_variation_in_degrees,
+            "magnetic_variation_east_west" => $magnetic_variation_east_west,
+        ];
+        return $hdg;
+    }
+
+
     // XTE - Cross-Track Error, Measured
     public function xteNMEA($text)
     {
@@ -528,7 +604,7 @@ $transducers[$i]['sensor_id'] = $sensor_id;
 
         $SVs = [];
 
-        $SVs[1] = [
+        $SVs[$SV_PRN_number[1]] = [
             "SV_PRN_number" => $SV_PRN_number[1],
             "elevation_in_degrees" => $elevation_in_degrees[1],
             "azimuth_degrees_from_true_north" =>
@@ -545,7 +621,7 @@ $transducers[$i]['sensor_id'] = $sensor_id;
             $azimuth_degrees_from_true_north[2] = $parts[10];
             $SNR[2] = $parts[11];
 
-            $SVs[2] = [
+            $SVs[$SV_PRN_number[2]] = [
                 "SV_PRN_number" => $SV_PRN_number[2],
                 "elevation_in_degrees" => $elevation_in_degrees[2],
                 "azimuth_degrees_from_true_north" =>
@@ -562,7 +638,7 @@ $transducers[$i]['sensor_id'] = $sensor_id;
             $azimuth_degrees_from_true_north[3] = $parts[14];
             $SNR[3] = $parts[15];
 
-            $SVs[3] = [
+            $SVs[$SV_PRN_number[3]] = [
                 "SV_PRN_number" => $SV_PRN_number[3],
                 "elevation_in_degrees" => $elevation_in_degrees[3],
                 "azimuth_degrees_from_true_north" =>
@@ -579,7 +655,7 @@ $transducers[$i]['sensor_id'] = $sensor_id;
             $azimuth_degrees_from_true_north[4] = $parts[18];
             $SNR[4] = $parts[19];
 
-            $SVs[4] = [
+            $SVs[$SV_PRN_number[4]] = [
                 "SV_PRN_number" => $SV_PRN_number[4],
                 "elevation_in_degrees" => $elevation_in_degrees[4],
                 "azimuth_degrees_from_true_north" =>

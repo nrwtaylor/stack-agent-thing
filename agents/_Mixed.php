@@ -131,7 +131,6 @@ $this->thing_report['sms'] = "MIXED";
     {
 }
 
-
     public function get()
     {
         $time_string = $this->thing->Read(["mixed", "refreshed_at"]);

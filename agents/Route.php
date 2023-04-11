@@ -186,7 +186,6 @@ function loadRoute($token)
         $message_thing = new Message($this->thing, $this->thing_report);
 
         $this->thing_report['info'] = $message_thing->thing_report['info'];
-
         $this->thing_report['thing'] = $this->thing->thing;
         $this->thing_report['help'] = "This makes a route from the datagram.";
     }
@@ -227,7 +226,6 @@ function loadRoute($token)
     }
 
     public function getRoutes() {
-
         $allowed_endpoints = [];
         if ((isset($this->allowed_routes_resource)) and (file_exists($this->resource_path .
             $this->allowed_routes_resource))) {

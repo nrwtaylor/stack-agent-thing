@@ -13,47 +13,41 @@ class ClimateData extends Agent
     {
         //    $path = "climate-data-gcca-yvr";
 
-        // This is the longest hourly dataset in British Columbia.
-        // Dating back to the 1950s when records began at YVR Vancouver Airport.
         $path = "climate-data-gcca-yvr";
         $number = "1108395";
         $place = "BC";
-
-        // Another place and another number for testing against.
-        //        $place = "NT";
-        //        $number = "2204100";
-
+//        $place = "NT";
+//        $number = "2204100";
         $static_resource = "en_climate_hourly_" . $place . "_" . $number . "_";
         $static_postfix = "_P1H.csv";
         // 12-2022_P1H.csv
-        $contents = "";
+
         $librex_agent = new Librex($this->thing, $contents);
-        $index = 0;
+
         $years = range(1950, 2022);
-        $months = range(1, 12);
+        $months = range(0, 12);
         $climate_data_points = [];
         foreach ($years as $i => $year) {
             foreach ($months as $j => $month) {
                 $padded_month = str_pad($month, 2, "0", STR_PAD_LEFT);
-                $index += 1;
+
                 $resource =
                     $static_resource .
                     $padded_month .
                     "-" .
                     $year .
                     $static_postfix;
-                $this->thing->console("Loading file.");
+
                 $file = $this->resource_path . $path . "/" . $resource;
                 if (file_exists($file)) {
-                    echo $file . "\n";
+                    echo "exists";
                     $contents = file_get_contents($file);
-                    $librex_agent->getLibrex("unnamed-" . $index, $contents);
 
+                    $librex_agent->getLibrex("unnamed", $contents);
+
+                    //$contents = $librex_agent->contents;
                     $lines = $librex_agent->linesLibrex();
-
                     foreach ($lines as $i => $line) {
-                        //echo $line. "\n";
-                        // Transform weather record CSV headers to PHP object.
                         // ﻿"Longitude (x)","Latitude (y)","Station Name","Climate ID","Date/Time (LST)","Year","Month","Day","Time (LST)","Temp (°C)","Temp Flag","Dew Point Temp (°C)","Dew Point Temp Flag","Rel Hum (%)","Rel Hum Flag","Wind Dir (10s deg)","Wind Dir Flag","Wind Spd (km/h)","Wind Spd Flag","Visibility (km)","Visibility Flag","Stn Press (kPa)","Stn Press Flag","Hmdx","Hmdx Flag","Wind Chill","Wind Chill Flag","Weather""
                         $field_names = [
                             "Longitude (x)",
@@ -94,52 +88,9 @@ class ClimateData extends Agent
                 }
             }
         }
-        var_dump("loaded");
+
         $this->climate_data_points = $climate_data_points;
 
-        //$day_points = [];
-        //$points = [];
-        $count = count($climate_data_points);
-        foreach ($climate_data_points as $i => $j) {
-            //var_dump($j);
-            $year = intval(trim($j["Year"], "\""));
-            $month = intval(trim($j["Month"], "\""));
-            $day = intval(trim($j["Day"], "\""));
-            //var_dump($year, $month, $day);
-
-if ($year === 0) {continue;}
-if ($month === 0) {continue;}
-if ($day === 0) {continue;}
-//var_dump($year);
-//exit();
-            $datetime1 = date_create("01-01-" . $year);
-            $datetime2 = date_create($day . "-" . $month . "-" . $year);
-            $interval = date_diff($datetime1, $datetime2);
-
-$days = intval($interval->format('%R%a'));
-
-     //       $days = 0;
-
-            //             $day_points[$days] = $j;
-            echo intval($i / $count * 100) . " " . $days . "\n";
-
-            $t = implode(",", $j) . "\r\n";
-            //echo $t;
-            file_put_contents(
-                "/tmp/climatedata-yvr-day-count-" . $days . ".csv",
-                $t,
-                FILE_APPEND | LOCK_EX
-            );
-            //}
-        }
-        exit();
-        $this->day_points = $day_points;
-        return $this->day_points;
-        exit();
-        //var_dump($d);
-        //exit();
-
-        return;
         $time_stamps = [
             "00:00",
             "01:00",
@@ -170,7 +121,7 @@ $days = intval($interval->format('%R%a'));
 
         $arr_handler = new Arr($this->thing, "arr");
 
-        $days = range(1, 31);
+        $days = range(0, 31);
 
         // Test
         //$months = range(1, 1);
@@ -180,15 +131,12 @@ $days = intval($interval->format('%R%a'));
         $point_histories = [];
 
         $day_count = 0;
-        $month_count = 0;
         foreach ($months as $i => $month) {
             foreach ($days as $j => $day) {
-                // Get all the records for a particular day count.
-                // Days since start of year.
-                // Save day count as line in file for that day.
-                $day_count += 1;
                 foreach ($time_stamps as $k => $time_stamp) {
-                    //                    $day_count += 1;
+
+                    $day_count += 1;
+
                     $padded_day = str_pad($day, 2, "0", STR_PAD_LEFT);
                     $padded_month = str_pad($month, 2, "0", STR_PAD_LEFT);
 
@@ -198,76 +146,33 @@ $days = intval($interval->format('%R%a'));
                         "time_stamp" => $time_stamp,
                     ];
 
-                    //var_dump($this->climate_data_points);
-                    //echo "\n";
-                    //var_dump("ClimateData filter", $filter);
-                    //                    $filtered_data_points = $arr_handler->filterFieldsArr(
-                    //                        $this->climate_data_points,
-                    //                        $filter
-                    //                    );
-
-                    //var_dump($this->climate_data_points);
-                    //var_dump($filtered_data_points);
-                    //var_dump($filter);
-                    //                    $point_label = $path . "-" . implode("-",$filter);
-
-                    //                    $point_history = ['event'=>$filtered_data_points, "eventAt"=>implode("-", $filter)];
-
-                    // There is not enough memory space (by PHP default) to deal with a variable of point_histories.
-                    // Running this code on my development machine has the processed killed by about month 12.
-                    //           $point_histories[] = $point_history;
-                    //$year = $point_history['event']["Year"];
-                    //var_dump($year);
-                    // So instead serialize the processed rows and save them as line rows in a working file.
-                    //$serialized_point_history = json_encode($point_history) . "\r\n";
-
-                    // Per month-day. All recorded hours.
-                    //file_put_contents("/tmp/test5-". $month ."-" .$day .".txt", $serialized_point_history, FILE_APPEND | LOCK_EX);
-
-                    //foreach($filtered_data_points as $z => $filtered_data_point) {
-                    $t = implode(",", $filtered_data_point) . "\r\n";
-
-                    //$serialized_point_history = json_encode($point_history) . "\r\n";
-                    //file_put_contents("/tmp/climatedata-yvr-day-count-". $day_count .".jsonArray", $serialized_point_history, FILE_APPEND | LOCK_EX);
-                    file_put_contents(
-                        "/tmp/climatedata-yvr-day-count-" . $day_count . ".csv",
-                        $t,
-                        FILE_APPEND | LOCK_EX
+                    $filtered_data_points = $arr_handler->filterFieldsArr(
+                        $this->climate_data_points,
+                        $filter
                     );
-                    //}
-
-                    // Per (year) day. All recorded hours.
-
-                    //file_put_contents("/tmp/test5-". $year_start_day . ".txt", $serialized_point_history, FILE_APPEND | LOCK_EX);
-
-                    // Resulting in an 8 Byte increase per (9x25)? records.
-                    // More manageable for server memory.
+                    $point_label = $path . "-" . implode("-",$filter);
+                    $point_histories[$point_label] = $filtered_data_points;
                 }
-                echo "day count " . $day_count . "\n";
-                echo memory_get_usage() . " " . "Bytes ";
+                var_dump($day_count);
             }
-            // Reset day count
-            //$day_count = 0;
-            $month_count += 1;
-            echo "Processed month " . $month_count;
+            var_dump("month",$day_count);
         }
 
-        //        $meta = ["path" => $path];
+        $meta = ["path" => $path];
+$climate_data_array = ['meta'=>$meta,'data'=>$point_histories];
 
-        $climate_data_array = [
-            "from" => "climatedata",
-            "to" => "merp",
-            "subject" => $path,
-            "agent_input" => $point_histories,
-        ];
+$output_file_name = "/tmp/" . $path . "_time_sequence.json";
 
-        $output_file_name = "/tmp/" . $path . "_time_sequence.json";
+        file_put_contents($output_file_name, json_encode($climate_data_array)
+        );
 
-        file_put_contents($output_file_name, json_encode($climate_data_array));
+        $data = json_decode(
+            file_get_contents($output_file_name),
+            true
+        );
 
-        $data = json_decode(file_get_contents($output_file_name), true);
 
-        var_dump($data["subject"]);
+        var_dump($data['meta']);
         //var_dump($new_variable[1]); // Not sure why a 0 and 1 index.
 
         return $climate_data_points;
@@ -312,7 +217,7 @@ $days = intval($interval->format('%R%a'));
     {
         $this->loadClimateData();
         if ($this->agent_input == null) {
-            //$array = ["miao", "miaou", "hiss", "prrr", "grrr"];
+            $array = ["miao", "miaou", "hiss", "prrr", "grrr"];
             $k = array_rand($array);
             $v = $array[$k];
 
@@ -330,6 +235,24 @@ $days = intval($interval->format('%R%a'));
         $this->negative_time = $agent->negative_time; //negative time is asking
     }
 
+    // -----------------------
+    /*
+    public function respondResponse()
+    {
+        $this->thing->flagGreen();
+
+        $this->thing_report["info"] =
+            "This is a cat keeping an eye on how late this Thing is.";
+        $this->thing_report["help"] = "This is about being inscrutable.";
+
+        //$this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report['message'] = $this->sms_message;
+        $this->thing_report['txt'] = $this->sms_message;
+
+        $message_thing = new Message($this->thing, $this->thing_report);
+        $thing_report['info'] = $message_thing->thing_report['info'];
+    }
+*/
     function makeSMS()
     {
         $this->node_list = ["cat" => ["cat", "dog"]];

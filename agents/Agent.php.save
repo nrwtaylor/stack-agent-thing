@@ -1,0 +1,1558 @@
+<?php
+/*
+ * Agent.php
+ *
+ * @package default
+ */
+namespace Nrwtaylor\StackAgentThing;
+
+// Agent resolves message disposition
+
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
+error_reporting(-1);
+
+define("MAX_EXECUTION_TIME", 2); # seconds
+class Agent
+{
+    public $input;
+
+    /**
+     *
+     * @param Thing   $thing
+     * @param unknown $input (optional)
+     */
+    function __construct(Thing $thing = null, $input = null)
+    {
+        //        if ($thing == false) {
+        //           $thing = new Thing(false);
+        //$this->thing = false;
+        //return;
+        //        }
+
+        $this->getName();
+
+        if (($thing == null) and (isset($input['uuid']))) {
+
+           // If the stack was able to pull a thing,
+           // then we would have it.
+           // So assume that it couldn't.
+
+           // Return making the agent class available.
+           return;
+        }
+
+        if ($thing == null) {
+            $thing = new Thing(null);
+        }
+
+        // Start the thing timer.
+        $this->start_time = $thing->elapsed_runtime();
+
+        $this->agent_input = $input;
+        if (is_array($input)) {
+            $this->agent_input = $input;
+        }
+        if (is_string($input)) {
+            $this->agent_input = $input;
+        }
+
+        $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
+        // Given a "thing".  Instantiate a class to identify
+        // and create the most appropriate agent to respond to it.
+
+        $this->thing = $thing;
+
+        $this->thing->agent_class_name_current = $this->agent_class_name;
+
+        $this->thing_report["thing"] = $this->thing;
+
+        $this->thing->agent_name = $this->agent_class_name;
+
+
+        if (!isset($this->thing->run_count)) {
+            $this->thing->run_count = 0;
+        }
+
+        $a = explode("\\", get_class($this))[2];
+        $this->thing->log($a);
+        $this->thing->log("Saw thing run count is ". $this->thing->run_count . ".");
+
+        $this->thing->log("Got thing.");
+        // So I could call
+        if ($this->thing->container["stack"]["state"] == "dev") {
+            $this->dev = true;
+            $this->test = true;
+        }
+        if ($this->thing->container["stack"]["engine_state"] == "dev") {
+            $this->dev = true;
+        }
+
+        $this->metaAgent();
+
+        $this->thing->log("Got meta.");
+        // Tell the thing to be quiet
+        if ($this->agent_input != null) {
+            //            $this->thing->silenceOn();
+            //            $quiet_thing = new Quiet($this->thing,"quiet on");
+        }
+
+        //$is_email = $this->isEmail($input);
+
+        // Get some stuff from the stack which will be helpful.
+
+        // dev test
+
+        // TODO define all default null settings
+        $this->default_font = null;
+        $this->default_pdf_page_template = null;
+
+        $stack_settings = $thing->container["stack"];
+        foreach ($stack_settings as $setting_name => $setting_value) {
+            // For 'backwards' compatibility.
+            //$this->{$setting_name} = $thing->container['stack'][$setting_name];
+
+            // Going forward set default_ and stack_ prefixes
+            // For settings from stack private settings.
+            $this->{"default_" . $setting_name} =
+                $thing->container["stack"][$setting_name];
+            $this->{"stack_" . $setting_name} =
+                $thing->container["stack"][$setting_name];
+        }
+
+        $this->web_prefix = $thing->container["stack"]["web_prefix"];
+        $this->mail_postfix = $thing->container["stack"]["mail_postfix"];
+        $this->word = $thing->container["stack"]["word"];
+        $this->email = $thing->container["stack"]["email"];
+
+        // And some more stuff
+        $this->short_name = $thing->container["stack"]["short_name"];
+
+        $this->stack_state = $thing->container["stack"]["state"];
+
+        $this->stack_engine_state = $thing->container["stack"]["engine_state"];
+
+        $this->entity_name = $thing->container["stack"]["entity_name"];
+
+        $this->default_font = null;
+        if (isset($this->thing->container["stack"]["font"])) {
+            $this->default_font = $this->thing->container["stack"]["font"];
+        }
+
+        $this->default_pdf_page_template = null;
+        if (isset($this->thing->container["stack"]["pdf_page_template"])) {
+            $this->default_pdf_page_template =
+                $this->thing->container["stack"]["pdf_page_template"];
+        }
+
+        $this->sqlresponse = null;
+
+        $this->thing->log("running on Thing " . $this->thing->nuuid . ".");
+
+        $this->resource_path = $GLOBALS["stack_path"] . "resources/";
+        $this->agents_path = $GLOBALS["stack_path"] . "agents/";
+        $this->agents_path =
+            $GLOBALS["stack_path"] .
+            "vendor/nrwtaylor/stack-agent-thing/agents/";
+
+        if (
+            isset($this->thing->container["api"][strtolower($this->agent_name)])
+        ) {
+            $this->settings =
+                $this->thing->container["api"][strtolower($this->agent_name)];
+        }
+
+        $this->agent_version = "redpanda";
+
+        // TODO
+
+        //$this->time_agent = new Time($this->thing,"time");
+        $this->current_time = $this->thing->time();
+
+        $this->num_hits = 0;
+
+        $this->verbosity = 9;
+
+        $this->context = null;
+
+        $this->error = "";
+        $this->warning = "";
+        $this->response = "";
+
+
+        if (isset($thing->container["api"]["agent"])) {
+            if ($thing->container["api"]["agent"] == "off") {
+                return;
+            }
+        }
+
+        if (isset($this->dev) and $this->dev == true) {
+            $this->debug();
+        }
+        // First things first... see if Mordok is on.
+        /* Think about how this should work and the user UX/UI
+            $mordok_agent = new Mordok($this->thing);
+
+            if ($mordok_agent->state == "on") {
+
+        $thing_report = $this->readSubject();
+
+        $this->respond();
+
+} else {
+// Don't
+
+}
+*/
+
+//
+//$this->getAccounts(); 
+/*
+        $this->getAccounts();
+        if (!$this->isAccount('thing')) {
+           $this->newAccount(['name'=>'thing', 'amount'=>0]);
+        }
+
+        if (!$this->isAccount('stack')) {
+           $this->newAccount(['name'=>'stack', 'amount'=>0]);
+        }
+*/
+
+
+
+        $this->init();
+
+        // read the current agent.
+        if (method_exists($this, "init" . $this->agent_class_name)) {
+            $this->{"init" . $this->agent_class_name}();
+        }
+        $this->thing->log("completed init.");
+
+        $this->get();
+        $this->thing->log("completed get.");
+
+        try {
+            $this->read();
+        $this->thing->log("completed read.");
+
+            $this->run();
+        $this->thing->log("completed run.");
+
+            $this->make();
+        $this->thing->log("completed make.");
+
+            $this->set();
+        $a = explode("\\", get_class($this))[2];
+$this->thing->log($a);
+        $this->thing->log("completed set.");
+
+        } catch (\OverflowException $t) {
+
+            $this->response =
+                "Stack variable store is full. Variables not saved. Text FORGET ALL.";
+            $web_thing = new Thing(null);
+            $web_thing->Create(
+                $this->from,
+                "error",
+                "Overflow: try set failed."
+            );
+            $this->thing_report["sms"] = "STACK | " . $this->response;
+            $this->thing->log("caught overflow exception.");
+            // Executed only in PHP 7, will not match in PHP 5
+        } catch (\Throwable $t) {
+$this->thing_report['sms'] = $this->textError($t);
+$this->thingError($t);
+/*
+            $this->thing_report["sms"] = $t->getMessage();
+            $web_thing = new Thing(null);
+            $web_thing->Create(
+                $this->from,
+                "error",
+                "Throwable: Set failed. " .
+                    $t->getMessage() .
+                    " " .
+                    $t->getTraceAsString()
+            );
+*/
+            //$error_text =
+            //    $t->getLine() . "---" . $t->getFile() . $t->getMessage();
+            $error_text = $this->textError($t);
+            $this->thing->console($error_text . "\n");
+            $this->thing->log($error_text, "ERROR");
+            // Executed only in PHP 7, will not match in PHP 5
+        } catch (\Exception $e) {
+            $error_text =
+                $t->getLine() . "---" . $t->getFile() . $t->getMessage();
+
+            $web_thing = new Thing(null);
+            $web_thing->Create(
+                $this->from,
+                "error",
+                "Exception: Set failed. " .
+                    $e->getMessage() .
+                    " " .
+                    $t->getTraceAsString()
+            );
+            $this->thing->console($error_text . "\n");
+            $this->thing->log($error_text, "ERROR");
+            // Executed only in PHP 5, will not be reached in PHP 7
+        }
+
+
+        if ($this->agent_input == null or $this->agent_input == "") {
+            $this->respond();
+        }
+
+
+        if (!isset($this->response)) {
+            $this->response = "No response found.";
+        }
+        $this->thing_report["response"] = $this->response;
+
+        $this->thing->log(
+            "ran for " . number_format($this->thing->elapsed_runtime()) . "ms."
+        );
+        $this->thing_report["etime"] = number_format(
+            $this->thing->elapsed_runtime()
+        );
+        $this->thing_report["log"] = $this->thing->log;
+        if (isset($this->test) and $this->test) {
+            $this->thing->log("start test");
+            $this->test();
+        }
+        $this->thing->log($a);
+        $this->thing->log("__construct complete");
+
+    }
+
+function __destruct() {
+
+if (!isset($this->thing)) {return;}
+
+$this->thing->log($this->agent_prefix . 'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
+
+
+}
+
+
+public function variantsAgent($agent_class_name , $_namespace = "\\Nrwtaylor\\StackAgentThing\\") {
+
+        $agent_namespace_name =
+            $_namespace . $agent_class_name;
+
+        // See if the method exists within the function.
+        // Call it if we find it.
+
+        $agent_namespace_names[] = $agent_namespace_name;
+        $agent_namespace_names[] =
+            $_namespace . strtoupper($agent_class_name);
+
+        // Try plural and singular variants of agent name.
+        if (substr($agent_namespace_name, -3) == "ies") {
+            $agent_namespace_names[] =
+                rtrim($agent_namespace_name, "ies") . "y";
+        } elseif (substr($agent_namespace_name, -2) == "es") {
+            $agent_namespace_names[] = rtrim($agent_namespace_name, "es");
+            $agent_namespace_names[] = rtrim($agent_namespace_name, "es") . "e";
+        } elseif (substr($agent_namespace_name, -1) == "s") {
+            $agent_namespace_names[] = rtrim($agent_namespace_name, "s");
+        } elseif (substr($agent_namespace_name, -1) == "y") {
+            $agent_namespace_names[] =
+                rtrim($agent_namespace_name, "y") . "ies";
+        } else {
+            $agent_namespace_names[] = $agent_namespace_name . "s";
+            $agent_namespace_names[] = $agent_namespace_name . "es";
+        }
+return $agent_namespace_names;
+}
+
+    public function initAgent()
+    {
+    }
+/*
+    public function settingsAgent($settings_array, $default_setting = null)
+    {
+        $t = $this->thing->container["api"];
+        foreach ($settings_array as $setting) {
+            if (!isset($t[$setting])) {
+                return $default_setting;
+            }
+
+            $t = $t[$setting];
+        }
+        return $t;
+    }
+*/
+    // TODO DEV?
+    public function __call($agent_function, $args)
+    {
+if (!isset($this->thing)) {
+return true;}
+
+$this->thing->log("__call started.");
+
+
+//        $this->thing->log("__call start");
+        /*
+        Generalize this pattern from agents.
+        $agent_handler = new $agent_namespace_name($this->thing, $agent_input);
+        $response = $agent_handler->functionAgent($text);
+
+        Replace with instead.
+        $response = $this->functionAgent($text);
+
+        And add a generic useAgent call if there is no useAgent method in the class.
+       */
+        $pieces = preg_split("/(?=[A-Z])/", $agent_function, 2);
+
+        $agent_class_name = "Agent";
+        if (isset($pieces[1])) {
+            $agent_class_name = $pieces[1];
+        }
+
+        $agent_name = strtolower($agent_class_name);
+
+        // Get the first "bit" of the function name.
+        // ie use from useHook.
+        $function_primitive_name = "use";
+        if (isset($pieces[0])) {
+            $function_primitive_name = $pieces[0];
+        }
+
+    //    $this->thing->log(
+    //        "Check if " . $agent_name . " == " . $this->agent_name
+    //    );
+        if ($agent_name == $this->agent_name) {
+$this->thing->log("__call saw agent name is the same.");
+
+            return false;
+        }
+
+        // Looking for the function in the namespace functionAgent.
+        $function_name = $agent_function;
+
+        // Allow for customizing this later.
+        $agent_input = $agent_name;
+
+        // dev test
+        //$agent_input = $this->agent_input;
+        //if ($this->agent_input == null) {$agent_input = $agent_name;}
+
+        // Namespaced class.
+        $agent_namespace_name =
+            "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
+
+$agent_namespace_names = $this->variantsAgent($agent_class_name, "\\Nrwtaylor\\StackAgentThing\\");
+
+        // See if the method exists within the function.
+        // Call it if we find it.
+/*
+        $agent_namespace_names[] = $agent_namespace_name;
+        $agent_namespace_names[] =
+            "\\Nrwtaylor\\StackAgentThing\\" . strtoupper($agent_class_name);
+
+        // Try plural and singular variants of agent name.
+        if (substr($agent_namespace_name, -3) == "ies") {
+            $agent_namespace_names[] =
+                rtrim($agent_namespace_name, "ies") . "y";
+        } elseif (substr($agent_namespace_name, -2) == "es") {
+            $agent_namespace_names[] = rtrim($agent_namespace_name, "es");
+            $agent_namespace_names[] = rtrim($agent_namespace_name, "es") . "e";
+        } elseif (substr($agent_namespace_name, -1) == "s") {
+            $agent_namespace_names[] = rtrim($agent_namespace_name, "s");
+        } elseif (substr($agent_namespace_name, -1) == "y") {
+            $agent_namespace_names[] =
+                rtrim($agent_namespace_name, "y") . "ies";
+        } else {
+            $agent_namespace_names[] = $agent_namespace_name . "s";
+            $agent_namespace_names[] = $agent_namespace_name . "es";
+        }
+*/
+
+
+
+        foreach (
+            $agent_namespace_names
+            as $i => $agent_namespace_name_variant
+        ) {
+            if (method_exists($agent_namespace_name_variant, $function_name)) {
+                /*
+                $agent_handler = new $agent_namespace_name_variant(
+                    $this->thing,
+                    $agent_input
+                );
+                $response = $agent_handler->{$function_name}(...$args);
+*/
+                // Test optimize by only initiating once.
+                if (!isset($this->thing->{$agent_name . "_handler"})) {
+                    $this->thing->{$agent_name .
+                        "_handler"} = new $agent_namespace_name_variant(
+                        $this->thing,
+                        $agent_input
+                    );
+                }
+                $response = $this->thing->{$agent_name .
+                    "_handler"}->{$function_name}(...$args);
+  //              $this->thing->log("__call response complete");
+$this->thing->log("__call got method response.");
+
+                return $response;
+            }
+        }
+
+        // No functionAgent found in the namespace.
+        if (class_exists($agent_namespace_name)) {
+            // No functionAgent found in the namespace.
+            // ie flerpMerp
+
+            if ($function_primitive_name == "use") {
+                // But we did see a request for the use function.
+
+                // Consider this as a starting point for all agents.
+                $agent_handler = new $agent_namespace_name(
+                    $this->thing,
+                    $agent_input . implode(" ", $args)
+                );
+                $agent_handler->init();
+                $agent_handler->read(...$args);
+                $agent_handler->run();
+
+                $variable = null;
+                if (isset($agent_handler->$agent_name)) {
+                    $variable = $agent_handler->$agent_name;
+                }
+                $this->thing->log("__call hook return");
+                return [$variable, $agent_handler];
+            }
+        }
+        throw new \Exception(
+            "Agent (" .
+                $this->agent_name .
+                ") called for a non-existent functionAgent [" .
+                $agent_function .
+                "]. "
+        );
+
+        $this->thing->log("__call complete");
+    }
+
+    // dev exploration
+    /*
+public function __set($name, $value) {
+//	if ((stripos($name, "prior_thing")) and (!isset($this->$$name))) {
+//		throw new \Exception($name.' thing does not exist');
+//	}
+
+}
+*/
+
+    /**
+     *
+     */
+    public function init()
+    {
+    }
+
+    /**
+     *
+     */
+    public function get()
+    {
+$this->refreshedatAgent();
+
+    }
+
+    public function refreshedatAgent() {
+
+$agent_name = strtolower($this->agent_name);
+        $time_string = $this->thing->Read([$agent_name, "refreshed_at"]);
+
+        if ($time_string == false) {
+            $time_string = $this->thing->time();
+            $this->thing->Write([$agent_name, "refreshed_at"], $time_string);
+        }
+
+
+    }
+
+    /**
+     *
+     */
+    public function set()
+    {
+       if ($this->agent_name == 'agent') {return;}
+       if (!isset($this->{$this->agent_name})) {return true;}
+       $this->thing->Write([$this->agent_name], $this->{$this->agent_name});
+    }
+
+    public function getThings($agent_name = null)
+    {
+        $things = [];
+        if ($agent_name == null) {
+            $agent_name = "tick";
+        }
+        $agent_name = strtolower($agent_name);
+        $rules_list = [];
+        $this->rules_list = [];
+        $this->unique_count = 0;
+        $findagent_thing = new Findagent($this->thing, $agent_name);
+
+        if (!is_array($findagent_thing->thing_report["things"])) {
+            return;
+        }
+        $count = count($findagent_thing->thing_report["things"]);
+
+        //$rule_agent = new Rule($this->thing, "rule");
+
+        if ($count > 0) {
+            foreach (
+                array_reverse($findagent_thing->thing_report["things"])
+                as $thing_object
+            ) {
+                $uuid = $thing_object["uuid"];
+                $variables_json = $thing_object["variables"];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+
+                $associations_json = $thing_object["associations"];
+                $associations = $this->thing->json->jsontoArray(
+                    $associations_json
+                );
+                //$thing = new \stdClass();
+                $thing = new Thing(null);
+                $thing->subject = $thing_object["task"];
+
+                $thing->uuid = $thing_object["uuid"];
+                $thing->nom_to = $thing_object["nom_to"];
+                $thing->nom_from = $thing_object["nom_from"];
+
+                $thing->variables = $variables;
+                $thing->created_at = $thing_object["created_at"];
+
+                $thing->associations = $associations;
+
+                if (isset($variables[$agent_name]) or $agent_name == "things") {
+                    //                    $things[$uuid] = $variables[$agent_name];
+                    $things[$uuid] = $thing;
+                }
+
+                $response = $this->readAgent($thing_object["task"]);
+            }
+        }
+
+        return $things;
+    }
+
+    public function isThing($thing)
+    {
+        if ($thing === null) {
+            return false;
+        }
+        return true;
+    }
+
+    public function getVariables($agent_name = null)
+    {
+        $variables_array = [];
+        if ($agent_name == null) {
+            $agent_name = "tick";
+        }
+        $agent_name = strtolower($agent_name);
+        $rules_list = [];
+
+        $this->rules_list = [];
+        $this->unique_count = 0;
+
+        $findagent_thing = new Findagent($this->thing, $agent_name);
+        if (!is_array($findagent_thing->thing_report["things"])) {
+            return;
+        }
+        $count = count($findagent_thing->thing_report["things"]);
+
+        //$rule_agent = new Rule($this->thing, "rule");
+
+        if ($count > 0) {
+            foreach (
+                array_reverse($findagent_thing->thing_report["things"])
+                as $thing_object
+            ) {
+                $uuid = $thing_object["uuid"];
+                $variables_json = $thing_object["variables"];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+
+                $variables_array[$uuid] = $variables;
+            }
+        }
+        return $variables_array;
+    }
+
+    // Read the provided text and create a set of flags.
+    public function flagAgent($indicators = null, $input = null)
+    {
+        foreach ($indicators as $flag_name => $flag_indicators) {
+            foreach ($flag_indicators as $flag_indicator) {
+                $f = $this->agent_name . "_" . $flag_name . "_flag";
+                if (stripos($input, $flag_indicator) !== false) {
+                    $this->{$f} = "on";
+                }
+
+                if (
+                    stripos($input, str_replace("-", " ", $flag_indicator)) !==
+                    false
+                ) {
+                    $this->{$f} = "on";
+                }
+            }
+        }
+    }
+
+    public function memoryAgent($text = null)
+    {
+        $agent_class_name = $text;
+        $agent_name = strtolower($agent_class_name);
+
+        $slug = $this->getSlug($agent_name . "-" . $this->from);
+
+        $agent_namespace_name =
+            "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
+
+        ${$agent . "_agent"} = new $agent_namespace_name(
+            $this->thing,
+            $agent_name
+        );
+
+        ${$agent_name} = ${$agent . "_agent"}->{"get" . $agent_class_name}();
+        ${$agent_name}["retrieved_at"] = $this->current_time;
+
+        $this->memory->set($slug, ${$agent_name});
+
+        $this->response .= "Got {$agent_name}. ";
+
+        return ${$agent_name};
+    }
+
+    public function settingsAgent($settings_array, $default_setting = null)
+    {
+        $t = $this->thing->container["api"];
+        foreach ($settings_array as $setting) {
+            if (!isset($t[$setting])) {
+                return $default_setting;
+            }
+
+            $t = $t[$setting];
+        }
+        return $t;
+    }
+
+    public function readAgent($text = null)
+    {
+        // devstack
+        return true;
+    }
+
+    /**
+     *
+     */
+    public function make()
+    {
+        // Call the classes make function.
+        try {
+            $this->{"make" . $this->agent_class_name}();
+        } catch (\Throwable $t) {
+            $this->thing->log(
+                "caught make " . $this->agent_class_name . " throwable.",
+                "WARNING"
+            );
+            //return;
+        } catch (\Error $ex) {
+            $warning_text =
+                $t->getLine() .
+                "---" .
+                $t->getFile() .
+                $t->getMessage() .
+                " caught make " .
+                $this->agent_class_name .
+                " error.";
+            $this->thing->log($warning_text, "WARNING");
+        }
+
+        // So ... don't call yourself.
+        // Don't do a make on yourself.
+        $this->thing->log("start make.");
+        $this->makeAgent();
+
+        $this->makeResponse();
+        $this->makeInput();
+        //$this->makeChoices();
+        $this->makeMessage();
+
+        $this->makeChart();
+        $this->makeImage();
+        $this->makePNG();
+        $this->makePNGs();
+        $this->makeJPEG();
+        $this->makeJPEGs();
+
+        $this->thing->log("completed make of image channels.");
+
+        $this->makeSMS();
+
+        if (isset($this->error) and $this->error != "" and $this->error != null) {
+           $sms = $this->thing_report['sms'];
+           $this->sms_message = $sms . " " . $this->error;
+           $this->thing_report['sms'] = $sms . " " . $this->error;
+        } 
+        $this->thing->log("completed make of sms channel.");
+
+        // Snippet might be used by web.
+        // So run it first.
+        $this->makeSnippet();
+
+        $this->thing->log("completed make of snippet channel.");
+
+        $this->makeWeb();
+$this->thing->log( "got class name " . explode("\\", strtolower(get_class($this)))[2] );
+        $this->thing->log("completed make of web channel.");
+
+        $this->makeJson();
+
+        // Explore adding in INFO and HELP to web response.
+        $dev_agents = ["response", "help", "info", "sms", "message"];
+        $prod_agents = ["response", "help", "info"];
+
+        $agents = $dev_agents;
+        if ($this->stack_engine_state == "prod") {
+            $agents = $prod_agents;
+        }
+
+        $web = "";
+        if (isset($this->thing_report["web"])) {
+            foreach ($agents as $i => $agent_name) {
+                if (
+                    !isset($this->thing_report[$agent_name]) or
+                    $this->thing_report[$agent_name] == null
+                ) {
+                    if (isset($this->{$agent_name})) {
+                        $this->thing_report[$agent_name] = $this->{$agent_name};
+                    }
+                }
+
+                if (!isset($this->thing_report[$agent_name])) {
+                    continue;
+                }
+
+                if ($this->thing_report[$agent_name] == "") {
+                    continue;
+                }
+                // dev stack filter out repeated agent web reports
+                $needle = "<b>" . strtoupper($agent_name) . "</b>";
+                if (strpos($this->thing_report["web"], $needle) !== false) {
+                    continue;
+                }
+
+                $web .= "<b>" . strtoupper($agent_name) . "</b><p>";
+                $web .= $this->thing_report[$agent_name];
+                $web .= "<p>";
+            }
+        }
+
+        if (isset($this->thing_report["web"])) {
+            if ($this->agent_name != "agent") {
+                $needle = ucwords($this->agent_name) . " Agent";
+
+                if (strpos($this->thing_report["web"], $needle) !== false) {
+                } else {
+                    $this->thing_report["web"] =
+                        "<b>" .
+                        ucwords($this->agent_name) .
+                        " Agent" .
+                        "</b><br><p>" .
+                        $this->thing_report["web"];
+                }
+            }
+            $needle = "<p>";
+            $pos = strpos($this->thing_report["web"], $needle);
+            $length = strlen($this->thing_report["web"]);
+            $needle_length = strlen($needle);
+
+            // Note our use of ===.  Simply == would not work as expected
+            // because the position of 'a' was the 0th (first) character.
+            if ($pos === false) {
+                $this->thing_report["web"] .= "<p>";
+            } else {
+                if ($pos == $length - $needle_length) {
+                } else {
+                    //$this->thing_report['web'] .= "<p>";
+                }
+                $this->thing_report["web"] .= "<p>";
+            }
+
+            $this->thing_report["web"] .= "<p>" . $web;
+        }
+
+        //$this->makeSnippet();
+        $this->makeEmail();
+        $this->makeTXT();
+
+        $this->makePDF();
+
+        $this->makeKeyword();
+        $this->makeLink();
+
+if ((isset($this->thing_report['png'])) and isset($this->link)) {
+
+//if (!(($this->thing_report['png'] == false) or ($this->thing_report['png'] == null) or ($this->thing_report['png'] == true))) {
+
+$this->image_url = $this->link .'.png';
+$this->thing_report['image_url'] = $this->image_url;
+//}
+
+}
+
+        $this->makeHelp();
+        $this->makeInfo();
+
+        // devstack
+
+        if ($this->agent_name != "web" and !isset($this->thing->web_agent)) {
+            $this->thing->web_agent = new Web($this->thing, "agent");
+            $this->web_state = $this->thing->web_agent->state;
+        }
+
+        // Check the web agent to see whether urls should be appended the sms response.
+        $web_state = "off";
+        if (isset($this->web_state)) {
+            $web_state = $this->web_state;
+        }
+
+        if (
+            isset($this->thing->web_agent->state) and
+            $this->thing->web_agent->state == "on"
+        ) {
+            if (
+                isset($this->thing_report["sms"]) and
+                //and (!$this->thing->url_agent->hasUrls($this->thing_report['sms']))
+                substr($this->thing_report["link"], -4) != "help"
+            ) {
+                if (substr_count($this->thing_report["sms"], "http") == 0) {
+                    $this->thing_report["sms"] =
+                        $this->thing_report["sms"] .
+                        " " .
+                        $this->thing_report["link"];
+                }
+            }
+        }
+
+        $this->makeThingreport();
+
+        if (
+            strtolower($this->agent_name) == "agent" and
+            isset($this->thing_report)
+        ) {
+            $variable_name = "thing-report-" . $this->uuid;
+
+            if (!isset($this->thing->refresh_at)) {
+                $this->thing->refresh_at = false;
+            } // false = request again now.
+
+            $created_at = false;
+            if (isset($this->thing->created_at)) {
+                $created_at = $this->thing->created_at;
+            } // false = request again now.
+
+            $thing_report = $this->thing_report;
+
+            //unset($thing_report['thing']['thing']);
+            $t = [
+                "uuid" => $this->thing->uuid,
+                "to" => $this->thing->to,
+                "from" => $this->thing->from,
+                "subject" => $this->thing->subject,
+                //'agent_input'=>$thing_report['thing']->agent_input,
+                "created_at" => $created_at,
+                "refresh_at" => $this->thing->refresh_at,
+            ];
+
+            $thing_report["thing"] = $t;
+            $this->setMemory($variable_name, $thing_report);
+        }
+
+    }
+
+    /**
+     *
+     */
+    public function run()
+    {
+    }
+
+    /**
+     *
+     * @return unknown
+     */
+    public function kill()
+    {
+        // No messing about.
+        return $this->thing->Forget();
+    }
+
+    /**
+     *
+     */
+    public function test()
+    {
+        // See if it can run an agent request
+        //$agent_thing = new Agent($this->thing, "agent");
+        // No result for now
+        //$this->test = null;
+    }
+
+    public function parse($text = null)
+    {
+    }
+
+    public function load($resource_name = null)
+    {
+        if ($resource_name == null) {
+            return true;
+        }
+
+        $file = $this->resource_path . "" . $resource_name;
+
+        if (!file_exists($file)) {
+            return true;
+        }
+
+        $contents = file_get_contents($file);
+
+        return $contents;
+
+        $handle = fopen($file, "r");
+
+        if ($handle) {
+            while (($line = fgets($handle)) !== false) {
+                $this->parse($line);
+            }
+            fclose($handle);
+        } else {
+            return true;
+            // error opening the file.
+        }
+    }
+
+    /**
+     *
+     * @return unknown
+     */
+    public function callingAgent()
+    {
+        //get the trace
+        $trace = debug_backtrace();
+
+        // Get the class that is asking for who awoke it
+        if (!isset($trace[1]["class"])) {
+            $this->calling_agent = true;
+            return true;
+        }
+
+        $class_name = $trace[1]["class"];
+        // +1 to i cos we have to account for calling this function
+        for ($i = 1; $i < count($trace); $i++) {
+            if (isset($trace[$i])) {
+                if (
+                    isset($trace[$i]["class"]) and
+                    $class_name != $trace[$i]["class"]
+                ) {
+                    // is it set?
+                    // is it a different class
+                    $this->calling_agent = $trace[$i]["class"];
+                    return $trace[$i]["class"];
+                }
+            }
+        }
+
+        $this->calling_agent = null;
+    }
+
+    public function traceAgent()
+    {
+        //get the trace
+        $agent_trace = [];
+        $trace = debug_backtrace();
+        foreach ($trace as $i => $t) {
+            $agent_trace[] = $t["class"];
+        }
+        return $agent_trace;
+        // Get the class that is asking for who awoke it
+        if (!isset($trace[1]["class"])) {
+
+            $this->calling_agent = true;
+            return true;
+        }
+
+        $class_name = $trace[1]["class"];
+        // +1 to i cos we have to account for calling this function
+        for ($i = 1; $i < count($trace); $i++) {
+            if (isset($trace[$i])) {
+                if (
+                    isset($trace[$i]["class"]) and
+                    $class_name != $trace[$i]["class"]
+                ) {
+                    // is it set?
+                    // is it a different class
+                    $this->calling_agent = $trace[$i]["class"];
+                    return $trace[$i]["class"];
+                }
+            }
+        }
+
+        $this->calling_agent = null;
+    }
+
+    function listAgents()
+    {
+        $this->agent_list = [];
+        $this->agents_list = [];
+
+        // Only use Stackr agents for now
+        // Single source folder ensures uniqueness of N-grams
+        $dir =
+            $GLOBALS["stack_path"] .
+            "vendor/nrwtaylor/stack-agent-thing/agents";
+        $files = scandir($dir);
+
+        foreach ($files as $key => $file) {
+            if ($file[0] == "_") {
+                continue;
+            }
+            if (strtolower(substr($file, 0, 3)) == "dev") {
+                continue;
+            }
+
+            // Ignore Makejson, Makepdf, etc
+            if (strtolower(substr($file, 0, 4)) == "Make") {
+                continue;
+            }
+
+            if (strtolower(substr($file, -7)) == "handler") {
+                continue;
+            }
+
+            if (strtolower(substr($file, -4)) != ".php") {
+                continue;
+            }
+            if (!ctype_upper($file[0])) {
+                continue;
+            }
+
+            $agent_name = substr($file, 0, -4);
+
+            $this->agent_list[] = ucwords($agent_name);
+            $this->agents_list[$agent_name] = ["name" => $agent_name];
+        }
+    }
+
+    public function makeAgent()
+    {
+        $this->currentAgent();
+        $agent = "help";
+        if (isset($this->current_agent)) {
+            $agent = $this->current_agent;
+
+            $this->thing_report["agent"] = $agent;
+        }
+    }
+
+    public function makeJson()
+    {
+        if (!isset($this->thing_report["json"])) {
+            $this->thing_report["json"] = null;
+        }
+    }
+
+    /**
+     *
+     */
+    function makeChannel($name = null)
+    {
+        $text = strtolower($this->agent_name);
+        $file = $this->resource_path . "/" . $text . "/" . $text . ".txt";
+
+        if (!file_exists($file)) {
+            return true;
+        }
+        $contents = file_get_contents($file);
+        $handle = fopen($file, "r");
+
+        $channels = [
+            "sms",
+            "email",
+            "txt",
+            "snippet",
+            "han",
+            "word",
+            "slug",
+            "choices",
+            "message",
+            "response",
+            "help",
+            "info",
+            "request",
+        ];
+        $channel = "null";
+        if ($handle) {
+            while (($line = fgets($handle)) !== false) {
+                $text = trim(str_replace(["#", "[", "]"], "", $line));
+                if (in_array($text, $channels)) {
+                    $channel = $text;
+                    continue;
+                }
+
+                if (!isset($this->thing_report[$channel])) {
+                    $this->thing_report[$channel] = "";
+                }
+                $this->thing_report[$channel] .= $line;
+            }
+
+            fclose($handle);
+        } else {
+            // error opening the file.
+        }
+    }
+
+    public function memcachedAgent() {
+       $t = new Memcached($this->thing, "memcached");
+       $this->mem_cached = $t->mem_cached;
+    }
+
+    /**
+     *
+     */
+    public function getName()
+    {
+        $this->agent_name = explode("\\", strtolower(get_class($this)))[2];
+        $this->agent_class_name = explode("\\", get_class($this))[2];
+    }
+
+    function debug()
+    {
+        $this->thing->log("agent_name is  " . $this->agent_name . ".");
+
+        $this->callingAgent();
+        $this->thing->log("Calling agent is  " . $this->calling_agent . ".");
+
+        $agent_input_text = $this->agent_input;
+        if (is_array($this->agent_input)) {
+            $agent_input_text = "array";
+            if (isset($this->agent_input["thing"])) {
+                $agent_input_text = "thing";
+            }
+        }
+
+        $this->thing->log("agent_input is  " . $agent_input_text . ".");
+        $this->thing->log("subject is  " . $this->subject . ".");
+    }
+
+    /**
+     *
+     * @param unknown $input
+     * @param unknown $agent (optional)
+     * @return unknown
+     */
+    function assert($input, $agent = null, $flag_lowercase = true)
+    {
+        if ($agent == null) {
+            $agent = $this->agent_name;
+        }
+
+        if (is_array($input)) {
+            return "";
+        }
+
+        $string = $input;
+        $str_pattern = $agent;
+        $str_replacement = "";
+        $filtered_input = $input;
+        if (strpos($string, $str_pattern) !== false) {
+            $occurrence = strpos($string, $str_pattern);
+            $filtered_input = substr_replace(
+                $string,
+                $str_replacement,
+                strpos($string, $str_pattern),
+                strlen($str_pattern)
+            );
+        }
+        $filtered_input = trim($filtered_input);
+
+        if ($flag_lowercase === true) {
+            $filtered_input = strtolower($filtered_input);
+        }
+
+        return $filtered_input;
+    }
+
+    /**
+     *
+     * @param unknown $thing (optional)
+     */
+    public function metaAgent($thing = null)
+    {
+        // TODO move meta code to Meta agent.
+        //if (!isset($this->meta_handler)) {$this->meta_handler = new Meta($this->thing, "meta");}
+
+        if ($thing == null) {
+            $thing = $this->thing;
+        }
+
+        // Non-nominal
+        $this->uuid = $thing->uuid;
+
+        if (isset($thing->to)) {
+            $this->to = $thing->to;
+        }
+
+        // Potentially nominal
+        if (isset($thing->subject)) {
+            $this->subject = $thing->subject;
+        }
+
+        // Treat as nomina
+        if (isset($thing->from)) {
+            $this->from = $thing->from;
+        }
+        // Treat as nomina
+        if (isset($thing->created_at)) {
+            $this->created_at = $thing->created_at;
+        }
+
+        if (isset($this->thing->thing->created_at)) {
+            $this->created_at = strtotime($this->thing->thing->created_at);
+        }
+        if (!isset($this->to)) {
+            $this->to = "null";
+        }
+        if (!isset($this->from)) {
+            $this->from = "null";
+        }
+        if (!isset($this->subject)) {
+            $this->subject = "null";
+        }
+        //if (!isset($this->created_at)) {$this->created_at = date('Y-m-d H:i:s');}
+        if (!isset($this->created_at)) {
+            $this->created_at = time();
+        }
+    }
+
+    public function currentAgent()
+    {
+        //        $previous_thing = new Thing($block_thing['uuid']);
+        //        $this->prior_thing = $previous_thing;
+        if (!isset($this->thing->json->array_data["message"]["agent"])) {
+            $this->current_agent = "help";
+        } else {
+            $this->current_agent =
+                $this->thing->json->array_data["message"]["agent"];
+        }
+        /*
+        $this->link =
+            $this->web_prefix .
+            'thing/' .
+            $this->uuid .
+            '/' .
+            strtolower($this->current_agent);
+*/
+    }
+
+    /**
+     *
+     * @return unknown
+     */
+    public function getLink($variable = null)
+    {
+        $block_things = [];
+        // See if a block record exists.
+        $findagent_thing = new Findagent($this->thing, "thing");
+
+        // This pulls up a list of other Block Things.
+        // We need the newest block as that is most likely to be relevant to
+        // what we are doing.
+
+        $this->max_index = 0;
+
+        $match = 0;
+
+        if ($findagent_thing->thing_report["things"] == true) {
+            $this->link_uuid = null;
+            return false;
+        }
+
+        foreach ($findagent_thing->thing_report["things"] as $block_thing) {
+            if ($block_thing["nom_to"] != "usermanager") {
+                $match += 1;
+                $this->link_uuid = $block_thing["uuid"];
+                if ($match == 2) {
+                    break;
+                }
+            }
+        }
+
+        $previous_thing = new Thing($block_thing["uuid"]);
+        $this->prior_thing = $previous_thing;
+        if (!isset($previous_thing->json->array_data["message"]["agent"])) {
+            $this->prior_agent = "help";
+        } else {
+            $this->prior_agent =
+                $previous_thing->json->array_data["message"]["agent"];
+        }
+
+        $this->link =
+            $this->web_prefix .
+            "thing/" .
+            $this->uuid .
+            "/" .
+            strtolower($this->prior_agent);
+
+        return $this->link_uuid;
+    }
+
+    /**
+     *
+     * @return unknown
+     */
+    function getTask()
+    {
+        $block_things = [];
+        // See if a stack record exists.
+        $findagent_thing = new Findagent($this->thing, "thing");
+
+        $this->max_index = 0;
+        $match = 0;
+        $link_uuids = [];
+
+        $things = $findagent_thing->thing_report["things"];
+        if ($things === true) {
+            return;
+        }
+
+        foreach ($things as $block_thing) {
+            $this->thing->log(
+                $block_thing["task"] .
+                    " " .
+                    $block_thing["nom_to"] .
+                    " " .
+                    $block_thing["nom_from"]
+            );
+            if ($block_thing["nom_to"] != "usermanager") {
+                $match += 1;
+                $this->link_task = $block_thing["task"];
+                $link_tasks[] = $block_thing["task"];
+                // if ($match == 2) {break;}
+                // Get upto 10 matches
+                if ($match == 10) {
+                    break;
+                }
+            }
+        }
+        $this->prior_agent = "web";
+        foreach ($link_tasks as $key => $link_task) {
+            if (isset($link_task)) {
+                if (
+                    in_array(strtolower($link_task), [
+                        "web",
+                        "pdf",
+                        "txt",
+                        "log",
+                        "php",
+                        "syllables",
+                        "brilltagger",
+                    ])
+                ) {
+                    continue;
+                }
+
+                $this->link_task = $link_task;
+                break;
+            }
+        }
+
+        $this->web_exists = true;
+        if (!isset($agent_thing->thing_report["web"])) {
+            $this->web_exists = false;
+        }
+
+        return $this->link_task;
+    }
+
+    /**
+     *
+     * @param unknown $variable_name (optional)
+     * @param unknown $variable      (optional)
+     * @return unknown
+     */
+    function getVariable($variable_name = null, $variable = null)
+    {
+        // This function does a minor kind of magic
+        // to resolve between $variable, $this->variable,
+        // and $this->default_variable.
+
+        if ($variable != null) {
+            // Local variable found.
+            // Local variable takes precedence.
+            return $variable;
+        }
+
+        if (isset($this->$variable_name)) {
+            // Class variable found.
+            // Class variable follows in precedence.
+            return $this->$variable_name;
+        }
+
+        // Neither a local or class variable was found.
+        // So see if the default variable is set.
+        if (isset($this->{"default_" . $variable_name})) {
+            // Default variable was found.
+            // Default variable follows in precedence.
+            return $this->{"default_" . $variable_name};
+        }
+
+        // Return false ie (false/null) when variable
+        // setting is found.
+        return false;
+    }
+
+    /**
+     *
+     */
+    public function respond()
+    {
+//if ($this->agent_name !== 'agent') {return;}
+        // Call the response agent
+        $this->respondResponse();
+    }
+
+    public function makeInput()
+    {
+    }
+
+    /**
+     *
+     */
+    private function makeResponse()
+    {
+        if (isset($this->response)) {
+            return;
+        }
+
+        //$this->response = "Standby.";
+        $this->response = "";
+        $this->thing_report['response'] = $this->response;
+    }
+
+    /**
+     *
+     */
+    public function makeWeb()
+    {
+    }
+
+    public function makeLink()
+    {

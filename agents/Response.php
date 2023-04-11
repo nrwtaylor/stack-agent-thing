@@ -105,10 +105,15 @@ class Response extends Agent
         return $this->response;
     }
 
+    public function forgetResponse() {
+
+      $this->response = "Forgot. ";
+
+    }
+
     public function metaResponse()
     {
         $m = $this->getMeta();
-//var_dump($m);
         $t = "";
         $t .= $m['from'] ." ";
         $t .= $m['to'] . " ";

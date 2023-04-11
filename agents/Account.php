@@ -9,8 +9,8 @@ class Account extends Agent
 
     function init()
     {
-
         $this->json = new Json(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
+//        $this->json = new Json(null, $this->uuid);
 
         $settings = require $GLOBALS["stack_path"] . "private/settings.php";
 

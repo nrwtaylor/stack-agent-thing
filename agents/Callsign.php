@@ -228,8 +228,6 @@ class Callsign extends Agent
                 $uuid = $thing_object["uuid"];
                 $variables_json = $thing_object["variables"];
                 $variables = $this->thing->variables->jsontoArray($variables_json);
-// origin/redpanda
-//                $variables = $this->thing->json->jsontoArray($variables_json);
 
                 if (isset($variables["callsign"])) {
                     $callsign = "X";
@@ -798,6 +796,7 @@ class Callsign extends Agent
         $web = "";
 
         $web .= "<b>Callsign Agent</b><br>";
+
         $web .= "<p>";
         $callsigns = $this->callsigns;
 

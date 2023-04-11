@@ -148,6 +148,7 @@ class Arr extends Agent
 
         return $filtered_data_points;
     }
+
     public function filterArr(array $array, $search_words)
     {
         $filtered_array = [];
@@ -204,7 +205,8 @@ class Arr extends Agent
             $array_data = ["text" => $array_data];
         }
 
-        /*
+/*
+>>>>>>> origin/kokopelli
         foreach ($array_data as $key => $value) {
             if ($key != "") {
                 $this->{$key} = $value;
@@ -226,6 +228,7 @@ class Arr extends Agent
         }
         //var_dump($dest);
         //return null;}
+
         $finalKey = array_pop($path);
         foreach ($path as $key) {
             $dest = &$dest[$key];

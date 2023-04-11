@@ -191,7 +191,7 @@ class Latitude extends Agent
             ) {
                 $sign = -1;
             }
-            $latitude = $nmea_response["current_latitude"] * $sign;
+            $latitude = floatval($nmea_response["current_latitude"]) * $sign;
             $latitudes[] = $latitude;
         }
 
@@ -205,7 +205,7 @@ class Latitude extends Agent
             if (strtolower($nmea_response["latitude_north_south"]) == "w") {
                 $sign = -1;
             }
-            $latitude = $nmea_response["latitude"] * $sign;
+            $latitude = floatval($nmea_response["latitude"]) * $sign;
             $latitudes[] = $latitude;
         }
         if (count($latitudes) == 1) {

@@ -185,7 +185,6 @@ class Memory extends Agent
 
     public function getMemory($text = null)
     {
-var_dump("Memory getMemory");
         if (!isset($this->memory)) {
             return null;
         }

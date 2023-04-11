@@ -181,7 +181,7 @@ class Longitude extends Agent
                 ) {
                     $sign = -1;
                 }
-                $longitude = $nmea_response["current_longitude"] * $sign;
+                $longitude = floatval($nmea_response["current_longitude"]) * $sign;
                 $longitudes[] = $longitude;
             }
 
@@ -195,7 +195,7 @@ class Longitude extends Agent
                 if (strtolower($nmea_response["longitude_east_west"]) == "w") {
                     $sign = -1;
                 }
-                $longitude = $nmea_response["longitude"] * $sign;
+                $longitude = floatval($nmea_response["longitude"]) * $sign;
                 $longitudes[] = $longitude;
             }
         }
