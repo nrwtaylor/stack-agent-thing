@@ -76,6 +76,9 @@ class Nuuid extends Agent
         if (!isset($this->head_codes)) {
             $this->nuuids = [];
         }
+
+if ($input === null) {return $this->nuuids;}
+
         // Why not combine them into one character class? /^[0-9+#-]*$/ (for matching) and /([0$
         // $pattern = "|[A-Za-z0-9]{4}|"; // Nope just a-f.
         $pattern = "|[A-Fa-f0-9]{4}|";

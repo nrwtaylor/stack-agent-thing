@@ -212,6 +212,34 @@ $cut_ngrams = [];
 
                     break;
 
+                case "moscow":
+                    $place_times["951e"] = [
+                        "text" => "moscow",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 55.751244,
+                        "longitude" => 37.618423,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["951e"];
+                    }
+
+                    break;
+
+
+                case "beijing":
+                    $place_times["4bfa"] = [
+                        "text" => "beijing",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 39.9075,
+                        "longitude" => 116.39723,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["4bfa"];
+                    }
+
+                    break;
+
+
 
                 case "dublin":
                     $place_times["ce34"] = [

@@ -114,6 +114,16 @@ class Snapshot extends Agent
         $nuuid = $this->extractNuuid($parts[2]);
 
         $uuid = $this->nuuids[$nuuid]["uuid"];
+
+if ($uuid === null) {
+$uuid = $this->uuid;
+$nuuid = "X";
+
+}
+
+
+
+
         $datagram = [
             "subject" => $this->subject,
             "from" => $uuid,
