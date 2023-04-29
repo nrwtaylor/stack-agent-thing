@@ -17,9 +17,42 @@ ini_set("display_errors", 0);
 error_reporting(0);
 
 define("MAX_EXECUTION_TIME", 2); # seconds
+
+#[\AllowDynamicProperties]
 class Agent
 {
     public $input;
+
+    public $subject;
+    public $uuid;
+
+    public $thing_report;
+
+    public $nuuid;
+
+    public $sms_message;
+    public $web_message;
+
+    public $keyword;
+
+    public $default_thing_resolution;
+    public $stack_thing_resolution;
+    public $default_max_db_connections;
+    public $stack_max_db_connections;
+
+    public $default_hash_algorithm;
+    public $stack_hash_algorith;
+    public $stack_hashtag;
+    public $default_hashmessage;
+    public $stack_hash;
+    public $default_hash;
+
+    public $response_handler;
+    public $tokens_handler;
+    public $limit_handler;
+    public $text_handler;
+    public $uuid_handler;
+
 
     /**
      *

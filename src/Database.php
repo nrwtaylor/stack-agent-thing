@@ -25,6 +25,14 @@ class Database
 {
     public $var = "hello";
 
+    private $operations_time;
+    private $split_time;
+    private $log;
+    private $operations;
+    private $agent_input;
+
+    private $thing;
+
     /**
      *
      * @param unknown $uuid

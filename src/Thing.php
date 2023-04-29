@@ -24,6 +24,15 @@ class Thing
 
     public $from = null;
 
+    public $logging_console;
+    public $logging_level_default;
+    public $queue_handler;
+    public $hash;
+    public $hash_algorithm;
+    public $console_output;
+    public $engine_state;
+
+
     public function __construct($uuid, $test_message = null)
     {
 

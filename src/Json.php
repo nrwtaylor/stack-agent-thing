@@ -17,6 +17,11 @@ class Json
 {
     public $var = 'hello';
 
+    public $container;
+    public $mail_prefix;
+    public $size_overflow;
+
+
     /**
      *
      * @param unknown $uuid

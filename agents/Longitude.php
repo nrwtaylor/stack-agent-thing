@@ -4,6 +4,7 @@ namespace Nrwtaylor\StackAgentThing;
 class Longitude extends Agent
 {
     public $var = "hello";
+    public $default_longitude;
 
     function init()
     {

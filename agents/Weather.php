@@ -303,9 +303,8 @@ $this->thing->Write(['weather','refreshed_at'], $this->refreshed_at);
 
 public function lineWeather($contents, $searchfor) {
 
-
 //        $searchfor = "Current Conditions";
-
+//var_dump($contents, $searchfor);
         $pattern = preg_quote($searchfor, "/");
         // finalise the regular expression, matching the whole line
         $pattern = "/^.*" . $pattern . ".*\$/m";
@@ -316,6 +315,45 @@ public function lineWeather($contents, $searchfor) {
             $m = implode("\n", $matches[0]);
             $this->matches = $matches;
         }
+
+
+$current_observations_text = trim($this->matches[0][0]);
+
+//$parts = explode($searchfor . ":", $current_observations_text);
+//var_dump($exp[1]);
+
+//var_dump($exp);
+
+//var_dump($current_observations_text);
+
+$trimmed = trim($current_observations_text);
+$parts = explode("   ", $trimmed);
+//var_dump($parts);
+$response = null;
+foreach($parts as $part) {
+
+ // var_dump($part);
+
+if (strpos($part, $searchfor) !== false)
+{
+$response = $part;
+break;
+//var_dump($part);
+
+//  echo "true";
+}
+
+
+}
+if ($response === true) {return true;}
+//$parts = explode("  ", $trimmed);
+//var_dump($trimmed);
+
+// 28 April 2023 format changed.
+/*
+
+
+
         // Condition text
         $text = str_replace(
             $searchfor,
@@ -326,6 +364,23 @@ public function lineWeather($contents, $searchfor) {
         $text = trim(
             str_replace(": ", "", $text)
         );
+*/
+        // Condition text
+        $text = str_replace(
+            $searchfor,
+            "",
+            $response
+        );
+
+        $text = trim(
+            str_replace(": ", "", $text)
+        );
+
+
+//var_dump($text);
+//exit();
+
+//return $parts[1];
 return $text;
 
 
@@ -416,6 +471,7 @@ return $text;
 
 
 $text_temperature = $this->lineWeather($contents, 'Temperature');
+
         $text_temperature = str_replace(
             "&deg;",
             '°',

@@ -4,6 +4,9 @@ namespace Nrwtaylor\StackAgentThing;
 class Latitude extends Agent
 {
     public $var = "hello";
+    public $default_latitude;
+    public $stack_latitude;
+
 
     function init()
     {

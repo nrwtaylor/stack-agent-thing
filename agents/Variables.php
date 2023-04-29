@@ -6,6 +6,7 @@ ini_set("display_errors", 1);
 
 // TODO: Rebuild. Faster.
 
+#[\AllowDynamicProperties]
 class Variables
 {
     // So Variables manages a set of variables.
@@ -19,6 +20,32 @@ class Variables
     // return the calling identities self-tally.
 
     //   variables   / thing  /   $this->from
+
+    public $nuuid;
+    public $num_hits;
+    public $variables_thing;
+    public $index;
+    public $name;
+
+    public $train_agents;
+    public $node_list;
+
+    public $variable_set_name;
+
+    public $limit;
+    public $thing_report;
+
+    public $agent_keywords;
+    public $log_verbosity;
+
+    public $agent_variables;
+    public $verbosity;
+
+    public $agent_command;
+    public $nom_input;
+    public $hour;
+    public $minute;
+    public $agent_name;
 
     function __construct(Thing $thing, $agent_command = null)
     {

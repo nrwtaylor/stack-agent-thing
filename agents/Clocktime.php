@@ -10,6 +10,15 @@ ini_set("allow_url_fopen", 1);
 class Clocktime extends Agent
 {
     public $var = "hello";
+    public $info;
+    public $link;
+    public $txt;
+    
+    public $clock_time;
+    public $hour;
+    public $minute;
+
+    public $clocktime;
 
     function init()
     {

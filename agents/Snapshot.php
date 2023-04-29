@@ -110,15 +110,15 @@ class Snapshot extends Agent
         $conditionedInput = str_replace("snapshot", "", $this->input);
         $conditionedInput = trim($conditionedInput);
         $parts = explode(" ", $conditionedInput);
-
+//var_dump($parts);
         $nuuid = $this->extractNuuid($parts[2]);
 
         $uuid = $this->nuuids[$nuuid]["uuid"];
 
 if ($uuid === null) {
-$uuid = $this->uuid;
-$nuuid = "X";
-
+return true;
+//$uuid = $this->uuid;
+//$nuuid = "X";
 }
 
 
