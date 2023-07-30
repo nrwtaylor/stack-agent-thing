@@ -26,6 +26,7 @@ class Thing
 
     public function __construct($uuid, $test_message = null)
     {
+var_dump("Thing __construct", $uuid, $test_message);
 $this->bananas = "hello";
         //declare(ticks=1);
 
@@ -158,6 +159,9 @@ if (isset($this->db)) {
 //}
 $this->log("Thing database connected.");} else {$this->log("Problem with thing database");}
         } catch (\Exception $e) {
+
+
+
             $this->error = "No Thing to get";
             $this->log("No Thing to get.");
 //var_dump($e->getMessage());
@@ -620,12 +624,26 @@ And review Agent variables.
 
     public function Read($path, $field = null)
     {
+//var_dump("Thing Read db", $this->db);
+
+
 if (!isset($this->db)) {
+var_dump("Thing Read db not set");
 $this->log("Read did not see a database connection.");
-return;
-return true;
+//return;
+//return true;
 }
 
+
+if ($this->db === null) {
+
+var_dump("Thing Read null");
+$this->log("Read did not see a database connection.");
+//return;
+//return true;
+}
+
+var_dump("Thing Read", $path, $field);
 
         if ($field == null) {
             $field = 'variables';
@@ -633,7 +651,7 @@ return true;
         $this->log(
             "Thing Read uuid " . $this->uuid . " path " .
             implode(">", $path), 'INFORMATION');
-
+var_dump("Thing Read uuid readField", $this->uuid);
         $array_data = $this->db->readField($field);
 
         if ($array_data == false) {
@@ -666,24 +684,42 @@ return true;
         var_dump("Thing Write db uuid ", $this->db->uuid);
         var_dump("Thing Write uuid", $this->uuid);
 */
+
+
+
+if ($this->db === null) {
+
+$this->log("Read did not see a database connection.");
+
+var_dump("Thing Write db null");
+
+//return;
+//return true;
+}
+
+
+
+
+
         if ($field == null) {
             $field = "variables";
         }
+var_dump("Thing Write uuid readField", $this->uuid);
+
 
         $array_data = $this->db->readField($field);
-var_dump("Thing Write array_data", $array_data);
+
+var_dump("Thing Write readField variables uuid array_data", $this->uuid, $array_data);
+
         $this->variables->setValueFromPath($array_data, $path, $value);
 //$this->array_handler->setPathValueArr($array_data, $path, $value);
-
-
-var_dump("Thing Write array_data", $array_data);
-
 
 
 // Get the local array data
 
 $array_data = $this->variables->array_data;
-var_dump($array_data);
+
+var_dump("Thing Write array_data from variables uuid array_data",$this->uuid, $array_data);
 
 // Then merge this against what we just got from the stack.
 // Before writing it.
@@ -692,6 +728,7 @@ var_dump($array_data);
 
         $last_write = $this->db->writeDatabase("variables", $array_data);
 
+var_dump("Thing Write last_write",$last_write);
 
 $bytes_written = mb_strlen(serialize((array)$array_data), '8bit');
 //        var_dump("Thing Write array data", $array_data);

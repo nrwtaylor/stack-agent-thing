@@ -9,15 +9,6 @@ class Mongo extends Agent
 
     public function init()
     {
-<<<<<<< HEAD
-
-
-$this->extension_loaded = extension_loaded("mongodb") ? "loaded" : "not loaded";
-$this->version = phpversion('mongodb');
-
-$this->response .= $this->extension_loaded . " " . $this->version .". ";
-=======
->>>>>>> origin/kokopelli
         $this->hash_state = "off";
         if (isset($settings["settings"]["stack"]["hash"])) {
             $this->hash_state = $settings["settings"]["stack"]["hash"];
@@ -37,45 +28,6 @@ $this->response .= $this->extension_loaded . " " . $this->version .". ";
         $this->mongo_test_flag = "off";
         $path =
             "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
-<<<<<<< HEAD
-
-if (isset($this->db)) {return;}
-
-        try {
-//            $client = new \MongoDB\Client($path);
-            $client = new \MongoDB\Driver\Manager($path);
-            $this->db = $client;
-            $this->collection = $this->db->stack_db->things;
-            $this->statusMongo('ready');
-            $this->response .= "Connected to Mongo database. ";
-        } catch (\Throwable $t) {
-
-            $this->error = 'Could not connect to Mongo database';
-            $this->errorMongo($t->getMessage());
-        } catch (\Error $ex) {
-            $this->errorMongo($ex->getMessage());
-            $this->error = 'Could not connect to Mongo database';
-            $this->collection = true;
-        }
-    }
-
-    public function errorMongo($text = null)
-    {
-        var_dump("error" . $text);
-        if ($text == null) {
-            return;
-        }
-        $this->statusMongo('error');
-        //var_dump("error: " . $text);
-        $this->error = $text;
-
-        if (!isset($this->response)) {
-            $this->response = "";
-        }
-        $this->response .= $text . " ";
-    }
-
-=======
         try {
             $client = new \MongoDB\Client($path);
             $this->db = $client;
@@ -104,7 +56,6 @@ if (isset($this->db)) {return;}
         $this->response .= $text . " ";
     }
 
->>>>>>> origin/kokopelli
     // Useful later for matching in variables
     // https://groups.google.com/g/mongodb-user/c/lv8XbtAkS4w?pli=1
 
@@ -166,14 +117,6 @@ if (isset($this->db)) {return;}
             return;
         }
 
-<<<<<<< HEAD
-        if ($this->db === true) {
-            $this->response .= "Mongo not available. No test performed. ";
-            return;
-        }
-
-=======
->>>>>>> origin/kokopelli
         if (!$this->isReadyMongo()) {
             $test_response .= "Mongo not ready. ";
             $this->response .= $test_response;
@@ -232,10 +175,6 @@ if (isset($this->db)) {return;}
 
     public function writeMongo($field_text, $arr)
     {
-<<<<<<< HEAD
-var_dump("Mongo writeMongo");
-=======
->>>>>>> origin/kokopelli
         if (!isset($this->write_fail_count)) {
             $this->write_fail_count = 0;
         }
@@ -246,10 +185,6 @@ var_dump("Mongo writeMongo");
         }
 
         $existing = $this->getMongo($this->uuid);
-<<<<<<< HEAD
-var_dump("Mongo writeMongo existing", $existing);
-=======
->>>>>>> origin/kokopelli
         //$variables = $existing['variables'];
         // Hmmm
         // Ugly but do this for now.
@@ -259,22 +194,6 @@ var_dump("Mongo writeMongo existing", $existing);
         $data = $arr;
         $data = ["variables" => $data];
 
-<<<<<<< HEAD
-// whitefox incoming
-
-        $j = new ThingJson($this->uuid);
-var_dump("Mongo writeMongo string_json", $string_json);
-        $j->jsontoarrayJson($string_json);
-        $data = $j->jsontoarrayJson($string_json);
-//        $this->setValueFromPath($this->array_data, $var_path, $value);
-//        $this->arraytoJson();
-//        $t = $this->write();
-
-
-//         $this->setValueFromPath($this->array_data, $var_path, $value);
-
-=======
->>>>>>> origin/kokopelli
         // dev develop associations.
         if (isset($this->associations)) {
             $data["associations"] = $this->associations;
@@ -306,12 +225,8 @@ var_dump("Mongo writeMongo string_json", $string_json);
         if (is_array($existing)) {
             $d = array_replace_recursive($existing, $data);
         }
-<<<<<<< HEAD
-
-=======
         //var_dump("u", $this->uuid);
         //var_dump("e", $d);
->>>>>>> origin/kokopelli
         // In development
         $uuid = $this->setMongo($this->uuid, $d);
         if ($uuid == true) {
@@ -324,7 +239,6 @@ var_dump("Mongo writeMongo string_json", $string_json);
         return $uuid;
     }
 
-
     function run()
     {
     }
@@ -336,32 +250,6 @@ var_dump("Mongo writeMongo string_json", $string_json);
     // use memcache model for get.
     public function getMongo($text = null)
     {
-<<<<<<< HEAD
-var_dump("Mongo getMongo");
-        // Get mongo key by uuid.
-        if (!$this->isReadyMongo()) {
-            return;
-        }
-
-$result = null;
-try {
-        $result = $this->collection->findOne(["_id" => $text]);
-        } catch (\Throwable $t) {
-           $this->error = 'Could not connect to Mongo database';
-            $this->errorMongo($t->getMessage());
-        } catch (\Error $ex) {
-
-            $this->errorMongo($ex->getMessage());
-
-            $this->error = 'Could not connect to Mongo database';
-        }
-
-var_dump("Mongo getMongo result", $result);
-
-        if ($result == null) {
-            return true;
-        }
-=======
         // Get mongo key by uuid.
         if (!$this->isReadyMongo()) {
             return;
@@ -380,7 +268,6 @@ var_dump("Mongo getMongo result", $result);
         if ($result == null) {
             return false;
         }
->>>>>>> origin/kokopelli
         $thing = iterator_to_array($result);
         unset($thing['_id']);
         return $thing;
@@ -389,10 +276,6 @@ var_dump("Mongo getMongo result", $result);
 
     public function createMongo($subject, $to)
     {
-<<<<<<< HEAD
-var_dump("Mongo createMongo");
-=======
->>>>>>> origin/kokopelli
         if (!$this->isReadyMongo()) {
             return true;
         }
@@ -477,11 +360,6 @@ var_dump("Mongo createMongo");
     // use memcache model for set.
     public function setMongo($key = null, $variable = null)
     {
-<<<<<<< HEAD
-var_dump("Mongo setMongo");
-
-=======
->>>>>>> origin/kokopelli
         if (!$this->isReadyMongo()) {
             return true;
         }
@@ -504,19 +382,7 @@ var_dump("Mongo setMongo");
 
         // If a uuid key is provided, check if it exists.
 
-<<<<<<< HEAD
-//        if ($this->isUuid($key) and $key !== null) {
-
-        $value = $variable;
-        if ((is_array($variable)) and (isset($variable[0]))) {
-            $value = $variable[0];
-        }
-
-
-        if (($this->isUuid($key)) and ($key !== null)) {
-=======
         if ($this->isUuid($key) and $key !== null) {
->>>>>>> origin/kokopelli
             $m = $this->getMongo($key);
             if ($m === true) {
                 return true;
@@ -525,23 +391,11 @@ var_dump("Mongo setMongo");
 
         // Create random uuid key if none provided.
         if ($key == null) {
-<<<<<<< HEAD
-$t = new Thing(null);
-$key = $t->uuid;
-
-       $result = $this->collection->insertOne(["_id"=>$key, "test"=>$value]);
-
-return $key;
-
-//$key = $uuid->randomUuid();
-//            $key = $this->thing->getUUid();
-=======
             // Because thing is the only plae uuids are made.
             $t = new Thing(null);
             $key = $t->uuid;
             //$key = $uuid->randomUuid();
             //            $key = $this->thing->getUUid();
->>>>>>> origin/kokopelli
 
             /*
             $uuid = $this->uuid;
@@ -572,20 +426,8 @@ return $key;
         } catch (\Throwable $t) {
             $this->errorMongo($t->getMessage());
             return true;
-<<<<<<< HEAD
-        } catch (\Throwable $t) {
-            $this->error = 'Could not connect to Mongo database';
-            $this->errorMongo($t->getMessage());
-            return true;
-        } catch (\Error $ex) {
-            var_dump("setMongo error", $ex);
-            $this->errorMongo($ex->getMessage());
-
-            $this->error = 'Could not connect to Mongo database';
-=======
         } catch (\Error $ex) {
             $this->errorMongo($ex->getMessage());
->>>>>>> origin/kokopelli
             return true;
         }
         return $key;
@@ -594,13 +436,7 @@ return $key;
     // Delete by key.
     public function forgetMongo($uuid = null)
     {
-<<<<<<< HEAD
-        if (!$this->isReadyMongo()) {return true;}
-//if ($this->collection === true) {return true;}
-        if ($key == null) {
-=======
         if (!$this->isReadyMongo()) {
->>>>>>> origin/kokopelli
             return true;
         }
 
@@ -643,8 +479,6 @@ return $key;
      */
     public function respondResponse()
     {
-var_dump("respondResponse Mongo");
-
         $this->thing->flagGreen();
 
         $this->thing_report["email"] = $this->sms_message;
@@ -682,10 +516,7 @@ var_dump("respondResponse Mongo");
             $this->mongo_test_flag = "on";
             $this->testMongo();
         }
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/kokopelli
         if ($input == "prior") {
             $prior_thing = $this->priorMongo();
             $this->response .=
@@ -702,10 +533,6 @@ var_dump("respondResponse Mongo");
             $this->response .=
                 "Got thing " . $uuid . " " . $thing['subject'] . ". ";
         }
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/kokopelli
         if ($this->hasText($input, 'create')) {
             //    if ($input == "create") {
             $create_mongo_uuid = $this->createMongo("foo", "bar");
