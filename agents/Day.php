@@ -2388,7 +2388,7 @@ Now draw the twilight.
 
         //$ngrams = $this->extractNgrams($this->input);
 
-        $ngrams = $this->extractNgrams($expand_places_input);
+        $ngrams = $this->extractNgrams($expand_places_input,4);
 
         $period_index = 0;
         $period_timestamp =

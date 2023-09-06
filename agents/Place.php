@@ -420,6 +420,67 @@ $cut_ngrams = [];
 
                     break;
 
+// https://whc.unesco.org/en/list/1501
+// https://www.antequerapatrimoniomundial.com/en/antequera-dolmens/tholos-el-romeral/
+
+/*
+The Tholos El Romeral is one of the very few examples in the Iberian Peninsula where the orientation is towards the half-west of the sky. Its axis points -another peculiarity- at the highest rock point of the El Torcal mountain range, the Camorro de las Siete Mesas. At noon, during the winter solstice, the sun light gets deep into the second sepulchre chamber. You can enjoy this phenomenon by previously booking.
+*/
+
+// https://en.wikipedia.org/wiki/Tholos_de_El_Romeral
+// Coordinates	37°02′04″N 4°32′08″W
+
+                case "tholos de el romeral":
+                    $place_times["7f0f"] = [
+                        "text" => "tholos de el romeral",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 37.034444,
+                        "longitude" => 4.5355556,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["7f0f"];
+                    }
+
+                    break;
+
+// 37.024586° N, 4.5462917° W
+
+                case "dolmen of menga":
+                    $place_times["7f0f"] = [
+                        "text" => "dolmen of menga",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 37.024586,
+                        "longitude" => 4.5462917,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["7f0f"];
+                    }
+
+                    break;
+
+// https://en.wikipedia.org/wiki/Dolmen_de_Viera
+// Coordinates: 37.024116°N 04.548374°W
+
+                case "dolmen de viera":
+                    $place_times["7f0f"] = [
+                        "text" => "dolmen of menga",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 37.024116,
+                        "longitude" => 4.548374,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["7f0f"];
+                    }
+
+                    break;
+
+
+
+
+
                 // https://cdnc.ucr.edu/?a=d&d=SFC19110910.2.43.7&
                 // https://books.google.ca/books?id=qfTu-wAQAO8C&pg=PA143&lpg=PA143&dq=%22mare+island+observatory%22+latitude+longitude&source=bl&ots=lNCBamPF9R&sig=ACfU3U3YRTpMQYuU7Le1_8ZERWfu391uhQ&hl=en&sa=X&ved=2ahUKEwiav8GC__v2AhVTOH0KHW3RAYsQ6AF6BAgIEAM#v=onepage&q=%22mare%20island%20observatory%22%20latitude%20longitude&f=false
                 // Poition of observatory Lat. 38 05'59" north 122 15'15" west, in time 9h 09m 01*.2 W"
