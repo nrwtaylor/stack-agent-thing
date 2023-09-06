@@ -173,6 +173,49 @@ $cut_ngrams = [];
 
         foreach ($ngrams as $j => $ngram) {
             switch ($ngram) {
+
+                case "kokopelli":
+
+$data_source = "http://localhost/snapshot.json";
+
+    stream_context_set_default(array(
+            'ssl'                => array(
+            'peer_name'          => 'generic-server',
+            'verify_peer'        => FALSE,
+            'verify_peer_name'   => FALSE,
+            'allow_self_signed'  => TRUE
+             )));
+
+        $data = file_get_contents($data_source, FALSE);
+
+        if ($data == false) {
+            $this->response = "Could not ask Kokopelli.";
+//            $this->available_places_count = 0;
+//            $this->places_count = 0;
+            return true;
+            // Invalid query of some sort.
+        }
+// https://stackoverflow.com/questions/36036329/file-get-contents-peer-certificate-did-not-match
+                   $json_data = json_decode($data, true);
+                   unset($json_data['log']);
+
+                   $latitude = $json_data['latitude_decimal'];
+                   $longitude = $json_data['longitude_decimal'];
+
+                    $place_times["e871"] = [
+                        "text" => "kokopelli",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => $latitude,
+                        "longitude" => $longitude,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["e871"];
+                    }
+
+                    break;
+
+
+
                 case "amsterdam":
                     $place_times["aa34"] = [
                         "text" => "amsterdam",
