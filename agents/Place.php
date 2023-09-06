@@ -430,12 +430,15 @@ The Tholos El Romeral is one of the very few examples in the Iberian Peninsula w
 // https://en.wikipedia.org/wiki/Tholos_de_El_Romeral
 // Coordinates	37°02′04″N 4°32′08″W
 
+// circa 1,800 BC or perhaps 2,500 BC
+// https://www.thetravel.com/how-old-are-the-dolmens-of-antequera/
+
                 case "tholos de el romeral":
                     $place_times["7f0f"] = [
                         "text" => "tholos de el romeral",
                         "datum_projected" => $datum_projected,
                         "latitude" => 37.034444,
-                        "longitude" => 4.5355556,
+                        "longitude" => -4.5355556,
                     ];
 
                     if (!isset($first_place)) {
@@ -445,17 +448,19 @@ The Tholos El Romeral is one of the very few examples in the Iberian Peninsula w
                     break;
 
 // 37.024586° N, 4.5462917° W
+// circa 3,800 BC 
+// https://www.thetravel.com/how-old-are-the-dolmens-of-antequera/
 
                 case "dolmen of menga":
-                    $place_times["7f0f"] = [
+                    $place_times["bd4c"] = [
                         "text" => "dolmen of menga",
                         "datum_projected" => $datum_projected,
                         "latitude" => 37.024586,
-                        "longitude" => 4.5462917,
+                        "longitude" => -4.5462917,
                     ];
 
                     if (!isset($first_place)) {
-                        $first_place = $place_times["7f0f"];
+                        $first_place = $place_times["bd4c"];
                     }
 
                     break;
@@ -463,19 +468,47 @@ The Tholos El Romeral is one of the very few examples in the Iberian Peninsula w
 // https://en.wikipedia.org/wiki/Dolmen_de_Viera
 // Coordinates: 37.024116°N 04.548374°W
 
+// circa 3,800 BC
+// https://www.thetravel.com/how-old-are-the-dolmens-of-antequera/
+
                 case "dolmen de viera":
-                    $place_times["7f0f"] = [
-                        "text" => "dolmen of menga",
+                    $place_times["e6ec"] = [
+                        "text" => "dolmen de viera",
                         "datum_projected" => $datum_projected,
                         "latitude" => 37.024116,
-                        "longitude" => 4.548374,
+                        "longitude" => -4.548374,
                     ];
 
                     if (!isset($first_place)) {
-                        $first_place = $place_times["7f0f"];
+                        $first_place = $place_times["e6ec"];
                     }
 
                     break;
+
+// https://www.livescience.com/Spanish-stonehenge-dolmen-de-guadalperal.html
+// https://en.wikipedia.org/wiki/Dolmen_of_Guadalperal
+
+// 39°50′8.65″N 5°24′16.13″W
+// 39.835736, -5.404481
+
+                case "dolmen of guadalperal":
+                    $place_times["e6ed"] = [
+                        "text" => "dolmen of guadalperal",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 39.835736,
+                        "longitude" => -5.404481,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["e6ed"];
+                    }
+
+                    break;
+
+
+
+// Schulz Paulsson believes that the megaliths were first constructed by dwellers of northwest France during the second half of the fifth millennium BC.
+// https://www.smithsonianmag.com/articles/europe-megalithic-monuments-france-sea-routes-mediterranean-180971467/
 
 
 
