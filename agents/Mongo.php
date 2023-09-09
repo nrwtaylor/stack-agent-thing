@@ -25,20 +25,29 @@ class Mongo extends Agent
 
     public function initMongo()
     {
+
+
         $this->mongo_test_flag = "off";
         $path =
             "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
+
         try {
             $client = new \MongoDB\Client($path);
             $this->db = $client;
             $this->collection = $this->db->stack_db->things;
             $this->statusMongo('ready');
+var_dump("Mongo initMongo ok");
         } catch (\Throwable $t) {
+var_dump("Mongo initMongo Throwable");
             $this->errorMongo($t->getMessage());
         } catch (\Error $ex) {
+var_dump("Mongo initMongo Error");
+
             $this->errorMongo($ex->getMessage());
         }
+
     }
+
 
     public function errorMongo($text = null)
     {
@@ -509,6 +518,7 @@ class Mongo extends Agent
 
     public function readSubject()
     {
+var_dump("Mongo readSubject");
         $input = $this->assert($this->input);
         $uuid = $this->extractUuid($input);
 

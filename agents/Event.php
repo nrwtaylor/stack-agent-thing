@@ -25,6 +25,8 @@ class Event extends Agent
             "drop",
             "add",
             "new",
+            "stochastic",
+            "random"
         ];
 
         $this->default_event_name =
@@ -47,6 +49,36 @@ class Event extends Agent
         $this->minutes = "X";
         $this->event_code = "X";
         $this->refreshed_at = "X";
+
+//$this->event_handler = new Events($this->thing, "events");
+
+    }
+
+    public function isEvent($text = null)
+    {
+        var_dump($text);
+        $dateline = $this->extractDateline($text);
+        var_dump("isEvent dateline");
+        var_dump($dateline);
+
+        if (
+            $dateline["year"] === false &&
+            $dateline["month"] === false &&
+            $dateline["day"] === false &&
+            $dateline["day_number"] === false &&
+            $dateline["hour"] === false &&
+            $dateline["minute"] === false
+        ) {
+            return false;
+        }
+
+// Expect...
+// Not strange to put date at beginning.
+   $parts = strtok($contents, ".");
+
+
+
+        return true;
     }
 
     public function currentEvent()
@@ -180,8 +212,63 @@ class Event extends Agent
         return $event_string;
     }
 
-    public function loadEvents()
+    public function stochasticEvent()
     {
+$this->response .= "Called stochasticEvent. ";
+// Older pattern for test.
+//$this->event_handler = new Events($this->thing, "events");
+
+var_dump("stochasticEvent");
+$raw_event_lines = $this->loadEvents();
+
+$is_event = false;
+$loop_count = 0;
+while (!$is_event || $loop_count > 20) {
+
+$random_raw_event = $raw_event_lines[array_rand($raw_event_lines, 1)];
+var_dump($random_raw_event);
+
+//exit();
+
+$is_event = $this->isEvent($random_raw_event);
+if ($is_event === false) {$random_raw_event = null;}
+$loop_count += 1;
+}
+
+var_dump($random_raw_event);
+var_dump($is_event);
+
+// Make an event in the system.
+if ($is_event) {
+$this->makeEvent(null, $random_raw_event);
+}
+
+//exit();
+
+//if ($is_event !== false) {
+
+ $dateline = $this->extractDateline($random_raw_event);
+
+
+var_dump($dateline);
+/*
+//}
+//        $this->pleasant_words_list = array_map(
+//            "strtolower",
+//            $pleasant_words_list
+//        );
+
+$ts= $this->timestampDateline($dateline['dateline']);
+var_dump($ts);
+var_dump("exit loadEvents");
+*/
+
+$this->response .= "Stochastic event. " . $dateline['line'] . "[" . $this->timestampDateline($dateline['dateline']) . "] ";
+
+
+
+
+
         // Events
     }
 
@@ -227,7 +314,6 @@ class Event extends Agent
 
         $event->events = $this->events;
         $event->refreshed_at = $this->current_time;
-
     }
 
     function lastEvent()
@@ -308,7 +394,6 @@ class Event extends Agent
 
         foreach ($events as $event) {
             if ($timestamp_agent->isTimestamp($selector)) {
-
                 if (isset($event["dateline"])) {
                     $t = $timestamp_agent->extractTimestamp($event["dateline"]);
                     $time_distance = strtotime($selector) - strtotime($t);
@@ -912,15 +997,16 @@ class Event extends Agent
         $web .= "<br>event_name is " . $this->event_name . "";
 
         $event_code_text = "X";
-        if ((isset($this->event_code)) and ($this->event_code !== false)) {
+        if (isset($this->event_code) and $this->event_code !== false) {
             $event_code_text = $this->event_code;
         }
         $web .= "<br>event_code is " . $event_code_text . "";
 
         $web .= "<br>" . $this->last_event_code;
         $web .= "<br>" . $this->last_event_name;
-
+if ($this->isText($this->minutes)) {
         $web .= "<br>run_time is " . $this->minutes . " minutes";
+}
         $web .=
             "<br>run_at is " .
             $this->day .
@@ -1071,9 +1157,10 @@ class Event extends Agent
         $sms_message .= " " . $event_code_text;
 
         $minutes_text = "Set RUNTIME. ";
-        if (isset($this->minutes) and $this->minutes != false) {
+        if (isset($this->minutes) and $this->isText($this->minutes) and $this->minutes != false  ) {
             $minutes_text = "runtime " . $this->minutes . " minutes. ";
         }
+
         $sms_message .= " | " . $minutes_text;
 
         $run_at_text = "Set RUNAT. ";
@@ -1101,7 +1188,7 @@ class Event extends Agent
         }
 
         $sms_message .= $run_at_text;
-
+$sms_message .= $this->response;
         $this->sms_message = $sms_message;
         $this->thing_report["sms"] = $sms_message;
     }
@@ -1216,6 +1303,7 @@ class Event extends Agent
 
         foreach ($pieces as $key => $piece) {
             foreach ($this->keywords as $command) {
+var_dump($command, $piece);
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
                         case "next":
@@ -1226,7 +1314,14 @@ class Event extends Agent
                         case "drop":
                             $this->dropEvent();
                             break;
-
+case "random":
+case "stochastic":
+case "s":
+//var_dump("heard");
+//exit();
+$this->stochasticEvent();
+//return;
+break;
                         case "make":
                         case "new":
                         case "create":
@@ -1245,7 +1340,7 @@ class Event extends Agent
                                 "Asserted Event and found " .
                                 strtoupper($this->event_name) .
                                 ".";
-                            return;
+      //                      return;
                             break;
 
                             $event_type = "4";
@@ -1268,7 +1363,8 @@ class Event extends Agent
                                             ".",
                                         "WARNING"
                                     );
-                                    return;
+///   break;    
+                             return;
                                 }
                             }
 

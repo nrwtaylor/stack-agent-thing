@@ -38,6 +38,10 @@ class Text extends Agent
         return $ngrams;
     }
 
+public function isText($text = null) {
+return is_string($text);
+}
+
 public function ngramsText($text = null, $min_gram_limit = 2, $max_gram_limit = 4, $delimiter = null)
     {
         if ($delimiter == null) {$delimiter = "";}

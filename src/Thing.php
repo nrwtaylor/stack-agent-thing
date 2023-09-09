@@ -624,7 +624,9 @@ And review Agent variables.
 
     public function Read($path, $field = null)
     {
-//var_dump("Thing Read db", $this->db);
+//var_dump("Thing Rd d, $this->db);
+var_dump("Thing Read path", $path);
+var_dump("Thing Read field", $field);
 
 
 if (!isset($this->db)) {
@@ -637,13 +639,11 @@ $this->log("Read did not see a database connection.");
 
 if ($this->db === null) {
 
-var_dump("Thing Read null");
+var_dump("Thing Read db", $this->db);
 $this->log("Read did not see a database connection.");
 //return;
 //return true;
 }
-
-var_dump("Thing Read", $path, $field);
 
         if ($field == null) {
             $field = 'variables';
@@ -651,7 +651,8 @@ var_dump("Thing Read", $path, $field);
         $this->log(
             "Thing Read uuid " . $this->uuid . " path " .
             implode(">", $path), 'INFORMATION');
-var_dump("Thing Read uuid readField", $this->uuid);
+var_dump("Thing Read uuid", $this->uuid);
+
         $array_data = $this->db->readField($field);
 
         if ($array_data == false) {
@@ -669,12 +670,17 @@ var_dump("Thing Read uuid readField", $this->uuid);
             $value = false;
         }
 
+var_dump("Thing Read value", $value);
+
         //var_dump("Thing Read value ", $value);
         return $value;
     }
 
     public function Write($path, $value, $field = null)
     {
+var_dump("Thing Write path", $path);
+var_dump("Thing Write value", $value);
+var_dump("Thing Write field", $field);
 /*
         var_dump(
             "Thing Write " . $this->uuid . " path " . $this->uuid . " path " ,
@@ -700,16 +706,16 @@ var_dump("Thing Write db null");
 
 
 
-
+// Default for field is assume variables
         if ($field == null) {
             $field = "variables";
         }
-var_dump("Thing Write uuid readField", $this->uuid);
+var_dump("Thing Write uuid", $this->uuid);
 
 
         $array_data = $this->db->readField($field);
 
-var_dump("Thing Write readField variables uuid array_data", $this->uuid, $array_data);
+var_dump("Thing Write array_data", $array_data);
 
         $this->variables->setValueFromPath($array_data, $path, $value);
 //$this->array_handler->setPathValueArr($array_data, $path, $value);
@@ -719,7 +725,7 @@ var_dump("Thing Write readField variables uuid array_data", $this->uuid, $array_
 
 $array_data = $this->variables->array_data;
 
-var_dump("Thing Write array_data from variables uuid array_data",$this->uuid, $array_data);
+var_dump("Thing Write array_data",$array_data);
 
 // Then merge this against what we just got from the stack.
 // Before writing it.

@@ -505,14 +505,15 @@ var_dump("Database connectDatabase", $stack);
     public function writeDatabase($field_text, $array, $uuid = null)
     {
         var_dump(
-            "Database writeDatabase field_text array uuid",
-            $field_text,
-            $array,
+            "Database writeDatabase uuid",
             $uuid
         );
 
+var_dump("Database writeDatabase field_text", $field_text);
+var_dump("Database writeDatabase array", $array);
+
         if ($array == null) {
-            var_dump("Database writeDatabase null array");
+            var_dump("Database writeDatabase return true");
 
             //            $this->thing->log("writeDatabase received null array.");
             return true;
@@ -622,14 +623,15 @@ var_dump("Database connectDatabase", $stack);
      */
     function readField($field)
     {
-var_dump("Database readField", $field);
+var_dump("Database readField field", $field);
         $thingreport = $this->Get();
 
         var_dump(
-            "Database readField uuid thingreport uuid",
-            $this->uuid,
-            $thingreport
+            "Database readField uuid",
+            $this->uuid
         );
+
+var_dump("Database readField thingreport", $thingreport);
 
         $this->thing = $thingreport["thing"];
         if (isset($this->thing->$field)) {
@@ -901,11 +903,12 @@ $authorative_thing = $thing;
 */
 
         $thingreport = [
+            "uuid" => $this->uuid,
             "thing" => $authorative_thing,
             "info" =>
                 "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing " .
                 $this->web_prefix .
-                "api/thing/<32 characters>.",
+                'api/thing/' . $this->uuid. '.',
             "help" => "Check your junk/spam folder.",
         ];
 

@@ -20,6 +20,13 @@ class Events extends Agent
 
         $this->retain_for = 24; // Retain for at least 24 hours.
         $this->state = "dev";
+
+        $this->initEvents();
+    }
+
+    public function initEvents()
+    {
+        $this->librex = new Librex($this->thing, "librex");
     }
 
     // Add in code for setting the current distance travelled.
@@ -27,28 +34,62 @@ class Events extends Agent
     {
         // UK Commonwealth spelling
         $time_string = $this->thing->time();
-        $this->thing->Write(
-            ["events", "refreshed_at"],
-            $time_string
-        );
+        $this->thing->Write(["events", "refreshed_at"], $time_string);
     }
 
     function get()
     {
-        $time_string = $this->thing->Read([
-            "events",
-            "refreshed_at",
-        ]);
+        $time_string = $this->thing->Read(["events", "refreshed_at"]);
 
         // Keep second level timestamp because I'm not
         // sure Stackr can deal with microtimes (yet).
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->Write(
-                ["events", "refreshed_at"],
-                $time_string
+            $this->thing->Write(["events", "refreshed_at"], $time_string);
+        }
+    }
+
+    public function rawEvents($text)
+    {
+        $this->librex->getLibrex($text);
+
+        return $this->librex->linesLibrex();
+    }
+
+    // Load events from paragraphs of available text.
+    public function loadEvents()
+    {
+        $raw_event_files = [];
+
+        $this->raw_event_lines = [];
+
+        $dir = "/var/www/stackr.test/resources/event";
+
+        $files = scandir($dir);
+
+        foreach ($files as $key => $file) {
+            if ($file[0] == "_") {
+                continue;
+            }
+            if (strtolower(substr($file, 0, 3)) == "dev") {
+                continue;
+            }
+            if (strtolower(substr($file, -4)) != ".txt") {
+                continue;
+            }
+            $file_name = strtok($file, ".");
+
+            $raw_event_files[$file_name] = ["name" => $file_name];
+        }
+        foreach ($raw_event_files as $filename => $meta) {
+            $raw_event_lines = $this->rawEvents("event/" . $filename);
+
+            $this->raw_event_lines = array_merge(
+                $this->raw_event_lines,
+                $raw_event_lines
             );
         }
+        return $this->raw_event_lines;
     }
 
     public function currentEvents()
@@ -148,32 +189,6 @@ $events_variable['request_flag'] = false;
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
-    }
-
-    public function deprecate_eventString($event)
-    {
-        $event_date = date_parse($event["runat"]);
-        $month_number = $event_date["month"];
-        $month_name = date("F", mktime(0, 0, 0, $month_number, 10)); // March
-
-        $simple_date_text = $month_name . " " . $event_date["day"];
-        $event_string = "" . $simple_date_text;
-        $event_string .= " " . $event["event"];
-
-        $runat = new Runat($this->thing, "extract " . $event["runat"]);
-
-        $event_string .= " " . $runat->day;
-        $event_string .= " " . str_pad($runat->hour, 2, "0", STR_PAD_LEFT);
-        $event_string .= ":" . str_pad($runat->minute, 2, "0", STR_PAD_LEFT);
-
-        $run_time = new Runtime($this->thing, "extract " . $event["runtime"]);
-
-        if ($event["runtime"] != "X") {
-            $event_string .= " " . $this->thing->human_time($run_time->minutes);
-        }
-
-        $event_string .= " " . $event["place"];
-        return $event_string;
     }
 
     function thingreportEvents()
@@ -338,14 +353,10 @@ $events_variable['request_flag'] = false;
                 }
             }
         }
-
-        //      $this->response = "Got the next Geekenders.";
     }
 
     public function getEvents()
     {
-        $this->response .= "Get events. ";
-
         $events_variable = $this->getMemory("events");
 
         $age = 1e9;
@@ -409,7 +420,6 @@ $events_variable['request_flag'] = false;
 
     public function readSubject()
     {
-        $this->response .= "Heard Events. ";
         $this->keyword = "events";
 
         if ($this->agent_input != null) {

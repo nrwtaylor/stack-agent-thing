@@ -3,7 +3,7 @@ namespace Nrwtaylor\StackAgentThing;
 
 class Dateline extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
@@ -13,9 +13,9 @@ class Dateline extends Agent
             $this->thing->at_agent = new At($this->thing, "at");
         }
         $this->test_url = null;
-        if (isset($this->thing->container['api']['dateline']['test_url'])) {
+        if (isset($this->thing->container["api"]["dateline"]["test_url"])) {
             $this->test_url =
-                $this->thing->container['api']['dateline']['test_url'];
+                $this->thing->container["api"]["dateline"]["test_url"];
         }
     }
 
@@ -44,10 +44,10 @@ class Dateline extends Agent
 
         $this->thing->console("Retrieved test contents.\n");
 
-        $arr = ['year', 'month', 'day', 'day_number', 'hour', 'minute'];
+        $arr = ["year", "month", "day", "day_number", "hour", "minute"];
 
         foreach ($paragraphs as $i => $paragraph) {
-//echo ".";
+            //echo ".";
             if (trim($paragraph) == "") {
                 continue;
             }
@@ -56,8 +56,8 @@ class Dateline extends Agent
                 continue;
             }
             //$this->thing->log($dateline['dateline'] . "\n" . $dateline['line']);
-            $this->thing->console($dateline['dateline'] . "\n");
-            $this->thing->console($dateline['line'] . "\n");
+            $this->thing->console($dateline["dateline"] . "\n");
+            $this->thing->console($dateline["line"] . "\n");
             $this->thing->console($this->timestampDateline($dateline) . "\n");
             $this->thing->console("\n");
         }
@@ -113,17 +113,17 @@ class Dateline extends Agent
         }
         $start_time = time();
 
-        $arr = ['year', 'month', 'day', 'day_number', 'hour', 'minute'];
+        $arr = ["year", "month", "day", "day_number", "hour", "minute"];
 
         foreach ($this->paragraphs as $i => $paragraph) {
-//echo "line " . $i . "\n";
+            //echo "line " . $i . "\n";
             $dateline = $this->extractDateline($paragraph);
             if ($this->isDateline($dateline) === false) {
                 continue;
             }
 
             $this->thing->log(
-                $dateline['dateline'] . "\n" . $dateline['line'] . "\n"
+                $dateline["dateline"] . "\n" . $dateline["line"] . "\n"
             );
             break;
         }
@@ -131,7 +131,7 @@ class Dateline extends Agent
         $this->thing->log(" getDateline " . $run_time);
         $this->response .= "Got a dateline [" . $run_time . " seconds]. ";
 
-        $dateline['retrieved_at'] = $this->current_time;
+        $dateline["retrieved_at"] = $this->current_time;
 
         return $dateline;
     }
@@ -142,11 +142,11 @@ class Dateline extends Agent
             return false;
         }
 
-        if (!isset($dateline['line'])) {
+        if (!isset($dateline["line"])) {
             return false;
         }
 
-        $text = $dateline['line'];
+        $text = $dateline["line"];
         if (ctype_space($text) === true) {
             return false;
         }
@@ -211,13 +211,13 @@ class Dateline extends Agent
         // Todo extract calendar.
 
         $arr = [
-            'year',
-            'month',
-            'day',
-            'day_number',
-            'hour',
-            'minute',
-            'timezone',
+            "year",
+            "month",
+            "day",
+            "day_number",
+            "hour",
+            "minute",
+            "timezone",
         ];
 
         if ($paragraph == "") {
@@ -240,9 +240,18 @@ class Dateline extends Agent
             return false;
         }
 
+        $parts = strtok($text, ".");
+
         $dateline = $this->textDateline($date);
-        $date['line'] = $paragraph;
-        $date['dateline'] = $dateline;
+
+        $authorative_dateline = $this->thing->at_agent->extractAt($parts);
+
+        if ($date["year"] === false) {
+            $dateline = $authorative_dateline;
+        }
+
+        $date["line"] = $paragraph;
+        $date["dateline"] = $dateline;
         return $date;
     }
 
@@ -255,13 +264,13 @@ class Dateline extends Agent
             return true;
         }
         $arr = [
-            'year' => 'XXXX',
-            'month' => 'XX',
-            'day_number' => 'XX',
-            'hour' => 'XX',
-            'minute' => 'XX',
-            'second' => 'XX',
-            'timezone' => 'X'
+            "year" => "XXXX",
+            "month" => "XX",
+            "day_number" => "XX",
+            "hour" => "XX",
+            "minute" => "XX",
+            "second" => "XX",
+            "timezone" => "X",
         ];
         foreach ($arr as $component => $default_text) {
             ${$component} = $default_text;
@@ -279,13 +288,13 @@ class Dateline extends Agent
             if ($dateline[$component] === true) {
                 continue;
             }
-            if (strtolower($dateline[$component]) === 'x') {
+            if (strtolower($dateline[$component]) === "x") {
                 continue;
             }
-            if (strtolower($dateline[$component]) === 'z') {
+            if (strtolower($dateline[$component]) === "z") {
                 continue;
             }
-            if ($dateline[$component] === '?') {
+            if ($dateline[$component] === "?") {
                 continue;
             }
 
@@ -303,7 +312,7 @@ class Dateline extends Agent
         }
 
         $timezone = "X";
-        if (strtolower($dateline['timezone']) == 'utc') {
+        if (strtolower($dateline["timezone"]) == "utc") {
             $timezone = "Z";
         }
 
@@ -313,7 +322,7 @@ class Dateline extends Agent
             $month .
             "-" .
             $day_number .
-            'T' .
+            "T" .
             $hour .
             ":" .
             $minute .
@@ -340,12 +349,12 @@ class Dateline extends Agent
     public function doDateline()
     {
         if ($this->agent_input == null) {
-            $array = ['where are you?'];
+            $array = ["where are you?"];
             $k = array_rand($array);
             $v = $array[$k];
 
-            if (isset($this->dateline['dateline'])) {
-                $v = $this->dateline['dateline'];
+            if (isset($this->dateline["dateline"])) {
+                $v = $this->dateline["dateline"];
             }
 
             //$response = "DATELINE | " . strtolower($v) . ".";
@@ -365,11 +374,11 @@ class Dateline extends Agent
         $this->thing_report["help"] = "This is about being inscrutable.";
 
         //$this->thing_report['sms'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['txt'] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
+        $this->thing_report["txt"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'];
+        $thing_report["info"] = $message_thing->thing_report["info"];
 
         // return $this->thing_report;
     }
@@ -394,14 +403,14 @@ class Dateline extends Agent
             // See if there is a dateline with a UTC timestamp.
             if (
                 $this->dateline !== false and
-                stripos($this->dateline['line'], " utc ") !== false
+                stripos($this->dateline["line"], " utc ") !== false
             ) {
-                $tokens = explode(" UTC ", $this->dateline['line']);
+                $tokens = explode(" UTC ", $this->dateline["line"]);
 
                 $text_token = $tokens[1];
                 $time_tokens = explode(" ", $tokens[0]);
 
-                if (strtolower($time_tokens[0]) === 'timestamp') {
+                if (strtolower($time_tokens[0]) === "timestamp") {
                     $sms .= "| " . $text_token . " ";
                 }
             }
@@ -409,14 +418,14 @@ class Dateline extends Agent
         $sms .= $this->response;
 
         $this->sms_message = "" . $sms;
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     function makeChoices()
     {
-        $this->thing->choice->Create('channel', $this->node_list, "dateline");
-        $choices = $this->thing->choice->makeLinks('dateline');
-        $this->thing_report['choices'] = $choices;
+        $this->thing->choice->Create("channel", $this->node_list, "dateline");
+        $choices = $this->thing->choice->makeLinks("dateline");
+        $this->thing_report["choices"] = $choices;
     }
 
     public function questionDateline($text = null)
@@ -451,7 +460,7 @@ class Dateline extends Agent
 
             $age =
                 strtotime($this->current_time) -
-                strtotime($memory['retrieved_at']);
+                strtotime($memory["retrieved_at"]);
 
             // How old can the dateline be before needing another check?
             if ($age <= $dateline_horizon and $this->isDateline($memory)) {
