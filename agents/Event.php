@@ -56,10 +56,7 @@ class Event extends Agent
 
     public function isEvent($text = null)
     {
-        var_dump($text);
         $dateline = $this->extractDateline($text);
-        var_dump("isEvent dateline");
-        var_dump($dateline);
 
         if (
             $dateline["year"] === false &&
@@ -218,7 +215,6 @@ $this->response .= "Called stochasticEvent. ";
 // Older pattern for test.
 //$this->event_handler = new Events($this->thing, "events");
 
-var_dump("stochasticEvent");
 $raw_event_lines = $this->loadEvents();
 
 $is_event = false;
@@ -226,7 +222,6 @@ $loop_count = 0;
 while (!$is_event || $loop_count > 20) {
 
 $random_raw_event = $raw_event_lines[array_rand($raw_event_lines, 1)];
-var_dump($random_raw_event);
 
 //exit();
 
@@ -235,8 +230,6 @@ if ($is_event === false) {$random_raw_event = null;}
 $loop_count += 1;
 }
 
-var_dump($random_raw_event);
-var_dump($is_event);
 
 // Make an event in the system.
 if ($is_event) {
@@ -250,7 +243,6 @@ $this->makeEvent(null, $random_raw_event);
  $dateline = $this->extractDateline($random_raw_event);
 
 
-var_dump($dateline);
 /*
 //}
 //        $this->pleasant_words_list = array_map(
@@ -260,7 +252,6 @@ var_dump($dateline);
 
 $ts= $this->timestampDateline($dateline['dateline']);
 var_dump($ts);
-var_dump("exit loadEvents");
 */
 
 $this->response .= "Stochastic event. " . $dateline['line'] . " [" . $this->timestampDateline($dateline['dateline']) . "] ";
@@ -1303,7 +1294,6 @@ $sms_message .= $this->response;
 
         foreach ($pieces as $key => $piece) {
             foreach ($this->keywords as $command) {
-var_dump($command, $piece);
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
                         case "next":
@@ -1317,8 +1307,6 @@ var_dump($command, $piece);
 case "random":
 case "stochastic":
 case "s":
-//var_dump("heard");
-//exit();
 $this->stochasticEvent();
 //return;
 break;

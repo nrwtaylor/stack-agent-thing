@@ -39,12 +39,12 @@ you can call with "mongo test"
             $this->db = $client;
             $this->collection = $this->db->stack_db->things;
             $this->statusMongo("ready");
-            var_dump("Mongo initMongo ok");
+            $this->thing->log("Mongo initMongo ok");
         } catch (\Throwable $t) {
-            var_dump("Mongo initMongo Throwable");
+            $this->thing->log("Mongo initMongo Throwable");
             $this->errorMongo($t->getMessage());
         } catch (\Error $ex) {
-            var_dump("Mongo initMongo Error");
+            $this->thing->log("Mongo initMongo Error");
 
             $this->errorMongo($ex->getMessage());
         }
@@ -52,7 +52,7 @@ you can call with "mongo test"
 
     public function errorMongo($text = null)
     {
-        var_dump("error" . $text);
+        $this->thing->log("error" . $text);
         if ($text == null) {
             return;
         }
@@ -306,7 +306,7 @@ you can call with "mongo test"
             return true;
         }
 
-        var_dump("Mongo write " . $uuid);
+        $this->thing->log("Mongo write " . $uuid);
 
         return $uuid;
     }

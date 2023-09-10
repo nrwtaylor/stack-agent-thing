@@ -26,7 +26,7 @@ class Thing
 
     public function __construct($uuid, $test_message = null)
     {
-var_dump("Thing __construct", $uuid, $test_message);
+$this->log("Thing __construct", $uuid, $test_message);
 $this->bananas = "hello";
         //declare(ticks=1);
 
@@ -153,10 +153,6 @@ $this->bananas = "hello";
         try {
             $this->getThing($uuid);
 if (isset($this->db)) {
-//var_dump("Thing database connected.");
-//} else {
-//var_dump("Problem with thing database");
-//}
 $this->log("Thing database connected.");} else {$this->log("Problem with thing database");}
         } catch (\Exception $e) {
 
@@ -164,7 +160,6 @@ $this->log("Thing database connected.");} else {$this->log("Problem with thing d
 
             $this->error = "No Thing to get";
             $this->log("No Thing to get.");
-//var_dump($e->getMessage());
             // Fail quietly. There was no Thing to get.
             $this->log(
                 'Caught exception: ',
@@ -625,12 +620,12 @@ And review Agent variables.
     public function Read($path, $field = null)
     {
 //var_dump("Thing Rd d, $this->db);
-var_dump("Thing Read path", $path);
-var_dump("Thing Read field", $field);
+$this->log("Thing Read path", $path);
+$this->log("Thing Read field", $field);
 
 
 if (!isset($this->db)) {
-var_dump("Thing Read db not set");
+$this->log("Thing Read db not set");
 $this->log("Read did not see a database connection.");
 //return;
 //return true;
@@ -639,7 +634,7 @@ $this->log("Read did not see a database connection.");
 
 if ($this->db === null) {
 
-var_dump("Thing Read db", $this->db);
+$this->log("Thing Read db", $this->db);
 $this->log("Read did not see a database connection.");
 //return;
 //return true;
@@ -651,7 +646,7 @@ $this->log("Read did not see a database connection.");
         $this->log(
             "Thing Read uuid " . $this->uuid . " path " .
             implode(">", $path), 'INFORMATION');
-var_dump("Thing Read uuid", $this->uuid);
+$this->log("Thing Read uuid", $this->uuid);
 
         $array_data = $this->db->readField($field);
 
@@ -670,7 +665,7 @@ var_dump("Thing Read uuid", $this->uuid);
             $value = false;
         }
 
-var_dump("Thing Read value", $value);
+$this->log("Thing Read value", $value);
 
         //var_dump("Thing Read value ", $value);
         return $value;
@@ -678,9 +673,9 @@ var_dump("Thing Read value", $value);
 
     public function Write($path, $value, $field = null)
     {
-var_dump("Thing Write path", $path);
-var_dump("Thing Write value", $value);
-var_dump("Thing Write field", $field);
+$this->log("Thing Write path", $path);
+$this->log("Thing Write value", $value);
+$this->log("Thing Write field", $field);
 /*
         var_dump(
             "Thing Write " . $this->uuid . " path " . $this->uuid . " path " ,
@@ -697,7 +692,7 @@ if ($this->db === null) {
 
 $this->log("Read did not see a database connection.");
 
-var_dump("Thing Write db null");
+$this->log("Thing Write db null");
 
 //return;
 //return true;
@@ -710,12 +705,12 @@ var_dump("Thing Write db null");
         if ($field == null) {
             $field = "variables";
         }
-var_dump("Thing Write uuid", $this->uuid);
+$this->log("Thing Write uuid", $this->uuid);
 
 
         $array_data = $this->db->readField($field);
 
-var_dump("Thing Write array_data", $array_data);
+$this->log("Thing Write array_data", $array_data);
 
         $this->variables->setValueFromPath($array_data, $path, $value);
 //$this->array_handler->setPathValueArr($array_data, $path, $value);
@@ -725,7 +720,7 @@ var_dump("Thing Write array_data", $array_data);
 
 $array_data = $this->variables->array_data;
 
-var_dump("Thing Write array_data",$array_data);
+$this->log("Thing Write array_data",$array_data);
 
 // Then merge this against what we just got from the stack.
 // Before writing it.
@@ -734,7 +729,7 @@ var_dump("Thing Write array_data",$array_data);
 
         $last_write = $this->db->writeDatabase("variables", $array_data);
 
-var_dump("Thing Write last_write",$last_write);
+$this->log("Thing Write last_write",$last_write);
 
 $bytes_written = mb_strlen(serialize((array)$array_data), '8bit');
 //        var_dump("Thing Write array data", $array_data);

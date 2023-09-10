@@ -34,11 +34,12 @@ class Database
     //public function init()
     function __construct($thing = null, $agent_input = null)
     {
-        var_dump("Database __construct saw ", $thing === null, $agent_input);
+//        var_dump("Database __construct saw ", $thing === null, $agent_input);
         if ($thing == null) {
             $thing = new \stdClass();
         }
         $this->thing = $thing;
+
 
         $uuid = null;
         if (isset($agent_input["uuid"])) {
@@ -176,36 +177,36 @@ class Database
         $this->stack_handlers = [];
 
         $this->candidate_stacks = $this->stacks;
-        var_dump("Database candidate_stacks", $this->candidate_stacks);
+        $this->thing->log("Database candidate_stacks", $this->candidate_stacks);
         foreach (
             $this->candidate_stacks
             as $candidate_service_name => $candidate_service
         ) {
-            var_dump("Database candidate_service", $candidate_service);
+            $this->thing->log("Database candidate_service", $candidate_service);
 
             if (isset($this->stack_handlers[$candidate_service_name])) {
-                var_dump("Database saw stack_handler", $candidate_service_name);
+                $this->thing->log("Database saw stack_handler", $candidate_service_name);
                 continue;
             }
             try {
 
                 $handler = $this->connectDatabase($candidate_service);
 
-                var_dump("Database handler", $candidate_service, $handler);
-                var_dump(
+                $this->thing->log("Database handler", $candidate_service, $handler);
+                $this->thing->log(
                     "Database connectDatabase ",
                     $candidate_service,
                     $handler !== true
                 );
 
             } catch (\Throwable $t) {
-                var_dump(
+                $this->thing->log(
                     "__construct Throwable",
                     $candidate_service,
                     $t->getMessage()
                 );
             } catch (\Error $ex) {
-                var_dump(
+                $this->thing->log(
                     "__construct Error",
                     $candidate_service,
                     $ex->getMessage()
@@ -317,7 +318,7 @@ class Database
     function connectDatabase($stack)
     {
 
-var_dump("Database connectDatabase", $stack);
+$this->thing->log("Database connectDatabase", $stack);
 
         $agent_name = $stack["infrastructure"];
 
@@ -328,7 +329,7 @@ var_dump("Database connectDatabase", $stack);
 
 
         try {
-            var_dump(
+            $this->thing->log(
                 "Database connectDatabase agent namespace name " .
                     $agent_namespace_name
             );
@@ -337,7 +338,7 @@ var_dump("Database connectDatabase", $stack);
                 $this->thing,
                 $this->agent_input
             );
-            var_dump("Database connectDatabase handler", $handler);
+            $this->thing->log("Database connectDatabase handler", $handler);
             $handler->uuid = $this->uuid;
             $handler->from = $this->from;
             $handler->to = $this->to;
@@ -358,16 +359,16 @@ var_dump("Database connectDatabase", $stack);
             if (isset($stack["user"])) {
                 $handler->user = $stack["user"];
             }
-            var_dump(
+            $this->thing->log(
                 "Database connectDatabase " .
                     $agent_namespace_name .
                     "connected"
             );
             return $handler;
         } catch (\Throwable $t) {
-            var_dump("Database connectDatabase Throwable", $t->getMessage());
+            $this->thing->log("Database connectDatabase Throwable", $t->getMessage());
         } catch (\Error $ex) {
-            var_dump("Database connectDatabase Error", $e->getMessage());
+            $this->thing->log("Database connectDatabase Error", $e->getMessage());
         }
 
         return true;
@@ -504,16 +505,16 @@ var_dump("Database connectDatabase", $stack);
      */
     public function writeDatabase($field_text, $array, $uuid = null)
     {
-        var_dump(
-            "Database writeDatabase uuid",
-            $uuid
-        );
+  //      $this->thing->log(
+  //          "Database writeDatabase uuid",
+  //          $uuid
+  //      );
 
-var_dump("Database writeDatabase field_text", $field_text);
-var_dump("Database writeDatabase array", $array);
+//$this->thing->log("Database writeDatabase field_text", $field_text);
+//$this->thing->log("Database writeDatabase array", $array);
 
         if ($array == null) {
-            var_dump("Database writeDatabase return true");
+//            $this->thing->log("Database writeDatabase return true");
 
             //            $this->thing->log("writeDatabase received null array.");
             return true;
@@ -525,7 +526,7 @@ var_dump("Database writeDatabase array", $array);
         //$array = $this->jsonArr($string_text);
         //$string_text = $this->arrayJson($array);
 
-        var_dump("Database active_stacks", $this->active_stacks);
+//        $this->thing->log("Database active_stacks", $this->active_stacks);
 
         foreach (
             $this->active_stacks
@@ -623,17 +624,22 @@ var_dump("Database writeDatabase array", $array);
      */
     function readField($field)
     {
-var_dump("Database readField field", $field);
+
+//$this->log("Database readField field", $field);
         $thingreport = $this->Get();
 
-        var_dump(
-            "Database readField uuid",
-            $this->uuid
-        );
+//        var_dump(
+//            "Database readField uuid",
+//            $this->uuid
+//        );
 
-var_dump("Database readField thingreport", $thingreport);
+//$this->thing->log("Database readField thingreport", $thingreport);
 
         $this->thing = $thingreport["thing"];
+//$this->thing->log("Database readField field", $field);
+//$this->thing->log("Database readField thingreport", $thingreport);
+
+
         if (isset($this->thing->$field)) {
             // I think I should also do
             $this->$field = $this->thing->$field;
@@ -768,7 +774,7 @@ var_dump("Database readField thingreport", $thingreport);
                         continue 2;
                     }
 
-                    var_dump("Database Get mysql", $result);
+                    $this->thing->log("Database Get mysql", $result);
                     $thing["mysql"] = $result;
                     break;
                 case "memcached":
@@ -782,7 +788,7 @@ var_dump("Database readField thingreport", $thingreport);
                     ) {
                         continue 2;
                     }
-                    var_dump("Database Get memcached", $result);
+                    $this->thing->log("Database Get memcached", $result);
                     $thing["memcached"] = $result;
                     break;
 
@@ -797,7 +803,7 @@ var_dump("Database readField thingreport", $thingreport);
                     ) {
                         continue 2;
                     }
-                    var_dump("Database Get memory", $result);
+                    $this->thing->log("Database Get memory", $result);
                     $thing["memory"] = $result;
 
                     break;
@@ -813,7 +819,7 @@ var_dump("Database readField thingreport", $thingreport);
                     ) {
                         continue 2;
                     }
-                    var_dump("Database Get mongo", $result);
+                    $this->thing->log("Database Get mongo", $result);
                     $thing["mongo"] = $result;
 
                     break;
@@ -1109,7 +1115,7 @@ return $thing_report;
 
             $conditioned_things = [];
             foreach ($things as $i => $thing) {
-                var_dump($this->stack_handlers);
+                $this->thing->log($this->stack_handlers);
                 $conditioned_things[] = $this->stack_handlers[
                     "mysql"
                 ]->thingMysql($thing);

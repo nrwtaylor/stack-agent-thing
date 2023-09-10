@@ -574,7 +574,7 @@ class Agent
             }
         }
 
-var_dump($agent_namespace_name);
+$this->thing->log($agent_namespace_name);
 
         throw new \Exception(
             "Agent (" .
