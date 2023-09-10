@@ -11,6 +11,7 @@ use RecursiveArrayIterator;
 
 ini_set("allow_url_fopen", 1);
 
+#[\AllowDynamicProperties]
 class Choice
 {
     public $var = "hello";

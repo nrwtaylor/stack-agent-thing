@@ -122,12 +122,21 @@ class Route extends Agent
 
     function loadRoute($token)
     {
+        try {
+
         $filename = "/var/www/pdf/" . $token;
-        $contents = file_get_contents($filename);
+        $contents = @file_get_contents($filename);
+if ($contents === false) {return true;}
         //   $contents = file_get_contents(
         //       "/var/www/pdf/a-practical-guide-for-the-amateur-time-traveller-ab43.pdf"
         //   );
         return $contents;
+        } catch (\Throwable $t) {
+        } catch (\Error $ex) {
+        }
+// Return true - not found.
+return true;
+
     }
 
     public function pdfRoute($token)
@@ -264,10 +273,21 @@ class Route extends Agent
             // to reply to.
             // Need to understand what FB is doing.
 
-            $facebook_agent = new Facebook($thing, $message);
-            $channel = new Channel($thing, "facebook");
+            //$facebook_agent = new Facebook($thing, $message);
+            //$channel = new Channel($thing, "facebook");
+        try {
 
             $agent = new Agent($thing);
+            return $agent->thing_report;
+        } catch (\Throwable $t) {
+//var_dump($t);
+        } catch (\Error $ex) {
+//var_dump($ex);
+        }
+
+        return false;
+
+
         }
     }
 

@@ -8,13 +8,14 @@ namespace Nrwtaylor\StackAgentThing;
 
 // Agent resolves message disposition
 
+//error_reporting(E_ALL ^ E_WARNING); 
 ini_set("display_startup_errors", 1);
 ini_set("display_errors", 1);
 error_reporting(-1);
 
-ini_set("display_startup_errors", 0);
-ini_set("display_errors", 0);
-error_reporting(0);
+//ini_set("display_startup_errors", 0);
+//ini_set("display_errors", 0);
+//error_reporting(0);
 
 define("MAX_EXECUTION_TIME", 2); # seconds
 
@@ -46,6 +47,8 @@ class Agent
     public $default_hashmessage;
     public $stack_hash;
     public $default_hash;
+
+    public $default_sms_numbers;
 
     public $response_handler;
     public $tokens_handler;
@@ -2698,7 +2701,6 @@ $this->thing_report = $start_agent->thing_report;
             $this->thing_report = $this->robot_agent->thing_report;
             return;
         }
-
         // ignore agent at the start
         $input = $this->stripAgent($input);
 
@@ -2712,6 +2714,12 @@ $this->thing_report = $start_agent->thing_report;
         if ($time_tokens[0] == "agent") {
             array_shift($time_tokens);
         }
+
+if ($timestamp_agent->isTimestamp($input)) {
+                    $this->thing_report = $timestamp_agent->thing_report;
+                    return;
+}
+
         foreach ($time_tokens as $time_token) {
             if ($timestamp_agent->isTimestamp($time_token) === true) {
                 if (count($time_tokens) == 1) {

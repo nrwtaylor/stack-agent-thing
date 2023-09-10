@@ -5,6 +5,9 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
+    // Disable deprecated warnings
+//    error_reporting(E_ALL & ~E_DEPRECATED);
+
 ini_set("allow_url_fopen", 1);
 
 use Ramsey\Uuid\Uuid;
@@ -18,6 +21,7 @@ use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 // and a means to serialize and deserialize into that store (json).
 // And a way to generate a unique identifier (uuid).
 
+#[\AllowDynamicProperties]
 class Thing
 {
     public $var = 'hello';

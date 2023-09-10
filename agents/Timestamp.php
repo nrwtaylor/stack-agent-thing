@@ -121,6 +121,19 @@ class Timestamp extends Agent
             return false;
         }
 
+// Old time traveller joke.
+        if ($text == "1970 01 01T00:00:00Z") {return true;}
+
+// Dashes can get dropped in favour of spaces
+        if ($this->validTimestamp($text, "Y m d\TH:i:s\Z") === true) {
+            return true;
+        }
+
+        if ($this->validTimestamp($text, "Y m d\TH:i:s\J") === true) {
+            return true;
+        }
+
+
         if ($this->validTimestamp($text, "Y-m-d\TH:i:s\J") === true) {
             return true;
         }

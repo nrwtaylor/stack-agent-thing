@@ -19,6 +19,28 @@ class makeEmail
 {
     public $var = 'hello';
 
+public $uuid;
+    public $choices;
+    public $mail_regulatory;
+    public $stack_state;
+public $web_prefix;
+    public $mail_postfix;
+public $mail_prefix;
+public $agent_name;
+    public $sql_response;
+public $sqlresponse;
+public $multipart;
+public $unsubscribe;
+public $input;
+public $thing;
+    public $subject;
+    public $robot_name;
+public $thing_report;
+public $email_message;
+public $from;
+public $to;
+public $short_name;
+
     function __construct(Thing $thing, $input = null)
     {
 

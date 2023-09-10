@@ -21,6 +21,7 @@ use Nrwtaylor\StackAgentThing\Mongo;
 use Nrwtaylor\StackAgentThing\Agent;
 use Nrwtaylor\StackAgentThing\Thing;
 
+#[\AllowDynamicProperties]
 class Database
 {
     public $var = "hello";

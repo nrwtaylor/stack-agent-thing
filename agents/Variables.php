@@ -2,11 +2,12 @@
 namespace Nrwtaylor\StackAgentThing;
 
 error_reporting(E_ALL);
+//error_reporting(E_ALL ^ E_DEPRECATED);
 ini_set("display_errors", 1);
 
 // TODO: Rebuild. Faster.
 
-#[\AllowDynamicProperties]
+//#[\AllowDynamicProperties]
 class Variables
 {
     // So Variables manages a set of variables.
@@ -46,6 +47,21 @@ class Variables
     public $hour;
     public $minute;
     public $agent_name;
+
+    public $agent_prefix;
+
+    public $thing;
+    public $start_time;
+    public $uuid;
+    public $to;
+    public $from;
+    public $subject;
+
+    public $identity;
+    public $response;
+    public $agent;
+    public $max_variable_sets;
+
 
     function __construct(Thing $thing, $agent_command = null)
     {
