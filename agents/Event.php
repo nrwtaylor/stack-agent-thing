@@ -263,7 +263,7 @@ var_dump($ts);
 var_dump("exit loadEvents");
 */
 
-$this->response .= "Stochastic event. " . $dateline['line'] . "[" . $this->timestampDateline($dateline['dateline']) . "] ";
+$this->response .= "Stochastic event. " . $dateline['line'] . " [" . $this->timestampDateline($dateline['dateline']) . "] ";
 
 
 

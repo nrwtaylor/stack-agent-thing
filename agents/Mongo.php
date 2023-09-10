@@ -6,6 +6,11 @@ namespace Nrwtaylor\StackAgentThing;
 class Mongo extends Agent
 {
     public $var = "hello";
+    /*
+This code encapsulates all the PHP needed to handle the core
+Thing calls to a Mongo database. Including self test functions
+you can call with "mongo test"
+*/
 
     public function init()
     {
@@ -25,8 +30,6 @@ class Mongo extends Agent
 
     public function initMongo()
     {
-
-
         $this->mongo_test_flag = "off";
         $path =
             "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
@@ -35,19 +38,17 @@ class Mongo extends Agent
             $client = new \MongoDB\Client($path);
             $this->db = $client;
             $this->collection = $this->db->stack_db->things;
-            $this->statusMongo('ready');
-var_dump("Mongo initMongo ok");
+            $this->statusMongo("ready");
+            var_dump("Mongo initMongo ok");
         } catch (\Throwable $t) {
-var_dump("Mongo initMongo Throwable");
+            var_dump("Mongo initMongo Throwable");
             $this->errorMongo($t->getMessage());
         } catch (\Error $ex) {
-var_dump("Mongo initMongo Error");
+            var_dump("Mongo initMongo Error");
 
             $this->errorMongo($ex->getMessage());
         }
-
     }
-
 
     public function errorMongo($text = null)
     {
@@ -55,7 +56,7 @@ var_dump("Mongo initMongo Error");
         if ($text == null) {
             return;
         }
-        $this->statusMongo('error');
+        $this->statusMongo("error");
         //var_dump("error: " . $text);
         $this->error = $text;
 
@@ -78,7 +79,7 @@ var_dump("Mongo initMongo Error");
 
     public function isReadyMongo()
     {
-        if (isset($this->status) and $this->status == 'ready') {
+        if (isset($this->status) and $this->status == "ready") {
             return true;
         }
         return false;
@@ -94,32 +95,33 @@ var_dump("Mongo initMongo Error");
         $things = $this->collection->find(["nom_from" => $nom_from]);
 
         foreach ($things as $object_key => $thing) {
-            $conditioned_things[$thing['uuid']] = $thing;
+            $conditioned_things[$thing["uuid"]] = $thing;
         }
 
         usort($conditioned_things, function ($first, $second) {
             // dev Allow null fields in sort.
-            if ($first['created_at'] == null) {
+            if ($first["created_at"] == null) {
                 return +1;
             }
-            if ($second['created_at'] == null) {
+            if ($second["created_at"] == null) {
                 return -1;
             }
 
-            return strtotime($first['created_at']) -
-                strtotime($second['created_at']);
+            return strtotime($first["created_at"]) -
+                strtotime($second["created_at"]);
         });
         $obj = $conditioned_things[0];
 
         $arr = (array) $obj;
-        unset($arr['_id']);
+        unset($arr["_id"]);
         return $arr;
     }
 
     public function testMongo()
     {
-        $test_result = "NOT OK";
-        $test_response = "Test started. ";
+        $test_result = "OK";
+        $this->response .= "Test called. ";
+        $test_response = "";
         if ($this->mongo_test_flag != "on") {
             $test_response .= "Test flag not on";
             $this->response .= $test_response;
@@ -130,17 +132,19 @@ var_dump("Mongo initMongo Error");
             $test_response .= "Mongo not ready. ";
             $this->response .= $test_response;
             return;
+        } else {
+            $test_response .= "Ready OK. ";
         }
 
         $test_create_uuid = $this->createMongo("test create mongo", "mongo");
-        $test_response .= "Created Mongo thing . " . $test_create_uuid . ". ";
+        $test_response .= "Create " . $test_create_uuid . " OK. ";
         $prior_thing = $this->priorMongo();
         $test_response .=
-            "Got prior thing " .
-            $prior_thing['uuid'] .
+            "Prior " .
+            $prior_thing["uuid"] .
             " " .
-            $prior_thing['subject'] .
-            ". ";
+            $prior_thing["subject"] .
+            "OK. ";
         // Test will fail if this uuid does not exist in database.
 
         $uuid = $test_create_uuid;
@@ -156,30 +160,89 @@ var_dump("Mongo initMongo Error");
         $result = $this->setMongo($uuid, $thing);
 
         $value = $this->getMongo($uuid);
-        $subject = $value['subject'];
 
-        $test_response .= "Got value '{$subject}' for uuid " . $uuid . ". ";
+        // task subject text. synonyms.
+
+        if ($this->isText($value["task"])) {
+            $subject = $value["task"];
+        }
+
+        if ($this->isText($value["subject"])) {
+            $subject = $value["subject"];
+        }
+
+        if ($subject == null) {
+            $test_result = "NOT OK";
+        }
+
+        //$test_response .= "Got value '{$subject}' for uuid " . $uuid . ". ";
+
+        // Test of updating a record.
 
         // Now try with a dynamically got uuid
         // Dev review how this works.
 
-        $uuid = $this->createMongo($this->subject, $this->from);
-        $test_response .= "createMongo created record for " . $uuid . ". ";
+        $uuid = $this->createMongo("mongo test", $this->from);
+        if ($this->isUuid($uuid)) {
+            $test_response .= "Create " . $uuid . "OK. ";
+
+            $result = $this->getMongo($uuid);
+
+            $result2 = $this->setMongo($uuid, [$thing]);
+
+            $result = $this->getMongo($uuid);
+
+            if ($result2 !== $uuid or $result["task"] !== "mongo test") {
+                $test_result = "NOT OK";
+                $test_response .= "Set NOT OK. ";
+            } else {
+                $test_response .= "Set " . $uuid . " OK. ";
+            }
+        } else {
+            $test_result = "NOT OK";
+            $test_response .= "Create NOT OK. ";
+        }
+
+        // Test of forgetting a record.
+
+        $uuid = $this->createMongo("Mongo forget test", $this->from);
+
+        if ($this->isUuid($uuid)) {
+            $test_response .= "Create " . $uuid . " OK. ";
+        } else {
+            $test_response .= "Create NOT OK. ";
+            $result_result = "NOT OK";
+        }
+        $this->forgetMongo($uuid);
 
         $result = $this->getMongo($uuid);
 
-        $result = $this->setMongo($uuid, [$thing]);
-
-        // For testing
-        $this->forgetMongo($uuid);
+        if ($result !== false) {
+            $test_result = "NOT OK";
+            $test_response .= "Forget NOT OK. ";
+        } else {
+            $test_response .= "Forget " . $uuid . " OK. ";
+        }
 
         // Test find
-        $result = $this->findMongo(["subject" => "mongo"]);
+        // Going to have to remember this. Some databases text field
+        // might be task.
+        // I think that is the specification established.
+
+        $result = $this->findMongo(["task" => "mongo test"]);
+
         $test_response .= "Found " . count($result) . " things. ";
+
+        if ($result === 0) {
+            $test_result = "NOT OK";
+            $test_response .= "Find NOT OK. ";
+        } else {
+            $test_response .= "Find OK. ";
+        }
 
         $this->test_response = $test_response;
         $this->test_result = $test_result;
-        $this->response .= $test_response . "Test result: " . $test_result;
+        $this->response .= $test_response . " [ " . $test_result . "] ";
     }
 
     public function writeMongo($field_text, $arr)
@@ -278,7 +341,7 @@ var_dump("Mongo initMongo Error");
             return false;
         }
         $thing = iterator_to_array($result);
-        unset($thing['_id']);
+        unset($thing["_id"]);
         return $thing;
         //        return iterator_to_array($result);
     }
@@ -347,7 +410,7 @@ var_dump("Mongo initMongo Error");
             $uuid = $t->uuid;
         }
 */
-        $thing['uuid'] = $uuid;
+        $thing["uuid"] = $uuid;
 
         try {
             $result = $this->collection->insertOne($thing);
@@ -373,8 +436,8 @@ var_dump("Mongo initMongo Error");
             return true;
         }
 
-        if (isset($variable['uuid'])) {
-            if ($variable['uuid'] != $key and $key != null) {
+        if (isset($variable["uuid"])) {
+            if ($variable["uuid"] != $key and $key != null) {
                 $this->errorMongo(
                     "Thing update requested with inconsistent uuids."
                 );
@@ -382,7 +445,7 @@ var_dump("Mongo initMongo Error");
             }
 
             if ($key == null) {
-                $key = $variable['uuid'];
+                $key = $variable["uuid"];
             }
         }
 
@@ -426,7 +489,7 @@ var_dump("Mongo initMongo Error");
         if (is_array($variable) and isset($variable[0])) {
             $value = $variable[0];
         }
-        $value['uuid'] = $key;
+        $value["uuid"] = $key;
 
         try {
             $result = $this->collection->updateOne($condition, [
@@ -453,11 +516,12 @@ var_dump("Mongo initMongo Error");
             return true;
         }
 
-        $condition = ["uuid" => $key];
+        $condition = ["uuid" => $uuid];
 
         $result = $this->collection->deleteOne($condition);
+
         $count = $result->getDeletedCount();
-        $this->response .= "Deleted " . $count . " thing. ";
+        $this->response .= "Forgot " . $count . " thing(s). ";
         if ($count == 1) {
             return true;
         }
@@ -467,13 +531,13 @@ var_dump("Mongo initMongo Error");
     public function findMongo($arr)
     {
         if (!$this->isReadyMongo()) {
+            $this->response .= "findMongo saw Mongo not ready. ";
             return true;
         }
 
         // example
         // [ '_id' => $uuid ]
         $result = $this->collection->find($arr);
-
         $arr = [];
         foreach ($result as $entry) {
             $key_id = (string) $entry["_id"];
@@ -518,35 +582,45 @@ var_dump("Mongo initMongo Error");
 
     public function readSubject()
     {
-var_dump("Mongo readSubject");
+        $responsive = false;
         $input = $this->assert($this->input);
         $uuid = $this->extractUuid($input);
 
         if ($input == "test") {
             $this->mongo_test_flag = "on";
             $this->testMongo();
+            $responsive = true;
         }
+
+        //$this->response .= "merp";
 
         if ($input == "prior") {
             $prior_thing = $this->priorMongo();
             $this->response .=
                 "Got prior thing " .
-                $prior_thing['uuid'] .
+                $prior_thing["uuid"] .
                 " " .
-                $prior_thing['subject'] .
+                $prior_thing["subject"] .
                 ". ";
+            $responsive = true;
         }
 
-        if ($this->hasText($input, 'get')) {
+        if ($this->hasText($input, "get")) {
             //    if ($input == "get") {
             $thing = $this->getMongo($uuid);
             $this->response .=
-                "Got thing " . $uuid . " " . $thing['subject'] . ". ";
+                "Got thing " . $uuid . " " . $thing["subject"] . ". ";
+            $responsive = true;
         }
-        if ($this->hasText($input, 'create')) {
+        if ($this->hasText($input, "create")) {
             //    if ($input == "create") {
             $create_mongo_uuid = $this->createMongo("foo", "bar");
             $this->response .= "Created " . $create_mongo_uuid . ". ";
+            $responsive = true;
+        }
+
+        if ($responsive === false) {
+            $this->response .= "Try TEST PRIOR GET CREATE. ";
         }
     }
 }

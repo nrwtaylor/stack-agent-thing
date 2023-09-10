@@ -75,11 +75,16 @@ class Uuid extends Agent
 
         if ($text == null) {return false;}
 
-        if (!isset($this->uuids)) {$this->extractUuids($text);}
+//        if (!isset($this->uuids)) {$this->extractUuids($text);}
+//        if (count($this->uuids) != 1) {return false;} // Too many. Is not A uuid.
 
-        if (count($this->uuids) != 1) {return false;} // Too many. Is not A uuid.
+//        if (strtolower($this->uuids[0]) == strtolower($text)) {
 
-        if (strtolower($this->uuids[0]) == strtolower($text)) {
+        $uuids = $this->extractUuids($text);
+        if (count($uuids) != 1) {return false;} // Too many. Is not A uuid.
+
+        if (strtolower($uuids[0]) == strtolower($text)) {
+
 
             return true;
 

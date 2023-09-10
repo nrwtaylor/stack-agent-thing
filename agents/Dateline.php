@@ -263,6 +263,9 @@ class Dateline extends Agent
         if ($dateline == false) {
             return true;
         }
+
+if (is_string($dateline)) {return true;}
+
         $arr = [
             "year" => "XXXX",
             "month" => "XX",
