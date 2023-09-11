@@ -1173,8 +1173,15 @@ public function makeDiscord() {
 
     public function makeAgent()
     {
+
+if (!is_array($this->thing_report)) {
+    $this->thing_report = []; // Initialize as an empty array
+}
+
         if (!isset($this->thing_report["agent"])) {
+//            if ($this->thing_report["agent"] === false) {
             $this->thing_report["agent"] = "agent";
+//            }
         }
 
 
@@ -1890,7 +1897,7 @@ $this->message = $this->thing_report['sms'];
 
         // Timecheck
 
-        switch (strtolower($this->context)) {
+        switch (strtolower($this->context ?? '')) {
             case "place":
                 $array = ["place", "mornington crescent"];
                 break;
@@ -3802,8 +3809,9 @@ usort($this->responsive_agents, function ($a, $b) {
             $this->thing_report = $resource_agent->thing_report;
             return $this->thing_report;
         }
+        switch (strtolower($this->context ?? '')) {
 
-        switch (strtolower($this->context)) {
+//        switch (strtolower($this->context)) {
             case "group":
                 // Now if it is a head_code, it might also be a train...
                 if ($this->stack_engine_state == "dev") {

@@ -3,6 +3,7 @@ namespace Nrwtaylor\StackAgentThing;
 
 class Emoji
 {
+public $emoji;
 public $from;
 public $keywords;
 public $agent_prefix;
@@ -17,7 +18,10 @@ public $reading;
 public $keyword;
 public $translated_input;
 public $word;
+public $words;
 public $subject;
+public $sqlresponse;
+public $resource_path;
     function __construct(Thing $thing, $agent_input = null)
     {
         $this->start_time = microtime(true);

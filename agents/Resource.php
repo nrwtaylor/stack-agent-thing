@@ -709,7 +709,8 @@ class Resource extends Agent
 
     public function makeSMS()
     {
-        $sms = "RESOURCE " . strtoupper($this->resource_name);
+//Passing null to parameter #1 ($string) of type string is deprecate
+        $sms = "RESOURCE " . strtoupper($this->resource_name ?? '');
         $sms .= " ";
         $sms .= strtoupper($this->head_code);
         $sms .= " ";

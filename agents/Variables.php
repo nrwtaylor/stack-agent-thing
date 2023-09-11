@@ -62,6 +62,7 @@ class Variables
     public $agent;
     public $max_variable_sets;
 
+    public $head_code;
 
     function __construct(Thing $thing, $agent_command = null)
     {

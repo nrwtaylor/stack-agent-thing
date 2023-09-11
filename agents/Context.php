@@ -417,7 +417,7 @@ class Context extends Agent
 
     public function makeSMS()
     {
-        $sms_message = "CONTEXT IS " . strtoupper($this->context);
+        $sms_message = "CONTEXT IS " . strtoupper($this->context ?? '');
 
         $sms_message .= " | context id " . $this->context_id;
         //        $sms_message .= " | nuuid " . substr($this->variables_agent->variables_thing->uuid,0,4);
