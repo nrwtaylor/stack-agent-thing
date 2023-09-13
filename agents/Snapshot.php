@@ -145,7 +145,7 @@ $url= 'https://example.com';
   //      exit();
 
         $json_data = json_decode($data, true);
-
+//var_dump($json_data);
         $transducers = $json_data['transducers'];
 //var_dump($transducers);
 
@@ -159,6 +159,8 @@ $url= 'https://example.com';
 
 //        exit();
 $this->response .= $m;
+
+$this->response .= $this->zuluStamp();
 
 
         /*
