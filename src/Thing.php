@@ -224,7 +224,7 @@ $this->log("Thing database connected.");} else {$this->log("Problem with thing d
             $this->uuid = (string) Uuid::uuid4();
             $this->nuuid = substr($this->uuid, 0, 4);
 
-            $this->log("Thing made a UUID." . $this->uuid);
+            $this->log("Thing made a UUID. " . $this->uuid);
 
             // And then we pull out some Thing related svariables and settings.
 /*
@@ -652,7 +652,7 @@ $this->log("Thing Read uuid", $this->uuid);
 
         if ($array_data == false) {
             //var_dump("Thing Read array_data " . $array_data);
-            $this->log('No array_data returnd.');
+            $this->log('No array_data returned.');
             return false;
         }
 
@@ -673,7 +673,7 @@ $this->log("Thing Read value", $value);
 
     public function Write($path, $value, $field = null)
     {
-$this->log("Thing Write path", $path);
+$this->log("Thing Write path", json_encode($path));
 $this->log("Thing Write value", $value);
 $this->log("Thing Write field", $field);
 /*
@@ -710,7 +710,7 @@ $this->log("Thing Write uuid", $this->uuid);
 
         $array_data = $this->db->readField($field);
 
-$this->log("Thing Write array_data", $array_data);
+$this->log("Thing Write array_data", json_encode($array_data));
 
         $this->variables->setValueFromPath($array_data, $path, $value);
 //$this->array_handler->setPathValueArr($array_data, $path, $value);
@@ -729,7 +729,7 @@ $this->log("Thing Write array_data",$array_data);
 
         $last_write = $this->db->writeDatabase("variables", $array_data);
 
-$this->log("Thing Write last_write",$last_write);
+$this->log("Thing Write last_write", json_encode($last_write));
 
 $bytes_written = mb_strlen(serialize((array)$array_data), '8bit');
 //        var_dump("Thing Write array data", $array_data);
@@ -1259,7 +1259,16 @@ echo "Previous uuid got " . ($prior_uuid) . "\n";
             ' ' .
             strip_tags($text);
 
+if (!is_array($logging_level)) {
         $this->log .= $t . " [" . $logging_level . "]" . "<br>";
+}
+
+if (is_array($logging_level)) {
+
+        $this->log .= $t . " ["  . json_encode($logging_level) . "]" . "<br>";
+
+
+}
 
         if (isset($this->logging_console)) {
             switch (strtoupper($this->logging_console)) {

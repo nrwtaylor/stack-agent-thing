@@ -36,6 +36,7 @@ class Database
     {
 //        var_dump("Database __construct saw ", $thing === null, $agent_input);
         if ($thing == null) {
+
             $thing = new \stdClass();
         }
         $this->thing = $thing;
@@ -177,22 +178,27 @@ class Database
         $this->stack_handlers = [];
 
         $this->candidate_stacks = $this->stacks;
-        $this->thing->log("Database candidate_stacks", $this->candidate_stacks);
+        $this->thing->log("Database candidate_stacks", json_encode($this->candidate_stacks));
         foreach (
             $this->candidate_stacks
             as $candidate_service_name => $candidate_service
         ) {
-            $this->thing->log("Database candidate_service", $candidate_service);
+            $this->thing->log("Database candidate_service", json_encode($candidate_service));
 
             if (isset($this->stack_handlers[$candidate_service_name])) {
-                $this->thing->log("Database saw stack_handler", $candidate_service_name);
+                $this->thing->log("Database saw stack_handler", $json_encode($candidate_service_name));
                 continue;
             }
             try {
 
-                $handler = $this->connectDatabase($candidate_service);
 
-                $this->thing->log("Database handler", $candidate_service, $handler);
+                $handler = $this->connectDatabase($candidate_service);
+var_dump("connectDatabase handler",$handler);
+//if ($candidate_service === 'mongo') {
+//var_dump($handler);
+//exit();
+//}
+                $this->thing->log("Database handler", json_encode($candidate_service), $handler);
                 $this->thing->log(
                     "Database connectDatabase ",
                     $candidate_service,
@@ -200,17 +206,23 @@ class Database
                 );
 
             } catch (\Throwable $t) {
+var_dump($t);
+/*
                 $this->thing->log(
                     "__construct Throwable",
                     $candidate_service,
-                    $t->getMessage()
+ //                   $t->getMessage()
                 );
+*/
             } catch (\Error $ex) {
+var_dump($ex);
+/*
                 $this->thing->log(
                     "__construct Error",
                     $candidate_service,
-                    $ex->getMessage()
+   //                 $ex->getMessage()
                 );
+*/
             }
 
             if ($handler !== true) {
@@ -220,9 +232,10 @@ class Database
                 $this->stack_handlers[$candidate_service_name] = $handler;
             }
         }
-
+//exit();
         //echo "Database merp";
         //exit();
+
 
         $this->active_stacks = $this->available_stacks;
 
@@ -235,7 +248,9 @@ class Database
             $this->stack = $this->available_stacks[$primary_stack_name];
             $this->stack_handler = $this->stack_handlers[$primary_stack_name];
         }
-
+//var_dump($this->available_stacks);
+//var_dump($this->stack);
+//exit();
         $this->container = new \Slim\Container($settings);
 
         // create app instance
@@ -317,27 +332,44 @@ class Database
 
     function connectDatabase($stack)
     {
-
-$this->thing->log("Database connectDatabase", $stack);
-
+//$this->thing->log("Database connectDatabase", $stack);
+//return;
+//if ($stack === 'mongo') {
+//var_dump("adfas"); exit();
+//}
         $agent_name = $stack["infrastructure"];
+
+
 
         $agent_class_name = ucwords($agent_name);
         $agent_namespace_name =
             "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
-
-
 
         try {
             $this->thing->log(
                 "Database connectDatabase agent namespace name " .
                     $agent_namespace_name
             );
+var_dump("hey");
             //$handler = new $agent_namespace_name($this->thing, $this->agent_input);
+if ($agent_name === 'mongo') {
+var_dump("saw mongo", $agent_namespace_name); 
+//exit(); 
+}
+        
             $handler = new $agent_namespace_name(
                 $this->thing,
                 $this->agent_input
             );
+
+if ($agent_name === 'mongo') {
+//var_dump("set up handle", $handler); exit(); 
+var_dump("set up handle");
+exit();
+}
+
+
+var_dump("ho");
             $this->thing->log("Database connectDatabase handler", $handler);
             $handler->uuid = $this->uuid;
             $handler->from = $this->from;
@@ -346,9 +378,7 @@ $this->thing->log("Database connectDatabase", $stack);
             $handler->hash_state = $this->hash_state;
             $handler->hash_algorithm = $this->hash_algorithm;
             $handler->get_prior = $this->get_prior;
-
             $handler->init();
-
             if (isset($stack["host"])) {
                 $handler->host = $stack["host"];
             }
@@ -364,11 +394,19 @@ $this->thing->log("Database connectDatabase", $stack);
                     $agent_namespace_name .
                     "connected"
             );
-            return $handler;
+return $handler;
+//            return ['data'=>$handler, status=>'complete', 'error'=>null];
         } catch (\Throwable $t) {
-            $this->thing->log("Database connectDatabase Throwable", $t->getMessage());
+var_dump($t);
+exit();
+//return ['error'=>json_encode($t),'data'=>null, 'status'=>'complete'];
+//return;
+//            $this->thing->log("Database connectDatabase Throwable", $t->getMessage());
         } catch (\Error $ex) {
-            $this->thing->log("Database connectDatabase Error", $e->getMessage());
+var_dump($ex);
+//return ['error'=>$ex-getMessage(),'data'=>null, 'status'=>'complete'];
+
+//            $this->thing->log("Database connectDatabase Error", $ex->getMessage());
         }
 
         return true;
@@ -505,6 +543,8 @@ $this->thing->log("Database connectDatabase", $stack);
      */
     public function writeDatabase($field_text, $array, $uuid = null)
     {
+//$thing->log("Database writeDatabase log test");
+$response = ['data'=>[], 'error'=>null, 'status'=>'started'];
   //      $this->thing->log(
   //          "Database writeDatabase uuid",
   //          $uuid
@@ -523,11 +563,16 @@ $this->thing->log("Database connectDatabase", $stack);
         if (!isset($this->write_fail_count)) {
             $this->write_fail_count = 0;
         }
+
+$response['data'] = array_merge(['write_fail_count'=>$this->write_fail_count], $response['data']);
+//var_dump("1",$response);
         //$array = $this->jsonArr($string_text);
         //$string_text = $this->arrayJson($array);
 
 //        $this->thing->log("Database active_stacks", $this->active_stacks);
-
+$response['data'] = array_merge(['meta'=>['active_stacks'=>$this->active_stacks]], $response['data']);
+//var_dump("2",$response);
+//var_dump("3",$this->active_stacks);
         foreach (
             $this->active_stacks
             as $active_service_name => $active_service
@@ -539,15 +584,15 @@ $this->thing->log("Database connectDatabase", $stack);
                     $field_text,
                     $array
                 );
-                /*
-                var_dump(
+               $response['data'] = array_merge(['mysql'=>$r],$response['data']);
+                $this->log(
                     "write Mysql uuid " .
                         $this->stack_handlers['mysql']->uuid .
                         " key " .
                         $r
                 );
                 var_dump($this->stack_handlers['mysql']->error);
-*/
+
             }
             if ($active_service_name == "memcached") {
                 $key = $this->stack_handlers["memcached"]->writeMemcached(
@@ -588,6 +633,10 @@ $this->thing->log("Database connectDatabase", $stack);
                     $field_text,
                     $array
                 );
+//$this->log("ASdfsadfsafd");
+               $response['data'] = array_merge(['mongo'=>$key],$response['data']);
+
+
                 /*
                 var_dump(
                     "write Mongo uuid " .
@@ -599,6 +648,12 @@ $this->thing->log("Database connectDatabase", $stack);
 */
             }
         }
+
+              $response['data'] = array_merge(['banana'=>'TruE'],$response['data']);
+
+
+
+return $response;
     }
 
     /**

@@ -1363,7 +1363,7 @@ $this->thing_report['discord'] =$d;
             }
         }
 
-        $this->thing->log("agent_input is  " . $agent_input_text . ".");
+        $this->thing->log("agent_input is  " . json_encode($agent_input_text) . ".");
         $this->thing->log("subject is  " . $this->subject . ".");
     }
 
