@@ -86,7 +86,8 @@ class Alert extends Agent
     {
         $this->node_list = ["alert" => ["alert"]];
         $m =
-            strtoupper($this->agent_name) .
+"ALERT" .
+//            strtoupper($this->agent_name) .
             " | " .
             $this->textAlerts($this->alerts) .
             " " .
@@ -165,7 +166,7 @@ class Alert extends Agent
         if ($text == null or $text == "") {
             return true;
         }
-        $alerts_list = ["transit", "vlt0"];
+        $alerts_list = ["transit"];
         $OptionsArray = $alerts_list;
 
         $matches = [];
@@ -182,7 +183,7 @@ class Alert extends Agent
             $match = $matches[0];
         }
 
-        $this->response .= "Could not resolve the alert. ";
+        //$this->response .= "Could not resolve the alert. ";
 
         return $match;
     }

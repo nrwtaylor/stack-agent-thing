@@ -165,8 +165,9 @@ $alerts = [];
             "GASE" => [">600" => ["text" => "CHECK SENSOR E"]],
             "VLT1" => ["<12.0" => ["text" => "LOW CHARGE START BATTERY"]],
             "AMP0" => [
-                ">0" => ["text" => "CHARGING"],
-                "<0" => ["text" => "DISCHARGING"],
+                "<0" => ["text" => "CHARGING"],
+                "=0" => ["text" => "BALANCED"],
+                ">0" => ["text" => "DISCHARGING"],
             ],
         ];
 
@@ -191,6 +192,14 @@ $text = "ALERT <";
 $text = "ALERT >";
                     }
                 }
+
+                if ($operator === '=') {
+                    if ($number == floatval($j["amount"]) ) {
+$text = "ALERT =";
+                    }
+                }
+
+
 $text2 = null;
 if ($text !== null) {
 $text2 = $t . " " . floatval($j['amount']) . " " . $text . " " . $number. " " .  $t. " " . $universe_alerts[$t][$rule]["text"];
