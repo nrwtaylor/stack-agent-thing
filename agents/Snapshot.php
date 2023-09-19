@@ -41,7 +41,8 @@ class Snapshot extends Agent
 
     public function run()
     {
-        $this->getApi();
+       // $this->getApi();
+$this->getSnapshot();
     }
 
     function set()
@@ -68,7 +69,44 @@ class Snapshot extends Agent
 //        $this->counter = $this->counter + 1;
     }
 
-    function getApi($type = "dictionary")
+
+
+
+
+  function getSnapshot($type = "dictionary")
+    {
+        if ($type == null) {
+            $type = "dictionary";
+        }
+
+$options=array(
+      "ssl"=>array(
+            "verify_peer"=>false,
+            "verify_peer_name"=>false,
+        ),
+    );  
+
+        $context = stream_context_create($options);
+        $data_source = "https://192.168.10.10/snapshot.json";
+
+
+        $data = file_get_contents($data_source, false, $context);
+
+        $json_data = json_decode($data, true);
+        $transducers = $json_data['transducers'];
+
+        $this->response .= $this->textTransducers($transducers);
+}
+
+
+
+
+
+
+
+
+
+    function deprecate_getApi($type = "dictionary")
     {
 //        if ($this->application_key == null or $this->application_id == null) {
 //            return true;
