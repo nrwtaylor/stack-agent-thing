@@ -661,6 +661,7 @@ public function __set($name, $value) {
                 array_reverse($findagent_thing->thing_report["things"])
                 as $thing_object
             ) {
+var_dump($thing_object);
                 $uuid = $thing_object["uuid"];
                 //        $variables_json = $thing_object["variables"];
                 //        $variables = $this->thing->json->jsontoArray($variables_json);

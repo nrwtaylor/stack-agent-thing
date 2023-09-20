@@ -648,7 +648,12 @@ $this->log("Read did not see a database connection.");
             implode(">", $path), 'INFORMATION');
 $this->log("Thing Read uuid", $this->uuid);
 
-        $array_data = $this->db->readField($field);
+//        $array_data = $this->db->readField($field);
+$u = 'cce4aab5-ffe9-4c23-aaf3-bb864d5d2451';
+$array_data = Database::readStaticField($u, $field);
+//var_dump($u, $array_data);
+//exit();
+//$array_data = Database::readStaticField($this->uuid, $field);
 
         if ($array_data == false) {
             //var_dump("Thing Read array_data " . $array_data);
@@ -708,9 +713,15 @@ $this->log("Thing Write db null");
 $this->log("Thing Write uuid", $this->uuid);
 
 
-        $array_data = $this->db->readField($field);
+    //    $array_data = $this->db->readField($field);
 
+
+$array_data = Database::readStaticField($this->uuid, $field);
+//var_dump($array_data);
 $this->log("Thing Write array_data", json_encode($array_data));
+//var_dump($this->uuid,$field);
+
+
 
         $this->variables->setValueFromPath($array_data, $path, $value);
 //$this->array_handler->setPathValueArr($array_data, $path, $value);
@@ -722,12 +733,17 @@ $array_data = $this->variables->array_data;
 
 $this->log("Thing Write array_data",$array_data);
 
+
 // Then merge this against what we just got from the stack.
 // Before writing it.
 // To do.
 
+// For now take the returned array.
 
-        $last_write = $this->db->writeDatabase("variables", $array_data);
+
+//        $last_write = $this->db->writeDatabase("variables", $array_data);
+        $last_write = Database::writeStaticDatabase($this->uuid, "variables", $array_data);
+
 
 $this->log("Thing Write last_write", json_encode($last_write));
 

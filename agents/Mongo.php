@@ -28,6 +28,143 @@ you can call with "mongo test"
         $this->initMongo();
     }
 
+    static function initStaticMongo()
+    {
+        //$this->mongo_test_flag = "off";
+        $path =
+            "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
+
+        try {
+            $client = new \MongoDB\Client($path);
+            //$this->db = $client;
+            $collection = $client->stack_db->things;
+return $collection;
+            //$this->statusMongo("ready");
+            //$this->thing->log("Mongo initMongo ok");
+        } catch (\Throwable $t) {
+            //$this->thing->log("Mongo initMongo Throwable");
+            //$this->errorMongo($t->getMessage());
+        } catch (\Error $ex) {
+            //$this->thing->log("Mongo initMongo Error");
+
+            //$this->errorMongo($ex->getMessage());
+        }
+    }
+
+    // use memcache model for get.
+    static function getStaticMongo($text = null)
+    {
+        // Get mongo key by uuid.
+//        if (!$this->isReadyMongo()) {
+//            return;
+//        }
+        $path =
+            "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
+
+        $result = null;
+        try {
+            $client = new \MongoDB\Client($path);
+            $collection = $client->stack_db->things;
+            $result = $collection->findOne(["uuid" => $text]);
+        } catch (\Throwable $t) {
+//var_dump($t->getMessage());
+   //         $this->errorMongo($t->getMessage());
+        } catch (\Error $ex) {
+//var_dump($t->getMessage());
+   //         $this->errorMongo($ex->getMessage());
+        }
+//var_dump("getStaticMongo result", $result);
+        if ($result == null) {
+            return false;
+        }
+$arr = json_decode(json_encode($result), true);
+
+//var_dump($arr);
+//exit();
+//        $thing = iterator_to_array($result);
+        unset($arr["_id"]);
+        return $thing;
+        //        return iterator_to_array($result);
+    }
+
+
+
+    static function setStaticMongo($key = null, $variable = null)
+    {
+       // if (!$this->isReadyMongo()) {
+       //     return true;
+       // }
+        if (isset($variable["uuid"])) {
+            if ($variable["uuid"] != $key and $key != null) {
+      //          $this->errorMongo(
+      //              "Thing update requested with inconsistent uuids."
+      //          );
+                return true;
+            }
+
+            if ($key == null) {
+                $key = $variable["uuid"];
+            }
+        }
+
+        // Stack rule.
+        // You can not create a specific uuid on the stack.
+
+        // If a uuid key is provided, check if it exists.
+
+//        if ($this->isUuid($key) and $key !== null) {
+//       if ($key !== null) {
+//            $m = Mongo::getStaticMongo($key);
+//            if ($m === true) {
+//                return true;
+//            }
+//        }
+
+        // Create random uuid key if none provided.
+//        if ($key == null) {
+            // Because thing is the only plae uuids are made.
+        //    $t = new Thing(null);
+        //    $key = $t->uuid;
+//$key =null;
+//        }
+        $condition = ["uuid" => $key];
+
+        $value = $variable;
+ //       if (is_array($variable) and isset($variable[0])) {
+ //           $value = $variable[0];
+ //       }
+$value["hhh"] = "jjj";
+        $value["uuid"] = $key;
+
+        try {
+
+
+        $path =
+            "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
+
+            $client = new \MongoDB\Client($path);
+            $collection = $client->stack_db->things;
+
+            $result = $collection->updateOne($condition, [
+                '$set' => $value,
+            ], ['upsert'=>true]);
+        } catch (\Throwable $t) {
+var_dump($t->getMessage());
+//            $this->errorMongo($t->getMessage());
+            return true;
+        } catch (\Error $ex) {
+var_dump($ex->getMessage());
+//            $this->errorMongo($ex->getMessage());
+            return true;
+        }
+//var_dump("result",$result);
+        return $key;
+    }
+
+
+
+
+
     public function initMongo()
     {
         $this->mongo_test_flag = "off";
@@ -244,6 +381,94 @@ you can call with "mongo test"
         $this->test_result = $test_result;
         $this->response .= $test_response . " [ " . $test_result . "] ";
     }
+
+
+
+
+
+
+
+    static function writeStaticMongo($uuid, $field_text, $arr)
+    {
+/*
+        if (!isset($this->write_fail_count)) {
+            $this->write_fail_count = 0;
+        }
+
+        if (!$this->isReadyMongo()) {
+            $this->write_fail_count += 1;
+            return true;
+        }
+*/
+        $existing = Mongo::getStaticMongo($uuid);
+//var_dump("existing",$uuid,$existing);
+        //$variables = $existing['variables'];
+        // Hmmm
+        // Ugly but do this for now.
+        //     $j = new Json(null, $this->uuid);
+        //     $j->jsontoarrayJson($string_json);
+        //     $data = $j->jsontoarrayJson($string_json);
+        //$data = $arr;
+        $data = ["variables" => $arr];
+
+        // dev develop associations.
+/*
+        if (isset($this->associations)) {
+            $data["associations"] = $this->associations;
+        }
+
+        if (isset($this->uuid)) {
+            $data["uuid"] = $this->uuid;
+        }
+
+        if (isset($this->from)) {
+            $data["nom_from"] = $this->from;
+        }
+
+        if (isset($this->to)) {
+            $data["nom_to"] = $this->to;
+        }
+
+        if (isset($this->subject)) {
+            $data["task"] = $this->subject;
+        }
+*/
+
+$data["uuid"] = $uuid;
+
+
+//        $existing = Mongo::getStaticMongo($uuid);
+
+/*
+        if ($existing == false) {
+            //$this->errorMongo("Existing uuid not found on write request.");
+            return false;
+        }
+*/
+
+        $d = $data;
+        if (is_array($existing)) {
+            $d = array_replace_recursive($existing, $data);
+        }
+        $u = Mongo::setStaticMongo($uuid, $d);
+        if ($u == true) {
+            //$this->write_fail_count += 1;
+            return true;
+        }
+
+        //$this->thing->log("Mongo write " . $uuid);
+
+        return $uuid;
+    }
+
+
+
+
+
+
+
+
+
 
     public function writeMongo($field_text, $arr)
     {
@@ -464,8 +689,9 @@ you can call with "mongo test"
         // Create random uuid key if none provided.
         if ($key == null) {
             // Because thing is the only plae uuids are made.
-            $t = new Thing(null);
-            $key = $t->uuid;
+        //    $t = new Thing(null);
+        //    $key = $t->uuid;
+$key =null;
             //$key = $uuid->randomUuid();
             //            $key = $this->thing->getUUid();
 
@@ -546,6 +772,164 @@ you can call with "mongo test"
         return $arr;
     }
 
+    public function variablesearchMongo($path, $value, $max = null)
+    {
+
+// Harder than it seems iniitally to replicate the
+// exact Mysql behaviour.
+
+        if ($max == null) {
+            $max = 3;
+        }
+        $max = (int) $max;
+
+        $user_search = $this->from;
+        $hash_user_search = hash($this->hash_algorithm, $user_search);
+
+        // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
+        //$value = "%$value%"; // Value to search for in Variables
+
+        $thingreport["things"] = [];
+
+        try {
+/*
+            $query =
+                "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+            $sth = $this->pdo->prepare($query);
+            $sth->bindParam(":user_search", $user_search);
+            $sth->bindParam(":hash_user_search", $hash_user_search);
+            $sth->bindParam(":value", $value);
+            $sth->bindParam(":max", $max, PDO::PARAM_INT);
+            $sth->execute();
+            $things = $sth->fetchAll();
+*/
+/*
+$condition, [
+                '$set' => $value,
+            ], ['upsert'=>true]);
+*/
+
+//        $path =
+//            "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
+
+//        try {
+
+$value = null;
+$user_search = "default_console_user";
+
+$things = $this->collection.find([
+  '$or' => [
+    [ "nom_from" => $user_search ],
+    [ "nom_from" => $hash_user_search ]
+  ],
+  ['variables' =>[ '$regex' =>  $value ]],
+]);
+
+
+
+//.sort([ "created_at"=>-1 ])
+//.limit(max);
+
+            $thingreport["info"] =
+                'So here are Things with the variable you provided in \$variables. That\'s what you want';
+            $thingreport["things"] = $things;
+        } catch (\PDOException $e) {
+            // echo "Error in PDO: ".$e->getMessage()."<br>";
+            $thingreport["info"] = $e->getMessage();
+            $thingreport["things"] = [];
+        }
+
+        $sth = null;
+
+        return $thingreport;
+    }
+
+
+
+    static function variablesearchStaticMongo($path, $value, $max = null, $from=null, $hash_algorithm='sha256')
+    {
+
+// Harder than it seems iniitally to replicate the
+// exact Mysql behaviour.
+
+        if ($max == null) {
+            $max = 3;
+        }
+        $max = (int) $max;
+
+        $user_search = $from;
+//var_dump($hash_algorithm);
+//exit();
+        $hash_user_search = hash($hash_algorithm, $user_search);
+
+        // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
+        $value = "%$value%"; // Value to search for in Variables
+
+        $thingreport["things"] = [];
+
+        try {
+/*
+$condition, [
+                '$set' => $value,
+            ], ['upsert'=>true]);
+*/
+
+
+   $path2 =            "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
+
+            $client = new \MongoDB\Client($path2);
+            //$this->db = $client;
+            $collection = $client->stack_db->things;
+
+
+
+$things = $collection->find([
+  '$or' => [
+    [ "nom_from" => $user_search ],
+    [ "nom_from" => $hash_user_search ]
+  ],
+  ['variables' =>[ '$regex' =>  $value ]],
+]);
+
+
+
+//$things = $collection->find(
+//    [ "nom_from" => 'default_console_user' ],
+//);
+$matchingResults = $things->toArray();
+
+// Initialize an array to store the converted results
+$convertedResults = [];
+
+// Convert each MongoDB object to an associative array
+foreach ($matchingResults as $document) {
+unset($document['_id']);
+    $convertedResults[] = json_decode(json_encode($document), true);
+}
+
+//.sort([ "created_at"=>-1 ])
+//.limit(max);
+//var_dump($convertedResults);
+//var_dump("merp");
+//exit();
+
+            $thingreport["info"] =
+                'So here are Things with the variable you provided in \$variables. That\'s what you want';
+            $thingreport["things"] = $convertedResults;
+        } catch (\PDOException $e) {
+            // echo "Error in PDO: ".$e->getMessage()."<br>";
+            $thingreport["info"] = $e->getMessage();
+            $thingreport["things"] = [];
+        }
+
+        $sth = null;
+
+        return $thingreport;
+    }
+
+
+
+
     /**
      *
      * @return unknown
@@ -582,10 +966,15 @@ you can call with "mongo test"
 
     public function readSubject()
     {
+
         $responsive = false;
         $input = $this->assert($this->input);
+//var_dump("Mondo readSubject");
+//return;
         $uuid = $this->extractUuid($input);
-
+//$uuid = null;
+//var_dump($input);
+//exit();
         if ($input == "test") {
             $this->mongo_test_flag = "on";
             $this->testMongo();

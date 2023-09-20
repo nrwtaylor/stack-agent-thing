@@ -189,15 +189,27 @@ class Database
                 $this->thing->log("Database saw stack_handler", $json_encode($candidate_service_name));
                 continue;
             }
+/*
+var_dump($this->uuid);
+$u = "bb6e603b-3bc4-4c8d-9095-ed57a59b0839";
+$u = $uuid;
+$get_response = Mongo::getStaticMongo($u);
+var_dump("get response", $get_response);
+$set_response = Mongo::setStaticMongo($u, ["test"=>"hey"]);
+var_dump("set response", $set_response);
+
+$validate_get_response = Mongo::getStaticMongo($u);
+var_dump("validate get response", $validate_get_response);
+*/
+
+
+//Mongo::setStaticMongo($this->uuid);
+
             try {
 
 
                 $handler = $this->connectDatabase($candidate_service);
-var_dump("connectDatabase handler",$handler);
-//if ($candidate_service === 'mongo') {
-//var_dump($handler);
-//exit();
-//}
+//var_dump("connectDatabase handler",$candidate_service, $handler);
                 $this->thing->log("Database handler", json_encode($candidate_service), $handler);
                 $this->thing->log(
                     "Database connectDatabase ",
@@ -206,7 +218,7 @@ var_dump("connectDatabase handler",$handler);
                 );
 
             } catch (\Throwable $t) {
-var_dump($t);
+var_dump($t->getMessage());
 /*
                 $this->thing->log(
                     "__construct Throwable",
@@ -232,9 +244,6 @@ var_dump($ex);
                 $this->stack_handlers[$candidate_service_name] = $handler;
             }
         }
-//exit();
-        //echo "Database merp";
-        //exit();
 
 
         $this->active_stacks = $this->available_stacks;
@@ -250,7 +259,6 @@ var_dump($ex);
         }
 //var_dump($this->available_stacks);
 //var_dump($this->stack);
-//exit();
         $this->container = new \Slim\Container($settings);
 
         // create app instance
@@ -332,10 +340,10 @@ var_dump($ex);
 
     function connectDatabase($stack)
     {
+
 //$this->thing->log("Database connectDatabase", $stack);
 //return;
 //if ($stack === 'mongo') {
-//var_dump("adfas"); exit();
 //}
         $agent_name = $stack["infrastructure"];
 
@@ -350,13 +358,18 @@ var_dump($ex);
                 "Database connectDatabase agent namespace name " .
                     $agent_namespace_name
             );
-var_dump("hey");
+//var_dump("Database try connectDatabse");
             //$handler = new $agent_namespace_name($this->thing, $this->agent_input);
 if ($agent_name === 'mongo') {
-var_dump("saw mongo", $agent_namespace_name); 
-//exit(); 
+
+// Develop a check here.
+// Static methods establish a connection each time.
+// This connectDatabase may become more of a checkDatabase
+//var_dump("Database saw mongo");
+$t = Mongo::initStaticMongo();
+return false;;
+//var_dump("saw mongo", $agent_namespace_name); 
 }
-        
             $handler = new $agent_namespace_name(
                 $this->thing,
                 $this->agent_input
@@ -365,7 +378,6 @@ var_dump("saw mongo", $agent_namespace_name);
 if ($agent_name === 'mongo') {
 //var_dump("set up handle", $handler); exit(); 
 var_dump("set up handle");
-exit();
 }
 
 
@@ -398,7 +410,7 @@ return $handler;
 //            return ['data'=>$handler, status=>'complete', 'error'=>null];
         } catch (\Throwable $t) {
 var_dump($t);
-exit();
+//exit();
 //return ['error'=>json_encode($t),'data'=>null, 'status'=>'complete'];
 //return;
 //            $this->thing->log("Database connectDatabase Throwable", $t->getMessage());
@@ -630,9 +642,18 @@ $response['data'] = array_merge(['meta'=>['active_stacks'=>$this->active_stacks]
 
             if ($active_service_name == "mongo") {
                 $key = $this->stack_handlers["mongo"]->writeMongo(
+                    $this->uuid,
                     $field_text,
                     $array
                 );
+
+                $key = Mongo::writeStaticMongo(
+                    $field_text,
+                    $array
+                );
+
+
+
 //$this->log("ASdfsadfsafd");
                $response['data'] = array_merge(['mongo'=>$key],$response['data']);
 
@@ -655,6 +676,25 @@ $response['data'] = array_merge(['meta'=>['active_stacks'=>$this->active_stacks]
 
 return $response;
     }
+
+    static function writeStaticDatabase($uuid, $field_text, $array)
+    {
+//$thing->log("Database writeDatabase log test");
+$response = ['data'=>[], 'error'=>null, 'status'=>'started'];
+
+//var_dump($uuid, $field_text, $array);
+                $key = Mongo::writeStaticMongo(
+                    $uuid,
+                    $field_text,
+                    $array
+                );
+//var_dump("key", $key);
+               $response['data'] = array_merge(['mongo'=>$key],$response['data']);
+
+return $response;
+
+}
+
 
     /**
      *
@@ -707,6 +747,25 @@ return $response;
         }
     }
 
+
+
+    static function readStaticField($uuid,$field)
+    {
+
+        $thingreport = Database::staticGet($uuid);
+        $thing = $thingreport["thing"];
+        if (isset($thing->$field)) {
+            // I think I should also do
+            $this->$field = $thing->$field;
+
+            return $thing->$field;
+        } else {
+            return false;
+        }
+    }
+
+
+
     /**
      *
      * @param unknown $subject
@@ -742,10 +801,14 @@ return $response;
             }
 
             if ($stack_infrastructure == "mongo") {
+/*
                 $uuid = $this->stack_handlers["mongo"]->createMongo(
                     $subject,
                     $to
                 );
+*/
+// Not tested;
+$uuid = Mongo::setStaticMongo(null, ['subject'=>$subject, 'to'=>$to]);
 
                 // Mongo agent returns true for failure condition.
                 // And uuid for success.
@@ -864,9 +927,14 @@ return $response;
                     break;
 
                 case "mongo":
-                    $result = $this->stack_handlers[
-                        $stack["infrastructure"]
-                    ]->getMongo($uuid);
+//                    $result = $this->stack_handlers[
+//                        $stack["infrastructure"]
+//                    ]->getMongo($uuid);
+//var_dump("well het");
+
+//exit();
+$result = Mongo::getStaticMongo($uuid);
+
                     if (
                         $result === null or
                         $result === false or
@@ -975,6 +1043,27 @@ $authorative_thing = $thing;
 
         return $thingreport;
     }
+
+static function staticGet($uuid) {
+
+$result = Mongo::getStaticMongo($uuid);
+
+
+        $thingreport = [
+            "uuid" => $uuid,
+            "thing" => $result,
+            "info" =>
+                "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing " .
+                'this->web_prefix' .
+                'api/thing/' . $uuid. '.',
+            "help" => "Check your junk/spam folder.",
+        ];
+
+        return $thingreport;
+
+
+}
+
 
     /**
      *
@@ -1089,6 +1178,28 @@ $authorative_thing = $thing;
         $max = null,
         $string_in_string = false
     ) {
+
+//go($path, $value, $max = null, $from, $hash_algorithm)
+$things = [];
+//var_dump($this->available_stacks);
+        foreach($this->available_stacks as $stack_name=>$stack) {
+switch ($stack['infrastructure']) {
+    case 'mongo':
+//        break 2;
+
+
+// Ignore string in string for now 19 sep 2023
+$t = Mongo::variablesearchStaticMongo($path, $value, $max, $this->from, 'sha256');
+
+$things = array_merge($things, $t['things']);
+
+            $thingreport["info"] =
+                'So here are Things with the variable you provided in \$variables. That\'s what you want';
+
+
+break 2;
+case 'mysql':
+
         //        $thing = false;
         /*
         $thing_report = [];
@@ -1130,7 +1241,7 @@ return $thing_report;
         if ($string_in_string === true) {
             $value = "%$value%"; // Value to search for in Variables
         }
-        $thingreport["things"] = [];
+        //$thingreport["things"] = [];
 
         try {
             //            $query =
@@ -1166,25 +1277,37 @@ return $thing_report;
             $sth->bindParam(":max", $max, PDO::PARAM_INT);
             $sth->execute();
 
-            $things = $sth->fetchAll();
+            $t = $sth->fetchAll();
 
-            $conditioned_things = [];
-            foreach ($things as $i => $thing) {
+            $mysql_things = [];
+            foreach ($t as $i => $thing) {
                 $this->thing->log($this->stack_handlers);
-                $conditioned_things[] = $this->stack_handlers[
+                $mysql_things[] = $this->stack_handlers[
                     "mysql"
                 ]->thingMysql($thing);
             }
 
-            $thingreport["info"] =
-                'So here are Things with the variable you provided in \$variables. That\'s what you want';
-            $thingreport["things"] = $conditioned_things;
+//            $thingreport["info"] =
+//                'So here are Things with the variable you provided in \$variables. That\'s what you want';
+//            $thingreport["things"] = $conditioned_things;
+$things = array_merge($things, $conditioned_things);
         } catch (\PDOException $e) {
             //var_dump($e->getMessage());
             // echo "Error in PDO: ".$e->getMessage()."<br>";
             $thingreport["info"] = $e->getMessage();
-            $thingreport["things"] = [];
+            $mysql_thingss = [];
         }
+
+
+$things = array_merge($things, $mysql_things);
+
+break 2;
+}
+
+}
+
+$thingreport['things'] = $things;
+
 
         // Destroy object
         // https://stackoverflow.com/questions/5772626/fatal-error-call-to-undefined-method-pdoclose
