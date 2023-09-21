@@ -747,11 +747,8 @@ return $response;
         }
     }
 
-
-
-    static function readStaticField($uuid,$field)
+    static function readStaticField($uuid,$field = null)
     {
-
         $thingreport = Database::staticGet($uuid);
         $thing = $thingreport["thing"];
         if (isset($thing->$field)) {
@@ -763,8 +760,6 @@ return $response;
             return false;
         }
     }
-
-
 
     /**
      *
@@ -1190,14 +1185,15 @@ switch ($stack['infrastructure']) {
 
 // Ignore string in string for now 19 sep 2023
 $t = Mongo::variablesearchStaticMongo($path, $value, $max, $this->from, 'sha256');
-
+//var_dump("heheh",$t);
+//exit();
 $things = array_merge($things, $t['things']);
 
             $thingreport["info"] =
                 'So here are Things with the variable you provided in \$variables. That\'s what you want';
 
-
-break 2;
+break;
+//break 2;
 case 'mysql':
 
         //        $thing = false;
@@ -1300,8 +1296,8 @@ $things = array_merge($things, $conditioned_things);
 
 
 $things = array_merge($things, $mysql_things);
-
-break 2;
+break;
+//break 2;
 }
 
 }

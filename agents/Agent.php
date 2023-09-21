@@ -2107,6 +2107,8 @@ $this->thing_report['discord'] =$d;
             $this->{"read" . $this->agent_class_name}($text);
         }
 
+        $this->thing->log("read agent_class_name " . $this->agent_class_name . ".");
+
         $input = $this->input;
         if (is_array($input)) {
             $input = "array";

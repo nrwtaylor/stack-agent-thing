@@ -695,8 +695,7 @@ $this->log("Thing Write field", $field);
 
 if ($this->db === null) {
 
-$this->log("Read did not see a database connection.");
-
+$this->log("Thing Write did not see a database connection.");
 $this->log("Thing Write db null");
 
 //return;
@@ -717,7 +716,7 @@ $this->log("Thing Write uuid", $this->uuid);
 
 
 $array_data = Database::readStaticField($this->uuid, $field);
-//var_dump($array_data);
+var_dump("Thing Write Database::readStaticField" , $array_data);
 $this->log("Thing Write array_data", json_encode($array_data));
 //var_dump($this->uuid,$field);
 
@@ -730,7 +729,7 @@ $this->log("Thing Write array_data", json_encode($array_data));
 // Get the local array data
 
 $array_data = $this->variables->array_data;
-
+var_dump("Thing Write this variables array_data", $array_data);
 $this->log("Thing Write array_data",$array_data);
 
 
@@ -745,11 +744,22 @@ $this->log("Thing Write array_data",$array_data);
         $last_write = Database::writeStaticDatabase($this->uuid, "variables", $array_data);
 
 
+// dev test read
+
+$test_array_data = Database::readStaticField($this->uuid); // null ignores requirement
+var_dump("Thing Write test Database::readStaticField", $test_array_data);
+
+$test_array_data = Database::staticGet($this->uuid); // null ignores requirement
+var_dump("Thing Write test Database::staticGet", $test_array_data);
+
+
+//
+
 $this->log("Thing Write last_write", json_encode($last_write));
 
 $bytes_written = mb_strlen(serialize((array)$array_data), '8bit');
 //        var_dump("Thing Write array data", $array_data);
-$this->log("Thing Write " . $bytes_written . " bytes");
+$this->log("Thing Write bytes " . $bytes_written . " bytes");
     }
 
     public function loadAccounts()
@@ -1274,6 +1284,8 @@ echo "Previous uuid got " . ($prior_uuid) . "\n";
             $agent_prefix .
             ' ' .
             strip_tags($text);
+
+// Because have not decided how to handle logging yet.
 
 if (!is_array($logging_level)) {
         $this->log .= $t . " [" . $logging_level . "]" . "<br>";

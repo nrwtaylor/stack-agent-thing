@@ -882,7 +882,7 @@ $condition, [
             $collection = $client->stack_db->things;
 
 
-
+/*
 $things = $collection->find([
   '$or' => [
     [ "nom_from" => $user_search ],
@@ -890,14 +890,22 @@ $things = $collection->find([
   ],
   ['variables' =>[ '$regex' =>  $value ]],
 ]);
+*/
 
-
-
-//$things = $collection->find(
-//    [ "nom_from" => 'default_console_user' ],
-//);
+//var_dump($from);
+//exit();
+$things = $collection->find(
+['$or' => [
+    [ "nom_from" => $from ],
+    [ "nom_from" => $hash_user_search ],
+],
+],
+);
+//if (is_array($things) and count($things) > 0) {
 $matchingResults = $things->toArray();
-
+//}
+//var_dump($matchingResults);
+//exit();
 // Initialize an array to store the converted results
 $convertedResults = [];
 
