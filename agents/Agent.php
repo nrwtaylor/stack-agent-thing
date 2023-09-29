@@ -4052,9 +4052,11 @@ echo "TRUE";
     /**
      *
      */
+
     public function makePNG()
     {
     }
+
 
     /**
      *

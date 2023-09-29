@@ -156,10 +156,12 @@ $alerts = [];
 */
         $universe_alerts = [
             "VLT0" => [
-                "<11.0" => ["text" => "LOW BATTERY"],
-                ">13.8" => ["text" => "FLOAT BATTERY"],
-                "<8.0" => ["text" => "CRITICALLY LOW BATTERY"],
-                ">15.0" => ["text" => "HIGH BATTERY"],
+                "<11.6" => ["text" => "LOW BATTERY"],
+                ">14.0" => ["text" => "ABSORPTION"],
+                ">14.6" => ["text"=>"HIGH BATTERY"],
+                "<11.0" => ["text" => "CRITICALLY LOW BATTERY"],
+                "<10.0" => ["text" => "BATTERY NOT OK"],
+                ">15.0" => ["text" => "CRITICALLY HIGH BATTERY"],
             ],
             "GASA" => [">600" => ["text" => "CHECK SENSOR A"]],
             "GASE" => [">600" => ["text" => "CHECK SENSOR E"]],

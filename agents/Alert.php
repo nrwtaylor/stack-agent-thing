@@ -145,8 +145,17 @@ class Alert extends Agent
         }
 
         if ($this->isAlertValid($this->alerts)) {
-            $m = "Found an alert. ";
+
+if (count($this->alerts) == 0) {
+
+            $this->flag = "green";
+            $m = "No alert found. ";
+
+} else {
+
+            $m = "Found " . (count($this->alerts) == 1 ? "an" : count($this->alerts)) . " alert" . (count($this->alerts) ==1 ? "" : "s"). ". ";
             $this->flag = "red";
+}
             //$m .= $this->alerts;
         } else {
             $this->flag = "green";
