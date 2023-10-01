@@ -10,16 +10,14 @@ class Exclamation extends Agent
 
     public function initExclamation()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "exclamation",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            //$this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["exclamation", "refreshed_at"],
                 $time_string
             );
@@ -28,10 +26,8 @@ class Exclamation extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable([
+        $this->reading = $this->thing->Read([
             "exclamation",
             "reading",
         ]);
@@ -39,13 +35,10 @@ class Exclamation extends Agent
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["exclamation", "reading"],
             $this->reading
         );
-        //        $this->thing->json->writeVariable(array("exclamation", "reading"), $this->reading);
     }
 
     public function stripExclamation($input, $replace_with = " ")
@@ -104,9 +97,6 @@ class Exclamation extends Agent
     public function readSubject()
     {
         $input = strtolower($this->input);
-
-//$test = $this->stripExclamation($input , ".");
-//var_dump($test);
 
         $this->readExclamation($input);
 

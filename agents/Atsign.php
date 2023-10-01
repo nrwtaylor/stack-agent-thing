@@ -23,10 +23,9 @@ class Atsign extends Agent
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["atsign", "refreshed_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
     }
 
@@ -158,15 +157,18 @@ class Atsign extends Agent
 
         $findagent_thing = new Findagent($this->thing, 'atsign');
 
-        if (!is_array($findagent_thing->thing_report['things'])) {
+        $things = isset($thing_report["things"]) ? $thing_report['things'] : [];
+
+
+        if (!is_array($things)) {
             return;
         }
 
-        $count = count($findagent_thing->thing_report['things']);
+        $count = count($things);
 
         if ($count > 0) {
             foreach (
-                array_reverse($findagent_thing->thing_report['things'])
+                array_reverse($things)
                 as $thing_object
             ) {
                 $uuid = $thing_object['uuid'];

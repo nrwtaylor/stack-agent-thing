@@ -57,8 +57,7 @@ class Rocky extends Agent
 
     function set($requested_state = null)
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["rocky", "inject"], $this->inject);
+        $this->thing->Write(["rocky", "inject"], $this->inject);
 
         $this->refreshed_at = $this->current_time;
 
@@ -110,16 +109,14 @@ class Rocky extends Agent
             "INFORMATION"
         );
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "rocky",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["rocky", "refreshed_at"],
                 $time_string
             );
@@ -127,7 +124,7 @@ class Rocky extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->inject = $this->thing->json->readVariable(["rocky", "inject"]);
+        $this->inject = $this->thing->Read(["rocky", "inject"]);
     }
 
     function getNuuid()
@@ -257,12 +254,10 @@ class Rocky extends Agent
     function makeSMS()
     {
         $sms = "ROCKY " . $this->inject . " " . $this->mode . "\n";
-        //        $sms .= $this->response;
 
         $sms .= trim($this->short_message) . "\n";
 
         $sms .= "TEXT WEB";
-        // $this->response;
 
         $this->sms_message = $sms;
         $this->thing_report["sms"] = $sms;
@@ -672,7 +667,7 @@ $person_from = $this->name_list[array_rand($this->name_list)];
             $this->text == "X"
         ) {
             //$this->response = $this->number . " " . $this->unit . ".";
-            $this->response = "No message to pass.";
+            $this->response = "No message to pass. ";
         }
 
         if (
@@ -1176,7 +1171,7 @@ $person_from = $this->name_list[array_rand($this->name_list)];
     public function readSubject()
     {
         if (!$this->getMember()) {
-            $this->response = "Generated an inject.";
+            $this->response = "Generated an inject. ";
         }
 
         $input = strtolower($this->subject);
@@ -1232,18 +1227,18 @@ $person_from = $this->name_list[array_rand($this->name_list)];
                             $this->response .=
                                 " Set messages to " .
                                 strtoupper($this->state) .
-                                ".";
+                                ". ";
 
                             return;
 
                         case "origin":
                         case "source":
-                            $this->response .= " Set mode to origin.";
+                            $this->response .= "Set mode to origin. ";
                             $this->setMode("origin");
                             $this->getMessage();
                             return;
                         case "relay":
-                            $this->response .= " Set mode to relay.";
+                            $this->response .= "Set mode to relay. ";
                             $this->setMode("relay");
                             $this->getMessage();
                             return;
@@ -1253,7 +1248,7 @@ $person_from = $this->name_list[array_rand($this->name_list)];
                             $this->response =
                                 "Hey " .
                                 strtoupper($this->member["call_sign"]) .
-                                ".";
+                                ". ";
 
                             return;
                         case "on":

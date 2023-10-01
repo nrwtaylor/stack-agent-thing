@@ -17,21 +17,6 @@ class Twitterdev extends Agent
     public function init()
     {
         $this->cost = 50;
-        //function __construct($arguments) {
-
-        //echo $arguments;
-        //var_dump($arguments);
-        //  $defaults = array(
-        //    'uuid' => Uuid::uuid4(),
-        //    'from' => NULL,
-        //	'to' => NULL,
-        //	'subject' => NULL,
-        //	'sqlresponse' => NULL
-        //  );
-
-        //  $arguments = array_merge($defaults, $arguments);
-
-        //  echo $arguments['firstName'] . ' ' . $arguments['lastName'];
 
         $this->test = "Development code";
 
@@ -74,8 +59,7 @@ class Twitterdev extends Agent
 
     public function nullAction()
     {
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["character", "action"],
             'null'
         );
@@ -128,12 +112,12 @@ class Twitterdev extends Agent
                 $dict1 = $this->findWord('affect', $piece);
 
                 if ($dict1 == false) {
-                    //echo "not found in twitter dict";
+                    // not found in twitter dict
 
                     $dict2 = $this->findWord('pool', $piece);
-                    //echo $dict2;
+
                     if ($dict2 == false) {
-                        //echo "not found in pool dict";
+                        // not found in pool dict
 
                         // Not found in pool either
                         $l .= '"' . $piece . '",';
@@ -146,21 +130,12 @@ class Twitterdev extends Agent
                             FILE_APPEND | LOCK_EX
                         );
 
-                        //$file = "/var/www/html/stackr.ca/temp/twitter_words.txt";
-                        //$file = escapeshellarg($file); // for the security concious (should be everyone!)
-                        //$line = `tail -n 1 $file`;
 
-                        //echo "<br>";
-                        //echo $line;
-
-                        //exit();
                     }
                 } else {
-                    //if ($dict1 != false) {echo 'Found "' . $piece . '" in affect dictionary. ';}
-                    //if ($dict2 != false) {echo 'Found "' . $piece . '" in pool dictionary.';}
-                    //var_dump($dict1);
+                    //if ($dict1 != false) {$this->thing->console('Found "' . $piece . '" in affect dictionary. ');}
+                    //if ($dict2 != false) {$this->thing->console('Found "' . $piece . '" in pool dictionary.');}
                 }
-                //                if ($this->words_added > 0) {echo "added to lexicon<br>";}
             }
 
             //            $txt .= $indented_wrapped_tweet_text . "\n";
@@ -234,10 +209,6 @@ class Twitterdev extends Agent
 
         $txt .= $this->tweets['twitter_activation'];
 
-        //echo "\n";
-        //var_dump($this->affect);
-
-        //exit();
         // Append a new person to the file
         // $current .= "John Smith\n";
         // Write the contents back to the file
@@ -277,23 +248,13 @@ class Twitterdev extends Agent
         $pattern = "/^.*$pattern.*\$/m";
         // search, and store all matching occurences in $matches
         //
-        //var_dump(preg_match_all($pattern,$contents,$matches));
-        //exit();
         if (preg_match_all($pattern, $contents, $matches)) {
-            //echo "Found matches:\n";
-            //$m = implode("\n", $matches[0]);
 
             $m = $matches[0][0];
 
-            //echo "match";
-            //var_dump($m);
-            //exit();
-            //echo "<br>";
             return $m;
         } else {
-            //echo "no found";
             return false;
-            //echo "No matches found";
         }
     }
 
@@ -385,7 +346,6 @@ class Twitterdev extends Agent
                             $words = ltrim($words);
 
                             $this->channel = $words;
-                            //exit();
 
                             //                            $this->Get($words);
                             $this->randomTweet();
@@ -399,20 +359,17 @@ class Twitterdev extends Agent
 
                             $this->channel = "cat";
 
-                            //$this->channel = "southampton";
-                            //exit();
 
                             //                            $this->Get($words);
                             $this->randomTweet();
-                            //echo $this->pleasantness;
-                            //echo $this->activation;
+                            // $this->pleasantness;
+                            // $this->activation;
                             // Then run it through the affect rater.
 
                             return;
 
                         default:
 
-                        //echo 'default';
                     }
                 }
             }
@@ -584,7 +541,6 @@ class Twitterdev extends Agent
         $i = array_rand($this->tweets);
         $this->random_tweet = $this->tweets[$i];
 
-        //var_dump($this->random_tweet);
     }
 
     function getVividness()
@@ -667,15 +623,8 @@ class Twitterdev extends Agent
             //     $this->tweets['vivid_count'] += $tweet['vivid_count'];
         }
 
-        //echo "pleasant " .$this->tweets['pleasant_count'];
-        //echo " unpleasant " .$this->tweets['unpleasant_count'];
-        //echo " vivid " .$this->tweets['vivid_count'];
-        //echo "<br>";
-
         $this->pleasantness_score =
             $this->tweets['pleasant_count'] - $this->tweets['unpleasant_count'];
-
-        //echo "pleasantness score " . $this->pleasantness_score;
 
         return $this->pleasantness_score;
     }
@@ -761,10 +710,6 @@ class Twitterdev extends Agent
             }
         }
 
-        //echo "active " .$this->tweets['active_count'];
-        //echo "passive " .$this->tweets['passive_count'];
-        //echo "vivid " .$this->tweets['vivid_count'];
-
         $this->activation_score = $this->tweets['activation_score'];
         /*$this->tweets['quote_count'] + 
                                     $this->tweets['reply_count'] +
@@ -773,8 +718,6 @@ class Twitterdev extends Agent
                                     $this->tweets['active_count'] -
                                     $this->tweets['passive_count']; 
   */
-
-        //        echo "activation score " . $this->activation_score;
 
         return $this->activation_score;
     }

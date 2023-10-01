@@ -1,12 +1,51 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
+ini_set('display_startup_errors', 1);
+ini_set('display_errors', 1);
+error_reporting(-1);
+
+
 class Memory extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
+        $this->initMemory();
+    }
+
+    public function initMemory()
+    {
+if (isset($this->agent_input) and $this->agent_input == 'fallback memory') {
+return;}
+        if (!isset($this->memory)) {
+            try {
+                $this->memory = new \Memcached(); //point 2.
+                $this->memory->addServer("127.0.0.1", 11211);
+            } catch (\Throwable $t) {
+                //$this->response .= "Could not access memory. ";
+                // Failto
+
+//$thing = $this->thing;
+//if ($this->thing == null) {
+//$thing = new Thing(null);
+//}
+//                $this->memory = new Memory($this->thing, "fallback memory");
+
+
+//$this->memory = new Memory($thing, "merp");
+                //restore_error_handler();
+//                $this->thing->log(
+//                    "caught memcached throwable. made memory",
+//                    "WARNING"
+//                );
+                return;
+            } catch (\Error $ex) {
+//                $this->thing->log("caught memcached error.", "WARNING");
+                return true;
+            }
+        }
     }
 
     function run()
@@ -17,7 +56,7 @@ class Memory extends Agent
     public function doMemory()
     {
         if ($this->agent_input == null) {
-            $array = array('miao', 'miaou', 'hiss', 'prrr', 'grrr');
+            $array = ["miao", "miaou", "hiss", "prrr", "grrr"];
             $k = array_rand($array);
             $v = $array[$k];
 
@@ -29,13 +68,55 @@ class Memory extends Agent
         }
     }
 
-    function getNegativetime()
+    public function getMemory($text = null)
     {
-        $agent = new Negativetime($this->thing, "memory");
-        $this->negative_time = $agent->negative_time; //negative time is asking
+
+if (!isset($this->memory)) {return null;}
+        // Null?
+        // $this->mem_cached = null;
+        // Fail to stack php memory code if Memcached is not availble.
+if ($text == null) {return false;} // false?
+        $memory = $this->memory->get($text);
+        return $memory;
     }
 
-    // -----------------------
+    public function createMemory($subject, $to) {
+
+if (!isset($this->response)) {$this->response = "";}
+  //         $this->thing->log(
+  //              'asked to create a Memory.',
+  //              "INFORMATION"
+  //          );
+        $this->response .= "Created a Memory. ";
+
+        return $this->setMemory(null,['from'=>$to,'to'=>'memory','task'=>$subject]);
+    }
+
+    public function setMemory($text = null, $variable = null)
+    {
+        // Stack rule.
+        // You can not create a specific uuid on the stack.
+        // If a uuid key is provided, check if it exists.
+        if ($this->isUuid($text)) {
+            $m = $this->getMemory($text);
+
+            if ($m === false) {
+                return true;
+            }
+        }
+
+        // Create random uuid key if none provided.
+
+        if ($text === null) {
+            $text = $this->thing->getUuid();
+        }
+if (!isset($this->memory)) {
+return true;
+}
+
+        $memory = $this->memory->set($text, $variable);
+        return $memory;
+    }
 
     public function respondResponse()
     {
@@ -46,31 +127,30 @@ class Memory extends Agent
         $this->thing_report["help"] = "This is about being inscrutable.";
 
         //$this->thing_report['sms'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['txt'] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
+        $this->thing_report["txt"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'];
+        $thing_report["info"] = $message_thing->thing_report["info"];
 
         return $this->thing_report;
     }
 
     function makeSMS()
     {
-        $this->node_list = array("memory" => array("memory"));
+        $this->node_list = ["memory" => ["memory"]];
         $this->sms_message = "" . $this->memory_message;
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     function makeChoices()
     {
-        $this->thing->choice->Create('channel', $this->node_list, "memory");
-        $choices = $this->thing->choice->makeLinks('memory');
-        $this->thing_report['choices'] = $choices;
+        $this->thing->choice->Create("channel", $this->node_list, "memory");
+        $choices = $this->thing->choice->makeLinks("memory");
+        $this->thing_report["choices"] = $choices;
     }
 
     public function readSubject()
     {
-        return false;
     }
 }

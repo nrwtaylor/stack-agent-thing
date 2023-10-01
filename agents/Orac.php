@@ -37,13 +37,14 @@ class Orac extends Agent {
     /**
      *
      */
-    function run() {
+    public function run() {
+    }
+
+    public function runOrac() {
         $this->text = "";
         $this->findOrac("orac", "orac");
         $this->startOrac();
-
     }
-
 
     /**
      *
@@ -52,7 +53,6 @@ class Orac extends Agent {
      * @return unknown
      */
     public function findOrac($librex, $searchfor) {
-        //echo "foo";
         $searchfor="Orac:";
         // Look up the meaning in the dictionary.
         if (($librex == "") or ($librex == " ") or ($librex == null)) {return false;}
@@ -70,22 +70,12 @@ class Orac extends Agent {
         // finalise the regular expression, matching the whole line
         $pattern = "/^.*". $pattern. ".*\$/m";
 
-        /*
-        if ($librex == "orac") {
-            $pattern = "\b" . preg_quote($searchfor, '/'). "\b";
-            // finalise the regular expression, matching the whole line
-            $pattern = "/^.*". $pattern. ".*\$/m";
-        }
-*/
         // search, and store all matching occurences in $matches
         $m = false;
         if (preg_match_all($pattern, $contents, $matches)) {
-            //echo "Found matches:\n";
             $m = implode("\n", $matches[0]);
             $this->matches = $matches;
         }
-
-        //$this->matches = preg_replace("/<.+>/sU", "", $this->matches);
 
         $this->matches = $this->matches[0];
         return $m;
@@ -100,8 +90,6 @@ class Orac extends Agent {
      */
     public function startOrac($type = null) {
 
-        //$this->findOrac("orac", "orac");
-
         $key = array_rand($this->matches);
         $value = $this->matches[$key];
         $value = strip_tags($value);
@@ -110,35 +98,25 @@ class Orac extends Agent {
         $this->message = $value;
         $this->sms_message = $value;
 
-        $this->thing->json->setField("variables");
+        $names = $this->thing->Write( array("orac", "log"), $this->text );
 
-        $names = $this->thing->json->writeVariable( array("orac", "log"), $this->text );
-
-        $this->thing->json->setField("variables");
         $time_string = $this->thing->time();
-        $this->thing->json->writeVariable( array("orac", "refreshed_at"), $time_string );
+        $this->thing->Write( array("orac", "refreshed_at"), $time_string );
 
         return $this->message;
     }
-
-
-    // -----------------------
 
     /**
      *
      * @return unknown
      */
-    public function respond() {
+    public function respondResponse() {
         // Thing actions
         $this->thing->flagGreen();
 
-        // Generate email response.
-        $to = $this->thing->from;
-        $from = "orac";
-
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "start");
-        $choices = $this->thing->choice->makeLinks('start');
-        $this->thing_report['choices'] = $choices;
+//        $this->thing->choice->Create($this->agent_name, $this->node_list, "start");
+//        $choices = $this->thing->choice->makeLinks('start');
+//        $this->thing_report['choices'] = $choices;
 
 
         $this->sms_message = "ORAC | " . $this->sms_message . " | REPLY HELP";
@@ -153,8 +131,6 @@ class Orac extends Agent {
         }
 
         $this->thing_report['help'] = "This is Blake 7's robot.";
-
-        return $this->thing_report;
     }
 
 
@@ -172,8 +148,6 @@ class Orac extends Agent {
      *
      */
     public function readSubject() {
-        $this->response = null;
-        return;
     }
 
 

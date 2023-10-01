@@ -69,8 +69,8 @@ class Entity extends Agent
         $this->entity_id->setVariable("id", $this->id);
         $this->entity_id->setVariable("refreshed_at", $this->current_time);
 
-        $this->thing->json->writeVariable( array("entity", "id"), $this->id );
-        $this->thing->json->writeVariable( array("entity", "refreshed_at"), $this->current_time );
+        $this->thing->Write( array("entity", "id"), $this->id );
+        $this->thing->Write( array("entity", "refreshed_at"), $this->current_time );
 
         $this->refreshed_at = $this->current_time;
     }
@@ -89,7 +89,7 @@ class Entity extends Agent
 
         // One minute into the next entity
         $quantity = 1;
-        $next_time = $this->thing->json->time(strtotime($this->end_at . " " . $quantity . " minutes"));
+        $next_time = $this->thing->time(strtotime($this->end_at . " " . $quantity . " minutes"));
 
         $this->get($next_time);
 
@@ -147,7 +147,6 @@ class Entity extends Agent
         //}
         $match_list = array();
 
-        //var_dump($this->entities);
         if (isset($this->entities[0])) {
 
 
@@ -510,10 +509,8 @@ class Entity extends Agent
             //                return true;
 
         } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
-            //echo "The agent is broken.";
 
             $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
-            // echo $ex;
             $message = $ex->getMessage();
             // $code = $ex->getCode();
             $file = $ex->getFile();
@@ -535,7 +532,6 @@ class Entity extends Agent
 
         $ad_hoc = true;
         if ( ($ad_hoc != false) ) {
-            //echo "The agent is broken.";
             // Ad-hoc headcodes allows creation of headcodes on the fly.
             // 'Z' indicates the associated 'Place' is offering whatever it has.
             // Block is a Place.  Train is a Place (just a moving one).
@@ -615,9 +611,6 @@ class Entity extends Agent
         foreach ($this->entity_agents as $index=>$entity_agent) {
 
             if (strpos(strtolower($input), strtolower($entity_agent)) !== false) {
-
-                //echo $entity_agent.  " " . $input . "\n";
-
 
                 $this->entity_agent_names[] = $entity_agent;
 
@@ -1039,12 +1032,10 @@ class Entity extends Agent
 
                         }
 
-                        //echo "entity get ". $this->input . ".\n";
                         $id = "entity_". strtolower($this->entity_agent) . "_"  . $nuuid;
 
                         //$this->makeEntity(strtolower($this->entity_agent));
                         $this->getEntity($id);
-                        //                            $this->get();
                         $this->response = "Got entity devstack";
                         break;
 

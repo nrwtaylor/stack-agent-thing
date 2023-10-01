@@ -30,39 +30,32 @@ class Meta extends Agent
 
     function set()
     {
-        /*
-        $this->thing->json->writeVariable(
-            array("meta", "reading"),
-            $this->reading
-        );
-*/
     }
 
     function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "meta",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["meta", "refreshed_at"],
                 $time_string
             );
         }
         /*
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable(array(
+        $this->reading = $this->thing->Read(array(
             "meta",
             "reading"
         ));
 */
     }
 
-    function getMeta($thing = null)
+    public function getMeta($thing = null)
     {
         if ($thing == null) {
             if (!isset($this->thing)) {
@@ -73,7 +66,7 @@ class Meta extends Agent
                 $thing = $this->thing;
             }
         }
-
+/*
         if (!isset($thing->to)) {
             $this->to = null;
         } else {
@@ -89,6 +82,45 @@ class Meta extends Agent
         } else {
             $this->subject = $thing->subject;
         }
+*/
+
+        // Non-nominal
+        $this->uuid = $thing->uuid;
+
+        if (isset($thing->to)) {
+            $this->to = $thing->to;
+        }
+
+        // Potentially nominal
+        if (isset($thing->subject)) {
+            $this->subject = $thing->subject;
+        }
+
+        // Treat as nomina
+        if (isset($thing->from)) {
+            $this->from = $thing->from;
+        }
+        // Treat as nomina
+        if (isset($thing->created_at)) {
+            $this->created_at = $thing->created_at;
+        }
+
+        if (isset($this->thing->thing->created_at)) {
+            $this->created_at = strtotime($this->thing->thing->created_at);
+        }
+        if (!isset($this->to)) {
+            $this->to = "null";
+        }
+        if (!isset($this->from)) {
+            $this->from = "null";
+        }
+        if (!isset($this->subject)) {
+            $this->subject = "null";
+        }
+        //if (!isset($this->created_at)) {$this->created_at = date('Y-m-d H:i:s');}
+        if (!isset($this->created_at)) {
+            $this->created_at = time();
+        }
 
         $data_gram = [
             "from" => $this->from,
@@ -98,6 +130,8 @@ class Meta extends Agent
 
         $this->meta = $data_gram;
         $this->meta_string = implode(" ", $data_gram);
+
+        return $this->meta;
     }
 
     function extractMeta($input = null)
@@ -210,7 +244,7 @@ class Meta extends Agent
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
         if (isset($this->meta)) {
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 [$this->agent_name, "meta"],
                 $this->meta
             );
@@ -283,8 +317,6 @@ class Meta extends Agent
 
         $this->extractMeta();
         $status = true;
-
-        return $status;
     }
 
     function contextWord()

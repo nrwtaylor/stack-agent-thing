@@ -23,12 +23,12 @@ class Channel extends Agent
             $channel_name = $this->channel_name;
         }
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
-            ["channel", "refreshed_at"],
-            $this->thing->json->time()
-        );
-        $this->thing->json->writeVariable(["channel", "name"], $channel_name);
+
+//        $this->thing->Write(
+//            ["channel", "refreshed_at"],
+//            $this->thing->time()
+//        );
+        $this->thing->Write(["channel", "name"], $channel_name);
     }
 
     public function initChannels()
@@ -76,7 +76,9 @@ class Channel extends Agent
 
     public function countChannels()
     {
-        $things = $this->thing->db->fromCount();
+        $things = $this->thing->db->fromcountDatabase();
+
+        if ($things == null) {return false;}
 
         $channel_count = count($things);
         return $channel_count;
@@ -85,8 +87,7 @@ class Channel extends Agent
     public function get()
     {
         if ($this->agent_input == "channel") {
-            $this->thing->json->setField("variables");
-            $this->channel_name = $this->thing->json->readVariable([
+            $this->channel_name = $this->thing->Read([
                 "channel",
                 "name",
             ]);
@@ -228,6 +229,17 @@ class Channel extends Agent
 
         $input = $this->input;
 
+/*
+        if (isset($this->agent_input) and is_string($this->agent_input)) {
+            if (
+                isset($this->channels_resource[strtolower($this->agent_input)])
+            ) {
+                $this->resourceChannel(strtolower($this->agent_input));
+return;
+            }
+        }
+*/
+
         if (stripos($input, "count") !== false) {
             $channel_count = $this->countChannels();
             $this->response .=
@@ -236,7 +248,9 @@ class Channel extends Agent
                 " unique channels on this stack. ";
             return;
         }
-
+/*
+And then this is commented out.
+*/
         $filtered_input = trim($this->assert($input));
         $this->resourceChannel($filtered_input);
 

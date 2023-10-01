@@ -124,21 +124,20 @@ class Callsign extends Agent
      */
     function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "callsign",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["callsign", "refreshed_at"],
                 $time_string
             );
         }
 
-        $this->reading = $this->thing->json->readVariable([
+        $this->reading = $this->thing->Read([
             "callsign",
             "reading",
         ]);
@@ -177,7 +176,7 @@ class Callsign extends Agent
      */
     function set()
     {
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["callsign", "reading"],
             $this->reading
         );
@@ -187,7 +186,7 @@ class Callsign extends Agent
                 "callsign",
                 $this->callsign["callsign"]
             );
-            $time_string = $this->thing->json->time();
+            $time_string = $this->thing->time();
             $this->variables->setVariable("refreshed_at", $time_string);
             $this->variables->setVariable("action", $this->callsign["action"]);
         }
@@ -238,7 +237,15 @@ class Callsign extends Agent
 
         // See if a headcode record exists.
         $findagent_thing = new Findagent($this->thing, 'callsign');
-        $count = count($findagent_thing->thing_report['things']);
+
+        $things = $findagent_thing->thing_report['things'];
+
+        if ($things === true) {
+            return [$this->callsign_list, $this->callsigns];
+        }
+
+        $count = count($things);
+
         $this->thing->log(
             'Agent "Callsign" found ' .
                 count($findagent_thing->thing_report['things']) .
@@ -415,7 +422,7 @@ class Callsign extends Agent
 
         $slug_agent = new Slug($this->thing, "slug");
         $chatbot_agent = new Chatbot($this->thing, "chatbot");
-        $mixed_agent = new Mixed($this->thing, "mixed");
+        $mixed_agent = new _Mixed($this->thing, "mixed");
 
         $input = $chatbot_agent->filterChatbots($input);
 

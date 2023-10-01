@@ -134,8 +134,7 @@ class Help extends Agent
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["help", "received_at"],
             gmdate("Y-m-d\TH:i:s\Z", time())
         );

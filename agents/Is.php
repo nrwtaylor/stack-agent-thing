@@ -75,7 +75,7 @@ class Is extends Agent
                 );
                 $this->alias_thing = new Alias($this->thing, 'alias');
 
-                $this->thing->json->writeVariable(
+                $this->thing->Write(
                     ["is", "alias_id"],
                     $this->alias_thing->alias_id
                 );
@@ -83,7 +83,7 @@ class Is extends Agent
             }
         }
 
-        $this->thing->json->writeVariable(["is", "alias_id"], true);
+        $this->thing->Write(["is", "alias_id"], true);
 
         return true;
     }

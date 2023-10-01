@@ -25,11 +25,9 @@ class Apology extends Agent
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-
         $this->apology['refreshed_at'] = $this->current_time;
 
-        $this->thing->json->writeVariable(["apology"], $this->apology);
+        $this->thing->Write(["apology"], $this->apology);
     }
 
     public function isApology($apology = null)
@@ -100,6 +98,10 @@ class Apology extends Agent
     {
         $this->apologies = [];
         $things = $this->getThings('apology');
+
+        if ($things === false) {return;}
+        if ($things === null) {return;}
+
         foreach ($things as $uuid => $thing) {
 
             // devstack.

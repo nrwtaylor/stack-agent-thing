@@ -49,11 +49,9 @@ class Watchdog extends Agent
 
     function set()
     {
-        $this->thing->json->setField("variables");
-
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["watchdog", "refreshed_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
     }
 
@@ -178,7 +176,6 @@ class Watchdog extends Agent
 
         $tick_limit_seconds = 60;
         if ($age > $tick_limit_seconds) {
-            //echo 'merp';
             $thing = new Thing(null);
             // Document as $thing->Create('to', 'from', 'message text')
             $thing->Create(

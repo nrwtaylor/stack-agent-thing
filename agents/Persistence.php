@@ -15,25 +15,23 @@ class Persistence extends Agent
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["persistence", "persist_to"],
-            $this->thing->json->time($this->persist_to)
+            $this->thing->time($this->persist_to)
         );
     }
 
     public function run()
     {
         // Before doing anything else
-        $this->thing->json->setField("variables");
-        $this->remember_status = $this->thing->json->readVariable([
+        $this->remember_status = $this->thing->Read([
             "remember",
             "status",
         ]);
 
         if ($this->remember_status == true) {
             $this->thing->log(
-                '<pre> Agent "Persistence" found a record flagged for Remember </pre>'
+                'found a record flagged for Remember.'
             );
             //$this->setRemember();
         } else {
@@ -86,26 +84,23 @@ class Persistence extends Agent
 
         // Thing actions
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["persistence", "persist_to"],
-            $this->thing->json->time($this->persist_to)
+            $this->thing->time($this->persist_to)
         );
 
         $this->thing->flagGreen();
 
-        $from = $this->from;
-        $to = $this->to;
+//        $from = $this->from;
+//        $to = $this->to;
 
-        //echo "from",$from,"to",$to;
-
-        $subject = $this->subject;
+//        $subject = $this->subject;
 
         // Now passed by Thing object
-        $uuid = $this->uuid;
-        $sqlresponse = "yes";
+//        $uuid = $this->uuid;
+//        $sqlresponse = "yes";
 
-        $message = "Thank you $from this was PERSISTENCE";
+//        $message = "Thank you $from this was PERSISTENCE";
 
         $this->sms_message = "PERSISTENCE | ";
         $this->sms_message .=
@@ -125,11 +120,10 @@ class Persistence extends Agent
 
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
-        $this->makeWeb();
+//        $this->makeWeb();
 
-        $this->thing_report['thing'] = $this->thing->thing;
+//        $this->thing_report['thing'] = $this->thing->thing;
 
-        return;
     }
 
     public function makeWeb()
@@ -169,7 +163,5 @@ class Persistence extends Agent
 
     public function readSubject()
     {
-        $status = true;
-        return $status;
     }
 }

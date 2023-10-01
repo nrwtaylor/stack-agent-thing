@@ -24,7 +24,7 @@ class Knock extends Agent
 
     function set()
     {
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["knock", "refreshed_at"],
             $this->current_time
         );

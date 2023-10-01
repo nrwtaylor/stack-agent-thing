@@ -14,8 +14,7 @@ class Forgetcollection extends Agent
         $this->thing_report['info'] =
             "Makes collections of datagrams and forgets them.";
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "forgetcollection",
             "refreshed_at",
         ]);
@@ -23,9 +22,8 @@ class Forgetcollection extends Agent
         $this->forget_count = 0;
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["forgetcollection", "refreshed_at"],
                 $time_string
             );

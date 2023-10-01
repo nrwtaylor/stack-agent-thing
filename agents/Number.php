@@ -97,7 +97,7 @@ class Number extends Agent
         $this->refreshed_at = $this->number_agent->getVariable("refreshed_at");
 
         // Extract calling agent name from class name.
-        $this->getCallingagent();
+        $this->callingAgent();
         $agent_class_name = $this->calling_agent;
         $this->calling_agent_name = strtolower(
             array_reverse(explode('\\', $agent_class_name))[0]
@@ -140,7 +140,7 @@ class Number extends Agent
     /**
      *
      */
-    public function makeChart()
+    public function deprecate_makeChart()
     {
         if (!isset($this->numbers_history)) {
             $this->historyNumber();
@@ -244,6 +244,9 @@ class Number extends Agent
      */
     public function makeImage()
     {
+        if ((!isset($this->chart_agent)) or (!is_resource($this->chart_agent))) {
+return true;
+        } 
         $this->image = $this->chart_agent->image;
     }
 
@@ -315,6 +318,71 @@ class Number extends Agent
         $num_digits = $number !== 0 ? floor(log10($number) + 1) : 1;
 
         return $num_digits;
+    }
+
+    function roundupNumber($n, $x = null)
+    {
+        // X - Specify
+        // Y - Available
+
+        // Rounding up X or Y gives 1.
+
+        if (in_array(strtoupper($n), ['X','Z'])) {return 1;}
+
+        if ($x == null) { 
+            $x = 5;
+        }
+
+        return round(($n + $x / 2) / $x) * $x;
+    }
+
+    public function spreadNumbers($min, $max, $default_spread = null) {
+
+         $spread = $default_x_spread;
+        if ($spread == null) {
+            if (is_numeric($min) and is_numeric($max)) {
+               $spread = $max - $min;
+            }
+        }
+
+switch (true) {
+case  ( is_numeric($min) and (in_array(strtoupper($max), ["X","Z"] ))):
+$spread = $default_spread;
+break;
+
+case  ( (in_array(strtoupper($min), ["X","Z"] ) and is_numeric($max))):
+$spread = $default_spread;
+break;
+default:
+$spread = $max - $min;
+
+
+}
+
+return $spread;
+
+    }
+
+    public function formatNumber($text) {
+        $this->textNumber($text);
+    }
+
+    public function textNumber($text) {
+
+       $number = $text;
+
+       if ((strtoupper($number) == "X") or (strtoupper($number) == "Z")) {
+
+          return strtoupper($number);
+
+       }
+
+       if (is_string($number)) {$number = floatval($number);}
+
+       $number = number_format($text);
+
+       return $number;
+
     }
 
     /**
@@ -555,6 +623,14 @@ class Number extends Agent
         return null;
     }
 
+    public function isNumber($text = null) {
+
+       $number = $this->extractNumber($text);
+       if ($number === null) {return false;}
+       return true;
+
+    }
+
     /**
      *
      * @return unknown
@@ -729,10 +805,10 @@ class Number extends Agent
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/number';
 
         $this->node_list = ["number" => ["number"]];
-
+$web = "";
         $embedded = true;
         if (!$embedded) {
-            $web = '<a href="' . $link . '">';
+            $web .= '<a href="' . $link . '">';
             $web .=
                 '<img src= "' .
                 $this->web_prefix .
@@ -741,9 +817,13 @@ class Number extends Agent
                 '/number.png">';
             $web .= "</a>";
         } else {
-            $web = '<a href="' . $link . '">';
+
+if (isset($this->image_embedded)) {
+            $web .= '<a href="' . $link . '">';
             $web .= $this->image_embedded;
             $web .= "</a>";
+}
+
         }
         $web .= "<br>";
 
@@ -796,6 +876,8 @@ class Number extends Agent
                 $this->web_return_max .
                 " extracted numbers are:<br>";
         }
+
+if (isset($this->numbers_history)) {
         $i = 0;
         foreach ($this->numbers_history as $key => $number) {
             $i += 1;
@@ -815,7 +897,7 @@ class Number extends Agent
 
             $web .= "<br>";
         }
-
+}
         if ($this->recognize_french == true) {
             //if (count($this->numbers) == $this->test_count) {
             //https://french.kwiziq.com/revision/grammar/how-to-write-decimal-numbers-in-french

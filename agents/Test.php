@@ -10,21 +10,12 @@ class Test extends Agent
 
     public function set()
     {
-        $this->thing->json->writeVariable(
-            ["test", "refreshed_at"],
-            $this->current_time
-        );
+        $this->thing->Write(["test", "refreshed_at"], $this->current_time);
 
-        $this->thing->json->writeVariable(
-            ["test", "response"],
-            $this->response
-        );
+        $this->thing->Write(["test", "response"], $this->response);
 
         if (isset($this->test_text)) {
-            $this->thing->json->writeVariable(
-                ["test", "text"],
-                $this->test_text
-            );
+            $this->thing->Write(["test", "text"], $this->test_text);
         }
 
         //   $this->response = true;
@@ -52,50 +43,29 @@ class Test extends Agent
 
             $this->response .= "Test text is " . $this->test_text . ". ";
 
-            //     $stub = $this->getMockBuilder($this->test_text)->disableOriginalConstructor()->getMock();
-            //      $stub->method("init")->willReturn(11);
-            // Calling $stub->doSomething() will now return
-            // 'foo'.
-            //        $this->assertEquals('foo', $stub->init());
             set_time_limit(20);
 
             $thing = new Thing(null);
-            //var_dump($this->from);
-            //var_dump($agent_name);
+
             $thing->Create($this->from, "agent", $agent_name);
             $agent = new Agent($thing);
-
-            //var_dump($a->thing_report['sms']);
-            //var_dump($a->thing_report['response']);
-
-            //$agent = new \stdClass();
-            //$agent->response = $a->thing_report['response'];
-            //$agent->response = $a->thing_report['sms']
-
-            //            $agent = $this->getAgent($agent_name); // Push agent response.
-
-            if (isset($agent->thing_report['response'])) {
-                $this->response .=
-                    "Got " .
-                    $agent_name .
-                    " response. " .
-                    trim($agent->thing_report['response']) .
-                    " ";
-            } else {
-                $this->response .=
-                    "Did not get a " . $agent_name . " response. ";
-            }
         } else {
-            // Either
-            //$agent = new Agent($this->thing,"agent");
             $this->test_text = 'agent';
             $agent = $this->getAgent('agent', $text);
+        }
+
+        if (isset($agent->thing_report['response'])) {
             $this->response .=
-                "Tested agent response. " .
+                "Got " .
+                $agent_name .
+                " response. " .
                 trim($agent->thing_report['response']) .
                 " ";
 
             // Neither is providing a thing_report.
+        } else {
+            $this->response .=
+                "No response to '" . $this->test_text . "' test seen. ";
         }
 
         if ($agent === true) {
@@ -161,10 +131,12 @@ class Test extends Agent
 
     public function getTests()
     {
-	$this->tests = [];
+        $this->tests = [];
         $things = $this->getThings('test');
 
-	if ($things === null) {return;}
+        if ($things === null) {
+            return;
+        }
 
         // Sort things by created at.
         $created_at = [];
@@ -224,7 +196,7 @@ class Test extends Agent
     {
         $this->agentsTest();
         $files = $this->agents;
-        //var_dump($files);
+
         $file = $files[array_rand($files)];
 
         $tokens = explode(".", $file);
@@ -310,25 +282,22 @@ class Test extends Agent
             <div padding: 5px; text-align: center">';
 
         $foot = "</td></div></td></tr></tbody></table></td></tr>";
-        /*
-        $web = "";
-        //$web = '<a href="' . $link . '">';
-        $web .= $this->image_embedded;
-        //$web .= "</a>";
-        $web .= "<br>";
-        $web .= "<p>";
 
-        $web .= "<b>Agent Age</b>";
-*/
         $web = "";
         $web .= "<p>";
         $web .= '<table>';
-        $web .= '<th>' . 'nuuid' . "</th><th>" . 'result' . "</th><th>" . 'timestamp' . "</th><th>" . 'text' . "</th><th>" . 'test response' . "</th>";
-
-        //        foreach ($this->tubs as $tub_name => $tub_quantity) {
-        //            $web .= '<tr>';
-        //            $web .= '<th>'.$tub_name . "</th><th>" . $tub_quantity . "</th>";
-        //            $web .= "</tr>";
+        $web .=
+            '<th>' .
+            'nuuid' .
+            "</th><th>" .
+            'result' .
+            "</th><th>" .
+            'timestamp' .
+            "</th><th>" .
+            'text' .
+            "</th><th>" .
+            'test response' .
+            "</th>";
 
         foreach ($this->tests as $uuid => $thing) {
             // devstack.

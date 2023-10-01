@@ -107,7 +107,7 @@ class Hyphenate extends Agent
         $this->thing->json->setField("settings");
         $this->thing->json->writeVariable(
             ["hyphenate", "received_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
     }
 
@@ -124,7 +124,6 @@ class Hyphenate extends Agent
         }
 
         $input = $this->input;
-        //var_dump($this->input);
         $strip_words = ["hyphenate"];
 
         foreach ($strip_words as $i => $strip_word) {
@@ -150,11 +149,6 @@ class Hyphenate extends Agent
         }
 
         $filtered_input = ltrim(strtolower($input), " ");
-        //var_dump($input);
-        //$this->doHyphenate($filtered_input);
-
-        //$this->response = "Merp.";
-        //        $this->thing_report['sms'] = "Merpity.";
         return false;
     }
 

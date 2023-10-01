@@ -79,7 +79,6 @@ class Html extends Agent
 
         // All whitespace including carriage return
         //$text = preg_replace("/\s+/", " ", $text);
-
         $text = preg_replace ('/\h+/u', ' ', $text);
 
         // Deal with &nbsp etc
@@ -111,7 +110,6 @@ class Html extends Agent
             }
             $result .= $node->nodeValue;
         }
-        echo $result;
     }
 
     public function readSubject()

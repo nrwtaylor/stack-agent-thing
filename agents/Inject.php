@@ -59,7 +59,7 @@ class Inject extends Agent
 
     function set($requested_state = null)
     {
-        $this->thing->json->writeVariable( array("inject", "inject"), $this->inject );
+        $this->thing->Write( array("inject", "inject"), $this->inject );
 
         $this->refreshed_at = $this->current_time;
         $this->variable->setVariable("state", $this->state);
@@ -90,18 +90,16 @@ class Inject extends Agent
 
         $this->thing->log($this->agent_prefix . 'got a ' . strtoupper($this->state) . ' FLAG.' , "INFORMATION");
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("inject", "refreshed_at") );
+        $time_string = $this->thing->Read( array("inject", "refreshed_at") );
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("inject", "refreshed_at"), $time_string );
+            $time_string = $this->thing->time();
+            $this->thing->Write( array("inject", "refreshed_at"), $time_string );
         }
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->inject = $this->thing->json->readVariable( array("inject", "inject") );
+        $this->inject = $this->thing->Read( array("inject", "inject") );
     }
 
     function getNuuid()

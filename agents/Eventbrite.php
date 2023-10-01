@@ -15,7 +15,7 @@ class Eventbrite extends Agent
     {
         $this->keywords = ["eventbrite", "event", "show", "happening"];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->api_key = null;
         if (isset($this->thing->container["api"]["eventbrite"]["api_key"])) {
@@ -181,8 +181,6 @@ class Eventbrite extends Agent
                 $runtime = "X";
             }
 
-            //if ($runtime > $this->run_time_max) {echo "meep";continue;}
-
             // Will need to run a venue request.
             $venue_name = null; //$event['venue_name'];
 
@@ -203,14 +201,7 @@ class Eventbrite extends Agent
                 "datagram" => $event,
             ];
 
-            //$event_haystack = $this->implode_multi(" ", $event_array);
-            //var_dump($event_haystack);
             $pieces = $this->array_flatten($event_array, " ");
-            //var_dump($pieces);
-            //          var_dump($this->search_words);
-
-            //            $keywords = explode(" ", $this->search_words);
-            //var_dump($this->search_words);
 
             if (!isset($this->search_words)) {
                 $this->events[$id] = $event_array;
@@ -221,8 +212,6 @@ class Eventbrite extends Agent
                     $words = explode(" ", $phrase);
                     foreach ($words as $piece) {
                         foreach ($keywords as $command) {
-                            //echo $command. " " . $piece . "\n";
-                            //exit();
                             if (
                                 strpos(
                                     strtolower($piece),
@@ -316,8 +305,6 @@ class Eventbrite extends Agent
         $event_string .= ":" . str_pad($runat->minute, 2, "0", STR_PAD_LEFT);
 
         $run_time = new Runtime($this->thing, "extract " . $event["runtime"]);
-
-        //var_dump($run_time->minutes);
 
         if ($event["runtime"] != "X") {
             $event_string .= " " . $this->thing->human_time($run_time->minutes);

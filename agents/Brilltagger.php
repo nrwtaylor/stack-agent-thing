@@ -46,7 +46,7 @@ class Brilltagger extends Agent
 
         // Load word list into memory.
 
-        $this->getMemcached();
+        $this->memcachedAgent();
 
         //   if ($this->wordpress_path_to !== false) {
         //       require_once $this->wordpress_path_to. 'wp-load.php';
@@ -69,18 +69,6 @@ class Brilltagger extends Agent
         if ($this->wordpress_path_to !== false) {
             $this->mem_cached->set('agent-brilltagger-lexicon', $this->dict);
         }
-    }
-
-    /**
-     *
-     * @param unknown $tags
-     */
-    function printTag($tags)
-    {
-        foreach ($tags as $t) {
-            echo $t['token'] . "/" . $t['tag'] . " ";
-        }
-        echo "\n";
     }
 
     /**
@@ -162,7 +150,6 @@ class Brilltagger extends Agent
         // Then run it through the classifier.
         $tags = $this->tag($filtered_input);
         $this->tags = $tags;
-        //        $this->printTag($tags);
         $this->textTag($tags);
     }
 

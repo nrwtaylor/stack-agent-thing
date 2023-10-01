@@ -17,7 +17,6 @@ class Radiogram extends Agent
     {
         // Need to add in mode changing - origin / relay
 
-        //        $this->node_list = array("rocky"=>array("rocky", "charley", "nonsense"));
         $this->node_list = [
             "radiogram" => ["forget", "trivia", "nonsense", "weather"],
         ];
@@ -92,7 +91,7 @@ class Radiogram extends Agent
 
     function set($requested_state = null)
     {
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["radiogram", "inject"],
             $this->inject
         );
@@ -147,16 +146,14 @@ class Radiogram extends Agent
             "INFORMATION"
         );
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "radiogram",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["radiogram", "refreshed_at"],
                 $time_string
             );
@@ -164,7 +161,7 @@ class Radiogram extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->inject = $this->thing->json->readVariable([
+        $this->inject = $this->thing->Read([
             "radiogram",
             "inject",
         ]);
@@ -459,25 +456,7 @@ class Radiogram extends Agent
         $web .= "<b>" . "META</b><br>";
         $web .= "<p>";
 
-        //$web .= "Message Bank - ";
-        //        $web .= "<p>";
-        //$web .= $this->filename . " - ";
-        //$web .= $this->title . " - ";
-        //$web .= $this->author . " - ";
-        //$web .= $this->date . " - ";
-        //$web .= $this->version . "";
-
-        //$web .= "<p>";
-        //$web .= "Message Metadata - ";
-        //        $web .= "<p>";
-
-        $web .= $this->thing->nuuid . " - " . $this->thing->thing->created_at;
-
-        //        $ago = $this->thing->human_time ( time() - strtotime( $this->thing->thing->created_at ) );
-
-        //        $web .= "Inject was created about ". $ago . " ago.";
-        //        $web .= "<p>";
-        //        $web .= "Inject " . $this->thing->nuuid . " generated at " . $this->thing->thing->created_at. "\n";
+        $web .= $this->thing->nuuid . " - " . $this->thing->created_at;
 
         $togo = $this->thing->human_time($this->time_remaining);
         $web .= " - " . $togo . " remaining.<br>";
@@ -488,7 +467,7 @@ class Radiogram extends Agent
         $privacy_link = '<a href="' . $link . '">' . $link . "</a>";
 
         $ago = $this->thing->human_time(
-            time() - strtotime($this->thing->thing->created_at)
+            time() - strtotime($this->thing->created_at)
         );
         $web .= "Radiogram was created about " . $ago . " ago. ";
 
@@ -537,7 +516,7 @@ class Radiogram extends Agent
         $pdf->SetTextColor(0, 0, 0);
 
         $text =
-            "Radiogram generated at " . $this->thing->thing->created_at . ".";
+            "Radiogram generated at " . $this->thing->created_at . ".";
         $pdf->SetXY(130, 10);
         $pdf->Write(0, $text);
 

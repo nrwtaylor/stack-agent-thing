@@ -98,7 +98,7 @@ class Minecraft extends Agent {
         $player_count = "X";
         if (isset($this->player_count)) {$player_count = $this->player_count;}
 
-        $this->thing->json->writeVariable( array("minecraft", "player_count"), $player_count );
+        $this->thing->Write( array("minecraft", "player_count"), $player_count );
 
         $this->refreshed_at = $this->current_time;
 
@@ -173,18 +173,16 @@ class Minecraft extends Agent {
 
         $this->thing->log($this->agent_prefix . 'got a ' . strtoupper($this->state) . ' FLAG.' , "INFORMATION");
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("minecraft", "refreshed_at") );
+        $time_string = $this->thing->Read( array("minecraft", "refreshed_at") );
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("minecraft", "refreshed_at"), $time_string );
+            $time_string = $this->thing->time();
+            $this->thing->Write( array("minecraft", "refreshed_at"), $time_string );
         }
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->previous_player_count = $this->thing->json->readVariable( array("minecraft", "player_count") );
+        $this->previous_player_count = $this->thing->Read( array("minecraft", "player_count") );
 
     }
 

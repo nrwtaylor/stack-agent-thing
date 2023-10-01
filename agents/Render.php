@@ -12,7 +12,7 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Stl extends Agent
+class Render extends Agent
 {
     public $var = 'hello';
 
@@ -36,7 +36,7 @@ class Stl extends Agent
                                 https:\\codegolf.stackexchange.com/questions/25416/roll-dungeons-and-dragons-dice";
         $this->thing_report['help'] = 
                 'This is about dice with more than 6 sides.  Try "Roll d20". Or "Roll 3d20+17. Or "Card"';
-$this->getStl();
+$this->getRender();
 
 foreach($this->triangles as $i=>$triangle) {
 
@@ -66,7 +66,7 @@ foreach($this->triangles as $i=>$triangle) {
         return $this->thing_report;
     }
 
-public function getStl() {
+public function getRender() {
 
 $x_max = 0;
 $y_max = 0;

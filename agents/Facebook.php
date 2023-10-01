@@ -1,55 +1,57 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Facebook {
-	
+class Facebook extends Agent
+{
+    public $var = "hello";
 
-	public $var = 'hello';
+    public function init()
+    {
+        //function __construct(Thing $thing, $input = null) {
+        //	$this->input = $input;
+        //	$this->cost = 50;
 
+        $this->test = "Development code";
 
-    function __construct(Thing $thing, $input = null) {
-		$this->input = $input;
-		$this->cost = 50;
+        //	$this->thing = $thing;
 
-		$this->test= "Development code";
+        //	$this->thing_report = array('thing' => $this->thing->thing);
+        $this->thing_report["info"] = "This is a facebook message agent.";
 
-		$this->thing = $thing;
+        $this->app_token =
+            $this->thing->container["api"]["facebook"]["app token"];
+        $this->app_id = $this->thing->container["api"]["facebook"]["app ID"];
+        $this->app_secret =
+            $this->thing->container["api"]["facebook"]["app secret"];
+        $this->page_access_token =
+            $this->thing->container["api"]["facebook"]["page_access_token"];
 
-		$this->thing_report = array('thing' => $this->thing->thing);
-		$this->thing_report['info'] = 'This is a facebook message agent.';
+        //        $this->uuid = $thing->uuid;
+        //      $this->to = $thing->to;
+        //    $this->from = $thing->from;
+        //  $this->subject = $thing->subject;
+        //$this->sqlresponse = null;
 
-        $this->app_token = $this->thing->container['api']['facebook']['app token'];
-        $this->app_id = $this->thing->container['api']['facebook']['app ID'];
-        $this->app_secret = $this->thing->container['api']['facebook']['app secret'];
-        $this->page_access_token = $this->thing->container['api']['facebook']['page_access_token'];
+        $this->agent_prefix = 'Agent "Facebook" ';
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-		$this->sqlresponse = null;
+        $this->node_list = ["sms send" => ["sms send"]];
 
-        $this->agent_prefix = 'Agent "Facebook" ';	
-
-        $this->node_list = array("sms send"=>array("sms send"));
-
-		$this->thing->log( 'Agent "Facebook" running on Thing ' .  $this->thing->nuuid . '.' );
-		$this->thing->log( 'Agent "Facebook" received this Thing "' .  $this->subject . '".' );
+        //		$this->thing->log( 'Agent "Facebook" running on Thing ' .  $this->thing->nuuid . '.' );
+        //		$this->thing->log( 'Agent "Facebook" received this Thing "' .  $this->subject . '".' );
 
         // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
+        //        $this->web_prefix = $thing->container['stack']['web_prefix'];
+        //      $this->mail_postfix = $thing->container['stack']['mail_postfix'];
+        //    $this->word = $thing->container['stack']['word'];
+        //  $this->email = $thing->container['stack']['email'];
 
-
-
+        /*
 		if ( $this->readSubject() == true) {
 			$this->thing_report = array('thing' => $this->thing->thing, 
 				'choices' => false,
@@ -59,16 +61,45 @@ class Facebook {
 		        $this->thing->log( 'Agent "Facebook" completed without sending a message.' );
 			return;
 		}
-		$this->respond();
+*/
+        //		$this->respond();
 
-		$this->thing->log ( 'Agent "Facebook" completed.' );
+        //		$this->thing->log ( 'Agent "Facebook" completed.' );
 
-		return;
+        //		return;
+    }
 
-		}
+    public function set()
+    {
+        $this->setFacebook();
+    }
 
-// -----------------------
+    public function setFacebook()
+    {
+        $test = true;
+        if ($test) {
+            if (isset($this->agent_input) and is_array($this->agent_input)) {
+                $input = $this->agent_input;
 
+                //                $this->thing->db->setFrom($this->from);
+
+                $this->thing->json->setField("message0");
+                $this->thing->json->writeVariable(["facebook"], $input);
+            }
+        }
+    }
+
+    public function testFacebook()
+    {
+        // https://developers.facebook.com/docs/messenger-platform/reference/send-api/
+        $to = $this->from;
+        $test_message = "Hello";
+        $this->sendMessage($to, $test_message);
+        $this->response .= "Tested facebook. ";
+    }
+
+    // -----------------------
+    /*
 	private function respond() {
 
 		// Thing actions
@@ -107,13 +138,20 @@ class Facebook {
 
 
 	}
+*/
 
-
-	public function readSubject()
+    public function readSubject()
     {
+        //var_dump($this->input);
+
+        if (stripos($this->input, "test") !== false) {
+            $this->testFacebook();
+            return;
+        }
+
         // Nothing to read.
-		return false;
-	}
+        return false;
+    }
 
     function makeMessage($message = null)
     {
@@ -127,10 +165,11 @@ class Facebook {
         // "text":"'.$message.'",
 
         $jsonData =
-
-'{
+            '{
   "recipient":{
-    "id":"'. $sender.'"
+    "id":"' .
+            $sender .
+            '"
   },
   "message":{
     "attachment":{
@@ -141,14 +180,16 @@ class Facebook {
            {
             "title":"ICHING",
             "image_url":"https://<web_prefix>/thing/d0f11a91-cce9-4b04-b046-07cf5ead3d31/iching.png",
-            "subtitle":"' . $message . '"
+            "subtitle":"' .
+            $message .
+            '"
           }
         ]
       }
     }
   }
 }';
-/*
+        /*
  '{
             "recipient":{
                "id":"'. $sender.'"
@@ -168,37 +209,37 @@ class Facebook {
         }';
 */
         $this->json_message = $jsonData;
-
     }
 
     function makeBasicMessage($message = null)
     {
-
         if ($this->input != null) {
             $message = $this->input;
         } else {
             $message = $this->subject;
         }
 
-
         $sender = $this->from;
 
-        $jsonData = '{
+        $jsonData =
+            '{
             "recipient":{
-               "id":"'. $sender.'"
+               "id":"' .
+            $sender .
+            '"
             },
             "message":{
-                "text":"'.$message.'"
+                "text":"' .
+            $message .
+            '"
             }
         }';
 
         $this->json_message = $jsonData;
-
     }
 
-
-    function sendMessage($to, $text) {
-
+    function sendMessage($to, $text)
+    {
         // http://blog.adnansiddiqi.me/develop-your-first-facebook-messenger-bot-in-php/
 
         //$fb_person = (string) $to; // Just make sure its a string.  Seems to be a 2016 FB to avoid.
@@ -215,30 +256,32 @@ class Facebook {
 
         $sender = $to;
         $message_to_reply = $text;
- //       $attachment = '{
- //           "message": {
- //               "attachments": {
- //                "type":"image",
- //                "payload":{
- //                   "url":"https://<web_prefix>/thing/7f0ef3d0-54e4-400c-b3cc-a537a2e358b6/uuid.png"
- //                   }
- //               }
- //               }
- //           }';
+        //       $attachment = '{
+        //           "message": {
+        //               "attachments": {
+        //                "type":"image",
+        //                "payload":{
+        //                   "url":"https://<web_prefix>/thing/7f0ef3d0-54e4-400c-b3cc-a537a2e358b6/uuid.png"
+        //                   }
+        //               }
+        //               }
+        //           }';
 
         //$attachment = '"attachment":{}';
 
-// above is not working
-//$attachment = "";
-
+        // above is not working
+        //$attachment = "";
         //API Url
-        $url = 'https://graph.facebook.com/v2.6/me/messages?access_token='.$this->page_access_token;
+        //        $url = 'https://graph.facebook.com/v2.6/me/messages?access_token='.$this->page_access_token;
+        $url =
+            "https://graph.facebook.com/v12.0/me/messages?access_token=" .
+            $this->page_access_token;
 
         //Initiate cURL.
         $ch = curl_init($url);
 
         //The JSON data.
-/*        $jsonData = '{
+        /*        $jsonData = '{
             "recipient":{
                "id":"'. $sender.'"
             },
@@ -247,12 +290,17 @@ class Facebook {
             }
         }';
 */
-        $jsonData = '{
+        $jsonData =
+            '{
             "recipient":{
-               "id":"'. $sender.'"
+               "id":"' .
+            $sender .
+            '"
             },
             "message":{
-                "text":"'.$message_to_reply.'"
+                "text":"' .
+            $message_to_reply .
+            '"
             }
         }';
 
@@ -268,28 +316,33 @@ class Facebook {
         curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonDataEncoded);
 
         //Set the content type to application/json
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Content-Type: application/json",
+        ]);
         //curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
 
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
         //Execute the request
-        if( !empty($message_to_reply) ){
+        if (!empty($message_to_reply)) {
             $result = curl_exec($ch);
         }
 
-
-                    $this->thing->json->setField("variables");
-                    $names = $this->thing->json->writeVariable( array("facebook", "result"), $result );
-                        $time_string = $this->thing->json->time();
-                        $this->thing->json->writeVariable( array("facebook", "refreshed_at"), $time_string );
-
-
-
+        var_dump($result);
+        $this->thing->json->setField("variables");
+        $names = $this->thing->json->writeVariable(
+            ["facebook", "result"],
+            $result
+        );
+        $time_string = $this->thing->json->time();
+        $this->thing->json->writeVariable(
+            ["facebook", "refreshed_at"],
+            $time_string
+        );
 
         return;
     }
-
-
 }
-
 ?>
 
+ ?>

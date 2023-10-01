@@ -74,10 +74,6 @@ class Amount extends Agent
         //$num = '$21.34';
         $a = new \NumberFormatter($region, \NumberFormatter::CURRENCY);
 
-        //echo $a->format("12353.2342) . "\n";
-        //echo "foo";
-        //echo $a->parseCurrency($num, $currency) . "\n";
-
         $tokens = explode(' ', $input);
         $amounts = [];
 
@@ -128,10 +124,9 @@ class Amount extends Agent
 
     function set()
     {
-        $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["amount", "received_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
     }
 
@@ -150,7 +145,6 @@ class Amount extends Agent
         }
 
         $input = $this->input;
-        //var_dump($this->input);
         $strip_words = ["amount"];
 
         foreach ($strip_words as $i => $strip_word) {

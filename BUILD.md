@@ -72,6 +72,12 @@ Configure `my.cnf`
 ```
 innodb_buffer_pool_size=1G
 ```
+innodb_buffer_pool_size=1G
+```
+myisamchk --silent --force --fast --update-state \
+--key_buffer_size=512M --sort_buffer_size=512M \
+--read_buffer_size=4M --write_buffer_size=4M \
+/var/lib/mysql/stack_db/stack
 
 ## 3. Setup PHP
 3 cont. Install PHP extensions
@@ -563,24 +569,32 @@ Remove forward slash from /Gearman in line 62.
 
 ## 12. Verify Snowflake (web, PNG, PDF)
 
+Run each as a test:
+```shell
+agent web
+agent png
+agent pdf
+```
 
 
 ---
 
-Add template files ... there are sample index, thing (and eventually email)
-templates in there.
+### Templates control how reports look
+
+Add template files ... there are sample index, thing (and eventually email) templates in there.
 ```shell
 cd /var/www/stackr.test
 cp -r /var/www/stackr.test/vendor/nrwtaylor/stackr/templates templates
 ```
 Or make your own.
+
 `Thing` takes the `$thing_report` and displays it.
 `Index` is a standalone non db page.  With no `thing` access
 
 
 ---
 
-Add resource files
+### Resource files form what they system "knows"
 
 Copy in resource files ... there are sample resource files for 
 some of the agents provided.
@@ -589,7 +603,10 @@ cd /var/www/stackr.test
 cp -r /var/www/stackr.test/vendor/nrwtaylor/stackr/resources resources
 ```
 
---- 
+---
+
+### Adding a `cron` job gives the system an idea of passing time
+ 
 Get the Clock ticking
 ```shell
 sudo crontab -e
@@ -611,9 +628,9 @@ Test this bit
 ```
 Once ticking, you'll see a `cron` tick every 60s in the database.
 
-### Install MYSQL
+### Solve problems installing MYSQL
 
-#### Problem #1
+#### MySQL Problem #1
 Increase Max connections  
 https://www.rfc3092.net/2017/06/mysql-max_connections-limited-to-214-on-ubuntu-foo/
 ```shell
@@ -692,7 +709,7 @@ query_cache_type = 0
 
 ---
 
-### INSTALL POSTFIX
+### Give the system a way to answer: INSTALL POSTFIX
 
 Test connection with.
 ```shell
@@ -745,7 +762,7 @@ sudo postfix status
 ```
 ---
 
-### Configure nano
+### Configure nano to make editing easier
 
 Set `nano` to 4 space indenting
 ```shell
@@ -758,7 +775,12 @@ Convert typed tabs to spaces.
 ```
 set tabstospaces
 ```
+Ctrl-3,Shift-3
+: a way to show linke numbers in `nano`
+
 --
+
+#### MySQL Problem 2
 
 Why is the `ibdata1` file continuously growing in MySQL
 
@@ -820,7 +842,7 @@ sudo apt-get install php-mbstring
 ```json
 {
     "name": "test project",
-    "description": "A PHP project to test my package",
+    "description": "A PHP CLI agent to communicate with the PHP stack-agent-thing framework.",
     "require": {
         "slim/slim": "^3.0",
         "slim/php-view": "*",
@@ -837,6 +859,8 @@ sudo apt-get install php-mbstring
         "vanderlee/php-sentence": "^1.0",
         "webignition/robots-txt-file": "^2.1",
         "symfony/console": "^4.3"
+        "johngrogg/ics-parser": "^2.2",
+        "zbateson/mail-mime-parser": "^1.3"
     }
 }
 ```
@@ -851,6 +875,9 @@ APACHE > PHP Warning:  file(/var/www/html/stackr.ca/vendor/vanderlee/syllable/la
 ```
 
 ## 16. Memcached (optional)
+
+To speed up agents that refer to large lookup files.  
+
 ```shell
 sudo apt-get update
 sudo apt-get install memcached
@@ -860,7 +887,52 @@ Memcached will speed up agents which call on it to store large text lookup files
 sudo apt-get install -y php-memcached
 ```
 --
+
+PHP-FPM
+
 ```shell
 sudo apt-get update
 sudo apt-get install php-fpm
 ```
+
+## Notes
+
+https://stackoverflow.com/questions/62524355/unable-to-start-mysql-server-control-process-exited-with-error-code
+
+sudo chmod -R u+rwx /etc/mysql/
+sudo chown -R mysql.mysql /etc/mysql/
+
+$ sudo apt-get purge mongodb-*
+$ sudo apt-get install -y mongodb-org
+$ composer require mongodb/mongodb
+
+$ sudo pecl install mongodb
+extension=mongodb.so > php.ini
+$ https://docs.mongodb.com/drivers/php/
+
+http://gearman.org/getting-started/
+$ tar xzf gearmand-X.Y.tar.gz
+$ cd gearmand-X.Y
+$ ./configure
+$ make
+$ make install
+
+
+http://pecl.php.net/get/gearman-2.1.0.tgz
+
+tar xzf gearman-X.Y.tgz
+cd gearman-X.Y
+phpize
+./configure
+make
+make install
+
+The following line will need to be added to all php.ini files, usually located in /etc/php.
+
+extension="gearman.so"
+
+The module should now be usable by all PHP interfaces. To test using the PHP command line interface, create gearman_version.php with the following contents:
+
+<?php
+print gearman_version() . "\n";
+?>

@@ -68,8 +68,7 @@ class Gopher extends Agent
 
     public function nullGopher()
     {
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["character", "action"],
             "null"
         );
@@ -290,7 +289,6 @@ DirEntity ::= Type User_Name Tab Selector Tab Host Tab Port CR-LF
 
                         default:
 
-                        //echo 'default';
                     }
                 }
             }

@@ -97,8 +97,7 @@ class Bible extends Agent
 */
     public function nullAction()
     {
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["character", "action"],
             'null'
         );
@@ -203,7 +202,6 @@ class Bible extends Agent
         //$url = 'https://labs.bible.org/api/?passage=John+3:16-17';
         $url = 'https://labs.bible.org/api/?keyword=samaritan';
 
-        //var_dump($url);
         $xml = $this->getXML($url);
 
         return $xml;
@@ -320,7 +318,6 @@ class Bible extends Agent
 
                         default:
 
-                        //echo 'default';
                     }
                 }
             }

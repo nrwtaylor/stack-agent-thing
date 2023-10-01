@@ -70,10 +70,9 @@ class MOSS extends Agent {
         $this->message = $value;
         $this->sms_message = $value;
 
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable( array("moss", "requested_agent"), $this->requested_agent );
+        $names = $this->thing->Write( array("moss", "requested_agent"), $this->requested_agent );
         $time_string = $this->thing->time();
-        $this->thing->json->writeVariable( array("moss", "refreshed_at"), $time_string );
+        $this->thing->Write( array("moss", "refreshed_at"), $time_string );
 
         return $this->message;
     }

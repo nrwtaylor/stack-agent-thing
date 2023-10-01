@@ -41,21 +41,6 @@ class Email
         //        $this->input = $input;
         $this->cost = 50;
 
-        //function __construct($arguments) {
-        //echo $arguments;
-        //var_dump($arguments);
-        //  $defaults = array(
-        //    'uuid' => Uuid::uuid4(),
-        //    'from' => NULL,
-        //  'to' => NULL,
-        //  'subject' => NULL,
-        //  'sqlresponse' => NULL
-        //  );
-
-        //  $arguments = array_merge($defaults, $arguments);
-
-        //  echo $arguments['firstName'] . ' ' . $arguments['lastName'];
-
         $this->test = "Development code";
 
         $this->thing = $thing;
@@ -105,23 +90,20 @@ class Email
         $this->node_list = ["email" => ["email"]];
 
         // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "email",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["email", "refreshed_at"],
                 $time_string
             );
         }
 
-        $this->thing->json->setField("variables");
-        $this->email_count = $this->thing->json->readVariable([
+        $this->email_count = $this->thing->Read([
             "email",
             "count",
         ]);
@@ -176,10 +158,44 @@ class Email
         return;
     }
 
+    public function isEmail($text) {
+       $meta = $this->metaEmail($text);
+$is_email = true;
+if (!isset($meta['from'])) {
+$is_email = false;
+}
+
+if (!isset($meta['subject'])) {
+$is_email = false;
+}
+
+
+       return $is_email;
+    }
+
+    public function metaEmail($text)
+    {
+        // Pull the message in again.
+        $parser = new MailMimeParser();
+
+        // parse() returns a Message
+        $message = $parser->parse($text);
+
+        $from = $message->getHeaderValue("From");
+
+        $subject = $message->getHeaderValue("Subject");
+        $sent = $message->getHeaderValue("Sent");
+        $received = $message->getHeaderValue("Received");
+        $date = $message->getHeaderValue("Date");
+
+        $meta = ["from"=>$from, "subject"=>$subject, "sent"=>$sent, "received"=>$received, "date"=>$date];
+
+        return $meta;
+    }
+
     public function attachmentsEmail($text)
     {
         // Pull the message in again.
-        //var_dump($text);
         $parser = new MailMimeParser();
 
         // parse() returns a Message
@@ -309,6 +325,7 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
         if (isset($toEmails[0])) {
             $toEmail = $toEmails[0];
         }
+
         $datagram = [
             "to" => $toEmail,
             "from" => $from,
@@ -414,7 +431,7 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
 
         $this->thing_report["info"] = 'Agent "Email" did not send an email.';
 
-        if (isset($this->thing->account)) {
+        if ( (isset($this->thing->account)) and (isset($this->thing->account['stack'])) ) {
             if (
                 $this->thing->account["stack"]->balance["amount"] >= $this->cost
             ) {
@@ -629,9 +646,6 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
 
         $user_state = $email_thing->getState("usermanager");
 
-        //  $db = new Database($this->uuid, $this->from);
-        //  $db->setUser($this->from);
-
         if ($donotsend) {
             return true;
         }
@@ -643,9 +657,6 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
 
             return true;
         }
-
-        //var_dump($to);
-        //var_dump($headers);
 
         if (strpos(strtolower($to), "@winlink.org") !== false) {
             $headers = null;

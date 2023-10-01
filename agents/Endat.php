@@ -114,8 +114,6 @@ class Endat extends Agent
 
     function getEndat()
     {
-        //var_dump($this->hour);
-        //var_dump($this->minute);
         if (!isset($this->end_at) and !isset($this->runtime)) {
             if (!isset($this->run_at)) {
                 $this->run_at = "X";
@@ -146,6 +144,41 @@ class Endat extends Agent
         }
         return $this->end_at;
     }
+
+    public function textEndat() {
+
+        if (isset($this->day)) {
+            $day = $this->day;
+        }
+        if ($day == null) {
+            $day = "X";
+        }
+
+        $hour = "X";
+        if (isset($this->hour)) {
+            $hour = $this->hour;
+        }
+
+        $minute = "X";
+        if (isset($this->minute)) {
+            $minute = $this->minute;
+        }
+
+        $hour_text = str_pad($hour, 2, "0", STR_PAD_LEFT);
+        $minute_text = str_pad($minute, 2, "0", STR_PAD_LEFT);
+        $day_text = $day;
+
+        $text =
+            " day " .
+            $day_text .
+            " hour " .
+            $hour_text .
+            " minute " .
+            $minute_text;
+
+        return $text;
+    }
+
 
     /**
      *
@@ -241,16 +274,12 @@ class Endat extends Agent
 
         $this->response .= "Got " . $day . " " . $hour . " " . $minute . ". ";
 
-        //var_dump($minute);
-        //var_dump($hour);
-        //var_dump($day);
         // See what numbers are in the input
         if (!isset($this->numbers)) {
             $this->extractNumbers($input);
         }
         $this->extractNumbers($input);
 
-        //var_dump($this->numbers);
         if (isset($this->numbers) and count($this->numbers) == 0) {
             $this->response .= "Did not see any numbers. ";
         } elseif (count($this->numbers) == 1) {
@@ -258,9 +287,6 @@ class Endat extends Agent
 
             if (strlen($this->numbers[0]) == 4) {
                 $this->response .= "Saw one four digit number. ";
-
-                //var_dump($minute);
-                //var_dump($hour);
 
                 if ($minute == 0 and $hour == 0) {
                     $this->response .=
@@ -314,10 +340,6 @@ class Endat extends Agent
             $this->day = $day;
         }
 
-        //echo "extract hour " .$this->hour;
-        //echo "extract minute " . $this->minute;
-
-        //        return array($this->day, $this->hour, $this->minute);
     }
 
     public function timeEndat($text = null)
@@ -367,7 +389,6 @@ class Endat extends Agent
                     switch ($piece) {
                         case 'stop':
                             if ($key + 1 > count($pieces)) {
-                                //echo "last word is stop";
                                 $this->stop = false;
                                 return "Request not understood";
                             } else {
@@ -489,18 +510,10 @@ class Endat extends Agent
             $minute = $this->minute;
         }
 
-        //if ($minute == null) {$minute = "X";}
-
-        //var_dump($this->hour);
-        //var_dump($this->minute);
-
         $sms_message = "ENDAT";
 
         $hour_text = str_pad($hour, 2, "0", STR_PAD_LEFT);
-        //if ($hour == 'X') {$hour_text = "X";}
-
         $minute_text = str_pad($minute, 2, "0", STR_PAD_LEFT);
-        //if ($minute == 'X') {$minute_text = "X";}
 
         $day_text = $day;
         $sms_message .= " " . $this->head_code . " ";
@@ -600,7 +613,7 @@ class Endat extends Agent
     function printEndat($text = null)
     {
         return;
-        echo $text . "\n";
+        $this->thing->console($text . "\n");
 
         if (!isset($this->day)) {
             $day = "X";
@@ -618,7 +631,7 @@ class Endat extends Agent
             $minute = $this->minute;
         }
 
-        echo $day . " " . $hour . " " . $minute . "\n";
+        $this->thing->console( $day . " " . $hour . " " . $minute . "\n");
     }
 
     /**

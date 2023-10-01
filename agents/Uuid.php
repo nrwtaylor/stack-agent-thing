@@ -99,10 +99,9 @@ $uuids = $this->extractUuids($text);
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["uuid", "refreshed_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
     }
 
@@ -225,16 +224,16 @@ $uuids = $this->extractUuids($text);
         $web = '<a href="' . $link . '">';
         //$web_prefix = "http://localhost:8080/";
         if (!isset($this->html_image)) {
-            $this->getQuickresponse();
+//            $this->getQuickresponse();
         }
-        $web .= $this->html_image;
+//        $web .= $this->html_image;
 
         $web .= "</a>";
 
         $web .= "<br>";
         $web .= $this->readUuid() . "<br>";
             "CREATED AT " .
-            strtoupper(date('Y M d D H:m', $this->created_at)) .
+            strtoupper(date('Y M d D H:m', strtotime($this->created_at))) .
             "<br>";
 
         $this->thing_report['web'] = $web;

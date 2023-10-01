@@ -41,7 +41,7 @@ class Ant extends Agent
         $this->stack_uuid = $this->thing->container['stack']['uuid'];
 
         // For the Ant
-        $this->created_at = $this->thing->thing->created_at;
+        $this->created_at = $this->thing->created_at;
 
         //		$this->sqlresponse = null;
 
@@ -146,12 +146,14 @@ class Ant extends Agent
         // Read the subject as passed to this class.
         // No charge to read the subject line.  By machine.
 
-        $this->state = $this->thing->choice->load('hive');
+        $this->default_state = 'inside nest';
+        $this->stateAnt();
 
         // Err ... making sure the state is saved.
         $this->thing->choice->Choose($this->state);
-
-        $this->state = $this->thing->choice->load('hive');
+        if ($this->stateAnt() === true) {
+            $this->response .= "Could not save state. ";
+        }
 
         $this->thing->log(
             $this->agent_prefix . 'state is "' . $this->state . '".'
@@ -179,41 +181,34 @@ class Ant extends Agent
         }
     }
 
-    //	function createAccount(String $account_name, $amount) {
+    public function stateAnt()
+    {
+        $state = $this->thing->choice->load('hive');
 
-    //		$scalar_account = new Account($this->uuid, 'scalar', $amount, "happiness", "Things forgotten"); // Yup.
-    //		$this->thing->scalar = $scalar_account;
-    //		return;
-    //	}
+        if ($state != false) {
+            $this->state = $state;
+        }
 
-    // -----------------------
+        if ($state === false) {
+            $this->state = $this->default_state;
+            return true;
+        }
+    }
 
     function set()
     {
-        $this->thing->json->setField("variables");
-
-        $this->thing->json->writeVariable(
-            ["ant", "left_count"],
-            $this->left_count
-        );
-        $this->thing->json->writeVariable(
-            ["ant", "right_count"],
-            $this->right_count
-        );
+        $this->thing->Write(["ant", "left_count"], $this->left_count);
+        $this->thing->Write(["ant", "right_count"], $this->right_count);
 
         $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE");
     }
 
     public function get($ant_code = null)
     {
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $this->time_string = $this->thing->json->readVariable([
-            "ant",
-            "refreshed_at",
-        ]);
+        $this->time_string = $this->thing->Read(["ant", "refreshed_at"]);
 
         // This is a request to get the Place from the Thing
         // and if that doesn't work then from the Stack.
@@ -222,33 +217,19 @@ class Ant extends Agent
         }
 
         if ($this->time_string == false) {
-            $this->thing->json->setField("variables");
-            $this->time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
-                ["ant", "refreshed_at"],
-                $this->time_string
-            );
+            $this->time_string = $this->thing->time();
+            $this->thing->Write(["ant", "refreshed_at"], $this->time_string);
         }
 
         $this->refreshed_at = strtotime($this->time_string);
 
-        $this->thing->json->setField("variables");
-        $this->left_count = $this->thing->json->readVariable([
-            "ant",
-            "left_count",
-        ]);
-        $this->right_count = $this->thing->json->readVariable([
-            "ant",
-            "right_count",
-        ]);
+        $this->left_count = $this->thing->Read(["ant", "left_count"]);
+        $this->right_count = $this->thing->Read(["ant", "right_count"]);
     }
 
     public function respondResponse()
     {
         // Thing actions
-
-        //$this->thing->flagGreen();
-        //$this->thing->flagRed();
 
         $this->whatisthis = [
             'inside nest' =>
@@ -482,15 +463,15 @@ class Ant extends Agent
                     break;
                 default:
                     $this->response .= "Ant spawned. ";
-                    // echo "not found => spawn()";
                     $this->thing->log("spawn Thing default");
                     $this->spawn();
                     $this->thing->log("spawned Thing");
-
             }
         }
 
-        $this->state = $this->thing->choice->load('hive');
+        //$this->state = $this->thing->choice->load('hive');
+
+        $this->stateAnt();
 
         // Will need to develop this to only only valid state changes.
 
@@ -621,8 +602,6 @@ class Ant extends Agent
         // ->db->userSearch($keyword)
         // ->UUids($uuid = null)
 
-        //echo "ant state: " . $this->thing->getState('hive');
-
         // Form a haystack from the whole thing.
     }
 
@@ -658,13 +637,6 @@ class Ant extends Agent
 
         $haystack .= json_encode($posterior_thing);
 
-        // And we can do this...
-
-        //echo "the thing is:";
-        //print_r($this->thing);
-
-        // But that really depends on the security of the Channel.
-
         // devstack use Uuid to extract Uuids.
         // $match = "/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12‌​}/";
 
@@ -686,7 +658,6 @@ class Ant extends Agent
         $linked = [];
 
         foreach ($arr as $key => $value) {
-            //echo $value;
             $temp_thing = new Thing($value);
 
             if ($temp_thing == false) {

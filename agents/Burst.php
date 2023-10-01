@@ -81,7 +81,6 @@ class Burst extends Agent
      */
     function run()
     {
-        $this->getBurst();
     }
 
     /**
@@ -90,6 +89,7 @@ class Burst extends Agent
      */
     function set($requested_flag = null)
     {
+        $this->thing->log("set start");
         if ($requested_flag == null) {
             if (!isset($this->requested_flag)) {
                 // Set default behaviour.
@@ -103,14 +103,13 @@ class Burst extends Agent
         $this->flag = $requested_flag;
         $this->refreshed_at = $this->current_time;
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["burst", "flag"], $this->flag);
-        $this->thing->json->writeVariable(
+        $this->thing->Write(["burst", "flag"], $this->flag);
+        $this->thing->Write(
             ["burst", "refreshed_at"],
             $this->current_time
         );
-        $this->thing->json->writeVariable(["burst", "burst"], $this->burst);
-        $this->thing->json->writeVariable(
+        $this->thing->Write(["burst", "burst"], $this->burst);
+        $this->thing->Write(
             ["burst", "burstiness"],
             $this->burstiness
         );
@@ -119,6 +118,7 @@ class Burst extends Agent
                 $this->agent_prefix . 'set Flag to ' . $this->flag
             );
         }
+        $this->thing->log("set complete");
     }
 
     /**
@@ -274,6 +274,7 @@ class Burst extends Agent
                 "DEBUG"
             );
         }
+        $this->thing->log("get burst complete");
     }
 
     /**
@@ -307,6 +308,8 @@ class Burst extends Agent
         $this->thing->log(
             $this->agent_prefix . 'got a ' . strtoupper($this->flag) . ' FLAG.'
         );
+
+        $this->getBurst();
     }
 
     /**
@@ -361,7 +364,7 @@ class Burst extends Agent
     /**
      *
      */
-    public function respond()
+    public function respondResponse()
     {
         // At this point state is set
         $this->set($this->flag);
@@ -372,11 +375,11 @@ class Burst extends Agent
 
         // Generate email response.
 
-        $to = $this->thing->from;
-        $from = $this->keyword;
+        //$to = $this->thing->from;
+        //$from = $this->keyword;
 
-        $this->makeSMS();
-        $this->makeMessage();
+        //$this->makeSMS();
+        //$this->makeMessage();
 
         $this->thing_report['email'] = $this->message;
 
@@ -503,13 +506,13 @@ class Burst extends Agent
 
         if ($this->flag == 'red') {
             $message .=
-                'MORDOK has seen burstiness in the previous ' .
+                'saw burstiness in the previous ' .
                 $this->horizon .
                 ' messages. ';
         }
 
         if ($this->flag == 'green') {
-            $message .= 'MORDOK is likely operating with low similarity. ';
+            $message .= 'saw low burstiness. ';
         }
 
         $message .= 'The flag is a  ' . strtoupper($this->flag) . " FLAG. ";
@@ -545,10 +548,15 @@ class Burst extends Agent
     public function readSubject()
     {
         if ($this->agent_input == "burst") {
+            $this->thing->log("did not read subject.");
             return null;
         }
 
+        $this->thing->log("start history.");
+
         $this->historyBurst();
+
+        $this->thing->log("start chart.");
         $this->chartBurst();
         $this->chartBurstiness();
 

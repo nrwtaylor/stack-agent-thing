@@ -49,6 +49,11 @@ class Slug extends Agent
             $this->thing,
             "alphanumeric"
         );
+       // $this->alphanumeric_agent = new Alphanumeric(
+       //     $this->thing,
+      //      "alphanumeric"
+      //  );
+        $this->getSlugs();
     }
 
     /**
@@ -56,10 +61,9 @@ class Slug extends Agent
      */
     function set()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["slug", "refreshed_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
     }
 
@@ -71,6 +75,7 @@ class Slug extends Agent
         $slug = $this->extractSlug($text);
         $this->slug = $slug;
         return $slug;
+/*
 
         $slug = $this->alphanumeric_agent->filterAlphanumeric($text);
 
@@ -82,7 +87,8 @@ class Slug extends Agent
 
         $this->slug = $slug;
         return $slug;
-    }
+*/ 
+   }
 
     public function extractSlug($text = null)
     {
@@ -93,7 +99,8 @@ class Slug extends Agent
         $slug = str_replace('\'', "", $text);
         $slug = str_replace('/', " ", $text);
 
-        $slug = $this->alphanumeric_agent->filterAlphanumeric($slug);
+        //$slug = $this->alphanumeric_agent->filterAlphanumeric($slug);
+        $slug = $this->filterAlphanumeric($slug);
         $slug = preg_replace('/\s+/', ' ', $slug);
         //$slug = str_replace("'","",$despaced_slug);
         //$slug = str_replace("/"," ",$slug);
@@ -102,6 +109,17 @@ class Slug extends Agent
         $slug = trim($slug, "-");
         return $slug;
     }
+
+    public function deSlug($text = null)
+    {
+        if ($text == null) {
+            return true;
+        }
+
+        $deslug = str_replace('-', " ", $text);
+        return $deslug;
+    }
+
 
     /**
      *

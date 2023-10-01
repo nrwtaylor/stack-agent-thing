@@ -170,9 +170,7 @@ class Brownpapertickets extends Agent
         // devstack sort
 
         foreach ($events['event'] as $not_used => $event) {
-            // $city = "vancouver";
             $city = strtolower($this->city);
-            //var_dump($event['city']);
             if (strtolower(trim($event['city'])) != $city) {
                 continue;
             }

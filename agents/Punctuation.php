@@ -13,7 +13,7 @@ class Punctuation extends Agent
     {
         $this->reading = count($this->punctuations);
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["punctuation", "reading"],
             $this->reading
         );
@@ -36,22 +36,27 @@ class Punctuation extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "punctuation",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["punctuation", "refreshed_at"],
                 $time_string
             );
+
+/*                $this->punctuations[] = $gram;
+            } else {
+                $message .= " " . $gram;
+            }
+*/
         }
 
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable([
+        $this->reading = $this->thing->Read([
             "punctuation",
             "reading",
         ]);
@@ -143,8 +148,6 @@ class Punctuation extends Agent
                             return;
 
                         default:
-
-                        //echo 'default';
                     }
                 }
             }

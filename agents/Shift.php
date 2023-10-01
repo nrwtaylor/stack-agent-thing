@@ -91,10 +91,8 @@ class Shift extends Agent
 
         // This isn't going to help because we don't know if this
         // is the base.
-        //        $this->state = "off";
-        //        $this->thing->choice->load($this->keyword);
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->test = "Development code"; // Always
     }
@@ -115,7 +113,6 @@ class Shift extends Agent
 
         return $this->block_time;
 
-        //exit();
     }
 
     function set($requested_state = null)
@@ -124,12 +121,11 @@ class Shift extends Agent
             $requested_state = $this->requested_state;
         }
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             [$this->keyword, "state"],
             $requested_state
         );
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             [$this->keyword, "refreshed_at"],
             $this->current_time
         );
@@ -146,19 +142,17 @@ class Shift extends Agent
 
     function getBlocks()
     {
-        // ---
         $this->block_list = null;
 
         $block_pattern = $this->block_patterns[$this->state];
         $block_time = $this->blockTime(); // Current 4 digit block time
 
         foreach ($block_pattern as $block => $train) {
-            // $this->thing->log('Agent "Shift" block is ' . $block . '.');
 
             $run_time = $train['run_time'];
             $run_at = $train['run_at'];
 
-            $end_at = $this->thing->json->time(
+            $end_at = $this->thing->time(
                 strtotime($train['run_at'] . " " . $run_time . " minutes")
             );
 
@@ -192,8 +186,6 @@ class Shift extends Agent
                 break;
             }
         }
-
-        // ---
     }
 
     function get()
@@ -206,12 +198,11 @@ class Shift extends Agent
         ) {
             $thing = new Thing($thing_obj['uuid']);
 
-            $thing->json->setField("variables");
-            $thing->previous_state = $thing->json->readVariable([
+            $thing->previous_state = $thing->Read([
                 $this->keyword,
                 "state",
             ]);
-            $thing->refreshed_at = $thing->json->readVariable([
+            $thing->refreshed_at = $thing->Read([
                 $this->keyword,
                 "refreshed_at",
             ]);
@@ -246,19 +237,17 @@ class Shift extends Agent
             $this->base_thing = $thing;
         }
 
-        $this->base_thing->json->setField("variables");
 
-        $this->previous_state = $this->base_thing->json->readVariable([
+        $this->previous_state = $this->base_thing->Read([
             $this->keyword,
             "state",
         ]);
-        $this->refreshed_at = $this->base_thing->json->readVariable([
+        $this->refreshed_at = $this->base_thing->Read([
             $this->keyword,
             "refreshed_at",
         ]);
 
         $this->previous_state = $this->base_thing->choice->load($this->keyword);
-        //            $this->previous_state = $this->thing->choice->current_node;
 
         $this->base_thing->choice->Create(
             $this->keyword,
@@ -287,12 +276,11 @@ class Shift extends Agent
         $block_time = $this->blockTime(); // Current 4 digit block time
 
         foreach ($block_pattern as $block => $train) {
-            // $this->thing->log('Agent "Shift" block is ' . $block . '.');
 
             $run_time = $train['run_time'];
             $run_at = $train['run_at'];
 
-            $end_at = $this->thing->json->time(
+            $end_at = $this->thing->time(
                 strtotime($train['run_at'] . " " . $run_time . " minutes")
             );
 
@@ -366,11 +354,7 @@ class Shift extends Agent
 
     public function respondResponse()
     {
-        // Thing actions
-
         $this->thing->flagGreen();
-
-        // Generate email response.
 
         $to = $this->thing->from;
         $from = $this->keyword;
@@ -430,8 +414,6 @@ class Shift extends Agent
         $haystack =
             $this->agent_input . " " . $this->from . " " . $this->subject;
 
-        //		$this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
-
         $prior_uuid = null;
 
         $pieces = explode(" ", strtolower($input));
@@ -475,7 +457,6 @@ class Shift extends Agent
                             return;
 
                         default:
-                        //$this->read();                                                    //echo 'default';
                     }
                 }
             }
@@ -521,8 +502,6 @@ class Shift extends Agent
 
         $aliases['on'] = ['red', 'on'];
         $aliases['off'] = ['green', 'off'];
-        //$aliases['reset'] = array('rst','reset','rest');
-        //$aliases['lap'] = array('lap','laps','lp');
 
         $words = explode(" ", $input);
 

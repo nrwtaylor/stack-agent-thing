@@ -97,18 +97,16 @@ class Latency extends Agent
 
     public function set()
     {
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "latency",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["latency", "refreshed_at"],
                 $time_string
             );
@@ -116,23 +114,22 @@ class Latency extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->thing->json->setField("variables");
-        $queue_time = $this->thing->json->readVariable([
+        $queue_time = $this->thing->Read([
             "latency",
             "queue_time",
         ]);
-        $run_time = $this->thing->json->readVariable(["latency", "run_time"]);
+        $run_time = $this->thing->Read(["latency", "run_time"]);
 
         if ($queue_time == false and $run_time == false) {
             $this->getLatency();
 
             $this->readSubject();
 
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["latency", "queue_time"],
                 $this->queue_time
             );
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["latency", "run_time"],
                 $this->run_time
             );

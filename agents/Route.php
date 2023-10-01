@@ -24,8 +24,7 @@ class Route extends Agent
 
         // Agent variables
 
-        $this->thing->json->setField("variables");
-        $this->head_code = $this->thing->json->readVariable([
+        $this->head_code = $this->thing->Read([
             "headcode",
             "head_code",
         ]);
@@ -49,7 +48,7 @@ class Route extends Agent
         }
         $route['refreshed_at'] = $this->current_time;
 
-        $this->thing->json->writeVariable(["route"], $route);
+        $this->thing->Write(["route"], $route);
     }
 
     function set()
@@ -122,8 +121,7 @@ if (count($this->routes) !=0) {
     function get($route = null)
     {
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "route",
             "refreshed_at",
         ]);
@@ -131,16 +129,14 @@ if (count($this->routes) !=0) {
         // And if there is no IChing timestamp create one now.
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["route", "refreshed_at"],
                 $time_string
             );
         }
 
-        //$this->thing->json->setField("variables");
-        //$this->route = $this->thing->json->readVariable(["route"]);
+        //$this->route = $this->thing->Read(["route"]);
 
         if (!isset($this->route)) {
             $this->route = $this->variables->getVariable('route');
@@ -172,7 +168,6 @@ if (count($this->routes) !=0) {
 
         $t = strtotime($input_time);
 
-        //echo $t->format("Y-m-d H:i:s");
         $this->hour = date("H", $t);
         $this->minute = date("i", $t);
 
@@ -353,9 +348,7 @@ if (count($this->routes) !=0) {
     public function readSubject()
     {
         $input = $this->input;
-//var_dump($input);
-//var_dump($this->agent_input);
-//var_dump($this->subject);
+
         // Bail at this point if only a headcode check is needed.
         if ($this->agent_input == "extract") {
             return;

@@ -212,7 +212,7 @@ $when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
 
                 $file = $ics_link;
                 if (isset($file) and is_string($file) and $file !== "") {
-                    $response = $this->readCalendar($file);
+                    $response = $this->icalCalendar($file);
                     if ($response != true) {
                         $calendar_count += 1;
                     }
@@ -505,9 +505,6 @@ $when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
                         "[",
                         "runtime",
                         "]",
-                        //                        "\n",
-                        //                        'description',' ',"\n",
-                        //                        'location',
                     ]) . "\n";
             }
 
@@ -574,7 +571,7 @@ $when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
                 $calendar_text .= $t;
             }
         }
-        //$this->node_list = ["calendar" => ["calendar", "dog"]];
+
         $txt =
             "CALENDAR " .
             $this->time_zone .
@@ -687,7 +684,7 @@ $when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
         return $event;
     }
 
-    public function readCalendar($calendar_uri, $calendar_name = null)
+    public function icalCalendar($calendar_uri, $calendar_name = null)
     {
         $this->calendar_unique_events === false;
 
@@ -769,7 +766,7 @@ $when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
         // Sort events list by start time.
         // https://stackoverflow.com/questions/4282413/sort-array-of-objects-by-object-fields
         usort($this->calendar->events, function ($first, $second) {
-            return strtotime($first->start_at) > strtotime($second->end_at);
+            return (strtotime($first->start_at) - strtotime($second->end_at));
         });
 
         //$time_agent = new Time($this->thing, "time");
@@ -944,7 +941,7 @@ $when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
         $errstr,
         $errfile,
         $errline,
-        $errContext
+        $errContext = null
     ) {
         //throw new \Exception('Class not found.');
         //trigger_error("Fatal error", E_USER_ERROR);
@@ -985,7 +982,7 @@ $when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
         }
 
         if ($this->stack_engine_state != "prod") {
-            echo $console . "\n";
+            $this->thing->console($console . "\n");
             $this->response .=
                 "Unexpected calendar warning seen. " . $errstr . ". ";
         }

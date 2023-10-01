@@ -28,11 +28,18 @@ class Zoom extends Agent
 
         $this->thing_report["info"] =
             "ZOOM is a tool for hosting audio-visual conferences.";
-        $this->thing_report["help"] = "Click on the image for a PDF.";
+        $this->thing_report["help"] =
+            "Join the screenshare with audio share. Click Zoom link.";
 
         $this->node_list = ["zoom" => ["zoom", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
+
+        $this->urls = $this->settingsAgent(["zoom", "urls"]);
+        $this->url = $this->settingsAgent(["zoom", "url"]);
+
+        $this->urls = $this->settingsAgent(["zoom", "urls"]);
+        $this->url = $this->settingsAgent(["zoom", "url"]);
 
         $this->initZoom();
     }
@@ -67,11 +74,29 @@ class Zoom extends Agent
         $this->thing_report["choices"] = $this->choices;
     }
 
+    public function makeUrl()
+    {
+        // Share default web link.
+
+        if ($this->urls === false) {
+            $this->urls = $this->settingsAgent(["zoom", "urls"]);
+        }
+        if ($this->url === false) {
+            $this->url = $this->settingsAgent(["zoom", "url"]);
+        }
+
+        $this->thing_report["url"] = $this->url;
+    }
+
     /**
      *
      */
     public function makeSMS()
     {
+        if (!isset($this->urls) or $this->url === false) {
+            $this->makeUrl();
+        }
+
         $sms = "ZOOM | ";
 
         $sms_text =
@@ -81,9 +106,15 @@ class Zoom extends Agent
         }
         $telephone_numbers_text = implode(" / ", $this->telephone_numbers);
 
-        if ($this->urls !== false) {
-            $urls_text = implode(" ", $this->urls);
-            $sms .= $urls_text . " ";
+        if (
+            is_array($this->urls) and
+            count($this->urls) > 1 and
+            $this->urls[0] != $this->url
+        ) {
+            if ($this->urls !== false) {
+                $urls_text = implode(" ", $this->urls);
+                $sms .= $urls_text . " ";
+            }
         }
         $sms .= $sms_text . " ";
         $sms .= $telephone_numbers_text . " ";
@@ -130,6 +161,7 @@ class Zoom extends Agent
 
     public function readZoom($text = null)
     {
+        if ($text == null) {return true;}
         //        $file = $this->resource_path . 'call/call-zoom-test' . '.txt';
 
         //        if (file_exists($file)) {
@@ -153,6 +185,8 @@ class Zoom extends Agent
      */
     public function makeWeb()
     {
+        $this->makeUrl();
+
         $link = $this->web_prefix . "thing/" . $this->uuid . "/zoom.pdf";
         $this->node_list = ["zoom" => ["zoom"]];
         $web = "";
@@ -162,6 +196,11 @@ class Zoom extends Agent
             $web .= $this->html_image;
             $web .= "</a>";
         }
+
+        $web .= $this->restoreUrl(
+            "Use this URL to connect with us " . $this->url . "."
+        );
+
         $web .= "<br>";
 
         $this->thing_report["web"] = $web;
@@ -169,16 +208,14 @@ class Zoom extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "zoom",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["zoom", "refreshed_at"],
                 $time_string
             );
@@ -190,11 +227,9 @@ class Zoom extends Agent
         $urls = $this->extractUrls($text);
 
         foreach ($urls as $i => $url) {
-
             if ($url === "https://zoom.us/") {
-               continue;
+                continue;
             }
-
 
             if (stripos($url, ".zoom.us/") !== false) {
                 // Match first instance.
@@ -417,6 +452,7 @@ class Zoom extends Agent
         if (count($pieces) == 1) {
             if ($input == "zoom") {
                 $this->getZoom();
+                $this->response .= "Shared Zoom meeting link.";
                 return;
             }
         }

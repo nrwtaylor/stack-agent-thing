@@ -235,9 +235,10 @@ tailoring: ## Set your servername in system files
 clean: ## Clean up the web folders and settings
 	@echo "===== Cleaning up: removing web folders and settings ==============="
 	read -p "Ready to erase all files in /var/www/stackr.test? (y|n)" cleaning; echo $$cleaning ; \
-	if [ "$$cleaning" = "n" ] ; then \
+
+	if [ "$$cleaning" = "n" ]; then \
 	echo "phew"; else \
-	rm -Rvf /var/www/$(SERVERNAME) ; \
+	rm -Rvf /var/www/$(SERVERNAME); \
 	rm -f /etc/apache2/sites-available/$(SERVERNAME).conf; fi
 
 #	rm -f /etc/apache2/sites-available/000-default.conf
@@ -245,13 +246,14 @@ clean: ## Clean up the web folders and settings
 # perhaps also:  mysql? php?
 
 patch: ## Activate a patch
+	@echo "Copy files from working to operating stack."; \
 	sudo cp -rf * /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/
 
 debug: ## Install enhanced debugging environment (dev optional?)
 	sudo apt install php-dev
 	sudo pecl install xdebug
 
-configuration: 
+configuration:
 # sudo nano /etc/sysctl.conf
 # fs.file-max = 65535
 

@@ -35,9 +35,8 @@ class Authcode extends Agent
 
     public function set()
     {
-        $this->thing->json->setField("variables");
         $this->authcode['refreshed_at'] = $this->current_time;
-        $this->thing->json->writeVariable(["authcode"], $this->authcode);
+        $this->thing->Write(["authcode"], $this->authcode);
     }
 
     public function uuidAuthcode($uuid = null)

@@ -32,7 +32,7 @@ class Webinar extends Agent
 
         $this->node_list = ["webinar" => ["webinar", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->initWebinar();
     }
@@ -155,16 +155,14 @@ class Webinar extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->readVariable([
             "webinar",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["webinar", "refreshed_at"],
                 $time_string
             );
@@ -191,16 +189,16 @@ class Webinar extends Agent
                 $selected_paragraphs[] = $paragraph;
                 continue;
             }
-
-
         }
-$urls = [];
-foreach($selected_paragraphs as $s=>$paragraph) {
-
-$urls = array_merge($this->extractUrls($paragraph), $urls);
-$urls = array_unique($urls);
-}
-if (count($urls) === 1) {$url = $urls[0]; return $url;}
+        $urls = [];
+        foreach ($selected_paragraphs as $s => $paragraph) {
+            $urls = array_merge($this->extractUrls($paragraph), $urls);
+            $urls = array_unique($urls);
+        }
+        if (count($urls) === 1) {
+            $url = $urls[0];
+            return $url;
+        }
 
         return false;
     }
@@ -305,7 +303,5 @@ if (count($urls) === 1) {$url = $urls[0]; return $url;}
         }
 
         $this->getWebinar();
-
-        return;
     }
 }

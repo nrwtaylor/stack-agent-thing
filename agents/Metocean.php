@@ -110,32 +110,20 @@ class Metocean extends Agent {
 
 
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("metocean", "refreshed_at") );
+        $time_string = $this->thing->Read( array("metocean", "refreshed_at") );
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("metocean", "refreshed_at"), $time_string );
+            $time_string = $this->thing->time();
+            $this->thing->Write( array("metocean", "refreshed_at"), $time_string );
         }
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->thing->json->setField("variables");
-        //        $queue_time = $this->thing->json->readVariable( array("metocean", "current_conditions") );
-        //        $run_time = $this->thing->json->readVariable( array("metocean", "forecast_conditions") );
-
-
-        //        if (($queue_time == false) and ($run_time==false) ) {
-        //            $this->getLatency();
-
-        //            $this->readSubject();
-
-        $this->thing->json->writeVariable( array("metocean", "current_conditions"), $this->current_conditions );
-        $this->thing->json->writeVariable( array("metocean", "forecast_conditions"), $this->forecast_conditions );
+        $this->thing->Write( array("metocean", "current_conditions"), $this->current_conditions );
+        $this->thing->Write( array("metocean", "forecast_conditions"), $this->forecast_conditions );
 
         //        }
 
@@ -178,7 +166,7 @@ class Metocean extends Agent {
         // String html tags
         //$data = strip_tags($data);
         $data = preg_replace("/<.*?>/", " ", $data);
-        //var_dump($data);
+
         $contents = $data;
         $this->weather_contents = $data;
 
@@ -187,9 +175,6 @@ class Metocean extends Agent {
         //$t = $this->getLineAfter($contents, $searchfor);
         $text = $this->getLine($contents, $searchfor, 0);
 
-        //var_dump($text);
-        //exit();
-        //$x = "Wind";
         $conditions_text = explode($searchfor, $text);
 
         $conditions = explode("Air", $conditions_text[1]);
@@ -206,8 +191,6 @@ class Metocean extends Agent {
         $timestamp = $timestamp_text[1];
         $conditions_timestamp = str_replace("&nbsp;", " " , $timestamp);
 
-        //var_dump($timestamp);
-
         //        $forecast_timestamp = trim(explode($searchfor, $this->conditions[0])[1]);
 
         $this->forecast_timestamp_date = preg_split( "/ (PDT|PST) /", $conditions_timestamp )[1];
@@ -218,14 +201,8 @@ class Metocean extends Agent {
         $this->refreshed_at = $this->current_time;
 
 
-        //exit();
-
         $conditions = explode("Air", $conditions_text[1]);
         $this->current_conditions = trim($conditions[0]);
-
-
-
-
 
         return;
 
@@ -371,11 +348,6 @@ class Metocean extends Agent {
         $this->chart_agent->y_min = $y_min;
         $this->chart_agent->y_max = $y_max;
 
-        //var_dump($y_min);
-        //var_dump($y_max);
-
-
-
         $y_spread = 100;
         if (($y_min == false) and ($y_max === false)) {
             //
@@ -391,7 +363,6 @@ class Metocean extends Agent {
         }
         if ($y_spread == 0) {$y_spread = 100;}
 
-        //var_dump($y_spread);
         $this->chart_agent->y_spread = $y_spread;
         $this->chart_agent->drawGraph();
 

@@ -33,8 +33,7 @@ class Human extends Agent
 
 public function set() {
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("human", "refreshed_at"), $this->current_time );
+        $this->thing->Write( array("human", "refreshed_at"), $this->current_time );
 
 
 }

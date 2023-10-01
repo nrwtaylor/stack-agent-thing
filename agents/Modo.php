@@ -205,7 +205,7 @@ class Modo extends Agent
      */
     function printCar($car)
     {
-        echo $this->carString($car) . "\n";
+        $this->thing->console($this->carString($car) . "\n");
     }
 
     /**
@@ -250,8 +250,6 @@ class Modo extends Agent
                 $start_time = $location["start_time"];
                 $end_time = $location["end_time"];
 
-                //echo $modo_id . " / " . $x . " / " . $start_time.  " / " . $end_time . " " ;
-
                 if (
                     $start_time != null and
                     $start_time < $x and
@@ -264,7 +262,6 @@ class Modo extends Agent
                 } // Not available.
 
                 if ($available_flag) {
-                    //echo "available";
                 } else {
                     $in_use_count += 1;
                 }
@@ -342,8 +339,6 @@ class Modo extends Agent
         if (is_array($text)) {
             $search_longitude = $text[0];
             $search_latitude = $text[1];
-
-            //echo $search_latitude . "  " . $search_longitude ."\n";
         }
         //$this->cars[$modo_id] = array("description"=>$description, "runat"=>null, "runtime"=>null, "place"=>$locations[0], "link"=>null);
 
@@ -365,7 +360,6 @@ class Modo extends Agent
                 $car["distance"] = $distance;
                 if ($distance < $min_distance) {
                     $min_distance = $distance;
-                    //echo $min_distance . "\n";
                     $this->nearest_cars[$distance] = $car;
                     //                if (strtolower($location['neighbourhood']) == strtolower($text)) {$this->matches[$modo_id] = $car;}
                 }
@@ -467,7 +461,6 @@ class Modo extends Agent
         $matches = [];
         foreach ($this->locations as $i => $location) {
             if (strtolower($location["Neighbourhood"]) == strtolower($text)) {
-                //echo "Is " . $location['Neighbourhood'] . "\n";
                 return true;
             }
         }
@@ -681,7 +674,6 @@ class Modo extends Agent
      */
     public function makeWeb()
     {
-        //var_dump($this->response);
         if (isset($this->html_message)) {
             return;
         }
@@ -893,7 +885,6 @@ class Modo extends Agent
 
         $input = $this->input;
 
-        //var_dump($this->input);
         $pieces = explode(" ", strtolower($input));
 
         // So this is really the 'sms' section
@@ -928,7 +919,6 @@ class Modo extends Agent
             $r = $car["description"] . " " . "[" . $filtered_input . "] / ";
             $this->response = $car["link"] . " " . $location . " " . $r;
 
-            //echo "number";
             return;
         }
 
@@ -1055,7 +1045,7 @@ class Modo extends Agent
         $response = "";
         $max_cars = 3;
         $car_count = 0;
-        //var_dump($this->matches);
+
         // Then sort by the location description
         $r = "";
 
@@ -1070,8 +1060,7 @@ class Modo extends Agent
             $r2 = "";
             foreach ($matches as $modo_id => $car) {
                 $car_count += 1;
-                //var_dump($car);
-                //exit();
+
                 $r2 = "";
                 $location_text = null;
                 $flag_error = false;
@@ -1196,7 +1185,7 @@ class Modo extends Agent
 
         $html .= '<p>Matched neighbourbood "' . $this->neighbourhood . '". ';
         $html .= "<p>";
-        //var_dump($this->matches);
+
         if (!isset($this->matches)) {
             $html .= "<br>No matching cars found on Modo.";
         } else {

@@ -53,7 +53,7 @@ class ICS213 extends Agent
 
     function set($requested_state = null)
     {
-        $this->thing->json->writeVariable( array("ics213", "inject"), $this->inject );
+        $this->thing->Write( array("ics213", "inject"), $this->inject );
 
         $this->refreshed_at = $this->current_time;
 
@@ -85,18 +85,16 @@ class ICS213 extends Agent
 
         $this->thing->log($this->agent_prefix . 'got a ' . strtoupper($this->state) . ' FLAG.' , "INFORMATION");
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("ics213", "refreshed_at") );
+        $time_string = $this->thing->Read( array("ics213", "refreshed_at") );
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("ics213", "refreshed_at"), $time_string );
+            $time_string = $this->thing->time();
+            $this->thing->Write( array("ics213", "refreshed_at"), $time_string );
         }
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->inject = $this->thing->json->readVariable( array("ics213", "inject") );
+        $this->inject = $this->thing->Read( array("ics213", "inject") );
     }
 
     function getNuuid()

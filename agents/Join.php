@@ -25,21 +25,18 @@ class Join extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "group",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
             // Then this Thing has no group information
-            //$this->thing->json->setField("variables");
-            //$time_string = $this->thing->json->time();
-            //$this->thing->json->writeVariable( array("group", "refreshed_at"), $time_string );
+            //$time_string = $this->thing->time();
+            //$this->thing->Write( array("group", "refreshed_at"), $time_string );
         }
 
-        $this->thing->json->setField("variables");
-        $this->group_id = $this->thing->json->readVariable([
+        $this->group_id = $this->thing->Read([
             "group",
             "group_id",
         ]);
@@ -64,8 +61,6 @@ class Join extends Agent
 
         $this->response .= "Joined group " . $group . ". ";
     }
-
-    // -----------------------
 
     public function respondResponse()
     {
@@ -149,7 +144,7 @@ class Join extends Agent
                         $uuid = $thing['uuid'];
                         $group_thing = new Thing($uuid);
 
-                        $this->group_id = $group_thing->json->readVariable([
+                        $this->group_id = $group_thing->Read([
                             "group",
                             "group_id",
                         ]);
@@ -200,7 +195,6 @@ class Join extends Agent
             }
 
             if (is_numeric($this->subject) and strlen($input) == 5) {
-                //return $this->response;
             }
 
             if (is_numeric($this->subject) and strlen($input) == 4) {
@@ -216,11 +210,9 @@ class Join extends Agent
                     switch ($piece) {
                         case 'join':
                             if ($key + 1 > count($pieces)) {
-                                //echo "last word is stop";
                                 $this->group = false;
                                 return "Request not understood";
                             } else {
-                                //echo "next word is:";
                                 $this->group = $pieces[$key + 1];
                                 $this->joinGroup($this->group);
 
@@ -232,18 +224,13 @@ class Join extends Agent
                             $this->response .= 'Saw new. ';
                             $this->startGroup();
                             return;
-                        //echo 'bus';
-                        //break;
                         case 'start':
                             $this->response .= 'Start group. ';
                             $this->startGroup();
                             return;
-                        //echo 'bus';
-                        //break;
 
                         default:
 
-                        //echo 'default';
                     }
                 }
             }
@@ -253,28 +240,6 @@ class Join extends Agent
 
     public function PNG()
     {
-        // Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
-
-        //I just lost about 4 hours on a really stupid problem. My images on the local server were somehow broken and therefore did not display in the browsers. After much looking around and tes$
-        //No the problem was not a whitespace, but the UTF BOM encoding character at the begining of one of my inluded files...
-        //So beware of your included files!
-        //Make sure they are not encoded in UTF or otherwise in UTF without BOM.
-        //Hope it save someone's time.
-
-        //http://php.net/manual/en/function.imagepng.php
-
-        //header('Content-Type: text/html');
-        //echo "Hello World";
-        //exit();
-
-        //header('Content-Type: image/png');
-        //QRcode::png('PHP QR Code :)');
-        //exit();
-        // here DB request or some processing
-
-        //		if ($this->group_id == null) {
-        //			$this->startGroup();
-        //		}
 
         $codeText = "group:" . $this->group_id;
 
@@ -292,7 +257,6 @@ class Join extends Agent
         //imagestring($image, 5, 0, 0, 'Hello world!', $textcolor);
 
         $this->thing_report['png'] = $image;
-        //echo $this->thing_report['png']; // for testing.  Want function to be silent.
 
         return $this->thing_report['png'];
     }

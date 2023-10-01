@@ -13,13 +13,18 @@ use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 // For testing.
 // See https://jolicode.com/blog/find-segfaults-in-php-like-a-boss
 
+// PHP class for a Thing.
+// A Thing needs access to a store (db)
+// and a means to serialize and deserialize into that store (json).
+// And a way to generate a unique identifier (uuid).
+
 class Thing
 {
     public $var = 'hello';
 
     public $from = null;
 
-    function __construct($uuid, $test_message = null)
+    public function __construct($uuid, $test_message = null)
     {
         //declare(ticks=1);
 
@@ -52,9 +57,13 @@ class Thing
         // It is a significant Stack concern.
 
         if (!isset($GLOBALS['stack_path'])) {
+//$directory = __DIR__ .'/../../../../';
+
             // Try this, otherwise fail.
             $GLOBALS['stack_path'] = "/var/www/stackr.test/";
             //$GLOBALS['stack_path'] = "/var/www/html/stackr.ca/";
+            //$GLOBALS['stack_path'] = $directory;
+
         }
 
         //set_error_handler(array($this, "exception_error_handler"));
@@ -135,28 +144,33 @@ class Thing
             $this->queue_handler = $this->container['stack']['queue_handler'];
         }
 
-        //set_error_handler(array($this, "exception_error_handler"));
+        $this->hash_algorithm = "sha256";
+        if (isset($this->container['stack']['hash_algorithm'])) {
+            $this->hash_algorithm = $this->container['stack']['hash_algorithm'];
+        }
 
+
+        //set_error_handler(array($this, "exception_error_handler"));
         try {
             $this->getThing($uuid);
         } catch (\Exception $e) {
+            $this->error = "No Thing to get";
             $this->log("No Thing to get.");
 
             // Fail quietly. There was no Thing to get.
-            //echo 'Caught exception: ',  $e->getMessage(), "\n";
+            $this->log('Caught exception: ',  $e->getMessage(), "\n", 'INFORMATION');
         }
-
         // Deal with it.
 
         // devstack
         //		echo "Stack Balance<br>";
         //		$this->stackBalance($this->uuid);
-
         $this->log("Thing instantiation completed.");
     }
 
-    function __destruct()
+    public function __destruct()
     {
+
         $t = "";
         if (isset($this->nuuid)) {
             $t = $this->nuuid;
@@ -164,7 +178,7 @@ class Thing
         $this->log("Thing " . $t . " de-instantiated.");
     }
 
-    function getThing($uuid = null)
+    public function getThing($uuid = null)
     {
         if (null === $uuid) {
             // ONLY PLACE IN STACK WHERE UUIDs ARE ASSIGNED
@@ -179,7 +193,7 @@ class Thing
 
             $this->log("Thing made a UUID.");
 
-            // And then we pull out some Thing related variables and settings.
+            // And then we pull out some Thing related svariables and settings.
 
             $this->container['thing'] = function ($c) {
                 $db = $c['settings']['thing'];
@@ -198,29 +212,27 @@ class Thing
             // Variable overflow is challenging. See VARIABLES.
 
             // Can't call db here, can only call it when $from is known.
-            // $this->db = new Database($this->uuid, $this->from);
 
-            $this->json = new Json($this->uuid);
+            $this->json = new ThingJson($this->uuid);
 
             $this->log("JSON connector made.");
             $this->log("Made a thing from null.");
 
             // Testing this as of 15 June 2018.  Not used by framework yet.
-            $this->variables = new Json($this->uuid);
+            $this->variables = new ThingJson($this->uuid);
+
             $this->variables->setField("variables");
 
-            $this->choice = new Choice($this->uuid, $this->from);
+            $this->choice = new ThingChoice($this->uuid, $this->from);
 
             $this->log("Choice connector made.");
 
             // Sigh.  Hold this Thing to account.  Unless it is a forager.
             $this->state = 'foraging'; // Add code link later.
-
             // Don't create accounts here because that is done on ->Create()
             // The instatiation function needs to return a minimum clean false
             // Thing.
             $this->thing = false;
-
             // Calling constructor with a uuid that doesn't exist,
             // returns false, and with a Thing instantiated.  For tasking.
         } else {
@@ -236,24 +248,23 @@ class Thing
 
             $this->uuid = $uuid;
             $this->nuuid = substr($this->uuid, 0, 4);
-
             // Is link to the ->db broken when the Thing is deinstantiated.
             // Assume yes.
-            $this->db = new Database($this->uuid, 'null' . $this->mail_postfix);
+
+            $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
 
             $this->log("Thing made a db connector.");
-
             // Provide handler for Json translation from/to MySQL.
-            $this->json = new Json($this->uuid);
+            $this->json = new ThingJson($this->uuid);
 
             // This is a placeholder for refactoring the Thing variables
-            $this->variables = new Json($this->uuid);
+            $this->variables = new ThingJson($this->uuid);
             $this->variables->setField("variables");
             $this->log("Thing made a json connector.");
 
             // Provide handler to support state maps and navigation.
             // And state persistence through de-instantiation/instantiation.
-            $this->choice = new Choice($this->uuid, $this->from);
+            $this->choice = new ThingChoice($this->uuid, $this->from);
             $this->log("Thing made a choice connector.");
 
             // Cost of connecting to a Thing is 100 <units>.
@@ -292,17 +303,30 @@ class Thing
 
     function spawn($datagram = null)
     {
+
         if (strtolower($this->queue_handler) != "gearman") {
+
             $this->log("No queue handler recognized");
             return true;
         }
 
         // "Failed to set exception option."
         // Try to catch.
-
+        //set_error_handler(array($this, "exception_error_handler"));
+        try {
         $client = new \GearmanClient();
+        } catch (\Throwable $e) {
+            $this->error = $e->getMessage();
+            $this->log('Caught throwable: ',  $e->getMessage(), "\n", 'INFORMATION');
+            return true;
+        } catch (\Exception $e) {
+            $this->error = $e->getMessage();
+            $this->log('Caught exception: ',  $e->getMessage(), "\n", 'INFORMATION');
+            return true;
+        }
 
         $arr = (array) $client;
+
         if (!$arr) {
             $this->log("spawn. Job queue not available.");
             // do stuff
@@ -315,8 +339,15 @@ class Thing
 
         $client->addServer();
         $arr = json_encode($datagram);
+$function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedence'] : "");
 
-        $client->doLowBackground("call_agent", $arr);
+
+//$function_name = "call_agent";
+
+
+//        $client->doLowBackground("call_agent", $arr);
+        $client->doLowBackground($function_name, $arr);
+
         $this->log("spawned a Thing.");
     }
 
@@ -334,7 +365,7 @@ class Thing
         $this->Forget();
     }
 
-    function Create($from = null, $to = "", $subject = "")
+    function Create($from = null, $to = "", $subject = "", $agent_input = null)
     {
         if ($from == null) {
             $from = 'null' . $this->mail_postfix;
@@ -354,8 +385,10 @@ class Thing
             $message0['50 words'] .=
                 $this->uuid . " found and removed an @ sign";
         }
+if (!isset($this->db)) {
+        $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>$from] );
+}
 
-        $this->db = new Database($this->uuid, $from);
         $this->log("Create. Database connector made.");
 
         // All records are associated with a posterior record.  Ideally
@@ -394,10 +427,11 @@ class Thing
 
         $query = $this->db->Create($subject, $to); // 3s
         $this->log("Create. Database create call completed.");
-
         $this->to = $to;
         $this->from = $from;
         $this->subject = $subject;
+
+        $this->agent_input = $agent_input;
 
         // test 9383 30 January 2021
         $this->created_at = time();
@@ -410,6 +444,13 @@ class Thing
             $this->sqlresponse = "New record created successfully.";
             $message0['500 words'] .= $this->sqlresponse;
         } elseif ($query == false) {
+
+           $this->log(
+                'new record received FALSE on create.',
+                "INFORMATION"
+            );
+
+
             return false;
         } else {
             $error_text = $query->errorInfo();
@@ -418,6 +459,13 @@ class Thing
         }
 
         if ($to == "error") {
+
+           $this->log(
+                'new record heard error.',
+                "INFORMATION"
+            );
+
+
             return true;
         }
 
@@ -432,7 +480,8 @@ class Thing
             //$this->sqlresponse = "Error: " . $sql . "<br>" . $query->errorInfo();
             $this->sqlresponse = "Error: " . implode(":", $query->errorInfo());
             $message0['50 words'] .= $this->sqlresponse;
-            return false;
+//return $this->Get();
+            //return false;
         }
 
         // Create new accounts.  Still under development as of 25 April.
@@ -445,12 +494,10 @@ class Thing
         // information with newly presented information.
 
         // Which means the stack can reset a Things balance.  Handy.
-
         $this->account = [];
 
         // Kind of ugly.  But I guess this isn't Python.  And null
         // accounts can't be allowed.
-
         if ($this->stack_account != null) {
             $this->newAccount(
                 $this->stack_uuid,
@@ -489,9 +536,10 @@ class Thing
         //$this->stackBalance();
 
         $this->log("Create completed.");
-        $this->log("Now called Get. (again?)");
+$g = $this->Get();
+        $this->log("Finished create.");
 
-        return $this->Get();
+        return $g;
     }
 
     public function newAccount($account_uuid, $account_name, $balance = null)
@@ -508,7 +556,7 @@ class Thing
             $this->account = [];
         }
 
-        $this->account[$account_name] = new Account(
+        $this->account[$account_name] = new ThingAccount(
             $this->uuid,
             $account_uuid,
             $account_name
@@ -518,11 +566,26 @@ class Thing
         return false;
     }
 
+/*
+Use this pattern. And deprecate getVariables.
+And review Agent variables.
+*/
+
+    public function Read($path) {
+        $this->json->setField("variables");
+        return $this->json->readVariable($path);
+    }
+
+    public function Write($path, $value) {
+        $this->json->setField("variables");
+        $this->json->writeVariable($path, $value);
+    }
+
     public function loadAccounts()
     {
         $this->json->setField("variables");
 
-        $accounts = $this->json->readVariable(["account"]);
+        $accounts = $this->Read(["account"]);
 
         // At this point we have a PHP array of all accounts on
         // this Thing.
@@ -651,39 +714,34 @@ class Thing
         // Call Db and forget the record.
 
         if (!isset($this->db)) {
-            return;
+            return ['error'=>true];
         }
         $thingreport = $this->db->Forget($this->uuid);
+        return $thingreport;
     }
 
     public function Ignore()
     {
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "status"], "green");
+        $this->Write(["thing", "status"], "green");
         $this->Get();
     }
 
     public function flagRed()
     {
         // Make the Thing show Red
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "status"], "red");
+        $this->Write(["thing", "status"], "red");
         $this->Get();
     }
 
     public function silenceOn()
     {
-        // Make the Thing show Red
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "silence"], "on");
+        $this->Write(["thing", "silence"], "on");
         $this->Get();
     }
 
     public function silenceOff()
     {
-        // Make the Thing show Red
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "silence"], "off");
+        $this->Write(["thing", "silence"], "off");
         $this->Get();
     }
 
@@ -691,7 +749,7 @@ class Thing
     {
         // Ask if the Thing is Green
         $var_path = ["thing", "silence"];
-        if ($this->json->readVariable($var_path) == "on") {
+        if ($this->Read($var_path) == "on") {
             return true;
         }
         return false;
@@ -700,16 +758,14 @@ class Thing
     public function flagAmber()
     {
         // Make the Thing show Amber
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "status"], "amber");
+        $this->Write(["thing", "status"], "amber");
         $this->Get();
     }
 
     public function flagGreen()
     {
         // Make the Thing show Green
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "status"], "green");
+        $this->Write(["thing", "status"], "green");
         $this->Get();
     }
 
@@ -717,7 +773,7 @@ class Thing
     {
         // Ask if the Thing is Red
         $var_path = ["thing", "status"];
-        if ($this->json->readVariable($var_path) == "red") {
+        if ($this->Read($var_path) == "red") {
             return true;
         }
         return false;
@@ -727,7 +783,7 @@ class Thing
     {
         // Ask if the Thing is Green
         $var_path = ["thing", "status"];
-        if ($this->json->readVariable($var_path) == "green") {
+        if ($this->Read($var_path) == "green") {
             return true;
         }
         return false;
@@ -738,7 +794,7 @@ class Thing
     {
         // Ask if the Thing is Amber.  Is it ready to go?
         $var_path = ["thing", "status"];
-        if ($this->json->readVariable($var_path) == "amber") {
+        if ($this->Read($var_path) == "amber") {
             return true;
         }
         return false;
@@ -765,7 +821,7 @@ class Thing
     {
         // More open way to ask a thing for its flag
         $var_path = ["thing", "status"];
-        return $this->json->readVariable($var_path);
+        return $this->Read($var_path);
     }
 
     public function flagSet($color = null)
@@ -775,8 +831,7 @@ class Thing
             $color = 'red';
         }
 
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "status"], $color);
+        $this->Write(["thing", "status"], $color);
         $this->Get();
     }
 
@@ -787,52 +842,45 @@ class Thing
         // Bootstrapping db access.
         // A Thing can call an UUID so called up
         // the requested UUID.  Using the null account.
+/*
+if (isset($this->db)) {
+        $hash_nom_from = hash($this->hash_algorithm, $this->from);
 
+$prior_uuid = $this->db->getMemory($hash_nom_from);
+echo "Previous uuid got " . ($prior_uuid) . "\n";
+}
+*/
+
+$thing = false;
+if (isset($this->db)) {
         $thingreport = $this->db->Get($this->uuid);
         $thing = $thingreport['thing'];
+}
 
         $this->log("loaded thing " . $this->nuuid . " from db.");
 
         if ($thing == false) {
-            //$this->uuid = $this->thing->uuid;
+
+// Returned thing is false.
+// So not on stack.
+
+// Use what we know.
+/*
             $this->to = null;
             $this->from = null;
             $this->subject = null;
+*/
         } else {
             // This just makes sure these four variables
             // are consistently available
             // as top level Thing objects.
-            //$this->uuid = $this->thing->uuid;
             $this->to = $thing->nom_to;
             $this->from = $thing->nom_from;
-
-            // One of these looks promising.
-
-            //$thingreport = $this->db->setUser($this->from);
-            //$thingreport = $this->db->from = $this->from;
-
             $this->subject = $thing->task;
+            $this->associations = $thing->associations;
         }
 
         $this->thing = $thing;
-
-        // Once the Thing has been pulled we can update the db connector
-        // to use the current from.
-
-        //		$this->db->setFrom($this->from);
-
-        //$this->db = new Database($this->uuid, $this->from);
-
-        //$thingreport = $this->db->setUser($this->from);
-
-        // Uncommenting any of the above options results in non-working uuids
-
-        // Commented out to allow PNG to work
-
-        // Keep for debugging.  Working as of 5 April 2017.  And passing all tests
-        // 25 Apr, except Test 4: Test posterior association.
-        // echo '<pre>  db.php Get()'; print_r($this->thing); echo '</pre>';
-
         return $thing;
     }
 
@@ -848,9 +896,6 @@ class Thing
 
     function getState($agent = null)
     {
-        // This can probably be deprecated after updating usermanager
-        //echo "agent provided";$agent;
-
         if ($agent == null) {
             $agent = 'thing';
         }
@@ -865,6 +910,7 @@ class Thing
         $things = $thingreport['things'];
 
         $states = [];
+if ($things != false) {
         foreach ($things as $thing) {
             $uuid = $thing['uuid'];
 
@@ -879,7 +925,7 @@ class Thing
             }
             $states[] = $t;
         }
-
+}
         if ($states == []) {
             return $this->current_state = null;
         }
@@ -915,7 +961,7 @@ class Thing
             // record if true.  Previous record updated to point to new record.
 
             if ($this->associate_posterior === true) {
-                $posterior_thing->json = new Json($posterior_thing->uuid);
+                $posterior_thing->json = new ThingJson($posterior_thing->uuid);
                 $posterior_thing->json->setField("associations");
                 $posterior_thing->json->pushStream($this->uuid);
                 //Tested with unset and commented out
@@ -974,10 +1020,15 @@ class Thing
 
     public function console($text = null)
     {
-        //$this->c_output = "off";
-        //if (isset($this->container['stack']['console_output'])) {
-        //        $this->console_output = $this->container['stack']['console_output'];
-        //}
+        // Console does a straight output of text.
+        // No processing.
+        if ($this->console_output == 'off') {return;}
+
+        if (!isset($this->console_output)) {
+
+            $this->console_output = 'on';
+            echo "Thing console started. Turn off in private/settings.\n";
+        }
 
         if (!isset($this->console_output)) {
             return;
@@ -985,11 +1036,10 @@ class Thing
         if ($this->console_output != 'on') {
             return;
         }
-
         echo $text;
     }
 
-    function log($text = null, $logging_level = null)
+function log($text = null, $logging_level = null)
     {
         if ($text == null) {
             return $this->log_last;
@@ -1019,19 +1069,24 @@ class Thing
 
         //        $trace = debug_backtrace();
         //        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-        $trace = debug_backtrace(false, 2);
+
+//        $trace = debug_backtrace(false, 2);
 
         // Get the class that is asking for who awoke it
         $class_name = "X";
+/*
         if (isset($trace[1]['class'])) {
             $class_namespace = $trace[1]['class'];
             $class_name_array = explode("\\", $class_namespace);
             $class_name = end($class_name_array);
         }
-
+*/
         $runtime = number_format($this->elapsed_runtime()) . "ms";
 
         $text = strip_tags($text);
+if (isset($this->agent_class_name_current )){
+$class_name = $this->agent_class_name_current;
+}
         $agent_prefix = 'Agent "' . ucwords($class_name) . '"';
 
         $text = str_replace($agent_prefix, "", $text);
@@ -1066,7 +1121,95 @@ class Thing
                         break;
                     }
                 default:
-                //echo "i is not equal to 0, 1 or 2";
+                // No action.
+            }
+        }
+        $this->log_last = $t;
+    }
+
+    function deprecate_log($text = null, $logging_level = null)
+    {
+        if ($text == null) {
+            return $this->log_last;
+        }
+
+        if (!isset($this->log)) {
+            $this->log = "\n";
+        }
+        // DEBUG, INFORMATION, WARNING, ERROR, FATAL
+        // Plus OPTIMIZE
+
+        if ($logging_level == null) {
+            $logging_level = "INFORMATION";
+            if (isset($this->logging_level_default)) {
+                $logging_level = $this->logging_level_default; // If message isn't specific - assume WARNING
+            }
+            //if (isset($this->logging_level)) {$logging_level = $this->logging_level;}
+        }
+
+        //get the calling class
+
+        // Causing a segmentation fault?
+        //    72.1589   76828520
+        //   -> debug_backtrace() /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php:1020
+
+        // Adjusted PHP7.4 CLI dev memory limit. Test
+
+        //        $trace = debug_backtrace();
+        //        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+
+//        $trace = debug_backtrace(false, 2);
+
+        // Get the class that is asking for who awoke it
+        $class_name = "X";
+/*
+        if (isset($trace[1]['class'])) {
+            $class_namespace = $trace[1]['class'];
+            $class_name_array = explode("\\", $class_namespace);
+            $class_name = end($class_name_array);
+        }
+*/
+        $runtime = number_format($this->elapsed_runtime()) . "ms";
+
+        $text = strip_tags($text);
+if (isset($this->agent_class_name_current )){
+$class_name = $this->agent_class_name_current;
+}
+        $agent_prefix = 'Agent "' . ucwords($class_name) . '"';
+
+        $text = str_replace($agent_prefix, "", $text);
+
+        $text = lcfirst($text);
+        $text = trim($text);
+        $t =
+            str_pad($runtime, 10, " ", STR_PAD_LEFT) .
+            " " .
+            $agent_prefix .
+            ' ' .
+            strip_tags($text);
+
+        $this->log .= $t . " [" . $logging_level . "]" . "<br>";
+
+        if (isset($this->logging_console)) {
+            switch (strtoupper($this->logging_console)) {
+                case "ON":
+                    $this->console($t . " [" . $logging_level . "]" . "\n");
+                    break;
+                case "OPTIMIZE":
+                case "FATAL":
+                case "ERROR":
+                case "WARNING":
+                case "INFORMATION":
+                case "DEBUG":
+                    if (
+                        strtoupper($logging_level) ===
+                        strtoupper($this->logging_console)
+                    ) {
+                        $this->console($t . " [" . $logging_level . "]" . "\n");
+                        break;
+                    }
+                default:
+                // No action.
             }
         }
         $this->log_last = $t;
@@ -1113,12 +1256,19 @@ class Thing
         ];
 
         foreach ($a as $secs => $str) {
-            $d = $etime / $secs;
+            $d = (float) $etime / (float) $secs;
             if ($d >= 1) {
                 $r = round($d);
                 return $r . ' ' . ($r > 1 ? $a_plural[$str] : $str) . '';
             }
         }
+    }
+
+    public function isThing($thing) {
+
+//var_dump(get_class($thing));
+//echo 'isThing?';
+
     }
     //}
 

@@ -98,9 +98,8 @@ class Litany extends Agent
         $this->message = $value;
         $this->sms_message = $value;
 
-        $this->thing->json->setField("variables");
         $time_string = $this->thing->time();
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["litany", "refreshed_at"],
             $time_string
         );

@@ -41,8 +41,7 @@ class Code extends Agent
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["code", "received_at"],
             gmdate("Y-m-d\TH:i:s\Z", time())
         );
@@ -143,6 +142,16 @@ class Code extends Agent
         $choices = $this->thing->choice->makeLinks("php");
 
         $this->thing_report["choices"] = $choices;
+    }
+
+    public function isCode($text) {
+
+       $brackets_open_count = substr_count($text,"{");
+       $brackets_close_count = substr_count($text,"}");
+
+       if ($brackets_open_count + $brackets_close_count >= 4) {return true;}
+       return false;
+
     }
 
     public function makePDF()

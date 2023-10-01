@@ -21,17 +21,15 @@ class Grep extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "grep",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
             // Then this Thing has no group information
-            //$this->thing->json->setField("variables");
-            //$time_string = $this->thing->json->time();
-            //$this->thing->json->writeVariable( array("group", "refreshed_at"), $time_string );
+            //$time_string = $this->thing->time();
+            //$this->thing->Write( array("group", "refreshed_at"), $time_string );
         }
     }
 
@@ -57,7 +55,6 @@ class Grep extends Agent
         //$this->thing->db->setUser($this->from);
         $thing_report = $this->thing->db->userSearch($text);
         $user_things = $thing_report['thing']; // Fix this discrepancy thing vs things
-
         // Or this.
         $thing_report = $this->thing->db->variableSearch(null, $text);
         $variable_things = $thing_report['things'];
@@ -80,7 +77,6 @@ class Grep extends Agent
             if ($this->isGrep($task)) {
                 continue;
             }
-            // echo $thing_string . "\n";
             $this->greps[] = $thing;
         }
     }

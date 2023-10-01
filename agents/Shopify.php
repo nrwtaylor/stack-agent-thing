@@ -1,27 +1,23 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-class Shopify extends Agent {
-	
+class Shopify extends Agent
+{
+    public $var = "hello";
 
-	public $var = 'hello';
+    public function init()
+    {
+        $this->domain = $this->thing->container["api"]["shopify"]["domain"];
+        $this->api_key = $this->thing->container["api"]["shopify"]["apiKey"];
+        $this->app_id = $this->thing->container["api"]["shopify"]["appId"];
 
+        $this->retain_for = 24; // Retain for at least 24 hours.
+    }
 
-public function init() {
-
-		$this->domain = $this->thing->container['api']['shopify']['domain'];
-        $this->api_key = $this->thing->container['api']['shopify']['apiKey'];
-        $this->app_id = $this->thing->container['api']['shopify']['appId'];
-
-		$this->retain_for = 24; // Retain for at least 24 hours.
-
-		}
-
-
-	function shopifyButtons() {
-
-
-$html = '<div id="product-component-266443766d9"></div>
+    function shopifyButtons()
+    {
+        $html =
+            '<div id="product-component-266443766d9"></div>
 <script type="text/javascript">
 /*<![CDATA[*/
 
@@ -47,9 +43,15 @@ $html = '<div id="product-component-266443766d9"></div>
 
   function ShopifyBuyInit() {
     var client = ShopifyBuy.buildClient({
-      domain: ' . $this->domain . ',
-      apiKey: ' . $this->api_key . ',
-      appId: '. $this->app_id . ',
+      domain: ' .
+            $this->domain .
+            ',
+      apiKey: ' .
+            $this->api_key .
+            ',
+      appId: ' .
+            $this->app_id .
+            ',
     });
 
     ShopifyBuy.UI.onReady(client).then(function (ui) {
@@ -128,52 +130,30 @@ $html = '<div id="product-component-266443766d9"></div>
 /*]]>*/
 </script>
 ';
+    }
 
+    public function respondResponse()
+    {
+        $this->thing->flagGreen();
 
-	}
+        $message_thing = new Message($this->thing, $this->thing_report);
 
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
 
-// -----------------------
+        return $this->thing_report;
+    }
 
-	public function respondResponse() {
+    public function readSubject()
+    {
+        $this->response = "Shopify says hello";
 
+        $this->sms_message = "SHOPIFY | Says hello | REPLY QUESTION";
+        $this->message = "Shopify says hello";
+        $this->keyword = "shopify";
 
-		$this->thing->flagGreen();
-
-
-                $message_thing = new Message($this->thing, $this->thing_report);
-                //$thing_report['info'] = 'SMS sent';
-
-
-		$this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
-
-		return $this->thing_report;
-
-
-	}
-
-
-
-	public function readSubject() {
-
-
-
-		//mail("nick@wildnomad.com","watson.php readSubject() run" ,"Test message");
-		//echo "Hello";
-		$this->response = "Shopify says hello";
-
-		$this->sms_message = "SHOPIFY | Says hello | REPLY QUESTION";
-		$this->message = "Shopify says hello";
-		$this->keyword = "shopify";
-
-		$this->thing_report['keyword'] = $this->keyword;
-		$this->thing_report['sms'] = $this->sms_message;
-                $this->thing_report['message'] = $this->message;
-		$this->thing_report['email'] = $this->message;
-
-//		return $this->response;
-
-	}
-
+        $this->thing_report["keyword"] = $this->keyword;
+        $this->thing_report["sms"] = $this->sms_message;
+        $this->thing_report["message"] = $this->message;
+        $this->thing_report["email"] = $this->message;
+    }
 }

@@ -85,18 +85,18 @@ class Cluster extends Agent
     public function set()
     {
         //if (!isset($this->size)) {return true;}
-        $this->thing->json->writeVariable(["cluster", "size"], $this->size);
-        $this->thing->json->writeVariable(
+        $this->thing->Write(["cluster", "size"], $this->size);
+        $this->thing->Write(
             ["cluster", "characteristic"],
             $this->characteristic
         );
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["cluster", "threshold"],
             $this->threshold
         );
 
         $time_string = $this->thing->time();
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["cluster", "refreshed_at"],
             $time_string
         );

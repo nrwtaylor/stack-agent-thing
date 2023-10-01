@@ -1,8 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
@@ -16,20 +16,16 @@ class Alias extends Agent
     // So first find the context.
     // Then find the latest alias record in that context.
 
-    public $var = 'hello';
+    public $var = "hello";
     public function init()
     {
         $this->keyword = "alias";
 
-//        $this->start_time = $this->thing->elapsed_runtime();
-//        $this->thing_report['thing'] = $this->thing->thing;
-
         $this->test = "Development code"; // Always
 
-        //$this->thing->choice->load('alias');
         $this->node_list = ["off" => ["on" => ["off"]]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->variables_agent = new Variables(
             $this->thing,
@@ -37,14 +33,12 @@ class Alias extends Agent
         );
 
         $this->alias_thing = $this->variables_agent->thing;
-        $this->keywords = ['alias', 'is'];
+        $this->keywords = ["alias", "is"];
 
         $this->context = null;
         $this->context_id = null;
         $this->alias = null;
         $this->alias_id = null;
-
-//        $this->current_time = $this->thing->json->time();
 
         $default_alias_name = "alias";
     }
@@ -82,21 +76,21 @@ class Alias extends Agent
             $this->current_time
         );
 
-        $this->thing->json->writeVariable(["alias", "alias"], $this->alias);
-        $this->thing->json->writeVariable(["alias", "context"], $this->context);
-        $this->thing->json->writeVariable(
+        $this->thing->Write(["alias", "alias"], $this->alias);
+        $this->thing->Write(["alias", "context"], $this->context);
+        $this->thing->Write(
             ["alias", "alias_id"],
             $this->alias_id
         ); // exactly same as context_id
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["alias", "refreshed_at"],
             $this->current_time
         );
 
         $this->thing->log(
             $this->agent_prefix .
-                ' thought ' .
+                " thought " .
                 $this->alias .
                 " " .
                 $this->context .
@@ -117,7 +111,7 @@ class Alias extends Agent
 
         $this->thing->log(
             $this->agent_prefix .
-                ' got context ' .
+                " got context " .
                 $this->context .
                 " " .
                 $this->context_id .
@@ -139,7 +133,7 @@ class Alias extends Agent
         }
 
         foreach ($this->aliases_list as $i => $alias) {
-            $alias_name = strtolower($alias['alias']);
+            $alias_name = strtolower($alias["alias"]);
             if (strtolower($text) == $alias_name) {
                 return true;
             }
@@ -152,43 +146,40 @@ class Alias extends Agent
     {
         $this->aliases_list = [];
 
-        $findagent_thing = new Findagent($this->thing, 'alias');
+        $findagent_thing = new Findagent($this->thing, "alias");
 
-        if($findagent_thing->thing_report['things'] === true) {return true;}
+        if ($findagent_thing->thing_report["things"] === true) {
+            return true;
+        }
 
         $this->thing->log(
             'Agent "Alias" found ' .
-                count($findagent_thing->thing_report['things']) .
+                count($findagent_thing->thing_report["things"]) .
                 " Alias Agent Things."
         );
         $this->thing->log(
             'Agent "Alias". Timestamp ' .
                 number_format($this->thing->elapsed_runtime()) .
-                'ms.'
+                "ms."
         );
 
-        foreach ($findagent_thing->thing_report['things'] as $thing_object) {
+        foreach ($findagent_thing->thing_report["things"] as $thing_object) {
             // While timing is an issue of concern
 
-            $uuid = $thing_object['uuid'];
+            $uuid = $thing_object["uuid"];
 
-            //echo $thing_object['task'];
-
-            if ($thing_object['nom_to'] != "usermanager") {
-                $variables_json = $thing_object['variables'];
+            if ($thing_object["nom_to"] != "usermanager") {
+                $variables_json = $thing_object["variables"];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
                 if (
-                    isset($variables['alias']) and
-                    isset($variables['alias']['alias'])
+                    isset($variables["alias"]) and
+                    isset($variables["alias"]["alias"])
                 ) {
-                    // prod
+                    $alias = $variables["alias"]["alias"];
 
-                    //     (isset($variables['alias'])) {
-                    $alias = $variables['alias']['alias'];
-
-                    $variables['alias'][] = $thing_object['task'];
-                    $this->aliases_list[] = $variables['alias'];
+                    $variables["alias"][] = $thing_object["task"];
+                    $this->aliases_list[] = $variables["alias"];
                 }
             }
         }
@@ -201,7 +192,6 @@ class Alias extends Agent
         if (!isset($this->aliases_list)) {
             $this->getAliases();
         }
-        //$search_array = array_combine(array_map('strtolower', $this->aliases), $this->aliases);
 
         $search_array = null;
         if ($input == null) {
@@ -213,16 +203,14 @@ class Alias extends Agent
         $pieces = explode(" ", strtolower($input));
         foreach ($pieces as $key => $piece) {
             foreach ($this->aliases_list as $key => $alias_arr) {
-                //        $search_array = array_combine(array_map('strtolower', $this->aliases), $this->aliases);
-
-                $alias = $alias_arr['alias'];
+                $alias = $alias_arr["alias"];
 
                 if (isset($search_array[strtolower($piece)])) {
                 } else {
                     $alphanum_alias = preg_replace("/[^A-Z]+/", "", $alias);
                     $this->aliases[] = $alphanum_alias;
                     $search_array = array_combine(
-                        array_map('strtolower', $this->aliases),
+                        array_map("strtolower", $this->aliases),
                         $this->aliases
                     );
                 }
@@ -238,31 +226,17 @@ class Alias extends Agent
         $this->get_start_time = $this->thing->elapsed_runtime();
 
         $this->thing->log(
-            'Timestamp ' .
+            "Timestamp " .
                 number_format($this->thing->elapsed_runtime()) .
-                'ms.'
+                "ms."
         );
 
-        $this->thing->json->setField("variables");
-        $this->head_code = $this->thing->json->readVariable([
+        $this->head_code = $this->thing->Read([
             "headcode",
             "head_code",
         ]);
 
         $flag_variable_name = "_" . $this->head_code;
-
-        // Get the current Identities flag
-        //        $this->flag = new Variables(
-        //            $this->thing,
-        //            "variables flag" . $flag_variable_name . " " . $this->from
-        //        );
-
-        /*
-        $this->variables_agent = new Variables(
-            $this->thing,
-            "variables alias " . $this->from
-        );
-*/
 
         $this->variables_agent = new Variables(
             $this->thing,
@@ -277,7 +251,7 @@ class Alias extends Agent
         $this->variables_agent->getVariables();
 
         $this->thing->log(
-            'Timestamp ' . $this->thing->elapsed_runtime() . 'ms.'
+            "Timestamp " . $this->thing->elapsed_runtime() . "ms."
         );
 
         // So if no alias records are returned, then this is the first
@@ -291,9 +265,7 @@ class Alias extends Agent
         $this->getAliases();
         $aliases = [];
         foreach ($this->aliases_list as $key => $alias) {
-            //            echo "alias " .$alias['alias'] . " alias_id " . $alias['alias_id'] . " context " . $alias['context'] . " is " . $alias['context'];
-            //            echo "<br>";
-            if ($alias['alias_id'] == $this->context_id) {
+            if ($alias["alias_id"] == $this->context_id) {
                 $aliases[] = $alias;
             }
         }
@@ -302,8 +274,8 @@ class Alias extends Agent
             $this->response .= "Got zero aliases. ";
             $this->alias = null;
         } else {
-            $this->alias = $aliases[0]['alias'];
-            $this->alias_id = $aliases[0]['alias_id'];
+            $this->alias = $aliases[0]["alias"];
+            $this->alias_id = $aliases[0]["alias_id"];
 
             $this->alias = null;
             $this->alias_id = null;
@@ -333,7 +305,7 @@ class Alias extends Agent
     {
         $this->thing->log(
             $this->agent_prefix .
-                'will make an Alias with ' .
+                "will make an Alias with " .
                 $this->alias .
                 "."
         );
@@ -342,22 +314,21 @@ class Alias extends Agent
 
         if ($allow_create_alias) {
             $this->thing->log(
-                'found an alias ' .
+                "found an alias " .
                     $this->alias .
-                    'and made a Alias entry' .
+                    "and made a Alias entry" .
                     $this->alias_id .
-                    '.'
+                    "."
             );
         } else {
             $this->thing->log(
-                $this->agent_prefix . 'was not allowed to make a Alias entry.'
+                $this->agent_prefix . "was not allowed to make a Alias entry."
             );
         }
 
         $this->thing->log(
-            $this->agent_prefix . 'found an alias and made a Alias entry.'
+            $this->agent_prefix . "found an alias and made a Alias entry."
         );
-        //$this->response .= 'Asked to make a Alias. But did not. ';
     }
 
     function extractAlias($input = null)
@@ -372,10 +343,9 @@ class Alias extends Agent
         } else {
             $input = strtolower($this->subject);
 
-            $keywords = ['is'];
+            $keywords = ["is"];
             $pieces = explode(" is ", strtolower($input));
 
-            //        $this->max_ngram = 10;
             if (count($pieces) == 2) {
                 // A left and a right pairing and nothing else.
                 // So we can substitute the word and pass it to Alias.
@@ -384,13 +354,13 @@ class Alias extends Agent
                 $this->right_grams = $pieces[1];
 
                 if (strtolower($this->left_grams) == "alias") {
-                    $this->alias_id = 'alias';
+                    $this->alias_id = "alias";
                     $this->alias = $this->right_grams;
                     return;
                 }
 
                 if (strtolower($this->right_grams) == "alias") {
-                    $this->alias_id = 'alias';
+                    $this->alias_id = "alias";
                     $this->alias = $this->left_grams;
                     return;
                 }
@@ -449,41 +419,33 @@ class Alias extends Agent
         }
 
         $txt =
-            'These are ALIASES for RAILWAY ' .
+            "These are ALIASES for RAILWAY " .
             $this->variables_agent->nuuid .
-            '. ';
+            ". ";
         $txt .= "\n";
-        $txt .= count($this->aliases_list) . ' Aliases retrieved.';
+        $txt .= count($this->aliases_list) . " Aliases retrieved.";
 
         $txt .= "\n";
 
-        //$txt .= str_pad("INDEX", 7, ' ', STR_PAD_LEFT);
-        //            $txt .= " " . str_pad("HEAD", 4, " ", STR_PAD_LEFT);
         $txt .= " " . str_pad("ALIAS", 24, " ", STR_PAD_RIGHT);
-        //            $txt .= " " . str_pad("DAY", 4, " ", STR_PAD_LEFT);
-
-        //            $txt .= " " . str_pad("RUNAT", 6, " ", STR_PAD_LEFT);
-        //            $txt .= " " . str_pad("ENDAT", 6, " ", STR_PAD_LEFT);
-
         $txt .= " " . str_pad("ALIAS_ID", 8, " ", STR_PAD_LEFT);
-
         $txt .= " " . str_pad("CONTEXT", 6, " ", STR_PAD_LEFT);
 
         $txt .= "\n";
         $txt .= "\n";
 
         foreach ($this->aliases_list as $key => $alias) {
-            $txt .= " " . str_pad($alias['alias'], 24, " ", STR_PAD_RIGHT);
+            $txt .= " " . str_pad($alias["alias"], 24, " ", STR_PAD_RIGHT);
 
-            if (!isset($alias['alias_id'])) {
-                $alias['alias_id'] = "X";
+            if (!isset($alias["alias_id"])) {
+                $alias["alias_id"] = "X";
             }
-            if (!isset($alias['context'])) {
-                $alias['context'] = "X";
+            if (!isset($alias["context"])) {
+                $alias["context"] = "X";
             }
 
-            $txt .= " " . str_pad($alias['alias_id'], 8, " ", STR_PAD_LEFT);
-            $txt .= " " . str_pad($alias['context'], 6, " ", STR_PAD_LEFT);
+            $txt .= " " . str_pad($alias["alias_id"], 8, " ", STR_PAD_LEFT);
+            $txt .= " " . str_pad($alias["context"], 6, " ", STR_PAD_LEFT);
 
             $txt .= "\n";
         }
@@ -497,7 +459,7 @@ class Alias extends Agent
 
         $txt .= "---";
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
 
         return $txt;
@@ -508,7 +470,7 @@ class Alias extends Agent
         // Thing actions
         $this->thing->flagGreen();
 
-        $this->thing_report['choices'] = false;
+        $this->thing_report["choices"] = false;
 
         if (!isset($this->index)) {
             $index = "0";
@@ -516,19 +478,17 @@ class Alias extends Agent
             $index = $this->index;
         }
 
-        $this->makeChoices();
+//        $this->makeChoices();
 
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        $this->thing_report["email"] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
 
-        $this->thing_report['help'] = 'This is the Aliasing manager.';
-
-        //		return $this->thing_report;
+        $this->thing_report["help"] = "This is the Aliasing manager.";
     }
-
+/*
     public function makeChoices()
     {
         if (!isset($this->choices)) {
@@ -537,11 +497,11 @@ class Alias extends Agent
                 $this->node_list,
                 "alias"
             );
-            $this->choices = $this->thing->choice->makeLinks('alias');
+            $this->choices = $this->thing->choice->makeLinks("alias");
         }
-        $this->thing_report['choices'] = $this->choices;
+        $this->thing_report["choices"] = $this->choices;
     }
-
+*/
     public function makeSMS()
     {
         if (!isset($this->sms_messages)) {
@@ -553,11 +513,8 @@ class Alias extends Agent
         $this->node_list = ["alias" => ["agent", "message"]];
 
         $sms = "ALIAS ";
-        //if ($this->alias_id != "alias") {
-        //    $sms .= "alias id " . strtoupper($this->alias_id) . " ";
-        //}
 
-        if ((isset($this->alias_id)) and (strtolower($this->alias_id) != 'alias')) {
+        if (isset($this->alias_id) and strtolower($this->alias_id) != "alias") {
             $sms .= "alias id " . strtoupper($this->alias_id) . " ";
         }
 
@@ -566,69 +523,12 @@ class Alias extends Agent
         }
 
         $sms .= strtoupper($this->head_code);
-
-//        $sms .= " ";
-//        $sms .= "| alias " . strtoupper($this->alias);
-
-        //        $sms .= " | variables nuuid " . substr($this->variables_agent->uuid, 0, 4);
-        //        $sms .= " | alias nuuid " . substr($this->alias_thing->uuid, 0, 4);
-
-        //        $sms .= " | context " . $this->context;
-        //        $sms .= " | alias id " . $this->alias_id;
-
-        /*
-        $sms .=
-            " | ~rtime " .
-            number_format($this->thing->elapsed_runtime()) .
-            "ms";
-*/
         $sms .= " " . $this->response;
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
-/*
-    function isPlace($input)
-    {
-        // recognize a place on the alias list
 
-        foreach ($this->aliases_list as $key => $alias_list) {
-            $alias = $alias_list['alias'];
-            $alias_id = $alias_list['alias_id'];
-            $alias_timestamp = $alias_list['refreshed_at'];
-            $context = $alias_list['context'];
-
-            if ($alias == null) {
-                continue;
-                echo "meep";
-            }
-
-            // building this for two people
-            if (strpos($input, strtolower($alias)) !== false) {
-                // never like these double-ifs, but it's kind of clear
-                // that we are check both the alias first.
-                //        echo 'found alias';
-                return "green";
-            }
-
-            if ($alias_id == null) {
-                continue;
-            } // ? badly formed alias?
-
-            if (strpos($input, $alias_id) !== false) {
-                // alias found the word in it's list of alias_ids
-                // possibly tells us the alias_id generator is
-                // quite liberal with it's identifiers.
-                //        echo 'found alias_id';
-                return "green";
-            }
-
-            // run - see if it works.  delete comment.  keep going.
-        }
-
-        return "red";
-    }
-*/
     public function readSubject()
     {
         $this->num_hits = 0;
@@ -639,7 +539,7 @@ class Alias extends Agent
 
         // Bail at this point if
         // only extract wanted.
-        if ($this->agent_input == 'extract') {
+        if ($this->agent_input == "extract") {
             // Added return here March 17 2018
             return;
             if ($this->alias != false) {
@@ -660,7 +560,7 @@ class Alias extends Agent
         // Keyword
 
         if (count($pieces) == 1) {
-            if ($this->input == 'alias') {
+            if ($this->input == "alias") {
                 $this->num_hits += 1;
                 $this->response .= "Saw request for current alias. ";
                 return;
@@ -671,24 +571,19 @@ class Alias extends Agent
             foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'drop':
+                        case "drop":
                             $this->dropAlias();
                             break;
 
-                        case 'add':
+                        case "add":
                             $this->makeAlias();
                             break;
 
-                        case 'is':
-                            //$this->alias = $this->input;
-                            //$this->alias = $this->extractAlias($input);
-
+                        case "is":
                             $this->makeAlias($this->alias);
-                            //$this->set();
                             return;
 
                         default:
-                        //$this->read();                                                    //echo 'default';
                     }
                 }
             }
@@ -711,14 +606,6 @@ class Alias extends Agent
 
         // Guess we check if it's a Place then?
 
-/*
-        if ($this->isPlace($input)) {
-            $place_thing = new Place($this->thing); // no agent because this now takes message priority
-            $this->thing_report['info'] =
-                'Agent "Alias" sent the datagram to Place';
-            return;
-        }
-*/
         $this->readAlias();
 
         return false;

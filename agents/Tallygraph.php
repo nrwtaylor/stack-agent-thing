@@ -58,7 +58,7 @@ class Tallygraph
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
 		$this->node_list = array("tallycounter");
 
@@ -88,19 +88,17 @@ class Tallygraph
     function set()
     {
 
-        $this->thing->json->setField("variables");
-
-//        $this->thing->json->writeVariable(array("tallycounter",
+//        $this->thing->Write(array("tallycounter",
 //            "count"),  $this->count
 //            );
 
-//        $this->thing->json->writeVariable(array("tallycounter",
+//        $this->thing->Write(array("tallycounter",
 //            "display"),  $this->display
 //            );
 
 
-//        $this->thing->json->writeVariable(array("tallycounter",
-//            "refreshed_at"),  $this->thing->json->time()
+//        $this->thing->Write(array("tallycounter",
+//            "refreshed_at"),  $this->thing->time()
 //            );
 
 
@@ -123,7 +121,6 @@ class Tallygraph
     function getData() {
 
         $this->identity = "null" . $this->mail_postfix;
-//echo $this->identity;
         // We will probably want a getThings at some point.
         $this->thing->db->setFrom($this->identity);
         $thing_report = $this->thing->db->agentSearch("tallycounter", 99);
@@ -131,24 +128,10 @@ class Tallygraph
 
         $things = $thing_report['things'];
 
-//echo "<pre>";
-//var_dump($things);
-//echo "</pre>";
-//exit();
         if ( $things == false  ) {return;}
 
         $this->points = array();
         foreach ($things as $thing) {
-/*
-            // Check each of the three Things.
-            $this->variables_thing = new Thing($thing['uuid']);
-
-            $created_at = strtotime($thing['created_at']);
-echo $created_at;
-            $variable = $this->getVariable('count');
-            //$name = $this->getVariable('name');
-            //$next_uuid = $this->getVariable('next_uuid');
-*/
 
                 $uuid = $thing['uuid'];
 
@@ -157,17 +140,10 @@ echo $created_at;
 
                 if (isset($variables['tallycounter'])) {
 
-//                    if(isset($variables['tallycounter']['created_at'])) {$created_at = strtotime($variables['tallycounter']['created_at']);}
                     if(isset($variables['tallycounter']['count'])) {$variable = $variables['tallycounter']['count'];}
                     if(isset($variables['tallycounter']['refreshed_at'])) {$refreshed_at = strtotime($variables['tallycounter']['refreshed_at']);}
                 }
 
-//echo $created_at;
-//echo $refreshed_at;
-//if (!isset($created_at)) {$created_at = $refreshed_at;}
-
-//echo $variable . " " . $refreshed_at . "<br>";
-//($variable);
             if ((($variable == null) or ($variable == 0)) and ($this->ignore_empty)) {
                 continue;
             }
@@ -176,15 +152,9 @@ echo $created_at;
             if ($variable > 1e6) {continue;}
 
 
-//            $this->points[] = array("created_at"=>$created_at, "variable"=>$variable);
             $this->points[] = array("created_at"=>$refreshed_at, "variable"=>$variable);
 
         }
-
-//echo "<pre>";
-//var_dump($this->points);
-//echo "</pre>";
-//exit();
 
 
     }
@@ -324,11 +294,10 @@ return;
 
 
         $this->variables_thing->db->setFrom($this->identity);
-        $this->variables_thing->json->setField("variables");
 
         $this->variables_agent = "tallycounter";
 
-        $this->variables_thing->$variable = $this->variables_thing->json->readVariable( array($this->variables_agent, $variable) );
+        $this->variables_thing->$variable = $this->variables_thing->Read( array($this->variables_agent, $variable) );
 
         // And then load it into the thing
 //        $this->$variable = $this->variables_thing->$variable;
@@ -351,8 +320,7 @@ return;
         $this->variables_thing->$variable = $value;
 
         $this->variables_thing->db->setFrom($this->identity);
-        $this->variables_thing->json->setField("variables");
-        $this->variables_thing->json->writeVariable( array($this->variables_agent, $variable), $value );
+        $this->variables_thing->Write( array($this->variables_agent, $variable), $value );
 
         return $this->variables_thing->$variable;
     }
@@ -484,12 +452,7 @@ return;
 
         $y = $this->roundUpToAny($y_min, $inc);
 
-        //echo $y . " ". $y_max;
-        //exit();
         while ($y <= $y_max) {
-            //    echo $i++;  /* the printed value would be
-            //                   $i before the increment
-            //                   (post-increment) */
 
             $y_spread = $y_max - $y_min;
             if ($y_spread == 0) {$y_spread = 100;}
@@ -580,10 +543,6 @@ return;
         $width = imagesx($this->image); 
         $height = imagesy($this->image);
         $pad = 0;
-        // imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $number);
-
-
-        // imagestring($this->image, 2, 100, 0, $this->thing->nuuid, $textcolor);
 
         ob_start();
         imagepng($this->image);
@@ -592,7 +551,6 @@ return;
 
         $this->thing_report['png'] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="tallygraph"/>';
         $this->image_embedded = $response;
 

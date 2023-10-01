@@ -19,7 +19,7 @@ class Beetlejuice extends Agent {
         $this->agent = strtolower(get_class());
         $this->agent_prefix = 'Agent "' . ucfirst($this->agent) . '" ';
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
 
         // So I could call

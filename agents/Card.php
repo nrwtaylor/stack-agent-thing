@@ -11,25 +11,6 @@ class Card extends Agent
 {
     public function init()
     {
-        //public function __construct(Thing $thing, $agent_input = null)
-        //{
-
-        // If just an empty thing is provided, turn it into a card.
-        //       if (!isset($this->thing->to)) {
-        //           $this->thing->Create(null,"card", 's/ card');
-        //       }
-
-        //$this->agent_input = $agent_input;
-        //if ($agent_input == null) {
-        //    $this->agent_input = $agent_input;
-        //}
-
-        //$this->thing = $thing;
-        //$this->agent_name = 'card';
-        //$this->agent_prefix = '"Card" ' . ucwords($this->agent_name) . '" ';
-
-        //$this->thing_report['thing'] = $this->thing->thing;
-
         // So I could call
         if ($this->thing->container['stack']['state'] == 'dev') {
             $this->test = true;
@@ -38,11 +19,7 @@ class Card extends Agent
         // Instead.
 
         $this->node_list = ["card" => ["card", "roll", "trivia"]];
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
-        $this->thing->log(
-            'Agent "Card" running on Thing ' . $this->thing->nuuid . '.'
-        );
     }
 
     public function get()
@@ -54,16 +31,14 @@ class Card extends Agent
         $this->current_time = $this->thing->time();
 
         // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "card",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["card", "refreshed_at"],
                 $time_string
             );
@@ -72,14 +47,14 @@ class Card extends Agent
         $this->refreshed_at = strtotime($time_string);
 
         $this->nom = strtolower(
-            $this->thing->json->readVariable(["card", "nom"])
+            $this->thing->Read(["card", "nom"])
         );
-        $this->suit = $this->thing->json->readVariable(["card", "suit"]);
+        $this->suit = $this->thing->Read(["card", "suit"]);
         if ($this->nom == false or $this->suit == false) {
             $this->getCard();
 
-            $this->thing->json->writeVariable(["card", "nom"], $this->nom);
-            $this->thing->json->writeVariable(["card", "suit"], $this->suit);
+            $this->thing->Write(["card", "nom"], $this->nom);
+            $this->thing->Write(["card", "suit"], $this->suit);
 
             $this->thing->log(
                 $this->agent_prefix . ' completed read.',
@@ -125,13 +100,6 @@ class Card extends Agent
 
         //$this->response = "Drew " . $this->colour . " " . $this->face . " " . $this->suit;
         $this->colourCard();
-        /*
-        if (($this->suit == 'spades') or ($this->suit == 'clubs')) {
-            $this->colour = "black";
-        } else {
-            $this->colour = "red";
-        }
-*/
 
         $this->response =
             "" .
@@ -179,17 +147,6 @@ class Card extends Agent
 
     public function makeSMS()
     {
-        //        switch ($this->id) {
-        //            case 1:
-        //                $sms = "CARD | A card is drawn. Text CARD.";
-        //                break;
-        //            case 2:
-        //                $sms = "CARD | Another one.  Appears. Text CARD.";
-        //                break;
-
-        //            case null:
-
-        //            default:
         $sms = "CARD | " . $this->response;
 
         //        }
@@ -214,6 +171,61 @@ class Card extends Agent
 
         return $filename;
     }
+
+    public function makePNG() {
+//        if (isset($this->canvas_size_x)) {
+//            $canvas_size_x = $this->canvas_size_x;
+//            $canvas_size_y = $this->canvas_size_x;
+//        } else {
+
+            $canvas_size_x = 400;
+            $canvas_size_y = 400;
+//        }
+
+
+        $this->image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
+
+
+
+        $card = ["nom" => $this->nom, "suit" => $this->suit];
+
+        $filename = $this->svgCard($card);
+        $svg = file_get_contents($this->resource_path . 'card/' . $filename);
+
+return;
+    $imagick = new \Imagick();
+$this->image = $imagick->readImageBlob($svg);
+
+
+        if (ob_get_contents()) {
+            ob_clean();
+        }
+
+        ob_start();
+        imagepng($this->image);
+        $imagedata = ob_get_contents();
+
+        ob_end_clean();
+
+        $this->thing_report["png"] = $imagedata;
+
+        $response =
+            '<img src="data:image/png;base64,' .
+            base64_encode($imagedata) .
+            '"alt="day"/>';
+
+        $this->html_image =
+            '<img src="data:image/png;base64,' .
+            base64_encode($imagedata) .
+            '"alt="day"/>';
+
+        $this->PNG_embed = "data:image/png;base64," . base64_encode($imagedata);
+
+        $this->PNG = $imagedata;
+
+        return $response;
+    }
+
 
     public function makeWeb()
     {
@@ -279,7 +291,6 @@ class Card extends Agent
 
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['email'] = $this->sms_message;
-        //$this->thing_report['sms'] = $this->sms_message;
 
         // While we work on this
         $message_thing = new Message($this->thing, $this->thing_report);
@@ -287,14 +298,10 @@ class Card extends Agent
 
         $this->thing_report['help'] =
             $this->agent_prefix . 'responding to the word card';
-        return $this->thing_report;
     }
 
     public function readSubject()
     {
-        //$this->newCard();
-        // Ignore subject.
-        return;
     }
 
     public function card()
@@ -309,7 +316,5 @@ class Card extends Agent
             $this->agent_prefix .
                 ' says, "Think that card could be any card.\n"'
         );
-
-        return;
     }
 }

@@ -25,16 +25,14 @@ class Nuuid extends Agent
 
     public function initNuuid()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "nuuid",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["nuuid", "refreshed_at"],
                 $time_string
             );
@@ -57,7 +55,7 @@ class Nuuid extends Agent
     {
         $this->thing->flagGreen();
 
-        $this->makeChoices();
+        //$this->makeChoices();
 
         $this->thing_report["info"] =
             "This creates a not UUID.  Rememberable. Machine guessable. Short.";
@@ -96,6 +94,7 @@ class Nuuid extends Agent
     function extractNuuid($input)
     {
         $nuuids = $this->extractNuuids($input);
+
         if (!is_array($nuuids)) {
             return true;
         }
@@ -122,8 +121,10 @@ class Nuuid extends Agent
     /**
      *
      */
+/*
     function makeChoices()
     {
+
         $this->thing->choice->Create(
             $this->agent_name,
             $this->node_list,
@@ -133,7 +134,7 @@ class Nuuid extends Agent
 
         $this->thing_report['choices'] = $this->choices;
     }
-
+*/
     /**
      *
      */
@@ -263,15 +264,13 @@ class Nuuid extends Agent
                 $this->image,
                 $size,
                 $angle,
-                $width / 2 - $bb_width / 2,
-                $height / 2 + $bb_height / 2,
+                intval($width / 2 - $bb_width / 2),
+                intval($height / 2 + $bb_height / 2),
                 $this->grey,
                 $font,
                 $text
             );
         }
-        // imagestring($image, 2, 100, 0, $this->roll, $textcolor);
-        // imagestring($this->image, 20, $bbox["left"], $bbox["top"], $this->thing->nuuid, $textcolor);
 
         // Save the image
         ob_start();
@@ -281,7 +280,6 @@ class Nuuid extends Agent
 
         $this->thing_report['png'] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
@@ -329,19 +327,31 @@ class Nuuid extends Agent
         if ($nuuid == null) {
             return true;
         }
-
-        $thing_report = $this->thing->db->nuuidSearch($nuuid);
-        $things = $thing_report['things'];
-
+        $things = $this->thingsNuuid($nuuid);
         if (count($things) == 1) {
             $this->response .= "Got a UUID from the stack. ";
             $nuuid_uuid = $things[0]['uuid'];
             return $nuuid_uuid;
         }
 
-        $this->response .= "Did not find a corresponding UUID. ";
+        if (count($things) > 1) {
+            return null;
+        }
 
+        $this->response .= "Did not find a corresponding UUID. ";
         return false;
+    }
+
+    public function thingsNuuid($nuuid = null) {
+        if ($nuuid == null) {
+            return true;
+        }
+
+        $thing_report = $this->thing->db->nuuidSearch($nuuid);
+        $things = $thing_report['things'];
+        $this->things = $things;
+        return $things;
+
     }
 
     /**
@@ -364,7 +374,6 @@ class Nuuid extends Agent
 
         $nuuid = $this->extractNuuid($input);
         $nuuid_uuid = $this->uuidNuuid($nuuid);
-
         if ($nuuid_uuid === false) {
             $this->response .= "No matching UUID found. ";
         }

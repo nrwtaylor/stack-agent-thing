@@ -56,7 +56,7 @@ class Robot extends Agent
 
         $this->node_list = ["start" => ["acknowledge"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->useragent = ini_get("user_agent");
         $url = rtrim($this->web_prefix . "/");
@@ -115,7 +115,7 @@ class Robot extends Agent
             try {
                 $headers = apache_request_headers();
             } catch (\Throwable $t) {
-                $this->thing->log("caught throwable.");
+                $this->thing->log("caught throwable. " . $t->getMessage() . $t->getFile() . $t->getLine());
                 // Executed only in PHP 7, will not match in PHP 5
                 return true;
             } catch (\Exception $e) {
@@ -135,7 +135,12 @@ class Robot extends Agent
         $this->hits = $this->librex_agent->getHits($text);
 
         $this->header_text = $text;
-        $this->hits_count = count($this->hits);
+
+        $hits_count = 0;
+        if (is_array($this->hits)) {
+           $hits_count = count($this->hits);
+        }
+        $this->hits_count = $hits_count;
     }
 
     public function isRobot()
@@ -145,8 +150,8 @@ class Robot extends Agent
         // Has a string of text in the Robot headers list matched?
         // Robot is self-identifying. 
         // Hello. Welcome. Thanks for the declaration.
-
-        if (count($this->hits) >= 1) {
+         
+        if ( (is_array($this->hits)) and (count($this->hits) >= 1)) {
             return true;
         }
         return false;
@@ -261,7 +266,7 @@ class Robot extends Agent
                     "privacy";
         }
 
-        if (count($this->hits) > 0) {
+        if ( is_array($this->hits) and (count($this->hits) > 0) ) {
             $this->response .= count($this->hits);
         }
 
@@ -498,7 +503,6 @@ class Robot extends Agent
             }
         }
         $this->scheme = $scheme;
-        //exit();
         // if there isn't a robots, then we're allowed in
         //https://serverfault.com/questions/154820/what-happens-if-a-website-does-not-have-a-robots-txt-file
 
@@ -739,7 +743,6 @@ return true;
         $allRobots = [];
         $fh = fopen($robotsUrl, 'r');
         while (($line = fgets($fh)) != false) {
-            //            echo $line . "<br>";
             if (preg_match("/user-agent.*/i", $line)) {
                 if ($robot != null) {
                     array_push($allRobots, $robot);

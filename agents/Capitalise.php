@@ -19,35 +19,24 @@ class Capitalise extends Agent
         $this->capitalisations = array();
         $this->capitalisation = null;
 
-        //global $wp;
         if (!isset($this->slug_agent)) {
             $this->slug_agent = new Slug($this->thing, "slug");
         }
 
         //$lines = array("The quick brown fox was not Capitalized.", "The Return of the Jedi was.", "The Jedi attack.","The Attack of the Clones.");
-        //$this->loadCapitalisations($lines);
-        //$this->getCapitalisation("Return the jeDi to me.");
         $this->initCapitalise();
     }
 
     public function capitaliseTitle($text = null)
     {
-        //return strtoupper($text);
-
-        //global $wp;
         $h_test = $this->getCapitalisation($text);
         $tks = explode(" ", $text);
         $s = mb_strlen($h_test);
-        //echo "<pre>";
-        //echo "Capitalisation test: " . $h_test. " " ." [".$s."]". "<br>";
 
         $brilltagger_agent = new Brilltagger($this->thing, "brilltagger");
         $m = $brilltagger_agent->tag($text);
 
-        //var_dump($m);
         $capitalised_title = "";
-
-        //$wp->capitalise_agent = new Capitalise($this->thing,"capitalise");
 
         foreach ($m as $i => $tag_array) {
             $tag = trim($tag_array['tag']);
@@ -77,7 +66,7 @@ class Capitalise extends Agent
                 }
             }
 
-            $mixed_agent = new Mixed($this->thing, "mixed");
+            $mixed_agent = new _Mixed($this->thing, "mixed");
 
             if ($mixed_agent->isMixed($token)) {
                 $tcapitalised_token = strtoupper($tag_array['token']);
@@ -88,10 +77,6 @@ class Capitalise extends Agent
 
             $capitalised_title .= " " . $capitalised_token;
         }
-
-        //$s = mb_strlen($capt);
-
-
 
         $this->capitalised_title = $capitalised_title;
 
@@ -119,8 +104,12 @@ class Capitalise extends Agent
 
     public function initCapitalise()
     {
+        $lines = [];
+        $path = '/var/www/stackr.test/resources/capitalise/capitalise.txt';
+
+        if (file_exists($path)) {
         $contents = file_get_contents(
-            '/var/www/stackr.test/resources/capitalise/capitalise.txt'
+            $path
         );
 
         $separator = "\r\n";
@@ -128,28 +117,15 @@ class Capitalise extends Agent
 
         while ($line !== false) {
             $lines[] = $line;
-            /*
-            $word = $this->getConcept($line);
-
-            if (mb_strlen($word['english']) == 1) {
-
-                //v/ar_dump($word);
-                //$dictionary_entry = $word['traditional'] . " " . $word['simplified'] . " >
-                //echo $dictionary_entry;
-                $dictionary[$word['english']] = $line . "\n";
-
-            }
-*/
             // do something with $line
             $line = strtok($separator);
         }
-
+}
         $this->loadCapitalisations($lines);
     }
 
     function preferredCapitalisation($text)
     {
-        //global $wp;
         $slug = $this->slug_agent->getSlug($text);
 
         if (!isset($this->capitalisations[$slug])) {
@@ -183,12 +159,9 @@ class Capitalise extends Agent
             $lines = array($lines);
         }
 
-        //    $token_agent= new Token($this->thing, "token");
         $ngram_agent = new Ngram($this->thing, "ngram");
-        // $slug_agent= new Slug($this->thing,"slug");
 
         foreach ($lines as $i => $line) {
-            //    $token_agent->extractTokens($line);
             $n = $ngram_agent->getNgrams($line, 3);
             $this->addCapitalisations($n);
 
@@ -206,22 +179,10 @@ class Capitalise extends Agent
      */
     function getCapitalisation($text = null)
     {
-        //global $wp;
-        //        $agent = "agent";
-        //        if (isset($this->search_agent)) {
-        //            $agent = $this->search_agent;
-        //        }
-        //        $word_agent = new Word($this->thing, "word");
-
-        //        $words = array();
-
         $tokens = explode(" ", strtolower($text));
         $t = "";
         foreach ($tokens as $i => $token) {
-            //$slug = $wp->slug_agent->getSlug($token);
-
             $preferred_capitalisation = $this->preferredCapitalisation($token);
-
             $t .= $preferred_capitalisation . " ";
         }
 
@@ -248,12 +209,7 @@ class Capitalise extends Agent
      */
     function makeSMS()
     {
-        //$this->sms_message = "PORTMANTEAU | no match found";
         $t = "";
-        //foreach ($this->words as $i => $word) {
-        //    $t .= $word . " ";
-        //}
-        //trim($t);
 
         $this->sms_message =
             "CAPITALISATION " . $this->input . " | " . $this->capitalisation;

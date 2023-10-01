@@ -1,8 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
@@ -11,12 +11,12 @@ ini_set("allow_url_fopen", 1);
 
 class Findagent extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     public function init()
     {
         // So I could call
-        if ($this->thing->container['stack']['state'] == 'dev') {
+        if ($this->thing->container["stack"]["state"] == "dev") {
             $this->test = true;
         }
 
@@ -30,7 +30,7 @@ class Findagent extends Agent
         $this->response = false;
 
         $this->horizon = 99;
-        $this->requested_agent_name = 'thing';
+        $this->requested_agent_name = "thing";
 
         $this->readInstruction();
 
@@ -47,14 +47,14 @@ class Findagent extends Agent
 
         $this->choices = false;
 
-        $this->thing_report['info'] =
+        $this->thing_report["info"] =
             '"Find Agent" looks for matching previous Things.';
-        $this->thing_report['help'] = 'This is the "Find Agent" manager.';
-        $this->thing_report['num_hits'] = $this->num_hits;
+        $this->thing_report["help"] = 'This is the "Find Agent" manager.';
+        $this->thing_report["num_hits"] = $this->num_hits;
 
         if ($this->verbosity >= 2) {
             $this->thing->log(
-                'returned ' . count($this->thing_report['things']) . ' Things.',
+                "returned " . count($this->thing_report["things"]) . " Things.",
                 "DEBUG"
             );
         }
@@ -62,39 +62,53 @@ class Findagent extends Agent
 
     function findAgent($name = null, $id = null)
     {
-        $this->thing->log("findAgent called " . "name " .$name . " id " . $id . ".", "DEBUG");
+        $this->thing->log(
+            "findAgent called " . "name " . $name . " id " . $id . ".",
+            "DEBUG"
+        );
         $ref_time = $this->thing->elapsed_runtime();
 
         // Search for a reference within the variables field to the agent.
 
         $things = [];
         if (isset($this->thing->db)) {
-            $thingreport = $this->thing->db->setUser($this->from);
-            $thingreport = $this->thing->db->variableSearch(
+            $thing_report = $this->thing->db->setUser($this->from);
+            $thing_report = $this->thing->db->variableSearch(
                 null,
                 $name,
-                $this->horizon
+                $this->horizon,
+                true
             );
-            $things = $thingreport['things'];
+            $things = isset($thing_report["things"])
+                ? $thing_report["things"]
+                : [];
+
+            foreach ($things as $i => $thing) {
+            }
+        } else {
+            return true;
         }
 
         $run_time = $this->thing->elapsed_runtime() - $ref_time;
-        $this->thing->log('findAgent db call for ' . $name . ' took ' . $run_time . 'ms.', "OPTIMIZE");
+        $this->thing->log(
+            "findAgent db call for " . $name . " took " . $run_time . "ms.",
+            "OPTIMIZE"
+        );
 
         $groups = [];
         $agent_things = [];
-        $this->thing->log('Scanning ' . count($things) . ' Things.');
+        $this->thing->log("Scanning " . count($things) . " Things.");
         foreach ($things as $thing_obj) {
             if ($id == null) {
                 // No id matching, just grab thing
                 $agent_things[] = $thing_obj;
             } else {
-                $uuid = $thing_object['uuid'];
+                $uuid = $thing_object["uuid"];
 
-                if ($thing_object['nom_to'] != "usermanager") {
+                if ($thing_object["nom_to"] != "usermanager") {
                     $match += 1;
 
-                    $variables_json = $thing_obj['variables'];
+                    $variables_json = $thing_obj["variables"];
                     $variables = $this->thing->json->jsontoArray(
                         $variables_json
                     );
@@ -116,18 +130,15 @@ class Findagent extends Agent
         }
 
         if (count($agent_things) == 0) {
-            $this->response .= "No agent thing found.";
-            //$this->sms_message .= "";
-            //$this->sms_message .= " | No agent thing found.";
-            $this->thing_report['things'] = true;
+            $this->response .= "No agent thing found. ";
+            $this->thing_report["things"] = true;
         } else {
             $this->agent_thing_id = $agent_things[0];
-            //$this->sms_message .=
-                ' | This is the "Find Agent" function.  Commands: none.';
-            $this->thing_report['things'] = $agent_things;
+            ' | This is the "Find Agent" function.  Commands: none.';
+            $this->thing_report["things"] = $agent_things;
         }
-        $this->thing->log("findAgent call done.","DEBUG");
-        return $this->thing_report['things'];
+        $this->thing->log("findAgent call done.", "DEBUG");
+        return $this->thing_report["things"];
     }
 
     public function run()
@@ -142,15 +153,11 @@ class Findagent extends Agent
 
         // Generate email response.
 
-        $to = $this->thing->from;
-
-        $from = "group";
-
-        $this->thing_report['choices'] = false;
+        $this->thing_report["choices"] = false;
 
         $t = "";
-        if (isset($this->choice['link']) and $this->choices['link'] !== false) {
-            $sms_end = strtoupper(strip_tags($this->choices['link']));
+        if (isset($this->choice["link"]) and $this->choices["link"] !== false) {
+            $sms_end = strtoupper(strip_tags($this->choices["link"]));
             $x = implode("", explode("FORGET", $sms_end, 2));
 
             $t = " | TEXT " . $x;
@@ -161,8 +168,8 @@ class Findagent extends Agent
 
         $this->message = $this->sms_message;
 
-        $this->thing_report['sms'] = $this->sms_message;
-        $this->thing_report['email'] = $this->message;
+        $this->thing_report["sms"] = $this->sms_message;
+        $this->thing_report["email"] = $this->message;
     }
 
     private function nextWord($phrase)
@@ -188,7 +195,6 @@ class Findagent extends Agent
 
     public function readSubject()
     {
-        //$this->response = null;
         $this->num_hits = 0;
     }
 }

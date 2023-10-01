@@ -36,7 +36,7 @@ class Cat extends Agent
     }
 
     // -----------------------
-
+/*
     public function respondResponse()
     {
         $this->thing->flagGreen();
@@ -51,10 +51,8 @@ class Cat extends Agent
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $thing_report['info'] = $message_thing->thing_report['info'];
-
-        return $this->thing_report;
     }
-
+*/
     function makeSMS()
     {
         $this->node_list = array("cat" => array("cat", "dog"));

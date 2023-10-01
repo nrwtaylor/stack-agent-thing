@@ -17,6 +17,12 @@ class Quote extends Agent
     {
         $this->node_list = ["quote" => ["quote", "trivia", "nonsense"]];
 
+        $this->test_url = null;
+        if (isset($this->thing->container['api']['dateline']['test_url'])) {
+            $this->test_url =
+                $this->thing->container['api']['dateline']['test_url'];
+        }
+
         $this->number = null;
         $this->unit = "";
 
@@ -45,24 +51,182 @@ class Quote extends Agent
         );
     }
 
+    public function urlQuote($url)
+    {
+        $this->thing->console("urlDateline read start.\n");
+
+        $start_time = time();
+
+        $read_agent = new Read($this->thing, $url);
+        $contents = $read_agent->contents;
+
+        // dev refactor
+        //       $contents = $this->urlRead($url);
+
+        $run_time = time() - $start_time;
+
+        $this->response .=
+            "Dateline source took " . $run_time . " seconds to get. ";
+
+        $this->thing->console("urlDateline read complete.\n");
+
+        return $contents;
+    }
+
     function isQuote($text = null)
     {
         // It is a quote if it has nested pairs of quotes.
         // The first test could be whether there is an odd number of some quote symbols.
 
-        $quote_count = substr_count($text, '"') . substr_count($text ,"'");
-if($quote_count%2) {
+        $quote_count = substr_count($text, '"') . substr_count($text, "'");
+        if ($quote_count % 2) {
+            return true;
+        }
 
-    return true;
+        return false;
+    }
 
+    public function test()
+    {
+        $this->thing->console("Quote test start.\n");
+
+        if (!is_string($this->test_url)) {
+            $this->thing->console("Test URL not found.\n");
+            return false;
+        }
+
+        //'“', '”'
+
+        $t = $this->parseQuotes(
+            "The quick 'brown fox “jumped over” the lazy' fox."
+        );
+
+foreach($t as $line) {
+
+        $this->thing->console($line . "\n");
 }
 
-return false;
+
+return;
+
+        $url = $this->test_url;
+
+        $contents = $this->urlQuote($url);
+        $paragraphs = $this->paragraphsDateline($contents);
+
+        $this->thing->console("Retrieved test contents.\n");
+
+        $arr = ['year', 'month', 'day', 'day_number', 'hour', 'minute'];
+
+        foreach ($paragraphs as $i => $paragraph) {
+            var_dump($paragraph);
+            echo ".";
+            if (trim($paragraph) == "") {
+                continue;
+            }
+
+            /*
+            $dateline = $this->extractDateline($paragraph);
+            if ($dateline == false) {
+                continue;
+            }
+*/
+
+            //$dequoted_paragraph = $this->deQuote($paragraph);
+            //$this->thing->log($dateline['dateline'] . "\n" . $dateline['line']);
+            $this->thing->console($dequoted_paragraph . "\n");
+            //            $this->thing->console($dateline['dateline'] . "\n");
+            //            $this->thing->console($dateline['line'] . "\n");
+            //            $this->thing->console($this->timestampDateline($dateline) . "\n");
+            $this->thing->console("\n");
+        }
+
+        //      }
+
+        $this->response .= "Read " . $i . " paragraphs. ";
+
+        $this->thing->console("Dateline test completed.\n");
     }
+
+    public function parseQuotes($text = null)
+    {
+        $quotation_mark_pairs = [
+            ['‘', '’'],
+            ['“', '”'],
+            ['"', '"'],
+            ["'", "'"],
+            ['«', '»'],
+            ['「', '」'],
+        ];
+
+        $y = mb_str_split($text);
+
+        $markFlag = false;
+        $index = 0;
+        $foundMarks = []; // Track current mark
+        $foundMarks[0] = "";
+
+        $quotations = [];
+        foreach ($y as $i => $character) {
+
+            foreach ($quotation_mark_pairs as $j => $quotation_mark_pair) {
+
+
+                if (
+                    $character == $quotation_mark_pair[0] and
+                    $character !== $foundMarks[0]
+                ) {
+                    $index = $index + 1;
+                    // echo "matched start mark " . $character . "\n";
+                    array_unshift($foundMarks, $quotation_mark_pair[0]);
+                    $markFlag = true;
+                    continue 2;
+                }
+
+                if (
+                    $character == $quotation_mark_pair[1] and
+                    $foundMarks[0] == $quotation_mark_pair[0]
+                ) {
+                    // echo "matched end mark " . $character . "\n";
+                    //      $index += 1;
+                    $markFlag = false;
+                    array_shift($foundMarks);
+                    $index = $index - 1;
+
+                    continue 2;
+                }
+            }
+
+
+            if (!isset($quotations[$index])) {
+                $quotations[$index] = "";
+            }
+
+
+            $quotations[$index] .= $character;
+        }
+
+        return $quotations;
+    }
+
+    /*
+
+    function deQuote($text = null) {
+
+if (preg_match('/"([^"]+)"/', $text, $m)) {
+    print $m[1];   
+} else {
+print "No quotes seen.";
+   //preg_match returns the number of matches found, 
+   //so if here didn't match pattern
+}
+
+    }
+*/
 
     function set($requested_state = null)
     {
-        $this->thing->json->writeVariable(["quote", "inject"], $this->inject);
+        $this->thing->Write(["quote", "inject"], $this->inject);
 
         $this->refreshed_at = $this->current_time;
 
@@ -74,10 +238,7 @@ return false;
             $this->current_time
         );
 
-        $this->thing->log(
-            'set Quote to ' . $this->state .'.',
-            "INFORMATION"
-        );
+        $this->thing->log('set Quote to ' . $this->state . '.', "INFORMATION");
     }
 
     function get()
@@ -119,24 +280,16 @@ return false;
             "INFORMATION"
         );
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
-            "quote",
-            "refreshed_at",
-        ]);
+        $time_string = $this->thing->Read(["quote", "refreshed_at"]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
-                ["quote", "refreshed_at"],
-                $time_string
-            );
+            $time_string = $this->thing->time();
+            $this->thing->Write(["quote", "refreshed_at"], $time_string);
         }
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->inject = $this->thing->json->readVariable(["quote", "inject"]);
+        $this->inject = $this->thing->Read(["quote", "inject"]);
     }
 
     function setState($state)
@@ -208,7 +361,9 @@ return false;
     {
         $sms = "QUOTE " . "\n";
 
-        $sms .= trim($this->short_message) . "\n";
+        if (isset($this->short_message)) {
+          $sms .= trim($this->short_message) . "\n";
+        }
 
         $this->sms_message = $sms;
         $this->thing_report['txt'] = $sms;
@@ -250,10 +405,13 @@ return false;
     {
         $sms = "QUOTE " . "\n";
 
-        $sms .= trim($this->short_message) . "\n";
+        if (isset($this->short_message)) {
+          $sms .= trim($this->short_message) . "\n";
+        }
 
-        $sms .= $this->infoQuote($this->text) . "";
-
+        if (isset($this->text)) {
+          $sms .= $this->infoQuote($this->text) . "";
+        }
         //$sms .= "TEXT WEB";
 
         $this->sms_message = $sms;
@@ -487,13 +645,17 @@ return false;
 
     function makeMessage()
     {
-        $message = $this->short_message . "<br>";
+        $message = "";
+        if (isset($this->short_message)) {
+          $message = $this->short_message . "<br>";
+        }
         $uuid = $this->uuid;
         $message .= "<p>" . $this->web_prefix . "thing/$uuid/quote\n \n\n<br> ";
         $this->thing_report['message'] = $message;
     }
 
-    public function stripQuotes($text) {
+    public function stripQuotes($text)
+    {
         // https://stackoverflow.com/questions/9734758/remove-quotes-from-start-and-end-of-string-in-php/9734805
         return preg_replace('/^(\'(.*)\'|"(.*)")$/', '$2$3', $text);
     }
@@ -534,15 +696,14 @@ return false;
 
         $web .= "<p>";
         $web .= "Message Metadata - ";
-if (isset($this->thing->thing->created_at)) {
-
-        $web .=
-            $this->inject .
-            " - " .
-            $this->thing->nuuid .
-            " - " .
-            $this->thing->thing->created_at;
-}
+        if (isset($this->thing->thing->created_at)) {
+            $web .=
+                $this->inject .
+                " - " .
+                $this->thing->nuuid .
+                " - " .
+                $this->thing->thing->created_at;
+        }
         $togo = $this->thing->human_time($this->time_remaining);
         $web .= " - " . $togo . " remaining.<br>";
 
@@ -551,12 +712,12 @@ if (isset($this->thing->thing->created_at)) {
         $link = $this->web_prefix . "privacy";
         $privacy_link = '<a href="' . $link . '">' . $link . "</a>";
 
-if (isset($this->thing->thing->created_at)) {
-        $ago = $this->thing->human_time(
-            time() - strtotime($this->thing->thing->created_at)
-        );
-        $web .= "Quote question was created about " . $ago . " ago. ";
-}
+        if (isset($this->thing->thing->created_at)) {
+            $ago = $this->thing->human_time(
+                time() - strtotime($this->thing->thing->created_at)
+            );
+            $web .= "Quote question was created about " . $ago . " ago. ";
+        }
         $web .= "<br>";
 
         $this->thing_report['web'] = $web;
@@ -566,7 +727,9 @@ if (isset($this->thing->thing->created_at)) {
     {
         $input = strtolower($this->input);
 
-        if ($input == "quote") {return;}
+        if ($input == "quote") {
+            return;
+        }
 
         $pieces = explode(" ", strtolower($input));
 
@@ -579,6 +742,11 @@ if (isset($this->thing->thing->created_at)) {
                 }
                 return;
             }
+        }
+
+        if ($input == "quote test") {
+            $this->test();
+            return;
         }
 
         $this->getMessage();

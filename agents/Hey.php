@@ -49,18 +49,16 @@ class Hey extends Agent
 		$this->sms_message = $value;
         $this->max_nod_time = 30;
 
-        //var_dump($this->nod->time_travelled);
         if ($this->nod->time_travelled > $this->max_nod_time) {
             $this->sms_message = "Last nod was over " . $this->thing->human_time($this->max_nod_time) . " ago.";
         }
 
-	    $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable( array("hey", "requested_agent"), $this->requested_agent );
+        $names = $this->thing->Write( array("hey", "requested_agent"), $this->requested_agent );
 
         //if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("hey", "refreshed_at"), $time_string );
+            $time_string = $this->thing->time();
+            $this->thing->Write( array("hey", "refreshed_at"), $time_string );
+
         //}
 
         return $this->message;
@@ -73,8 +71,12 @@ class Hey extends Agent
 		// Thing actions
 		$this->thing->flagGreen();
 
-		$this->thing->choice->Create($this->agent_name, $this->node_list, "start");
-		$choices = $this->thing->choice->makeLinks('start');
+		//$this->thing->choice->Create($this->agent_name, $this->node_list, "start");
+        $this->createChoice($this->agent_name, $this->node_list, "start");
+
+//		$choices = $this->thing->choice->makeLinks('start');
+        $choices = $this->linksChoice('start');
+
         $this->thing_report['choices'] = $choices;
 
 		$this->sms_message = "HEY | " . $this->sms_message . "";

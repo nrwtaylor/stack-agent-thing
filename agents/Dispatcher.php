@@ -27,8 +27,7 @@ class Dispatcher extends Agent {
 
         // Thing actions
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(array("dispatcher", "priority"), $this->priority);
+        $this->thing->Write(array("dispatcher", "priority"), $this->priority);
 
         $this->thing->flagRed();
 

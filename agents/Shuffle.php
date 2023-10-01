@@ -27,15 +27,14 @@ class Shuffle extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "shuffle",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["shuffle", "refreshed_at"],
                 $time_string
             );
@@ -75,8 +74,6 @@ class Shuffle extends Agent
         shuffle($things);
 
         $start_time = time();
-
-        //        echo count ($this->total_things);
 
         while (count($things) > 1) {
             $thing = array_pop($things);
@@ -204,7 +201,6 @@ class Shuffle extends Agent
     private function thingShuffle($thing = null)
     {
         if ($thing == null) {
-            //echo "shuffle commented out";
             $this->thing->shuffle();
 
             // And fix these pointers.  Now wrong.
@@ -271,7 +267,6 @@ class Shuffle extends Agent
             if (is_string($input) and strlen($input) == 1) {
                 // Test for single ? mark and call question()
                 $this->message = "Single question mark received";
-                //echo "single question mark received";
                 $this->helpShuffle();
                 if (!isset($this->response)) {
                     $this->response .= "This agent shuffles UUIDs";
@@ -303,8 +298,6 @@ class Shuffle extends Agent
                                 'Gave this thing a different unique identifier. ';
                         case '?':
                             if ($key + 1 > count($pieces)) {
-                                //echo "last word is stop";
-                                //$this->stop = false;
                                 $this->helpShuffle();
                                 $this->response .= "Question mark at end";
 
@@ -346,7 +339,6 @@ class Shuffle extends Agent
                             return;
 
                         default:
-                        //echo 'default';
                     }
                 }
             }

@@ -20,35 +20,32 @@ class Petal extends Agent
             $this->subject .
             $this->agent_input;
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
     }
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "petal",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["petal", "refreshed_at"],
                 $time_string
             );
         }
 
-        $this->thing->json->setField("variables");
-        $this->roll = $this->thing->json->readVariable(["petal", "roll"]);
-        $this->result = $this->thing->json->readVariable(["petal", "result"]);
+        $this->roll = $this->thing->Read(["petal", "roll"]);
+        $this->result = $this->thing->Read(["petal", "result"]);
     }
 
     public function set()
     {
-        $this->thing->json->writeVariable(["petal", "roll"], $this->roll);
-        $this->thing->json->writeVariable(["petal", "result"], $this->result);
+        $this->thing->Write(["petal", "roll"], $this->roll);
+        $this->thing->Write(["petal", "result"], $this->result);
 
     }
 
@@ -96,7 +93,7 @@ class Petal extends Agent
             $sms = "PETAL | Request not processed. Check syntax.";
         } else {
             $sms = "PETAL | ";
-            //var_dump($this->result);
+
             foreach ($this->result as $k => $v) {
                 foreach ($v as $key => $value) {
                     if ($key == "roll") {
@@ -277,11 +274,10 @@ class Petal extends Agent
     function iteratePetal()
     {
         $step_length = 20;
-        echo "<pre>";
+
         $drive_vector = [0, 1];
         $i = 0;
         foreach ($this->points as &$point) {
-            //  var_dump(rand(0,360)/360);
 
             $disturbance_vector = [rand(0, 100) / 100, rand(0, 100) / 100];
             $growth_vector = [
@@ -302,7 +298,6 @@ class Petal extends Agent
         if (!isset($this->rolls)) {
             $this->rolls = $this->extractRolls($input);
         }
-        //var_dump($this->rolls);
 
         if (count($this->rolls) == 1) {
             $this->roll = $this->rolls[0];
@@ -335,8 +330,6 @@ class Petal extends Agent
         //array_pop($arr);
         $this->rolls = $arr;
 
-        //$var_dump($this->rolls);
-        //exit();
 
         return $this->rolls;
     }
@@ -384,7 +377,6 @@ $input = $this->assert($this->input, "petal", false);
         }
 
         foreach ($dies as $die) {
-            //echo $die;
 
             $elements = explode("d", $die, 2);
 

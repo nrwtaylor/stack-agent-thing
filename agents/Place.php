@@ -81,15 +81,16 @@ class Place extends Agent
         $this->lastPlace();
 
         // Read the subject to determine intent.
-
         $this->railway_place = new Variables(
             $this->thing,
             "variables place " . $this->from
         );
+
     }
 
     function set()
     {
+
         if (!isset($this->refreshed_at)) {
             $this->refreshed_at = $this->thing->time();
         }
@@ -148,7 +149,7 @@ class Place extends Agent
 
         $alpha_agent = new A4($this->thing, "a4");
         //        $place_code_candidate = $this->thing->nuuid;
-        $place_code_candidate = $alpha_agent->alpha;
+        $place_code_candidate = $alpha_agent->a4;
 
         foreach ($this->places as $place) {
             $existing_place_code = strtolower($place['code']);
@@ -160,7 +161,7 @@ class Place extends Agent
 
                 $alpha_agent = new A4($this->thing, "a4");
                 //       $place_code_candidate = $this->thing->nuuid;
-                $place_code_candidate = $alpha_agent->alpha;
+                $place_code_candidate = $alpha_agent->a4;
 
                 //                $place_code_candidate = $this->thing->nuuid;
             }
@@ -181,7 +182,7 @@ class Place extends Agent
 
         // One minute into next headcode
         $quantity = 1;
-        $next_time = $this->thing->json->time(
+        $next_time = $this->thing->time(
             strtotime($this->end_at . " " . $quantity . " minutes")
         );
 
@@ -224,39 +225,6 @@ class Place extends Agent
         return $place;
     }
 
-    /*
-    function getVariable($variable_name = null, $variable = null)
-    {
-        // This function does a minor kind of magic
-        // to resolve between $variable, $this->variable,
-        // and $this->default_variable.
-
-        if ($variable != null) {
-            // Local variable found.
-            // Local variable takes precedence.
-            return $variable;
-        }
-
-        if (isset($this->$variable_name)) {
-            // Class variable found.
-            // Class variable follows in precedence.
-            return $this->$variable_name;
-        }
-
-        // Neither a local or class variable was found.
-        // So see if the default variable is set.
-        if (isset( $this->{"default_" . $variable_name} )) {
-
-            // Default variable was found.
-            // Default variable follows in precedence.
-            return $this->{"default_" . $variable_name};
-        }
-
-        // Return false ie (false/null) when variable
-        // setting is found.
-        return false;
-    }
-*/
     function getPlace($selector = null)
     {
         foreach ($this->places as $place) {
@@ -377,8 +345,6 @@ $count = count($things);
             ) {
                 //$uuid = $thing_object['uuid'];
 $uuid = $thing->uuid;
-                //$variables_json = $thing_object['variables'];
-                //$variables = $this->thing->json->jsontoArray($variables_json);
 $variables = $thing->variables;
                 if (isset($variables['place'])) {
                     $place_code = $this->default_place_code;
@@ -538,11 +504,8 @@ if (file_exists($file)) {
 
             if (isset($this->last_place_code)) {
                 $place_code = $this->last_place_code;
-                //exit();
             }
         }
-
-        //$place_code = $this->place_code;
 
         $this->place = new Variables(
             $this->thing,
@@ -946,7 +909,7 @@ if (file_exists($file)) {
         $this->thing_report['sms'] = $sms;
     }
 
-    function makeWeb()
+    public function makeWeb()
     {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
@@ -1149,7 +1112,7 @@ if (file_exists($font)) {
     }
 
     // Must be able to factor this out with Image. Eventually.
-    function ImageRectangleWithRoundedCorners(
+    public function ImageRectangleWithRoundedCorners(
         &$im,
         $x1,
         $y1,
@@ -1213,6 +1176,7 @@ if (file_exists($font)) {
 
     public function respondResponse()
     {
+
         // Thing actions
 
         $this->thing->flagGreen();

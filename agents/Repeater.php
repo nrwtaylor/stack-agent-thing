@@ -102,8 +102,8 @@ return false;
 
         $this->node_list = array("repeater"=>array("repeater", "frequency"));
         // Make buttons
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "repeater");
-        $choices = $this->thing->choice->makeLinks('repeater');
+        $this->createChoice($this->agent_name, $this->node_list, "repeater");
+        $choices = $this->linksChoice('repeater');
 
         $alt_text = "a QR code with a repeater";
 
@@ -133,7 +133,7 @@ function set() {
 
         $this->thing->json->setField("settings");
         $this->thing->json->writeVariable(array("repeater",
-                "received_at"),  $this->thing->json->time()
+                "received_at"),  $this->thing->time()
         );
 
 }
@@ -210,9 +210,9 @@ $this->makeResponse();
      *
      */
     function makeChoices() {
-        $this->thing->choice->Create("repeater", $this->node_list, "repeater");
+        $this->createChoice("repeater", $this->node_list, "repeater");
 
-        $choices = $this->thing->choice->makeLinks("repeater");
+        $choices = $this->linksChoice("repeater");
         $this->thing_report['choices'] = $choices;
         $this->choices = $choices;
     }

@@ -124,12 +124,12 @@ class Radiorelay extends Agent
 
     function set($requested_state = null)
     {
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["radiorelay", "inject"],
             $this->inject
         );
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ['radiorelay', 'callsign'],
             $this->callsign
         );
@@ -184,16 +184,14 @@ class Radiorelay extends Agent
             "INFORMATION"
         );
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "radiorelay",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["radiorelay", "refreshed_at"],
                 $time_string
             );
@@ -201,12 +199,12 @@ class Radiorelay extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->inject = $this->thing->json->readVariable([
+        $this->inject = $this->thing->Read([
             "radiorelay",
             "inject",
         ]);
 
-        $callsign = $this->thing->json->readVariable([
+        $callsign = $this->thing->Read([
             "radiorelay",
             "callsign",
         ]);
@@ -868,7 +866,7 @@ class Radiorelay extends Agent
                 " - " .
                 $this->thing->nuuid .
                 " - " .
-                $this->thing->thing->created_at;
+                $this->thing->created_at;
 
             $togo = $this->thing->human_time($this->time_remaining);
             $web .= " - " . $togo . " remaining.<br>";
@@ -877,7 +875,7 @@ class Radiorelay extends Agent
         $web .= "<p>";
 
         $ago = $this->thing->human_time(
-            time() - strtotime($this->thing->thing->created_at)
+            time() - strtotime($this->thing->created_at)
         );
         $web .= "This radiogram was created about " . $ago . " ago. ";
 
@@ -903,7 +901,7 @@ class Radiorelay extends Agent
 
         $this->getCallsigns();
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
         $call_horizon = 30; // minutes
 
         $callsigns_available = [];
@@ -993,7 +991,7 @@ class Radiorelay extends Agent
 
         if ($this->qr_code_state == "on") {
             $text =
-                "Inject generated at " . $this->thing->thing->created_at . ".";
+                "Inject generated at " . $this->thing->created_at . ".";
             $pdf->SetXY(130, 10);
             $pdf->Write(0, $text);
 

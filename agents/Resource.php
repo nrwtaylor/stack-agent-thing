@@ -75,15 +75,18 @@ class Resource extends Agent
             "Try MAKE RESOURCE FUEL. And QUANTITY 10.";
     }
 
-    public function loadResource($text)
+    public function loadResource($text, $prefix = 'resource-')
     {
+        // Rule is you can't create a uuid.
+        // So prefix it. And use that to respond to uuids.
+
         $uuid = null;
         if ($this->isUuid($text)) {
             $uuid = $this->extractUuid($text);
         }
         // Remove uuids
         $text = $this->stripUuids($text);
-        $response = $this->getMemory($text);
+        $response = $this->getMemory($prefix.$text);
 
         if ($response === false) {
             $file = $this->resource_path . $text;
@@ -95,7 +98,7 @@ class Resource extends Agent
 
                 if (is_array($interlinks)) {
                     foreach ($interlinks as $uuid => $interlink) {
-                        $this->setMemory($uuid, $interlink);
+                        $this->setMemory($prefix.$uuid, $interlink);
                     }
                     $this->response .= "Loaded array into memory. ";
                 }
@@ -105,7 +108,7 @@ class Resource extends Agent
             if ($uuid === false and is_array($interlinks)) {
                 $uuid = array_key_first($interlinks);
             }
-            $response = $this->getMemory($uuid);
+            $response = $this->getMemory($prefix.$uuid);
         }
         return $response;
     }
@@ -251,7 +254,7 @@ class Resource extends Agent
 
         // One minute into next headcode
         $quantity = 1;
-        $next_resource = $this->thing->json->time(
+        $next_resource = $this->thing->time(
             strtotime($this->end_at . " " . $quantity . " minutes")
         );
 
@@ -365,17 +368,12 @@ class Resource extends Agent
             return;
         }
 
-        //        $findagent_thing = new Findagent($this->thing, 'resource');
-
         $this->thing->log(
             'Agent "Place" found ' . count($things) . " resource Things."
         );
 
-        //        if ($findagent_thing->thing_report['things'] == true) {
-        //        }
-
         if (count($things) == 0) {
-            // No places found
+            // No things found
         } else {
             //$this->response .= "Found some resources on the stack. ";
             foreach (array_reverse($things) as $thing) {
@@ -416,13 +414,13 @@ class Resource extends Agent
         // Add in a set of default places
 
         $default_resourcename_list = [
-            "Fuel",
-            "Food",
-            "Water",
-            "Communications",
+            "Fuel"=>100,
+            "Food"=>100,
+            "Water"=>100,
+            "Communications"=>"X",
         ];
 
-        foreach ($default_resourcename_list as $resource_name) {
+        foreach ($default_resourcename_list as $resource_name => $resource_quantity) {
             //$place_code = str_pad(RAND(1,99999), 8, " ", STR_PAD_LEFT);
 
             //$this->placecode_list[] = $place_code;
@@ -452,7 +450,7 @@ class Resource extends Agent
             $resource_name = $this->resource_name;
         }
 
-        $this->head_code = $this->thing->json->readVariable([
+        $this->head_code = $this->thing->Read([
             "headcode",
             "head_code",
         ]);
@@ -851,7 +849,6 @@ $this->resource_quantity = $resource_quantity;
                         case "create":
                         case "place":
                         case "add":
-                            //var_dump("merp");
                             $this->assertResource(strtolower($input));
                             return;
 

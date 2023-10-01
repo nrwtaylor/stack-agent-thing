@@ -37,8 +37,6 @@ class Crow extends Agent
             "imitation call",
         ];
 
-        //        $this->created_at = $this->thing->thing->created_at;
-
         $this->default_state = "inside nest";
 
         $this->response .=
@@ -170,7 +168,6 @@ class Crow extends Agent
      */
     private function getPlace($place_name = null)
     {
-        //        $place_agent = new Place($this->thing, "place");
         $this->place_agent = new Place($this->crow_thing, "place");
     }
 
@@ -201,17 +198,15 @@ class Crow extends Agent
         // "I/we call this place < some symbol signal >"
         // "Awk."
 
-        $this->crow_thing->json->writeVariable(
+        $this->crow_thing->Write(
             ["crow", "place_name"],
             $this->place_name
         );
-        $this->crow_thing->json->writeVariable(
+        $this->crow_thing->Write(
             ["crow", "signal"],
             $this->signal
         );
 
-        //        $this->crow_thing->choice->Choose($this->state);
-        //        $this->state = $this->crow_thing->choice->load($this->primary_place);
         $this->setState();
     }
 
@@ -234,17 +229,15 @@ class Crow extends Agent
         // Load up the appropriate crow_thing
         $this->getCrow($crow_code);
 
-        $this->current_time = $this->crow_thing->json->time();
-        $this->crow_thing->json->setField("variables");
-        $this->time_string = $this->crow_thing->json->readVariable([
+        $this->current_time = $this->crow_thing->time();
+        $this->time_string = $this->crow_thing->Read([
             "crow",
             "refreshed_at",
         ]);
 
         if ($this->time_string == false) {
-            $this->crow_thing->json->setField("variables");
-            $this->time_string = $this->crow_thing->json->time();
-            $this->crow_thing->json->writeVariable(
+            $this->time_string = $this->crow_thing->time();
+            $this->crow_thing->Write(
                 ["crow", "refreshed_at"],
                 $this->time_string
             );
@@ -253,9 +246,9 @@ class Crow extends Agent
         $this->refreshed_at = strtotime($this->time_string);
 
         $this->place_name = strtolower(
-            $this->crow_thing->json->readVariable(["crow", "place_name"])
+            $this->crow_thing->Read(["crow", "place_name"])
         );
-        $this->signal = $this->crow_thing->json->readVariable([
+        $this->signal = $this->crow_thing->Read([
             "crow",
             "signal",
         ]);
@@ -281,8 +274,8 @@ class Crow extends Agent
         // Generate SMS response
 
         //  $this->message['sms'] = $litany[$this->state];
-        $this->makeMessage();
-        $this->makeSMS();
+//        $this->makeMessage();
+//        $this->makeSMS();
         // . " " . if (isset($this->response)) {$this->response;};
 
         $this->whatisthis = [
@@ -297,12 +290,12 @@ class Crow extends Agent
 
         // Generate email response.
 
-        $to = $this->thing->from;
-        $from = "crow";
+//        $to = $this->thing->from;
+//        $from = "crow";
 
         $this->makeChoices();
-        $this->makeWeb();
-        $this->makeTXT();
+//        $this->makeWeb();
+//        $this->makeTXT();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -336,12 +329,8 @@ class Crow extends Agent
         foreach ($crow_things as $key => $crow) {
             $crow_nuuid = substr($crow['uuid'], 0, 4);
 
-            //  if (strtolower($crow_nuuid) == strtolower($requested_nuuid)) {
-            // Consistently match the nuuid to a specific uuid.
             $this->crows[] = $crow;
 
-            //            $this->crows[] = new Thing($crow['uuid']);
-            //  }
         }
 
         if (!isset($this->crows[0])) {
@@ -432,9 +421,6 @@ class Crow extends Agent
         $test_message .= '<br>' . $this->litany[$this->state] . '<br>';
         $test_message .= '<br>' . $this->crow_narrative[$this->state] . '<br>';
 
-        // $test_message .= '<p>Agent "Crow" is responding to your web view of datagram subject "' . $this->subject . '", ';
-        // $test_message .= "which was received " . $this->thing->human_time($this->thing->elapsed_runtime()) . " ago.";
-
         $refreshed_at = max($this->created_at, $this->created_at);
         $test_message .= "<p>";
         $ago = $this->thing->human_time(
@@ -442,9 +428,6 @@ class Crow extends Agent
         );
         $test_message .= "<br>Thing happened about " . $ago . " ago.";
 
-        //$test_message .= '<br>' .$this->whatisthis[$this->state] . '<br>';
-
-        //$this->thing_report['sms'] = $this->message['sms'];
         $this->thing_report['web'] = $test_message;
     }
 
@@ -456,9 +439,9 @@ class Crow extends Agent
         $txt = "";
         $this->getCrows();
 
-        if ($crow_things === true) {
-            return;
-        }
+        //if ($crow_things === true) {
+        //    return;
+        //}
         if (isset($this->crows) and $this->crows != null) {
             foreach ($this->crows as $key => $crow) {
                 if (isset($crow->thing->uuid)) {
@@ -962,24 +945,6 @@ class Crow extends Agent
         $posterior_thing = $thingreport['thing'];
 
         $haystack .= json_encode($posterior_thing);
-
-        // And we can do this...
-
-        //echo "the thing is:";
-        //print_r($this->thing);
-
-        // But that really depends on the security of the Channel.
-
-        // devstack use Uuid to extract Uuids.
-        // $match = "/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12‌​}/";
-
-        // This is a loose screen on any alphanumeric sequence with UUID like hyphenation.
-
-        // Some other screens
-        //preg_match_all('/(\S{4,})/i', $haystack, $matches); // more than four letters long
-        //preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i', $haystack, $matches);
-        //preg_match_all('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12‌​}/', $haystack, $matches);
-
         // But use this one.
         preg_match_all('/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/', $haystack, $matches);
 
@@ -1056,8 +1021,6 @@ class Crow extends Agent
         $this->response .= $response;
 
         $this->thing->flagGreen();
-
-        return;
     }
 
     /**
@@ -1075,16 +1038,6 @@ class Crow extends Agent
                 $this->response .= $entity["nuuid"] . " ";
             }
         }
-    }
-
-    /**
-     *
-     * @return unknown
-     */
-    function kill()
-    {
-        // No messing about.
-        return $this->thing->Forget();
     }
 
     /**

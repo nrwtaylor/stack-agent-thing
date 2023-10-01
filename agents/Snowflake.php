@@ -40,7 +40,7 @@ class Snowflake extends Agent
 
         $this->node_list = ["snowflake" => ["snowflake", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Get some stuff from the stack which will be helpful.
         $this->entity_name = $this->thing->container['stack']['entity_name'];
@@ -265,8 +265,7 @@ class Snowflake extends Agent
      */
     public function setSnowflake()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["snowflake", "decimal"],
             $this->decimal_snowflake
         );
@@ -286,8 +285,7 @@ class Snowflake extends Agent
      */
     public function getSnowflake()
     {
-        $this->thing->json->setField("variables");
-        $this->decimal_snowflake = $this->thing->json->readVariable([
+        $this->decimal_snowflake = $this->thing->Read([
             "snowflake",
             "decimal",
         ]);
@@ -483,9 +481,20 @@ return;
                     STR_PAD_LEFT
                 );
 
+//            $txt .= " " . str_pad($cell['name'], 10, ' ', STR_PAD_LEFT);
+//            $txt .= " " . str_pad($cell['state'], 10, " ", STR_PAD_LEFT);
+//            $txt .= " " . str_pad($cell['value'], 10, " ", STR_PAD_RIGHT);
+
+if ($cell['name'] != null) {
             $txt .= " " . str_pad($cell['name'], 10, ' ', STR_PAD_LEFT);
+}
+if ($cell['state'] != null) {
             $txt .= " " . str_pad($cell['state'], 10, " ", STR_PAD_LEFT);
+}
+if ($cell['value'] != null) {
             $txt .= " " . str_pad($cell['value'], 10, " ", STR_PAD_RIGHT);
+}
+
 
             //$txt .= " " . str_pad($cell['neighbours'], 10, ' ', STR_PAD_LEFT);
             //$txt .= " " . str_pad($cell['p_melt'], 10, " ", STR_PAD_LEFT);
@@ -667,7 +676,6 @@ return;
 
         $this->thing_report['png'] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
@@ -1110,7 +1118,6 @@ return;
                 //                $n = 13;
             }
         }
-        //echo " p = " .$n
 
         // So we are supposed to use rule N for
         // finding the probability of melting
@@ -1325,7 +1332,6 @@ return;
         foreach (range(0, $this->max) as $a) {
             foreach (range(0, $a - 3) as $b) {
                 if (!($a - $b > $a)) {
-                    //echo $a-$b . " " .-$a . " " .$b . "---" . ( ($a-$b) > $a) . "<br>";
                     $this->point_list[] = [$a - $b, -$a, $b];
                 }
             }
@@ -1624,16 +1630,14 @@ return;
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "snowflake",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["snowflake", "refreshed_at"],
                 $time_string
             );
@@ -1818,7 +1822,7 @@ return;
             $image = $pdf->Output('', 'S');
             $this->thing_report['pdf'] = $image;
         } catch (Exception $e) {
-            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $this->error .= 'Caught exception: '. $e->getMessage() . ". ";
         }
 
         return $this->thing_report['pdf'];

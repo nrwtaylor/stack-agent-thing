@@ -1,14 +1,14 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
 class Tip extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     public function run()
     {
@@ -26,8 +26,8 @@ class Tip extends Agent
         // Allow for a new state tree to be introduced here.
         $this->node_list = ["start" => ["useful", "useful?"]];
 
-        $this->thing_report['info'] = 'Tip';
-        $this->thing_report['help'] =
+        $this->thing_report["info"] = "Tip";
+        $this->thing_report["help"] =
             "An agent which says, 'Hey'. Type 'Web' on the next line.";
     }
 
@@ -45,20 +45,16 @@ class Tip extends Agent
         $this->message = $value;
         $this->sms_message = $value;
 
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["tip", "requested_agent"],
             $this->requested_agent
         );
 
-        //if ($time_string == false) {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
+        $time_string = $this->thing->time();
+        $this->thing->Write(
             ["tip", "refreshed_at"],
             $time_string
         );
-        //}
 
         return $this->message;
     }
@@ -86,31 +82,29 @@ class Tip extends Agent
             $this->node_list,
             "start"
         );
-        $choices = $this->thing->choice->makeLinks('start');
-        $this->thing_report['choices'] = $choices;
+        $choices = $this->thing->choice->makeLinks("start");
+        $this->thing_report["choices"] = $choices;
 
         $this->sms_message = "TIP | " . $this->sms_message . "";
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
 
-        $this->thing_report['email'] = $this->message;
-        $this->thing_report['message'] = $this->message;
+        $this->thing_report["email"] = $this->message;
+        $this->thing_report["message"] = $this->message;
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
         $this->makeWeb();
     }
 
     public function makeWeb()
     {
-        $this->link = $this->web_prefix . 'thing/' . $this->uuid . "/tip";
-        $tip_link = 'thing/' . $this->uuid . "/tip";
-
-        //var_dump($this->link);
-        //exit();
+        $this->link = $this->web_prefix . "thing/" . $this->uuid . "/tip";
+        $tip_link = "thing/" . $this->uuid . "/tip";
 
         $html = '<script>
+
 function showHint(str) {
     if (str.length == 0) {
         document.getElementById("txtHint").innerHTML = "";
@@ -141,7 +135,7 @@ First name: <input type="text" onkeyup="showHint(this.value)">
 </form>
 <p>Suggestions: <span id="txtHint"></span></p>';
 
-        $this->thing_report['web'] = $html;
+        $this->thing_report["web"] = $html;
     }
 
     public function readSubject()
@@ -149,14 +143,8 @@ First name: <input type="text" onkeyup="showHint(this.value)">
         $this->readTip();
         // devstack
         // Get input from AJAX
-        //var_dump($this->subject);
-        //var_dump($this->input);
-        //var_dump($this->agent_input);
-
-        //var_dump($input);
         $this->response .= "devstack read tip";
+
         //$q = $_REQUEST["q"];
-        //var_dump($q);
-        //		return;
     }
 }

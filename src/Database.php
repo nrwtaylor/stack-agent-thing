@@ -7,8 +7,8 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
@@ -16,10 +16,14 @@ ini_set("allow_url_fopen", 1);
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 use \PDO;
+use Nrwtaylor\StackAgentThing\Mysql;
+use Nrwtaylor\StackAgentThing\Mongo;
+use Nrwtaylor\StackAgentThing\Agent;
+use Nrwtaylor\StackAgentThing\Thing;
 
 class Database
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      *
@@ -27,8 +31,16 @@ class Database
      * @param unknown $nom_from
      * @return unknown
      */
-    function __construct($uuid, $nom_from)
+    //public function init()
+    function __construct($thing = null, $agent_input = null)
     {
+        $uuid = $agent_input["uuid"];
+        $nom_from = $agent_input["from"];
+        $to = isset($agent_input["to"]) ? $agent_input["to"] : null;
+        $subject = isset($agent_input["subject"])
+            ? $agent_input["subject"]
+            : null;
+
         $start_time = microtime(true);
         $this->start_time = $start_time;
         $this->split_time = $start_time;
@@ -36,7 +48,7 @@ class Database
         $this->operations = 0;
         $this->log = [];
 
-//        $this->hash_algorithm = 'sha256';
+        //        $this->hash_algorithm = 'sha256';
         //        $this->hash_state = 'on';
 
         // Database controls access by $uuid.
@@ -58,47 +70,95 @@ class Database
         // Code here should allow either.
 
         if ($nom_from == null and $uuid == null) {
-            throw new Exception('No
+            throw new \Exception('No
 			$nom_from and $uuid provided to Class Db.');
         }
 
         if ($nom_from == null) {
-            throw new Exception('No $nom_from provided to
+            throw new \Exception('No $nom_from provided to
 			Class Db.');
         }
         if ($uuid == null) {
-            throw new Exception('No $uuid provided to
+            throw new \Exception('No $uuid provided to
 			Class Db.');
         }
+        // Determine which filestore to use.
+
+        $this->agent_input = $agent_input;
+
+        $service = null;
+        $handler = null;
 
         $this->from = $nom_from;
         $this->uuid = $uuid;
+        $this->subject = $subject;
+        $this->to = $to;
 
-        // create container and configure it
+        $settings = require $GLOBALS["stack_path"] . "private/settings.php";
 
-        $settings = require $GLOBALS['stack_path'] . "private/settings.php";
-
-        $this->web_prefix = $settings['settings']['stack']['web_prefix'];
-        $this->state = $settings['settings']['stack']['state'];
-
-        $this->hash_state = 'off';
-        if (isset($settings['settings']['stack']['hash'])) {
-            $this->hash_state = $settings['settings']['stack']['hash'];
+        // Get let of stacks
+        $this->stacks = [
+            "mysql" => ["infrastructure" => "mysql"],
+            "mongo" => ["infrastructure" => "mongo"],
+            "memcached" => ["infrastructure" => "memcached"],
+            "memory" => ["infrastructure" => "memory"],
+        ];
+        if (isset($settings["settings"]["stacks"])) {
+            $this->stacks = $settings["settings"]["stacks"];
         }
 
-        $this->hash_algorithm = 'sha256';
-        if (isset($settings['settings']['stack']['hash'])) {
+        $this->web_prefix = $settings["settings"]["stack"]["web_prefix"];
+        $this->state = $settings["settings"]["stack"]["state"];
+
+        $this->hash_state = "off";
+        if (isset($settings["settings"]["stack"]["hash"])) {
+            $this->hash_state = $settings["settings"]["stack"]["hash"];
+        }
+
+        $this->hash_algorithm = "sha256";
+        if (isset($settings["settings"]["stack"]["hash"])) {
             $this->hash_algorithm =
-                $settings['settings']['stack']['hash_algorithm'];
+                $settings["settings"]["stack"]["hash_algorithm"];
         }
 
         $this->get_prior = true;
-        if (isset($settings['settings']['stack']['get_prior'])) {
-            $this->get_prior =
-                $settings['settings']['stack']['get_prior'];
+        if (isset($settings["settings"]["stack"]["get_prior"])) {
+            $this->get_prior = $settings["settings"]["stack"]["get_prior"];
         }
 
+        $this->available_stacks = [];
+        $this->stack_handlers = [];
 
+        $this->candidate_stacks = $this->stacks;
+
+        foreach (
+            $this->candidate_stacks
+            as $candidate_service_name => $candidate_service
+        ) {
+            try {
+                $handler = $this->connectDatabase($candidate_service);
+            } catch (\Throwable $t) {
+            } catch (\Error $ex) {
+            }
+
+            if ($handler !== true) {
+                $this->available_stacks[
+                    $candidate_service_name
+                ] = $candidate_service;
+                $this->stack_handlers[$candidate_service_name] = $handler;
+            }
+        }
+        $this->active_stacks = $this->available_stacks;
+
+        $this->stack = false;
+        $this->stack_handler = false;
+        if (count($this->available_stacks) > 0) {
+            $primary_stack = reset($this->available_stacks);
+            $primary_stack_name = key($this->available_stacks);
+
+            $this->stack = $this->available_stacks[$primary_stack_name];
+            $this->stack_handler = $this->stack_handlers[$primary_stack_name];
+        }
 
         $this->container = new \Slim\Container($settings);
 
@@ -107,39 +167,17 @@ class Database
         $c = $app->getContainer();
 
         // Haven't seen this triggered.
-        $c['errorHandler'] = function ($c) {
+        $c["errorHandler"] = function ($c) {
             return function ($request, $response, $exception) use ($c) {
-                return $c['response']
+                return $c["response"]
                     ->withStatus(500)
-                    ->withHeader('Content-Type', 'text/html')
-                    ->write('AGENT | Maintenance.');
+                    ->withHeader("Content-Type", "text/html")
+                    ->write("AGENT | Maintenance.");
             };
         };
 
-        $c['db'] = function ($c) {
-            $db = $c['settings']['db'];
-
-        //try {
-
-            $pdo = new PDO(
-                "mysql:host=" . $db['host'] . ";dbname=" . $db['dbname'],
-                $db['user'],
-                $db['pass']
-            );
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-            return $pdo;
-/*
-        } catch (\Throwable $t) {
-            //throw new \Exception('Database not available.');
-        } catch (\Exception $e) {
-            //throw new \Exception('Database not available.');
-        }
-*/
-        };
-
-        $c['stack'] = function ($c) {
-            $db = $c['settings']['stack'];
+        $c["stack"] = function ($c) {
+            $db = $c["settings"]["stack"];
             return $db;
         };
 
@@ -150,7 +188,7 @@ class Database
         // NRW Taylor 12 June 2018
         // devstack Database for to disk persistent memory calls, redis for in ram persistent calls
 
-        $this->char_max = $c['stack']['char_max'];
+        $this->char_max = $c["stack"]["char_max"];
 
         $this->uuid = $uuid;
 
@@ -166,9 +204,26 @@ class Database
 
         $this->split_time = microtime(true);
 
-        $r = "";
+        // No memory available.
+        if ($thing === false) {
+            echo "false thing";
+            return;
+        }
 
-        return $r;
+        $c["db"] = function ($c) {
+            $db = $c["settings"]["db"];
+
+            //try {
+
+            $pdo = new PDO(
+                "mysql:host=" . $db["host"] . ";dbname=" . $db["dbname"],
+                $db["user"],
+                $db["pass"]
+            );
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            return $pdo;
+        };
     }
 
     /**
@@ -180,6 +235,49 @@ class Database
         $this->test("Database destruct ");
     }
 
+    // Test whether the persistence service is available.
+    // If it is provide a handler.
+    // Otherwise return true.
+
+    function connectDatabase($stack)
+    {
+        $agent_name = $stack["infrastructure"];
+        $agent_class_name = ucwords($agent_name);
+        $agent_namespace_name =
+            "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
+
+        try {
+            //$handler = new $agent_namespace_name($this->thing, $this->agent_input);
+            $handler = new $agent_namespace_name(null, $this->agent_input);
+
+            $handler->uuid = $this->uuid;
+            $handler->from = $this->from;
+            $handler->to = $this->to;
+            $handler->subject = $this->subject;
+            $handler->hash_state = $this->hash_state;
+            $handler->hash_algorithm = $this->hash_algorithm;
+            $handler->get_prior = $this->get_prior;
+
+            $handler->init();
+
+            if (isset($stack["host"])) {
+                $handler->host = $stack["host"];
+            }
+
+            if (isset($stack["pass"])) {
+                $handler->pass = $stack["pass"];
+            }
+            if (isset($stack["user"])) {
+                $handler->user = $stack["user"];
+            }
+            return $handler;
+        } catch (\Throwable $t) {
+        } catch (\Error $ex) {
+        }
+
+        return true;
+    }
+
     /**
      *
      * @param unknown $comment     (optional)
@@ -187,10 +285,9 @@ class Database
      */
     function test($comment = null, $instruction = null)
     {
-        if ($this->state != "test") {
+        if (isset($this->state) and $this->state != "test") {
             return;
         }
-
         if ($comment == null and $instruction == null) {
             $comment = "";
         }
@@ -230,21 +327,21 @@ class Database
         $caller = debug_backtrace();
 
         $caller = $caller[2];
-        $r = $caller['function'] . '()';
+        $r = $caller["function"] . "()";
 
-        if (isset($caller['class'])) {
-            $r .= ' called by ';
+        if (isset($caller["class"])) {
+            $r .= " called by ";
             // $r .= $caller['class'];
-            $t = explode("\\", $caller['class']);
+            $t = explode("\\", $caller["class"]);
             $r .= "" . $t[count($t) - 1];
         }
 
         $this->caller = $t[count($t) - 1];
 
         $r .= "\\";
-        $r .= debug_backtrace()[1]['function'];
+        $r .= debug_backtrace()[1]["function"];
 
-        if (isset($caller['object'])) {
+        if (isset($caller["object"])) {
             //$r .= ' (' . get_class($caller['object']) . ')';
         }
         return $r;
@@ -257,87 +354,23 @@ class Database
      */
     function priorGet($created_at = null)
     {
-
-if ($this->get_prior === false) {
-
         $thingreport = [
-            'thing' => false,
-            'info' =>
-                'Prior get is off for this stack.',
-            'help' => 'No help available.'
+            "thing" => false,
+            "info" => "Prior get is off for this stack.",
+            "help" => "Now help available.",
         ];
 
-return $thingreport;
-
-}
-
-        $nom_from = $this->from;
-        $hash_nom_from = hash($this->hash_algorithm, $nom_from);
-        // Given a $uuid.  Find the previous record the $from user
-        // created.
-
-        // Review thought.  Wouldn't searching for the latest record
-        // before the time_stamp be more efficient?
-
-        // http://stackoverflow.com/questions/28451031/how-to-get-second-last-row-from-mysql-database
-        // Doesn't work in case of same time_stamp.
-        // That is acceptable.  A second resolution for creating records is
-        // likely a good limit.  Easy to upgrade by adding a 'microsecond' column to the
-        // database.
-
-        // Change to InnoDB means stack is likely now working on microsecond
-        // time quantum.
-
-        // sqlinjection commentary
-        // nom_from is a carrier provided identifier, therefore judged safe to
-        // pass by message carriers.
-        // created_at is a stack created field
-
-        if ($created_at == null) {
-            $query_string =
-                "SELECT * FROM (SELECT * FROM stack WHERE
-				(nom_from='" .
-                $this->from .
-                "' OR nom_from='" .
-                $hash_nom_from .
-                "'" .
-                ") ORDER BY created_at DESC LIMIT 2) AS t ORDER BY created_at ASC LIMIT 2";
-        } else {
-            $query_string =
-                "SELECT * FROM stack where (nom_from = '" .
-                $this->from .
-                "' OR nom_from='" .
-                $hash_nom_from .
-                "'" .
-                ") and created_at < '" .
-                $created_at .
-                "' order by created_at DESC LIMIT 3";
+        foreach (
+            $this->active_stacks
+            as $active_service_name => $active_service
+        ) {
+            if ($active_service_name == "mysql") {
+                $thingreport = $this->stack_handlers["mysql"]->priorMysql(
+                    $created_at
+                );
+                break;
+            }
         }
-        try {
-            $sth = $this->container->db->prepare($query_string);
-            $sth->execute();
-            $thing = $sth->fetchObject();
-        } catch (\Exception $e) {
-            // Devstack - decide how to handle thing full
-
-            //            $t = new Thing(null);
-            //            $t->Create("stack", "error", 'priorGet ' . $e->getMessage());
-            $thing = false;
-        }
-
-        $sth = null;
-
-        $thingreport = [
-            'thing' => $thing,
-            'info' =>
-                'Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing ' .
-                $this->web_prefix .
-                'api/thing/<32 characters>.',
-            'help' => 'Check your junk/spam folder.'
-        ];
-
-        // Runs in 0 to 8ms
-
         return $thingreport;
     }
 
@@ -346,53 +379,47 @@ return $thingreport;
      * @param unknown $field_text
      * @param unknown $string_text
      */
-    function writeField($field_text, $string_text)
+    public function writeField($field_text, $string_text, $uuid = null)
     {
-        $this->split_time = microtime(true);
-        $this->log = [$field_text, $string_text];
-        //$this->test( $this->get_calling_function() );
+        foreach (
+            $this->active_stacks
+            as $active_service_name => $active_service
+        ) {
+            if ($active_service_name == "mysql") {
+                $r = $this->stack_handlers["mysql"]->writeField(
+                    $field_text,
+                    $string_text
+                );
+            }
+            if ($active_service_name == "memcached") {
+                $key = $this->stack_handlers["memcached"]->writeField(
+                    $field_text,
+                    $string_text
+                );
+                //if ($key === true) {return true;}
+            }
 
-        // sqlinjection commentary
-        // user provided string_text
-        // stack provided field_text
+            if ($active_service_name == "mongo") {
+                $key = $this->stack_handlers["mongo"]->writeMongo(
+                    $field_text,
+                    $string_text
+                );
+                //if ($key === true) {return true;}
+            }
+            /*
+        if ($active_service == "memory") {
+            $memory = $this->stack_handlers["memory"]->set($key, $value);
 
-        try {
-            $query = "UPDATE stack SET $field_text=:string_text WHERE uuid=:uuid";
-            $sth = $this->container->db->prepare($query);
-
-            $sth->bindParam(":uuid", $this->uuid);
-            $sth->bindParam(":string_text", $string_text);
-
-            // This is not allowed by PHP.
-            // Noting that field_text is generated by an Agent.  Not channel input.
-            //$sth->bindParam(":field_text", $field_text);
-
-            $sth->execute();
-//            $sth = null;
-            //$sth->close();
-            $this->last_update = false;
-        } catch (\Exception $e) {
-            // Devstack - decide how to handle thing full
-            // Do this for now.
-
-            //            $t = new Thing(null);
-            //            $t->Create('stack', "error", 'writeField ' . $e->getMessage());
-
-            // Commented out 24 November 2019.
-            // Prevents a SQLSTATE[22001] error from looping.
-            //$t = new Bork($t);
-
-            //echo "BORK | Thing is full.";
-            //echo 'Caught error: ',  $e->getMessage(), "\n";
-            $thing = false;
-            $this->last_update = true;
+            if ($memory === false) {
+                return true;
+            } //error
+            if ($memory === true) {
+                return $value;
+            } // success
+            return true; // error
         }
-
-        $sth = null;
-
-        $this->operations_time += microtime(true) - $this->split_time;
-        $this->operations += 1;
-        //$this->test("writeField");
+*/
+        }
     }
 
     /**
@@ -401,20 +428,13 @@ return $thingreport;
      */
     function count()
     {
-        $sth = $this->container->db->prepare("SELECT count(*) FROM stack");
-        $sth->execute();
-
-        $thing_count = $sth->fetchColumn();
-
-        $sth = null;
-
-        $thingreport = [
-            'things' => false,
-            'info' => 'Counted ' . $thing_count . '  records on stack.',
-            'help' => 'This is how big the stack is.'
-        ];
-        $thingreport['number'] = $thing_count;
-
+        if ($this->stack_handler == null) {
+            return true;
+        }
+        $thingreport = true;
+        if ($this->stack["infrastructure"] == "mysql") {
+            $thingreport = $this->stack_handler->countMysql();
+        }
         return $thingreport;
     }
 
@@ -426,7 +446,8 @@ return $thingreport;
     function readField($field)
     {
         $thingreport = $this->Get();
-        $this->thing = $thingreport['thing'];
+
+        $this->thing = $thingreport["thing"];
 
         if (isset($this->thing->$field)) {
             // I think I should also do
@@ -445,53 +466,43 @@ return $thingreport;
      */
     function Create($subject, $to)
     {
-        try {
-            // Create a new record in the db for the Thing.
-            $this->split_time = microtime(true);
-
-            //$this->test("Create");
-
-            $query = $this->container->db->prepare("INSERT INTO stack
-			(uuid,task,nom_from,nom_to)
-			VALUES (:uuid, :task, :hash_nom_from, :nom_to)");
-
-            $query->bindParam(':uuid', $uuid);
-            $query->bindParam(':task', $task);
-            $query->bindParam(':hash_nom_from', $hash_nom_from);
-            $query->bindParam(':nom_to', $nom_to);
-
-            $uuid = $this->uuid;
-            $task = $subject;
-            $nom_from = $this->from;
-
-            $hash_nom_from = hash($this->hash_algorithm, $nom_from);
-
-            if ($this->hash_state == 'off') {
-                $hash_nom_from = $nom_from;
+        foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
+            $stack_infrastructure = $stack_descriptor["infrastructure"];
+            if ($stack_infrastructure == "mysql") {
+                $response = $this->stack_handlers["mysql"]->createMysql(
+                    $subject,
+                    $to
+                );
+                $this->available_stacks["mysql"]["response"] = $response;
             }
-            $nom_to = $to;
 
-            $query->execute();
-$query = null;
-return true;
-            return $query;
-        } catch (\Exception $e) {
-            // Devstack - decide how to handle thing full
-            // Do this for now.
+            if ($stack_infrastructure == "memory") {
+                $response = $this->stack_handlers["memory"]->createMemory(
+                    $subject,
+                    $to
+                );
+                $this->available_stacks["memory"]["response"] = $response;
+            }
 
-            //            $t = new Thing(null);
-            //            $t->Create("stack", "error", 'Create' . $e->getMessage());
-
-            // Commented out 24 November 2019.
-            // Prevents a SQLSTATE[22001] error from looping.
-            //$t = new Bork($t);
-
-            //echo "BORK | Thing is full.";
-            //echo 'Caught error: ',  $e->getMessage(), "\n";
-            $thing = false;
-            $this->last_update = true;
-            return false;
+            if ($stack_infrastructure == "mongo") {
+                $response = $this->stack_handlers["mongo"]->createMongo(
+                    $subject,
+                    $to
+                );
+                $this->available_stacks["memory"]["response"] = $response;
+            }
         }
+
+        foreach ($this->available_stacks as $stack_name => $stack_descriptor) {
+            if (
+                isset($stack_descriptor["response"]) and
+                $stack_descriptor["response"] === true
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -505,91 +516,97 @@ return true;
 
         // So just return the contents of thing.  false if it doesn't exist.
 
-        try {
-            // Trying long form.  Doesn't seme to have performance advantage.
-            $sth = $this->container->db->prepare(
-                "SELECT uuid, task, nom_from, nom_to, created_at, associations, message0, message1, message2, message3, message4, message5, message6, message7, settings, variables FROM stack WHERE uuid=:uuid"
-            );
+        // Get first available.
 
-            //$sth = $this->container->db->prepare("SELECT * FROM stack WHERE uuid=:uuid");
-            $sth->bindParam("uuid", $this->uuid);
-            $sth->execute();
-            $thing = $sth->fetchObject();
-        } catch (\Exception $e) {
-            // devstack look get the error code.
-            // SQLSTATE[HY000] [2002] Connection refused
-            if ($e->getCode() == '2002' or $e->getCode() == 'HY000') {
-                // devstack write to text file?
-                // Don't try making more entries when the database is refusing entries...
-            } else {
-                //            $t = new Thing(null);
-                //            $t->Create("stack", "error", 'Get ' . $e->getCode());
+        //        $thing = false;
+        $thing = [];
+        foreach ($this->available_stacks as $stack_name => $stack) {
+            switch ($stack["infrastructure"]) {
+                case "mysql":
+                    $thing["mysql"] = $this->stack_handlers[
+                        $stack["infrastructure"]
+                    ]->getMysql();
+
+                    //          if ($thing['mysql'] !== false and $thing['mysql'] !== true) {
+                    //              break 2;
+                    //          }
+
+                    //if ($thing === false) {$thing = $thing['mysql'];}
+                    break;
+                case "memcached":
+                    $thing["memcached"] = $this->stack_handlers[
+                        $stack["infrastructure"]
+                    ]->getMemcached($this->uuid);
+                    break;
+
+                case "mongo":
+                    $thing["mongo"] = $this->stack_handlers[
+                        $stack["infrastructure"]
+                    ]->getMongo($this->uuid);
+                    break;
+
+                //                    if ($thing !== false and $thing !== true) {
+                //                        break 2;
+                //                   }
+
+                /*
+                case "mongo":
+                    break;
+                case "memory":
+                    $thing = $this->stack_handlers[
+                        $stack["infrastructure"]
+                    ]->getMemory($this->uuid);
+
+                    if ($thing !== false and $thing !== true) {
+                        break 2;
+                    }
+*/
+                /*
+                    if ($thing !== false) {
+                        //$thing = new Thing(null);
+                        //$thing->created_at = null;
+                        //$thing->nom_to = null;
+                        //$thing->nom_from = null;
+              c          //$thing->task = "empty task";
+                        //$thing->variables = json_encode($t, true);
+                        //$thing->settings = null;
+                        break;
+                    }
+*/
+
+                //break 2;
             }
-            $thing = false;
         }
 
-        if ($thing === false) {
-            $t = $this->getMemory($this->uuid);
-            if ($t !== false) {
-                $thing = new Thing(null);
-                $thing->created_at = null;
-                $thing->nom_to = null;
-                $thing->nom_from = null;
-                $thing->task = "empty task";
-                $thing->variables = json_encode($t, true);
-                $thing->settings = null;
-            }
-        }
+        // dev decide which thing is most authorative.
+        // merge?
+        $thing = $thing["mysql"];
 
-        $sth = null;
+        /*
+if (is_array($thing)) {
 
+if (count($thing) == 0) {
+$thing = false;
+}
+
+if (count($thing) >= 1) {
+$thcing = $thing[array_key_first($thing)];
+}
+
+
+}
+*/
         $thingreport = [
-            'thing' => $thing,
-            'info' =>
-                'Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing ' .
+            "thing" => $thing,
+            "info" =>
+                "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing " .
                 $this->web_prefix .
-                'api/thing/<32 characters>.',
-            'help' => 'Check your junk/spam folder.',
+                "api/thing/<32 characters>.",
+            "help" => "Check your junk/spam folder.",
         ];
-
-        $this->test();
 
         return $thingreport;
     }
-
-    // Plan to deprecate getMemcached terminology.
-    public function getMemory($text = null)
-    {
-        //        if (isset($this->memory)) {
-        //            return;
-        //        }
-
-        // Null?
-        // $this->mem_cached = null;
-        // Fail to stack php memory code if Memcached is not availble.
-        if (!isset($this->memory)) {
-            try {
-                $this->memory = new \Memcached(); //point 2.
-                $this->memory->addServer("127.0.0.1", 11211);
-            } catch (\Throwable $t) {
-                // Failto
-                $this->memory = new Memory($this->thing, "memory");
-                //restore_error_handler();
-                $this->thing->log(
-                    'caught memcached throwable. made memory',
-                    "WARNING"
-                );
-                return;
-            } catch (\Error $ex) {
-                $this->thing->log('caught memcached error.', "WARNING");
-                return true;
-            }
-        }
-
-        $memory = $this->memory->get($text);
-        return $memory;
-    }
-
 
     /**
      *
@@ -597,17 +614,37 @@ return true;
      */
     function Forget()
     {
-        $sth = $this->container->db->prepare(
-            "DELETE FROM stack WHERE uuid=:uuid"
-        );
-        $sth->bindParam("uuid", $this->uuid);
-        $sth->execute();
+        $thing_reports = [];
+        foreach (
+            $this->active_stacks
+            as $active_service_name => $active_service
+        ) {
+            if ($active_service_name == "mysql") {
+                $thing_reports[
+                    $active_service_name
+                ] = $this->stack_handler->forgetMysql($this->uuid);
+            }
 
-        $sth = null;
+            if ($active_service_name == "mongo") {
+                $thing_reports[
+                    $active_service_name
+                ] = $this->stack_handler->forgetMongo($this->uuid);
+            }
 
+            if ($active_service_name == "memory") {
+                $memory = $this->stack_handler->setMemory($this->uuid, null);
+                $thing_reports[$active_service_name] = [
+                    "info" => "That thing was forgotten.",
+                    "error" => $memory,
+                ];
+            }
+        }
 
-        $thingreport = ['info' => 'That thing was forgotten.'];
-        return $thingreport;
+        // Thing report fusion?
+        // But for now get first element
+        $thing_report = reset($thing_reports);
+
+        return $thing_report;
     }
 
     /**
@@ -617,9 +654,9 @@ return true;
     function setUser($id = null)
     {
         if ($id == null) {
-            $settings = require $GLOBALS['stack_path'] . "private/settings.php";
+            $settings = require $GLOBALS["stack_path"] . "private/settings.php";
 
-            $id = "null@" . $settings['settings']['stack']['mail_postfix'];
+            $id = "null@" . $settings["settings"]["stack"]["mail_postfix"];
         }
         $this->from = $id;
         return;
@@ -643,61 +680,29 @@ return true;
      */
     function associationSearch($value, $max = null)
     {
-        if ($max == null) {
-            $max = 3;
+        $thing_report = [
+            "things" => [],
+            "info" => "Did not find any things with that association.",
+            "help" => "Finds associated things.",
+        ];
+
+        if ($this->stack["infrastructure"] == "mysql") {
+            $thing_report = $this->stack_handlers[
+                "mysql"
+            ]->associationsearchMysql($value, $max);
         }
-        $max = (int) $max;
 
-        $user_search = $this->from;
-        //        $hash_user_search($this->hash_algorithm, $user_search);
-        $hash_user_search = hash($this->hash_algorithm, $user_search);
+        return $thing_report;
+    }
 
-        // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
-        $value = "%$value%"; // Value to search for in Variables
+    function isValidMd5($md5 = "")
+    {
+        return strlen($md5) == 32 && ctype_xdigit($md5);
+    }
 
-        $thingreport['things'] = [];
-
-        try {
-            $value = "%$value%"; // Value to search for in Variables
-
-            $query =
-                "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND associations LIKE :value ORDER BY created_at DESC LIMIT :max";
-
-            // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY creat$
-            // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY creat$
-            // $query = "SELECT uuid, task, nom_from, nom_to, created_at, message0, settings, variables FROM stack WHERE nom_from=:user_searc$
-
-            // $value = "*$value*"; // Value to search for in Variables
-            // $query = "SELECT uuid, variables FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) $
-
-            $sth = $this->container->db->prepare($query);
-
-            $sth->bindParam(":user_search", $user_search);
-            $sth->bindParam(":hash_user_search", $hash_user_search);
-
-            $sth->bindParam(":value", $value);
-            $sth->bindParam(":max", $max, PDO::PARAM_INT);
-            $sth->execute();
-
-            $things = $sth->fetchAll();
-
-            //$sth = null;
-
-            $thingreport['info'] =
-                'So here are Things with the association you provided. That\'s what you want';
-            $thingreport['things'] = $things;
-        } catch (\PDOException $e) {
-            //            $t = new Thing(null);
-            //            $t->Create("stack", "error", 'associationSearch ' .$e->getMessage());
-
-            // echo "Error in PDO: ".$e->getMessage()."<br>";
-            $thingreport['info'] = $e->getMessage();
-            $thingreport['things'] = [];
-        }
-        
-        $sth = null;
-
-        return $thingreport;
+    function isValidSha256($sha256 = "")
+    {
+        return strlen($sha256) == 64 && ctype_xdigit($sha256);
     }
 
     /**
@@ -707,8 +712,37 @@ return true;
      * @param unknown $max   (optional)
      * @return unknown
      */
-    function variableSearch($path, $value, $max = null)
-    {
+    public function variableSearch(
+        $path,
+        $value,
+        $max = null,
+        $string_in_string = false
+    ) {
+        //        $thing = false;
+        /*
+        $thing_report = [];
+        $thing_report["info"] =
+                'No things found.';
+        $thing_report["things"] = [];
+
+        foreach($this->available_stacks as $stack_name=>$stack) {
+
+switch ($stack['infrastructure']) {
+    case 'mysql':
+            $thing_report = $this->stack_handler->variablesearchMysql($path, $value, $max);
+        break 2;
+    case 'mongo':
+//        break 2;
+    case 'memory':
+//        break 2;
+}
+
+
+        }
+
+return $thing_report;
+*/
+
         if ($max == null) {
             $max = 3;
         }
@@ -717,44 +751,63 @@ return true;
         $user_search = $this->from;
         $hash_user_search = hash($this->hash_algorithm, $user_search);
 
+        $hash_user_search = $user_search;
+        if (!$this->isValidSha256($user_search)) {
+            $hash_user_search = hash($this->hash_algorithm, $user_search);
+        }
         // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
-        $value = "%$value%"; // Value to search for in Variables
-
-        $thingreport['things'] = [];
+        if ($string_in_string === true) {
+            $value = "%$value%"; // Value to search for in Variables
+        }
+        $thingreport["things"] = [];
 
         try {
-//            $query =
-//                "SELECT * FROM stack FORCE INDEX (created_at_nom_from) WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+            //            $query =
+            //                "SELECT * FROM stack FORCE INDEX (created_at_nom_from) WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
-            $query =
-                "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+            //            $query =
+            //              "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
+            if ($this->hash_state == "off") {
+                $query =
+                    "SELECT * FROM stack WHERE nom_from=:user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+            }
 
-        //$value = "+$value"; // Value to search for in Variables
+            if ($this->hash_state == "on") {
+                $query =
+                    "SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+            }
+            //           $query =
+            //                "(SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) UNION ALL (SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) ORDER BY created_at DESC LIMIT :max";
+            //$value = "+$value"; // Value to search for in Variables
 
-        //    $query =
-        //        'SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND MATCH(variables) AGAINST (:value IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max';
+            //    $query =
+            //        'SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND MATCH(variables) AGAINST (:value IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max';
 
             $sth = $this->container->db->prepare($query);
-
-            $sth->bindParam(":user_search", $user_search);
-            $sth->bindParam(":hash_user_search", $hash_user_search);
-
+            if ($this->hash_state == "off") {
+                $sth->bindParam(":user_search", $user_search);
+            }
+            if ($this->hash_state == "on") {
+                $sth->bindParam(":hash_user_search", $hash_user_search);
+            }
             $sth->bindParam(":value", $value);
             $sth->bindParam(":max", $max, PDO::PARAM_INT);
             $sth->execute();
 
             $things = $sth->fetchAll();
-
-            $thingreport['info'] =
+            $thingreport["info"] =
                 'So here are Things with the variable you provided in \$variables. That\'s what you want';
-            $thingreport['things'] = $things;
+            $thingreport["things"] = $things;
         } catch (\PDOException $e) {
+            //var_dump($e->getMessage());
             // echo "Error in PDO: ".$e->getMessage()."<br>";
-            $thingreport['info'] = $e->getMessage();
-            $thingreport['things'] = [];
+            $thingreport["info"] = $e->getMessage();
+            $thingreport["things"] = [];
         }
 
+        // Destroy object
+        // https://stackoverflow.com/questions/5772626/fatal-error-call-to-undefined-method-pdoclose
         $sth = null;
 
         return $thingreport;
@@ -767,7 +820,7 @@ return true;
 
         $nuuid = "$nuuid%"; // Value to search for in Variables
 
-        $thingreport['things'] = [];
+        $thingreport["things"] = [];
 
         try {
             $query =
@@ -783,49 +836,13 @@ return true;
 
             $things = $sth->fetchAll();
 
-            $thingreport['info'] =
-                'So here are Things with the nuuid you provided.';
-            $thingreport['things'] = $things;
+            $thingreport["info"] =
+                "So here are Things with the nuuid you provided.";
+            $thingreport["things"] = $things;
         } catch (\PDOException $e) {
-            $thingreport['info'] = $e->getMessage();
-            $thingreport['things'] = [];
+            $thingreport["info"] = $e->getMessage();
+            $thingreport["things"] = [];
         }
-
-        $sth = null;
-
-        return $thingreport;
-    }
-
-
-    /**
-     *
-     * @param unknown $agent
-     * @param unknown $max   (optional)
-     * @return unknown
-     */
-    function testSearch($keyword_input)
-    {
-        $query =
-            'SELECT * FROM stack WHERE task="something something something"';
-
-        $sth = $this->container->db->prepare($query);
-
-        try {
-            $sth->execute();
-        } catch (\PDOException $e) {
-            //            $t = new Thing(null);
-            //            $t->Create("stack", "error", 'testSearch ' . $e->getMessage());
-        }
-        $things = $sth->fetchAll();
-        //        $thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what y$
-        $thingreport = [
-            'things' => $things,
-            'info' =>
-                'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
-            'help' => 'It is up to you what you do with these.',
-            'whatisthis' =>
-                'A list of Things which match at the provided phrase.'
-        ];
 
         $sth = null;
 
@@ -857,24 +874,24 @@ return true;
         if ($mode == null or strtolower($mode) == "boolean") {
             $keyword = $this->container->db->quote($keyword_input);
             $query =
-                'SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max';
+                "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max";
         }
 
         if (strtolower($mode) == "like") {
             $keyword = "$keyword_input"; // Value to search for in Variables
             $query =
-                'SELECT * FROM stack WHERE task LIKE BINARY :keyword AND nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) ORDER BY created_at DESC LIMIT :max';
+                "SELECT * FROM stack WHERE task LIKE BINARY :keyword AND nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) ORDER BY created_at DESC LIMIT :max";
         }
         if (strtolower($mode) == "where") {
             $keyword = $this->container->db->quote($keyword_input);
             $query =
-                'SELECT * FROM stack WHERE task = BINARY :keyword AND nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) ORDER BY created_at DESC LIMIT :max';
+                "SELECT * FROM stack WHERE task = BINARY :keyword AND nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) ORDER BY created_at DESC LIMIT :max";
         }
 
         if (strtolower($mode) == "natural language") {
             $keyword = $this->container->db->quote($keyword_input);
             $query =
-                'SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN NATURAL LANGUAGE MODE) ORDER BY created_at DESC LIMIT :max';
+                "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN NATURAL LANGUAGE MODE) ORDER BY created_at DESC LIMIT :max";
         }
 
         if (strtolower($mode) == "equal") {
@@ -908,35 +925,52 @@ return true;
             //            $t->Create("stack", "error", 'subjectSearch ' .$e->getMessage());
             //            echo 'Caught exception: ', $e->getMessage(), "\n";
         }
+
         $things = $sth->fetchAll();
 
         $sth = null;
 
         $thingreport = [
-            'things' => $things,
-            'info' =>
+            "things" => $things,
+            "info" =>
                 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
-            'help' => 'It is up to you what you do with these.',
-            'whatisthis' =>
-                'A list of Things which match at the provided phrase.'
+            "help" => "It is up to you what you do with these.",
+            "whatisthis" =>
+                "A list of Things which match at the provided phrase.",
         ];
 
         return $thingreport;
     }
 
-
-    function fromCount($horizon = null)
+    function fromcountDatabase($horizon = null)
     {
+        $thing_report = [
+            "thing" => false,
+            "things" => [],
+            "info" => "Did not count any things.",
+            "help" => "Counts things.",
+        ];
 
-        $query =
-            'SELECT DISTINCT nom_from FROM stack';
+        foreach (
+            $this->active_stacks
+            as $active_service_name => $active_service
+        ) {
+            if ($active_service_name == "mysql") {
+                $thingreport = $this->stack_handlers["mysql"]->fromcountMysql(
+                    $horizon
+                );
+                break;
+            }
+        }
+
+        return $thingreport;
+
+        $query = "SELECT DISTINCT nom_from FROM stack";
 
         if ($horizon != null) {
-
             $horizon = (int) $horizon;
             $query =
-                'SELECT DISTINCT nom_from FROM stack WHERE created_at > (NOW() - INTERVAL :horizon HOUR)';
-
+                "SELECT DISTINCT nom_from FROM stack WHERE created_at > (NOW() - INTERVAL :horizon HOUR)";
         }
 
         $sth = $this->container->db->prepare($query);
@@ -948,9 +982,8 @@ return true;
         try {
             $sth->execute();
             $things = $sth->fetchAll();
-
         } catch (\PDOException $e) {
-            $things = array();
+            $things = [];
             //            $t = new Thing(null);
             //            $t->Create("stack", "error", 'subjectSearch ' .$e->getMessage());
 
@@ -960,17 +993,13 @@ return true;
         $sth = null;
 
         $thingreport = [
-            'things' => $things,
-            'info' =>
-                'Count unique nom_from in the stack.',
-            'help' => 'It is up to you what you do with these.',
-            'whatisthis' =>
-                'A count of the nom_from channels in the stack.'
+            "things" => $things,
+            "info" => "Count unique nom_from in the stack.",
+            "help" => "It is up to you what you do with these.",
+            "whatisthis" => "A count of the nom_from channels in the stack.",
         ];
         return $thingreport;
     }
-
-
 
     function agentCount($agent, $horizon = 48)
     {
@@ -985,7 +1014,7 @@ return true;
         $hash_user_search = hash($this->hash_algorithm, $user_search);
 
         $query =
-            'SELECT COUNT(*) FROM stack WHERE nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) AND created_at > (NOW() - INTERVAL :horizon HOUR)';
+            "SELECT COUNT(*) FROM stack WHERE nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) AND created_at > (NOW() - INTERVAL :horizon HOUR)";
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
@@ -1000,9 +1029,8 @@ return true;
         try {
             $sth->execute();
             $things = $sth->fetchAll();
-
         } catch (\PDOException $e) {
-            $things = array();
+            $things = [];
             //            $t = new Thing(null);
             //            $t->Create("stack", "error", 'subjectSearch ' .$e->getMessage());
 
@@ -1012,12 +1040,12 @@ return true;
         $sth = null;
 
         $thingreport = [
-            'things' => $things,
-            'info' =>
+            "things" => $things,
+            "info" =>
                 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
-            'help' => 'It is up to you what you do with these.',
-            'whatisthis' =>
-                'A list of Things which match at the provided phrase.'
+            "help" => "It is up to you what you do with these.",
+            "whatisthis" =>
+                "A list of Things which match at the provided phrase.",
         ];
         return $thingreport;
     }
@@ -1050,12 +1078,12 @@ return true;
         $sth = null;
 
         $thingreport = [
-            'things' => $things,
-            'info' =>
+            "things" => $things,
+            "info" =>
                 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
-            'help' => 'It is up to you what you do with these.',
-            'whatisthis' =>
-                'A list of Things which match at the provided phrase.'
+            "help" => "It is up to you what you do with these.",
+            "whatisthis" =>
+                "A list of Things which match at the provided phrase.",
         ];
         return $thingreport;
     }
@@ -1074,7 +1102,7 @@ return true;
         //$query = 'delete from stack where nom_to=:agent and nom_from=:user_search and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)';
         //$query = 'delete /*+ MAX_EXECUTION_TIME(100) */ from stack where nom_to="tile" and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)';
         $query =
-            'delete from stack where nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)';
+            "delete from stack where nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)";
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
@@ -1088,11 +1116,11 @@ return true;
         $sth = null;
 
         $thingreport = [
-            'things' => null,
-            'info' => 'Asked to delete records by agent.',
-            'help' => 'It is up to you what you do with these.',
-            'whatisthis' =>
-                'A command to delete all but some of a specific agent records.'
+            "things" => null,
+            "info" => "Asked to delete records by agent.",
+            "help" => "It is up to you what you do with these.",
+            "whatisthis" =>
+                "A command to delete all but some of a specific agent records.",
         ];
         return $thingreport;
     }
@@ -1126,7 +1154,6 @@ return true;
             $sth->bindParam(":agent", $agent);
             $sth->bindParam(":max", $max, PDO::PARAM_INT);
             $sth->execute();
-
             $things = $sth->fetchAll();
         } catch (\Exception $e) {
             //            $t = new Thing(null);
@@ -1139,12 +1166,12 @@ return true;
         $sth = null;
 
         $thingreport = [
-            'things' => $things,
-            'info' =>
+            "things" => $things,
+            "info" =>
                 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
-            'help' => 'It is up to you what you do with these.',
-            'whatisthis' =>
-                'A list of Things which match at the provided phrase.'
+            "help" => "It is up to you what you do with these.",
+            "whatisthis" =>
+                "A list of Things which match at the provided phrase.",
         ];
         return $thingreport;
     }
@@ -1188,9 +1215,9 @@ return true;
         $sth = null;
 
         $thingreport = [
-            'thing' => $things,
-            'info' => 'Searches by nom_from and task.',
-            'help' => 'Keyword subject line search.'
+            "thing" => $things,
+            "info" => "Searches by nom_from and task.",
+            "help" => "Keyword subject line search.",
         ];
 
         return $thingreport;
@@ -1241,11 +1268,10 @@ return true;
         }
 
         $thing = $this->user_things->fetch();
-        //$things = $sth->fetchAll();
 
-        $thing_report['thing'] = $thing;
-        $thing_report['info'] = 'So here is the next thing.';
-        $thing_report['help'] = 'No help';
+        $thing_report["thing"] = $thing;
+        $thing_report["info"] = "So here is the next thing.";
+        $thing_report["help"] = "No help";
 
         return $thing_report;
     }
@@ -1287,8 +1313,6 @@ return true;
         // This will need to be a public Stack variable.
 
         // Double-UU intentionally.
-
-        return;
     }
 
     /**
@@ -1308,11 +1332,10 @@ return true;
         // Do a self look-up if no uuid provided.
         if ($uuid == null);
         if ($this->uuid == null) {
-            $thingreport = ['things' => false];
-            $thingreport['info'] =
+            $thingreport = ["things" => false];
+            $thingreport["info"] =
                 'So here are the uuids of all records matching your request.  That\'s what you wanted.';
-            $thingreport['help'] = 'No matching records returned.';
-
+            $thingreport["help"] = "No matching records returned.";
 
             return $thingreport;
         } else {
@@ -1333,12 +1356,12 @@ return true;
         $task_exclusions = null;
 
         $querable_fields = [
-            'nom_from',
-            'nom_to',
-            'associations',
-            'task',
-            'message0',
-            'settings'
+            "nom_from",
+            "nom_to",
+            "associations",
+            "task",
+            "message0",
+            "settings",
         ];
 
         // Double capitals to make you thing before you ask a Thing
@@ -1408,10 +1431,10 @@ return true;
         $sth = null;
 
         $thingreport = [
-            'things' => $things,
-            'info' =>
+            "things" => $things,
+            "info" =>
                 'So here are the uuids of all records matching your request.  That\'s what you wanted.',
-            'help' => 'It is up to you what you do with these.'
+            "help" => "It is up to you what you do with these.",
         ];
 
         return $thingreport;
@@ -1492,10 +1515,10 @@ return true;
         $sth = null;
 
         $thingreport = [
-            'thing' => $things,
-            'info' => 'So here are Things which are flagged red.',
-            'help' => 'It is up to you what you do with these.',
-            'whatisthis' => 'A list of Things which have status red.'
+            "thing" => $things,
+            "info" => "So here are Things which are flagged red.",
+            "help" => "It is up to you what you do with these.",
+            "whatisthis" => "A list of Things which have status red.",
         ];
 
         return $thingreport;
@@ -1536,9 +1559,9 @@ return true;
         $sth = null;
 
         $thingreport = [
-            'things' => $things,
-            'info' => 'So here are Things which are flagged as stack reports.',
-            'help' => 'This reports on stack health'
+            "things" => $things,
+            "info" => "So here are Things which are flagged as stack reports.",
+            "help" => "This reports on stack health",
         ];
 
         return $thingreport;
@@ -1559,10 +1582,10 @@ return true;
         $sth = null;
 
         $thingreport = [
-            'thing' => $things,
-            'info' => 'So here are Things which are flagged red.',
-            'help' => 'It is up to you what you do with these.',
-            'whatisthis' => 'A list of Things which have status red.'
+            "thing" => $things,
+            "info" => "So here are Things which are flagged red.",
+            "help" => "It is up to you what you do with these.",
+            "whatisthis" => "A list of Things which have status red.",
         ];
 
         return $thingreport;
@@ -1574,26 +1597,24 @@ return true;
      */
     function length()
     {
-        $query =
-            "SELECT variables, LENGTH(variables) AS mlen FROM stack ORDER BY mlen DESC LIMIT 1";
-        $sth = $this->container->db->prepare($query);
-        $sth->execute();
-        $response = $sth->fetchAll();
-
-        $keys = array_keys($response);
-
-        $sth = null;
-
-        $thingreport = [
-            'thing' => false,
-            'db' => $response,
-            'info' => 'So here is the length of the variables field.',
-            'help' =>
-                'There is a limit to the variables the stack can keep track of.',
-            'whatisthis' => 'The maximum length of the variables field.'
+        $thing_report = [
+            "thing" => false,
+            "db" => true,
+            "info" => "So here is the length of the variables field.",
+            "help" =>
+                "There is a limit to the variables the stack can keep track of.",
+            "whatisthis" => "The maximum length of the variables field.",
         ];
 
-        return $thingreport;
+        if ($this->stack_handler == null) {
+            return $thing_report;
+        }
+
+        if ($this->stack["infrastructure"] == "mysql") {
+            $thing_report = $this->stack_handler->lengthMysql();
+        }
+
+        return $thing_report;
     }
 
     /**
@@ -1602,30 +1623,22 @@ return true;
      */
     function connections()
     {
-        // NOT TESTED
-
-        $query = "SHOW STATUS WHERE `variable_name` = 'Threads_connected'";
-
-        $sth = $this->container->db->prepare($query);
-        $sth->execute();
-        $response = $sth->fetchAll();
-
-        $keys = array_keys($response);
-
-        $sth = null;
-
-        $thingreport = [
-            'thing' => false,
-            'db' => $response,
-            'info' =>
-                'So here are Things matching at least one of the words provided. That\'s what you wanted.',
-            'help' => 'It is up to you what you do with these.',
-            'whatisthis' => 'A list of Things which match at least one keyword.'
+        $thing_report = [
+            "thing" => false,
+            "db" => true,
+            "info" => "Connected threads.",
+            "help" => "It is up to you what you do with these.",
         ];
 
-        //$thingreport = false;
+        if ($this->stack_handler == null) {
+            return $thing_report;
+        }
 
-        return $thingreport;
+        if ($this->stack["infrastructure"] == "mysql") {
+            $thing_report = $this->stack_handler->connectionsMysql();
+        }
+
+        return $thing_report;
     }
 
     /**
@@ -1636,74 +1649,21 @@ return true;
      */
     function random($nom_from = null, $n = 1)
     {
-        if ($nom_from == null) {
-            // https://explainextended.com/2009/03/01/selecting-random-rows/
-            // https://stackoverflow.com/questions/1244555/how-can-i-optimize-mysqls-order-by-rand-function
-            /*
-            $q = "SELECT  *
-                FROM    (
-                    SELECT  @cnt := COUNT(*) + 1,
-                        @lim := 1
-                FROM stack
-                ) vars
-                STRAIGHT_JOIN
-                (
-                SELECT  r.*,
-                    @lim := @lim - 1
-                    FROM    stack r
-                    WHERE   (@cnt := @cnt - 1)
-                    AND RAND(20090301) < @lim / @cnt
-                ) i";
-*/
-            //            $q = "SELECT * FROM stack WHERE RAND()<=0.0006 limit 1";
-            //            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) LIMIT 1";
-            //            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) LIMIT 1";
-            //            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT 1";
+        $thing_report = [
+            "thing" => [],
+            "info" => "So here is a random thing from the stack.",
+            "help" => "It is up to you what you do with these.",
+        ];
 
-            $q =
-                "SELECT * FROM stack WHERE RAND()<(SELECT ((" .
-                $n .
-                "/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT " .
-                $n;
-
-            //            $q = "SELECT * FROM stack ORDER BY RAND() LIMIT " . $n;
-            //            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((20/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT 20";
-
-            $sth = $this->container->db->prepare($q);
-
-            $sth->execute();
-            //      $thing = $sth->fetchObject();
-            $things = $sth->fetchAll();
-
-            $thingreport = [
-                'things' => $things,
-                'info' =>
-                    'So here are three things you put on the stack.  That\'s what you wanted.',
-                'help' => 'It is up to you what you do with these.'
-            ];
-        } else {
-            $q =
-                "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT 1";
-            $sth = $this->container->db->prepare($q);
-
-            $sth->execute();
-            $thing = $sth->fetchObject();
-
-            $this->to = $thing->nom_to;
-            $this->from = $thing->nom_from;
-            $this->subject = $thing->task;
-
-            $thingreport = [
-                'things' => $thing,
-                'info' =>
-                    'So here are three things you put on the stack.  That\'s what you wanted.',
-                'help' => 'It is up to you what you do with these.'
-            ];
+        if ($this->stack_handler == null) {
+            return $thing_report;
         }
 
-        $sth = null;
+        if ($this->stack["infrastructure"] == "mysql") {
+            $thing_report = $this->stack_handler->randomMysql($nom_from, $n);
+        }
 
-        return $thingreport;
+        return $thing_report;
     }
 
     /**
@@ -1712,30 +1672,24 @@ return true;
      * @param unknown $n        (optional)
      * @return unknown
      */
-    function randomN($nom_from, $n = 3)
+    function randomn($nom_from, $n = 3)
     {
-        $hash_nom_from = hash($this->hash_algorithm, $nom_from);
-
-        // Pick N of identity's things.
-        $sth = $this->container->db->prepare(
-            "SELECT * FROM stack WHERE (nom_from=:nom_from OR nom_from=:hash_nom_from) ORDER BY RAND() LIMIT 3"
-        );
-        $sth->bindParam("nom_from", $nom_from);
-        $sth->bindParam("hash_nom_from", $hash_nom_from);
-
-        $sth->execute();
-        $things = $sth->fetchAll();
-
-        $thingreport = [
-            'thing' => $things,
-            'info' =>
+        $thing_report = [
+            "thing" => [],
+            "info" =>
                 'So here are three things you put on the stack.  That\'s what you wanted.',
-            'help' => 'It is up to you what you do with these.'
+            "help" => "It is up to you what you do with these.",
         ];
 
-        $sth = null;
+        if ($this->stack_handler == null) {
+            return $thing_report;
+        }
 
-        return $thingreport;
+        if ($this->stack["infrastructure"] == "mysql") {
+            $thing_report = $this->stack_handler->randomnMysql($nom_from, $n);
+        }
+
+        return $thing_report;
     }
 
     /**
@@ -1751,63 +1705,26 @@ return true;
         $task_exclusions = null,
         $nom_to_exclusions = null
     ) {
-        // Example:
-        // SELECT * FROM stack WHERE nom_from='test@test.test' and ((task not like '%?%') or (nom_from not like '%transit%') or (nom_from not like '%test%')) ORDER BY RAND() LIMIT 3;
-
-        // sqlinjection comment
-        // $task_exlusions and $nom_to_exclusions are code defined
-
-        if ($task_exclusions == null) {
-            $task_exclusions = "";
-        } else {
-            $and = "";
-            $task_sql = "(";
-            foreach ($task_exclusions as $task_exclusion) {
-                $task_sql .= $and . "task not like '%" . $task_exclusion . "%'";
-                $and = " and ";
-            }
-            $task_sql .= " and task not like ''";
-            $task_sql .= ")";
-        }
-
-        if ($nom_to_exclusions == null) {
-            $nom_to_exclusions = "";
-        } else {
-            $nom_to_sql = "(";
-            $and = "";
-            //$nom_to_sql = "";
-            foreach ($nom_to_exclusions as $nom_to_exclusion) {
-                $nom_to_sql .=
-                    $and . "nom_to not like '%" . $nom_to_exclusion . "%'";
-                $and = " and ";
-            }
-            $nom_to_sql .= ")";
-        }
-
-        $query =
-            "SELECT * FROM stack WHERE nom_from='" .
-            $nom_from .
-            "' and (" .
-            $task_sql .
-            " and " .
-            $nom_to_sql .
-            ") ORDER BY RAND() LIMIT 3";
-
-        $sth = $this->container->db->prepare($query);
-        $sth->bindParam("nom_from", $nom_from);
-        $sth->execute();
-        $things = $sth->fetchAll();
-
-        $sth = null;
-
-        $thingreport = [
-            'thing' => $things,
-            'info' =>
+        $thing_report = [
+            "thing" => [],
+            "info" =>
                 'So here are three things you put on the stack.  That\'s what you wanted.',
-            'help' => 'It is up to you what you do with these.'
+            "help" => "It is up to you what you do with these.",
         ];
 
-        return $thingreport;
+        if ($this->stack_handler == null) {
+            return $thing_report;
+        }
+
+        if ($this->stack["infrastructure"] == "mysql") {
+            $thing_report = $this->stack_handler->reminderMysql(
+                $nom_from,
+                $task_exclusions,
+                $nom_to_exclusions
+            );
+        }
+
+        return $thing_report;
     }
 }
 
@@ -1844,7 +1761,7 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
         }
         //ob_clean();
         echo "BORK | e5ffb5de-a502-466e-8ecc-f0ec9f861e0d";
-        if (preg_match('(Maximum|execution|time|exceeded)', $errstr) === 1) {
+        if (preg_match("(Maximum|execution|time|exceeded)", $errstr) === 1) {
             echo " | We only have a limited amount of steam on this server.";
         }
 
@@ -1894,20 +1811,16 @@ function fatalErrorShutdownHandler()
     // ob_clean();
 
     //Add text.
-    //echo "BORK | Bounty ";
-    //exit();
 
     $last_error = error_get_last();
 
-//var_dump($last_error);
-
-    if ( ($last_error['type'] ?? null) === E_ERROR) {
+    if (($last_error["type"] ?? null) === E_ERROR) {
         // fatal error
         myErrorHandler(
             E_ERROR,
-            $last_error['message'],
-            $last_error['file'],
-            $last_error['line']
+            $last_error["message"],
+            $last_error["file"],
+            $last_error["line"]
         );
     }
 

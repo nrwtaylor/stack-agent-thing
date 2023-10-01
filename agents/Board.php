@@ -5,7 +5,7 @@ namespace Nrwtaylor\StackAgentThing;
 
 class Board extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
@@ -13,11 +13,11 @@ class Board extends Agent
 
     function run()
     {
-        $this->doBoard();
-        $this->readBoard();
+        //$this->doBoard();
+        //$this->readBoard();
 
-// Test
-$this->writeBoard();
+        // Test
+        //$this->writeBoard();
     }
 
     public function get()
@@ -28,31 +28,26 @@ $this->writeBoard();
     public function set()
     {
         $this->setBoard();
+        $this->writeBoard();
     }
-
 
     /**
      *
      */
     public function setBoard()
     {
-//        $this->lattice_agent->setLattice();
-//        $this->board = $this->lattice_agent->lattice;
+        $this->decimalBoard();
 
-$this->decimalBoard();
-
-//        $this->decimal_board += 1;
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["board", "decimal"],
             $this->decimal_board
         );
 
         $this->thing->log(
             $this->agent_prefix .
-                ' saved decimal board ' .
+                " saved decimal board " .
                 $this->decimal_board .
-                '.',
+                ".",
             "INFORMATION"
         );
     }
@@ -68,7 +63,12 @@ $this->decimalBoard();
         $i = 0;
         foreach (range(-1, 1, 1) as $j) {
             foreach (range(-1, 1, 1) as $k) {
-                $board_points[] = $this->board[$i][$j][$k]['state'];
+                // Outside of board area?
+                if (!isset($this->board[$i][$j][$k])) {
+                    continue;
+                }
+
+                $board_points[] = $this->board[$i][$j][$k]["state"];
             }
         }
 
@@ -92,37 +92,40 @@ $this->decimalBoard();
         }
 
         $Input = $dec;
-        $Output = '';
+        $Output = "";
         if (preg_match("/^\d+$/", $Input)) {
-            while ($Input != '0') {
+            while ($Input != "0") {
                 $Output .= chr(48 + ($Input[strlen($Input) - 1] % 2));
-                $Input = bcdiv($Input, '2');
+                $Input = bcdiv($Input, "2");
             }
             $Output = strrev($Output);
         }
 
         $this->binary_board = $Output;
-        //      $this->binary_snowflake= decbin($dec);
         return $this->binary_board;
     }
-
+/*
     function getNegativetime()
     {
         $agent = new Negativetime($this->thing, "board");
         $this->negative_time = $agent->negative_time; //negative time is asking
     }
-
+*/
     public function readBoard()
     {
         $i = 0;
         $j = 1;
         $k = 1;
+        $board_text = "X";
+        if (isset($this->board[$i][$j][$k]["state"])) {
+            $board_text = $this->board[$i][$j][$k]["state"];
+        }
+        $this->response .= "Read board " . $board_text . ". ";
 
-$this->response .= "Read board " . $this->board[$i][$j][$k]['state'] . ". ";
-
-        //$lattice_agent->lattice[$i][$j][$k]['name'] = "Mark";
-        //$lattice_agent->lattice[$i][$j][$k]['state'] = true;
-        //$lattice_agent->lattice[$i][$j][$k]['value'] = 1;
+        // Other parameters can/may be set.
+        //$this->board[$i][$j][$k]['name'] = "Mark";
+        //$this->board[$i][$j][$k]['state'] = true;
+        //$this->board[$i][$j][$k]['value'] = 1;
     }
 
     public function writeBoard()
@@ -131,29 +134,24 @@ $this->response .= "Read board " . $this->board[$i][$j][$k]['state'] . ". ";
         $j = 1;
         $k = 1;
 
-$random_boolean = rand(0,1) == 1;
-$this->response .= "Random boolean " . $random_boolean . ". ";
-        $this->board[$i][$j][$k]['state'] = $random_boolean;
-$this->setBoard();
-$this->response .= "Wrote board " . $this->board[$i][$j][$k]['state'] . ". ";
-        //$lattice_agent->lattice[$i][$j][$k]['name'] = "Mark";
-        //$lattice_agent->lattice[$i][$j][$k]['state'] = true;
-        //$lattice_agent->lattice[$i][$j][$k]['value'] = 1;
-    }
+        $random_boolean = rand(0, 1) == 1;
+        $this->response .= "Random boolean " . $random_boolean . ". ";
+        $this->board[$i][$j][$k]["state"] = $random_boolean;
+        $this->setBoard();
+        $this->response .=
+            "Wrote board " . $this->board[$i][$j][$k]["state"] . ". ";
 
+        // Other parameters can/may be set.
+        //$this->board[$i][$j][$k]['name'] = "Mark";
+        //$this->board[$i][$j][$k]['state'] = true;
+        //$this->board[$i][$j][$k]['value'] = 1;
+    }
 
     // -----------------------
 
     public function getBoard()
     {
-//        if (!isset($this->board)) {
-//            $this->lattice_agent = new Lattice($this->thing, "lattice");
-//            $this->lattice_agent->getLattice();
-//            $this->board = $this->lattice_agent->lattice;
-//        }
-
-        $this->thing->json->setField("variables");
-        $this->decimal_board = $this->thing->json->readVariable([
+        $this->decimal_board = $this->thing->Read([
             "board",
             "decimal",
         ]);
@@ -162,46 +160,29 @@ $this->response .= "Wrote board " . $this->board[$i][$j][$k]['state'] . ". ";
             $this->response .= "Did not find a decimal board. ";
 
             $this->thing->log(
-                $this->agent_prefix . ' did not find a decimal board.',
+                $this->agent_prefix . " did not find a decimal board.",
                 "INFORMATION"
             );
-            //$this->board = false;
-            // No snowflake saved.  Return.
             return true;
         }
 
-        //        $this->max = 12;
-        //        $this->size = 3.7;
-        //        $this->lattice_size = 15;
-
-        //        $this->binarySnowflake($this->decimal_snowflake);
-
-        //$lattice_agent = new Lattice($this->thing, "lattice");
-        //$t = $lattice_agent->lattice;
-
-        //$this->board = $t;
-
         $this->binaryBoard($this->decimal_board);
-$this->response .= "Got ". $this->binary_board . ". ";
-$i=0;
-foreach(range(-1,1,1) as $j) {
-foreach(range(-1,1,1) as $k) {
-$count = 0;
-$b = substr($this->binary_board, $count, 1);
-//var_dump($b);
-    //$this->board[$i][$j][$k]['value'] = rand();
-    $this->board[$i][$j][$k]['state'] = $b;
-$count += 1;
-
-
-}
-}
+        $this->response .= "Got " . $this->binary_board . ". ";
+        $i = 0;
+        foreach (range(-1, 1, 1) as $j) {
+            foreach (range(-1, 1, 1) as $k) {
+                $count = 0;
+                $b = substr($this->binary_board, $count, 1);
+                $this->board[$i][$j][$k]["state"] = $b;
+                $count += 1;
+            }
+        }
 
         $this->thing->log(
             $this->agent_prefix .
-                ' loaded decimal board ' .
+                " loaded decimal board " .
                 $this->decimal_board .
-                '.',
+                ".",
             "INFORMATION"
         );
         return;
@@ -215,16 +196,12 @@ $count += 1;
         $this->response .= "Board is " . $this->decimal_board;
 
         $this->makeTXT();
-        $web = nl2br($this->thing_report['txt']);
-
-        //var_dump($this->board);
-
-        //}
+        $web = nl2br($this->thing_report["txt"]);
 
         $web .= "<p>";
         $web .= $this->response;
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     public function makeTXT()
@@ -232,28 +209,22 @@ $count += 1;
         // Make a web html representation of the board.
         // Start with TXT.
         $text = "A BOARD\n";
-        //$this->response .= "Board is " . $this->decimal_board;
-        //foreach(range(-1,0,1) as $i) {
+
         $i = 0;
         foreach (range(-1, 1, 1) as $j) {
             foreach (range(-1, 1, 1) as $k) {
-                $thing = $this->board[$i][$j][$k];
-
-                $text .=
-                    " state " .
-                    $thing['state'] .
-                    " ";
+                $thing_text = "";
+                if (isset($this->board[$i][$j][$k])) {
+                    $thing = $this->board[$i][$j][$k];
+                    $thing_text = " state " . $thing["state"] . " ";
+                }
+                $text .= $thing_text;
             }
             $text .= "\n";
         }
         $text .= "\n";
 
-        //}
-        //var_dump($this->board);
-
-        //}
-
-        $this->thing_report['txt'] = $text;
+        $this->thing_report["txt"] = $text;
     }
 
     public function respondResponse()
@@ -264,14 +235,12 @@ $count += 1;
             "This is a board. You put things on a board.";
         $this->thing_report["help"] = "This is about being inscrutable.";
 
-        //$this->thing_report['sms'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['txt'] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
+        $this->thing_report["txt"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'];
+        $thing_report["info"] = $message_thing->thing_report["info"];
 
-        return $this->thing_report;
     }
 
     function makeSMS()
@@ -279,16 +248,16 @@ $count += 1;
         $link = $this->web_prefix . "/thing/" . $this->uuid . "/board";
 
         $this->node_list = ["board" => ["board"]];
-        $message = "No message provided.";
+        $message = "No message provided. ";
         if (isset($this->message)) {
-            $message = $this->message;
+            $message = $this->message ." ";
         }
         $sms = "BOARD | " . $message . $this->response;
         $sms .=
             "decimal_board " . $this->textBoard($this->decimal_board) . ". ";
         $sms .= $link;
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     public function textBoard($board = null)
@@ -299,13 +268,14 @@ $count += 1;
 
     function makeChoices()
     {
-        $this->thing->choice->Create('channel', $this->node_list, "board");
-        $choices = $this->thing->choice->makeLinks('board');
-        $this->thing_report['choices'] = $choices;
+        $this->thing->choice->Create("channel", $this->node_list, "board");
+        $choices = $this->thing->choice->makeLinks("board");
+        $this->thing_report["choices"] = $choices;
     }
 
     public function readSubject()
     {
+        $this->readBoard();
         $this->response .= "Ignored subject. ";
         return false;
     }

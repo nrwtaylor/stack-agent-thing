@@ -49,29 +49,25 @@ class Remember extends Agent
 
         // }
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["remember", "status"], true);
+        $this->thing->Write(["remember", "status"], true);
     }
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "remember",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["remember", "refreshed_at"],
                 $time_string
             );
         }
 
-        $this->thing->json->setField("variables");
-        $this->reminder_ids = $this->thing->json->readVariable([
+        $this->reminder_ids = $this->thing->Read([
             "remember",
             "status",
         ]);

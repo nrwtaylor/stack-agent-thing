@@ -47,6 +47,7 @@ class Dateline extends Agent
         $arr = ['year', 'month', 'day', 'day_number', 'hour', 'minute'];
 
         foreach ($paragraphs as $i => $paragraph) {
+//echo ".";
             if (trim($paragraph) == "") {
                 continue;
             }
@@ -115,6 +116,7 @@ class Dateline extends Agent
         $arr = ['year', 'month', 'day', 'day_number', 'hour', 'minute'];
 
         foreach ($this->paragraphs as $i => $paragraph) {
+//echo "line " . $i . "\n";
             $dateline = $this->extractDateline($paragraph);
             if ($this->isDateline($dateline) === false) {
                 continue;
@@ -145,7 +147,6 @@ class Dateline extends Agent
         }
 
         $text = $dateline['line'];
-
         if (ctype_space($text) === true) {
             return false;
         }
@@ -223,7 +224,6 @@ class Dateline extends Agent
             return false;
         }
         $t = $this->thing->at_agent->extractAt($paragraph);
-
         $flag = false;
         $date = [];
 
@@ -235,7 +235,6 @@ class Dateline extends Agent
             }
             $date[$component] = $this->{$component};
         }
-
         if ($flag === false) {
             // No components seen
             return false;
@@ -244,7 +243,6 @@ class Dateline extends Agent
         $dateline = $this->textDateline($date);
         $date['line'] = $paragraph;
         $date['dateline'] = $dateline;
-
         return $date;
     }
 

@@ -32,7 +32,7 @@ class Webex extends Agent
 
         $this->node_list = ["webex" => ["webex", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->initWebex();
     }
@@ -130,12 +130,14 @@ class Webex extends Agent
         //           $text = file_get_contents($file);
         //       }
         $this->access_code = $this->accesscodeWebex($text);
+
         $this->password = $this->passwordWebex($text);
 
         $this->url = $this->urlWebex($text);
         $this->host_url = $this->hosturlWebex($text);
 
         $this->telephone_numbers = $this->telephonenumberWebex($text);
+        //$this->thing->console("initWebex completed");
     }
 
     public function run()
@@ -162,16 +164,14 @@ class Webex extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "webex",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["webex", "refreshed_at"],
                 $time_string
             );
@@ -384,12 +384,13 @@ class Webex extends Agent
     {
         $input = strtolower($this->subject);
         $this->readWebex($input);
-
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
             if ($input == "webex") {
+$this->thing->console("call getWebex");
                 $this->getWebex();
+$this->thing->console("called getWebex");
                 return;
             }
         }

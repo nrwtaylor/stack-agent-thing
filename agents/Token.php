@@ -9,8 +9,8 @@
 namespace Nrwtaylor\StackAgentThing;
 
 // Transparency
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 class Token extends Agent
@@ -26,33 +26,30 @@ class Token extends Agent
 
         //$this->getSlug("123414sdfas asdfsad 234234 *&*dfg") ;
         $this->state = "X";
-        if (isset($this->settings['state'])) {
-            $this->state = $this->settings['state'];
+        if (isset($this->settings["state"])) {
+            $this->state = $this->settings["state"];
         }
 
-        $this->thing_report['help'] = "This gets tokens from the datagram.";
+        $this->thing_report["help"] = "This gets tokens from the datagram.";
         $this->initTokens();
     }
 
     public function initTokens()
     {
         $this->tokens_resource = null;
-        $resource_name = 'token/tokens.php';
+        $resource_name = "token/tokens.php";
         $uri = $this->resource_path . $resource_name;
         if (file_exists($uri)) {
             $this->tokens_resource = require $this->resource_path .
                 $resource_name;
         }
 
-        $resource_name = 'item/items.php';
+        $resource_name = "item/items.php";
         $uri = $this->resource_path . $resource_name;
         if (file_exists($uri)) {
             $this->items_resource = require $this->resource_path .
                 $resource_name;
         }
-
-
-        //$this->verbosityChannel();
     }
 
     /**
@@ -68,7 +65,7 @@ class Token extends Agent
         }
 
         if (!isset($this->mixed_agent)) {
-            $this->mixed_agent = new Mixed($this->thing, "mixed");
+            $this->mixed_agent = new _Mixed($this->thing, "mixed");
         }
     }
 
@@ -77,11 +74,7 @@ class Token extends Agent
      */
     function set()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
-            ["token", "refreshed_at"],
-            $this->thing->json->time()
-        );
+        $this->thing->Write(["token", "refreshed_at"], $this->thing->time());
     }
 
     public function getToken($text = null)
@@ -89,16 +82,22 @@ class Token extends Agent
         if ($text == null) {
             return true;
         }
-        //if ($this->state == "off") {$this->slug = ""; return null;}
-
-        //$alphanumeric_agent = new Alphanumeric($this->thing,"alphanumeric");
         $slug = $this->alphanumeric_agent->filterAlphanumeric($text);
 
-        $despaced_slug = preg_replace('/\s+/', ' ', $slug);
+        $despaced_slug = preg_replace("/\s+/", " ", $slug);
         $slug = str_replace(" ", "-", $despaced_slug);
         $slug = strtolower($slug);
         $slug = trim($slug, "-");
         $this->slug = $slug;
+    }
+
+    public function countTokens($input = null)
+    {
+        if ($input === null) {
+            return true;
+        }
+        $tokens = explode(" ", $input);
+        return count($tokens);
     }
 
     /**
@@ -110,17 +109,10 @@ class Token extends Agent
 
         $this->thing->flagGreen();
 
-        //$this->makeSMS();
         $this->makeChoices();
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
-
-        //$this->makeWeb();
-
-        //$this->thing_report['thing'] = $this->thing->thing;
-
-        // $this->thing_report['help'] = "This gets tokens from the datagram.";
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
     }
 
     public function testToken($text)
@@ -191,23 +183,27 @@ class Token extends Agent
         }
 
         foreach ($this->tokens as $i => $token_string) {
-            $t5 = explode('/', $token_string);
+            $t5 = explode("/", $token_string);
             $this->addTokens($t5);
         }
 
         foreach ($this->tokens as $i => $token_string) {
-            $t5 = explode('\\', $token_string);
+            $t5 = explode("\\", $token_string);
 
             $this->addTokens($t5);
         }
 
         //$mixed_agent = new Mixed($this->thing,"mixed");
-        $mixeds = $this->mixed_agent->extractMixeds($this->input);
+        //        $mixeds = $this->mixed_agent->extractMixeds($this->input);
+        $mixeds = $this->mixed_agent->extractMixeds($text);
 
         $this->addTokens($mixeds);
 
+        //        $this->getToken($this->input);
         $this->getToken($this->input);
-        $text = str_replace("-", " ", $this->input);
+
+        //$text = str_replace("-", " ", $this->input);
+        $text = str_replace("-", " ", $text);
 
         $t = $this->pairTokens($text);
         $this->addTokens($t);
@@ -215,11 +211,15 @@ class Token extends Agent
         $t = $this->tripletTokens($text);
         $this->addTokens($t);
 
+        $t = $this->quadTokens($text);
+        $this->addTokens($t);
+
         $this->trimTokens();
 
         $this->tokens = array_unique($this->tokens, SORT_REGULAR);
 
         $this->makeSnippet();
+        return $this->tokens;
     }
 
     public function trimTokens($arr = null)
@@ -268,16 +268,40 @@ class Token extends Agent
         return $t;
     }
 
+    public function quadTokens($str)
+    {
+        $t = [];
+        $tokens = explode(" ", $str);
+        $i = 0;
+        foreach ($tokens as $i => $token) {
+            if ($i > count($tokens) - 4) {
+                break;
+            }
+
+            $t[] =
+                $tokens[$i] .
+                " " .
+                $tokens[$i + 1] .
+                " " .
+                $tokens[$i + 2] .
+                " " .
+                $tokens[$i + 3];
+
+            $i += 1;
+        }
+
+        return $t;
+    }
+
     public function makeSnippet()
     {
         $snippet = '<div class="thing snippet">';
         foreach ($this->tokens as $i => $token) {
             $snippet .= "" . $token . "" . "<br>";
         }
-        $snippet .= '</div>';
+        $snippet .= "</div>";
 
-        //echo $snippet;
-        $this->thing_report['snippet'] = $snippet;
+        $this->thing_report["snippet"] = $snippet;
     }
 
     public function addTokens($arr = null)
@@ -306,8 +330,6 @@ class Token extends Agent
 
         if ($this->agent_input == "token") {
             $input = $this->subject;
-            //} else {
-            //    $input = $this->agent_input;
         }
         //        $this->input = $input;
         $this->extractTokens();
@@ -320,28 +342,29 @@ class Token extends Agent
             $this->getToken($input);
         }
         // Get the recognized tokens.
-        foreach($this->tokens_resource as $token_slug=>$token) {
-
-        $token_text = str_replace("-", " ", $token_slug);
-        $token_name = str_replace("-token","", $token_slug);
-        //if ($this->matchToken('red-token')) {
+if ($this->tokens_resource != null) {
+        foreach ($this->tokens_resource as $token_slug => $token) {
+            $token_text = str_replace("-", " ", $token_slug);
+            $token_name = str_replace("-token", "", $token_slug);
+            //if ($this->matchToken('red-token')) {
             if (
                 stripos($input, $token_slug) !== false or
                 stripos($input, $token_text) !== false
             ) {
                 //if ($input == 'red-token') {
                 $this->itemToken($token_name);
-                $this->response .= "Made a " . $token_name. " token payment link. ";
-$this->score = strlen($input);
-return;
+                $this->response .=
+                    "Made a " . $token_name . " token payment link. ";
+                $this->score = strlen($input);
+                return;
             }
-       //     return;
+            //     return;
         }
-
+}
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'token') {
+            if ($input == "token") {
                 $this->getToken();
                 $this->response .= "Last token retrieved. ";
                 return;
@@ -358,26 +381,29 @@ return;
      */
     function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/uuid';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/uuid";
 
         $this->node_list = ["number" => ["number", "thing"]];
         $web = "";
 
         $web .= "<br>";
-        $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
+        $web .= "<b>" . ucwords($this->agent_name) . " Agent</b><br>";
 
-//        $items = ['red', 'blue', 'yellow', 'green', 'channel'];
-
-        foreach ($this->items_resource as $item_slug=>$item) {
-            $item_slug = str_replace("-token","",$item_slug);
+        //        $items = ['red', 'blue', 'yellow', 'green', 'channel'];
+if (isset($this->items_resource) and $this->items_resource != null) {
+        foreach ($this->items_resource as $item_slug => $item) {
+            $item_slug = str_replace("-token", "", $item_slug);
             //if ($this->subject == $item . '-token') {
             //if ($this->subject == $item . '-token') {
-            if ($this->matchToken($item_slug . '-token')) {
+            if ($this->matchToken($item_slug . "-token")) {
                 // Check for some conditions which are problematic.
-                if (!isset($item['price'])) {$web .= "<div>Unpriced item retrieved.</div>"; continue;}
-                if ($item['price'] <= $this->item_minimum_price) {
+                if (!isset($item["price"])) {
+                    $web .= "<div>Unpriced item retrieved.</div>";
+                    continue;
+                }
+                if ($item["price"] <= $this->item_minimum_price) {
                     $this->freeToken($item_slug);
-                    $web .= $this->web_token[$item_slug]; 
+                    $web .= $this->web_token[$item_slug];
                     continue;
                 }
 
@@ -386,10 +412,10 @@ return;
                 $web .= $this->web_token[$item_slug];
             }
         }
-
+}
         $web .= "<br>";
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     public function matchToken($text = null)
@@ -413,11 +439,11 @@ return;
     function makeSMS()
     {
         $link_text = "";
-        if (isset($this->token_item['title'])) {
+        if (isset($this->token_item["title"])) {
             $slug_agent = new Slug($this->thing, "slug");
-            $slug = $slug_agent->getSlug($this->token_item['title']);
+            $slug = $slug_agent->getSlug($this->token_item["title"]);
             //if (($slug != "") and ($slug != null)) {
-            $link = $this->web_prefix . 'thing/' . $this->uuid . '/' . $slug;
+            $link = $this->web_prefix . "thing/" . $this->uuid . "/" . $slug;
             $link_text = $link;
         }
 
@@ -433,7 +459,48 @@ return;
         $sms .= $link_text;
         $sms .= " " . $this->response;
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
+    }
+
+    /*
+        Build an array with the different subsets of tokens within the token
+        string.
+    */
+
+    public function subsetsTokens($tokens)
+    {
+        $number_of_tokens = count($tokens);
+        $subsets = [];
+        foreach (range(0, $number_of_tokens - 1) as $start => $values) {
+            foreach (range(0, $number_of_tokens - 1) as $end => $valuee) {
+                if ($start > $end) {
+                    continue;
+                }
+
+                $selected_tokens = [];
+                foreach (range($start, $end) as $index => $value) {
+                    $selected_tokens[] = trim($tokens[$value]);
+                }
+
+                $text = trim(implode(" ", $selected_tokens));
+
+                if ($text == "") {
+                    continue;
+                }
+
+                $subsets[] = $text;
+
+                //}
+            }
+        }
+        $subsets = array_unique($subsets);
+
+        usort($subsets, function ($a, $b) {
+            return mb_strlen($a) - mb_strlen($b);
+        });
+        // Sort so longest string to shortest string
+        $subsets = array_reverse($subsets);
+        return $subsets;
     }
 
     public function itemToken($colour = null)
@@ -445,12 +512,12 @@ return;
         $item = null;
 
         // Load token defintitions.
-        $item = ['text' => ucwords($colour) . ' Token', 'price' => '1'];
-        $item_id = 'grey' . '-token';
+        $item = ["text" => ucwords($colour) . " Token", "price" => "1"];
+        $item_id = "grey" . "-token";
 
-        if (isset($this->tokens_resource[$colour . '-token'])) {
-            $item_id = $colour . '-token';
-            $item = $this->tokens_resource[$colour . '-token'];
+        if (isset($this->tokens_resource[$colour . "-token"])) {
+            $item_id = $colour . "-token";
+            $item = $this->tokens_resource[$colour . "-token"];
         }
 
         // TODO: Check item creation
@@ -470,8 +537,8 @@ return;
         $help_text = "Support us.";
 
         $this->help = $help_text;
-        $this->thing_report['help'] = $help_text;
-        $this->thing_report['info'] = 'Generates tokens.';
+        $this->thing_report["help"] = $help_text;
+        $this->thing_report["info"] = "Generates tokens.";
 
         //$this->response .= "Made " . $colour . " token. ";
 
@@ -487,12 +554,12 @@ return;
         $item = null;
 
         // Load token defintitions.
-        $item = ['text' => ucwords($colour) . ' Token', 'price' => '1'];
-        $item_id = 'grey' . '-token';
+        $item = ["text" => ucwords($colour) . " Token", "price" => "1"];
+        $item_id = "grey" . "-token";
 
-        if (isset($this->tokens_resource[$colour . '-token'])) {
-            $item_id = $colour . '-token';
-            $item = $this->tokens_resource[$colour . '-token'];
+        if (isset($this->tokens_resource[$colour . "-token"])) {
+            $item_id = $colour . "-token";
+            $item = $this->tokens_resource[$colour . "-token"];
         }
 
         // TODO: Check item creation
@@ -514,14 +581,13 @@ return;
         $help_text = "Support us.";
 
         $this->help = $help_text;
-        $this->thing_report['help'] = $help_text;
-        $this->thing_report['info'] = 'Generates tokens.';
+        $this->thing_report["help"] = $help_text;
+        $this->thing_report["info"] = "Generates tokens.";
 
         //$this->response .= "Made " . $colour . " token. ";
 
         $this->web_token[$colour] = $web;
     }
-
 
     /**
      *
@@ -529,29 +595,7 @@ return;
     function makeChoices()
     {
         $choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
         $this->choices = $choices;
     }
-
-    /**
-     *
-     * @return unknown
-     */
-    /*
-    public function makePNG() {
-        $text = "thing:".$this->alphas[0];
-
-        ob_clean();
-
-        ob_start();
-
-        QRcode::png($text, false, QR_ECLEVEL_Q, 4);
-
-        $image = ob_get_contents();
-        ob_clean();
-
-        $this->thing_report['png'] = $image;
-        return $this->thing_report['png'];
-    }
-*/
 }

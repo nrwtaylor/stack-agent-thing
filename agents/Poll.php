@@ -3,17 +3,16 @@ namespace Nrwtaylor\StackAgentThing;
 
 // Start by picking a random thing and seeing what needs to be done.
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 class Poll extends Agent
 {
     function init()
     {
-
         // So I could call
-        if ($this->thing->container['stack']['state'] == 'dev') {
+        if ($this->thing->container["stack"]["state"] == "dev") {
             $this->test = true;
         }
 
@@ -37,7 +36,6 @@ class Poll extends Agent
         $this->verbosity = 1;
 
         $this->thing->flagGreen();
-
     }
 
     public function set()
@@ -57,7 +55,7 @@ class Poll extends Agent
         );
 
         $this->thing->log(
-            $this->agent_prefix . 'loaded ' . $this->counter . ".",
+            $this->agent_prefix . "loaded " . $this->counter . ".",
             "DEBUG"
         );
 
@@ -91,7 +89,7 @@ class Poll extends Agent
         $sms .= " | counter " . $this->counter;
         //}
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     function isNominal()
@@ -110,7 +108,7 @@ class Poll extends Agent
 
         $web = "Here is a question.";
         $this->web_message = $web;
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     public function makeEmail()
@@ -147,21 +145,21 @@ class Poll extends Agent
         }
 
         $this->message = $message;
-        $this->thing_report['email'] = $message;
+        $this->thing_report["email"] = $message;
     }
 
     public function makeChoices()
     {
-//$this->node_list = array("poll"=>$this->responses);
+        //$this->node_list = array("poll"=>$this->responses);
         // Make buttons
-        $this->thing->choice->Create(
+        $this->createChoice(
             $this->agent_name,
             $this->node_list,
             "poll"
         );
-        $choices = $this->thing->choice->makeLinks('poll');
+        $choices = $this->linksChoice("poll");
 
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
     }
 
     public function respondResponse()
@@ -177,47 +175,48 @@ class Poll extends Agent
 
         $this->makeChoices();
 
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
+        $this->thing_report["email"] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
 
         // While we work on this
         $message_thing = new Message($this->thing, $this->thing_report);
 
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
 
-        $this->thing_report['help'] =
-            $this->agent_prefix . 'responding to a poll of some sort.';
+        $this->thing_report["help"] =
+            $this->agent_prefix . "responding to a poll of some sort.";
     }
 
-
-    public function readPoll($text = null) {
-        if ($text == null) {return true;}
+    public function readPoll($text = null)
+    {
+        if ($text == null) {
+            return true;
+        }
 
         $filtered_input = $this->assert($text);
 
-$tokens = explode("/",$filtered_input);
+        $tokens = explode("/", $filtered_input);
 
-var_dump($tokens);
+        var_dump($tokens);
 
-$this->question = trim($tokens[0]);
+        $this->question = trim($tokens[0]);
 
-foreach($tokens as $i=>$j) {
-if ($i == 0) {continue;}
+        foreach ($tokens as $i => $j) {
+            if ($i == 0) {
+                continue;
+            }
 
-$this->nomnom_agent = new Nomnom($this->thing, 'nomnom');
+            $this->nomnom_agent = new Nomnom($this->thing, "nomnom");
 
-$text = trim($j);
+            $text = trim($j);
 
-$reponse_text = (strtolower($text));
+            $reponse_text = strtolower($text);
 
-
-$response = ['count' => 0, 'text'=> $text];
-$this->responses[$response_text] = $response;
-
-}
-var_dump($this->responses);
-
+            $response = ["count" => 0, "text" => $text];
+            $this->responses[$response_text] = $response;
+        }
+        var_dump($this->responses);
     }
 
     public function readSubject()

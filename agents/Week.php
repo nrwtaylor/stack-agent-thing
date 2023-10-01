@@ -39,7 +39,7 @@ class Week extends Agent
 
         $this->node_list = ["week" => ["week", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Get some stuff from the stack which will be helpful.
         $this->entity_name = $this->thing->container['stack']['entity_name'];
@@ -66,10 +66,11 @@ class Week extends Agent
             $this->default_canvas_size_x,
             $this->default_canvas_size_y
         );
+
     }
 
     public function set()
-    {
+{
         $this->setWeek();
     }
 
@@ -146,9 +147,7 @@ class Week extends Agent
     public function respondResponse()
     {
         $this->thing->flagGreen();
-
         $this->makeChoices();
-
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'];
@@ -219,12 +218,7 @@ class Week extends Agent
      */
     public function setWeek()
     {
-        $this->thing->json->setField("variables");
-        //$this->thing->json->writeVariable(
-        //    ["week", "decimal"],
-        //    $this->decimal_week
-        //);
-
+        //$this->thing->json->setField("variables");
     }
 
     /**
@@ -289,6 +283,7 @@ class Week extends Agent
      */
     public function makePNG()
     {
+
         if (isset($this->canvas_size_x)) {
             $canvas_size_x = $this->canvas_size_x;
             $canvas_size_y = $this->canvas_size_x;
@@ -424,7 +419,6 @@ class Week extends Agent
 
         $this->thing_report['png'] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
@@ -474,16 +468,14 @@ class Week extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "week",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["week", "refreshed_at"],
                 $time_string
             );
@@ -502,7 +494,6 @@ class Week extends Agent
             $this->thing_report['pdf'] = null;
             return;
         }
-
         $this->getWhatis($this->subject);
         try {
             // initiate FPDI
@@ -618,7 +609,7 @@ class Week extends Agent
             $image = $pdf->Output('', 'S');
             $this->thing_report['pdf'] = $image;
         } catch (Exception $e) {
-            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $this->error .= 'Caught exception: ' .$e->getMessage() .". ";
         }
 
         return $this->thing_report['pdf'];
@@ -641,7 +632,6 @@ class Week extends Agent
                 return;
             }
         }
-
         $input_agent = new Input($this->thing, "input");
         $discriminators = ['wedge', 'slice'];
         $input_agent->aliases['wedge'] = ['pizza', 'wheel', 'wedge'];
@@ -650,7 +640,6 @@ class Week extends Agent
         if ($type != false) {
             $this->type = $type;
         }
-
         $keywords = ["week", "day"];
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {

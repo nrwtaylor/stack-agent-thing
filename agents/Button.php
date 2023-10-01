@@ -1,22 +1,22 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
 class Button extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
         $this->test_slack_button = null;
-        if (file_exists($this->resource_path . 'button/test-button.php')) {
+        if (file_exists($this->resource_path . "button/test-button.php")) {
             $this->test_slack_button = require $this->resource_path .
-                'button/test-button.php';
+                "button/test-button.php";
         }
         $this->agent_name = "button";
         $this->keyword = "button";
@@ -34,7 +34,7 @@ class Button extends Agent
         $t = $this->test_slack_button;
 
         $bodies = json_decode($this->thing->thing->message0, true);
-        $this->body = $bodies['slack'];
+        $this->body = $bodies["slack"];
 
         $this->body = json_decode($t);
     }
@@ -136,17 +136,8 @@ class Button extends Agent
     function test()
     {
         // Test corpus
-        //        $this->subject = "button yes | no";
-        //        $this->subject = "yes | no";
-        //        $this->subject = "button is yes";
         $this->subject = "button is yes no";
-        //        $this->subject = "button is yes | no";
-        //        $this->subject = "orange brown";
-        //        $this->subject = "button";
         return true;
-        //        $this->getButtons();
-        //        $this->extractButtons();
-        //        return $this->state;
     }
 
     // Make buttons from a choice
@@ -156,12 +147,12 @@ class Button extends Agent
             $this->makeChoices();
         }
 
-        $this->words = $this->choices['words'];
-        $this->links = $this->choices['links'];
-        $this->url = $this->choices['url']; // nl version of links array
-        $this->link = $this->choices['link'];
+        $this->words = $this->choices["words"];
+        $this->links = $this->choices["links"];
+        $this->url = $this->choices["url"]; // nl version of links array
+        $this->link = $this->choices["link"];
 
-        $this->buttons = $this->choices['button'];
+        $this->buttons = $this->choices["button"];
     }
 
     public function makeWeb()
@@ -186,7 +177,7 @@ class Button extends Agent
 
         //$w .= nl2br($this->url);
 
-        $this->thing_report['web'] = $w;
+        $this->thing_report["web"] = $w;
     }
 
     public function makeSnippet()
@@ -204,7 +195,7 @@ class Button extends Agent
         //        $w .= "<br><br>Copy-and-paste buttons below into your email.<br>";
 
         $this->snippet = $w;
-        $this->thing_report['snippet'] = $w;
+        $this->thing_report["snippet"] = $w;
     }
 
     function makeSMS()
@@ -218,7 +209,7 @@ class Button extends Agent
         //} else {
         //    $sms_message .= " | TEXT ?";
         //}
-        $this->thing_report['sms'] = $s;
+        $this->thing_report["sms"] = $s;
     }
 
     function makeChoices()
@@ -229,8 +220,8 @@ class Button extends Agent
             $this->node_list,
             "button"
         );
-        $this->choices = $this->thing->choice->makeLinks('button');
-        $this->thing_report['choices'] = $this->choices;
+        $this->choices = $this->thing->choice->makeLinks("button");
+        $this->thing_report["choices"] = $this->choices;
     }
 
     function selectChoice($choice = null)
@@ -255,16 +246,12 @@ class Button extends Agent
         $this->extractButtons($input);
 
         if ($this->agent_input != null) {
-            //            $this->response = "Saw an agent instruction and didn't read further.";
             return;
         }
 
-        //var_dump($this->input);
-        //        $this->extractButtons($this->subject);
         return;
 
         $input = $this->input;
-        //        $input = strtolower($this->subject);
         $pieces = explode(" ", strtolower($input));
 
         // So this is really the 'sms' section
