@@ -649,11 +649,11 @@ $this->log("Read did not see a database connection.");
 $this->log("Thing Read uuid", $this->uuid);
 
 //        $array_data = $this->db->readField($field);
-$u = 'cce4aab5-ffe9-4c23-aaf3-bb864d5d2451';
-$array_data = Database::readStaticField($u, $field);
+//$u = 'cce4aab5-ffe9-4c23-aaf3-bb864d5d2451';
+//$array_data = Database::readStaticField($u, $field);
 //var_dump($u, $array_data);
 //exit();
-//$array_data = Database::readStaticField($this->uuid, $field);
+$array_data = Database::readStaticField($this->uuid, $field);
 
         if ($array_data == false) {
             //var_dump("Thing Read array_data " . $array_data);
@@ -697,13 +697,13 @@ if ($this->db === null) {
 
 $this->log("Thing Write did not see a database connection.");
 $this->log("Thing Write db null");
-
+var_dump("Thing Write db null");
 //return;
 //return true;
 }
 
 
-
+var_dump("foobar");
 
 // Default for field is assume variables
         if ($field == null) {
@@ -713,10 +713,13 @@ $this->log("Thing Write uuid", $this->uuid);
 
 
     //    $array_data = $this->db->readField($field);
-
+var_dump("Thing Write field", $field);
+var_dump("Thing Write value", $value);
+var_dump("Thing Write path", $path);
 
 $array_data = Database::readStaticField($this->uuid, $field);
-var_dump("Thing Write Database::readStaticField" , $array_data);
+
+var_dump("Thing Write Database::readStaticField existing array_data" , $array_data);
 $this->log("Thing Write array_data", json_encode($array_data));
 //var_dump($this->uuid,$field);
 
@@ -729,6 +732,7 @@ $this->log("Thing Write array_data", json_encode($array_data));
 // Get the local array data
 
 $array_data = $this->variables->array_data;
+var_dump("Thing Write this uuid", $this->uuid);
 var_dump("Thing Write this variables array_data", $array_data);
 $this->log("Thing Write array_data",$array_data);
 
@@ -746,7 +750,7 @@ $this->log("Thing Write array_data",$array_data);
 
 // dev test read
 
-$test_array_data = Database::readStaticField($this->uuid); // null ignores requirement
+$test_array_data = Database::readStaticField($this->uuid, "variables"); // null ignores requirement
 var_dump("Thing Write test Database::readStaticField", $test_array_data);
 
 $test_array_data = Database::staticGet($this->uuid); // null ignores requirement

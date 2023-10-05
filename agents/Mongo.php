@@ -3,6 +3,11 @@ namespace Nrwtaylor\StackAgentThing;
 
 // https://www.php.net/manual/en/mongodb.tutorial.library.php
 
+//use MongoDB\BSON\toPHP;
+//use MongoDB\BSON\toJSON;
+
+use MongoDB\Model\BSONDocument;
+
 class Mongo extends Agent
 {
     public $var = "hello";
@@ -51,9 +56,25 @@ return $collection;
         }
     }
 
+
+    public static function convertBSONDocumentToArray($document) {
+        if (!$document instanceof BSONDocument) {
+            return $document; // Return non-BSONDocument values as is
+        }
+
+        $result = [];
+
+        foreach ($document as $key => $value) {
+            $result[$key] = self::convertBSONDocumentToArray($value);
+        }
+
+        return $result;
+    }
+
     // use memcache model for get.
     static function getStaticMongo($text = null)
     {
+var_dump("Mongo getStaticMongo text", $text);
         // Get mongo key by uuid.
 //        if (!$this->isReadyMongo()) {
 //            return;
@@ -65,25 +86,34 @@ return $collection;
         try {
             $client = new \MongoDB\Client($path);
             $collection = $client->stack_db->things;
-            $result = $collection->findOne(["uuid" => $text]);
+            $resultRaw = $collection->findOne(["uuid" => $text]);
+//var_dump("Mongo getStaticMongo resultRaw", $resultRaw);
+//if ($resultRaw == null) {return false;}
+//$instance = new self();
+$result = Mongo::convertBSONDocumentToArray($resultRaw);
+//var_dump("Mongo getStaticMongo result", $result);
         } catch (\Throwable $t) {
-//var_dump($t->getMessage());
+var_dump("Mongo getStaticMongo throwable");
+var_dump($t->getMessage());
+exit();
    //         $this->errorMongo($t->getMessage());
         } catch (\Error $ex) {
-//var_dump($t->getMessage());
+var_dump("Mongo getStaticMongo error");
+var_dump($t->getMessage());
+exit();
    //         $this->errorMongo($ex->getMessage());
         }
 //var_dump("getStaticMongo result", $result);
         if ($result == null) {
             return false;
         }
-$arr = json_decode(json_encode($result), true);
+//$arr = json_decode(json_encode($result), true);
 
 //var_dump($arr);
 //exit();
 //        $thing = iterator_to_array($result);
-        unset($arr["_id"]);
-        return $thing;
+        unset($result["_id"]);
+        return $result;
         //        return iterator_to_array($result);
     }
 
@@ -447,9 +477,12 @@ $data["uuid"] = $uuid;
 */
 
         $d = $data;
+var_dump("provided data", $data);
         if (is_array($existing)) {
             $d = array_replace_recursive($existing, $data);
         }
+var_dump("array replace recursive", $d);
+//exit();
         $u = Mongo::setStaticMongo($uuid, $d);
         if ($u == true) {
             //$this->write_fail_count += 1;
@@ -817,6 +850,16 @@ $condition, [
 $value = null;
 $user_search = "default_console_user";
 
+
+
+
+
+
+/*
+
+db.things.find( { ln : { $exists : true } } );db.things.find( { ln : { $exists : true } } );
+
+*/
 $things = $this->collection.find([
   '$or' => [
     [ "nom_from" => $user_search ],
@@ -862,8 +905,10 @@ $things = $this->collection.find([
 //exit();
         $hash_user_search = hash($hash_algorithm, $user_search);
 
+
+
         // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
-        $value = "%$value%"; // Value to search for in Variables
+//        $value = "%$value%"; // Value to search for in Variables
 
         $thingreport["things"] = [];
 
@@ -894,6 +939,54 @@ $things = $collection->find([
 
 //var_dump($from);
 //exit();
+
+
+
+
+/*
+
+db.things.find( { ln : { $exists : true } } );db.things.find( { ln : { $exists : true } } );
+
+*/
+$value = "uuid";
+$variable_name = 'variables.' . $value ;
+
+//$filter = [$variable_name => 
+//    [ '$exists' => true ],
+//];
+
+$filter = [
+    '$and' => [
+        [
+            '$or' => [
+                ["nom_from" => $user_search],
+                ["nom_from" => $hash_user_search]
+            ]
+        ],
+        [
+            $variable_name => [
+                '$exists' => true
+            ]
+        ]
+    ]
+];
+
+
+$things = $collection->find($filter);
+//var_dump("search complete");
+// Iterate over the results
+
+
+
+//foreach ($things as $document) {
+//    var_dump($document);
+//}
+//var_dump($user_search);
+//var_dump($value);
+//var_dump("het");
+//exit();
+
+/*
 $things = $collection->find(
 ['$or' => [
     [ "nom_from" => $from ],
@@ -901,11 +994,12 @@ $things = $collection->find(
 ],
 ],
 );
+*/
 //if (is_array($things) and count($things) > 0) {
 $matchingResults = $things->toArray();
 //}
 //var_dump($matchingResults);
-//exit();
+//exit();// Iterate over the results
 // Initialize an array to store the converted results
 $convertedResults = [];
 
@@ -914,6 +1008,9 @@ foreach ($matchingResults as $document) {
 unset($document['_id']);
     $convertedResults[] = json_decode(json_encode($document), true);
 }
+
+//var_dump($convertedResults);
+//exit();
 
 //.sort([ "created_at"=>-1 ])
 //.limit(max);
