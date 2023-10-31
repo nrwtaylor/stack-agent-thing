@@ -49,6 +49,7 @@ class From extends Agent
      */
     public function from()
     {
+return;
         $this->countFrom();
         return;
         if ($this->isFrom() === true) {

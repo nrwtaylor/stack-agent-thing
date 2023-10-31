@@ -25,6 +25,30 @@ class Database
 {
     public $var = "hello";
 
+    private $hash_algorithm;
+    private $get_prior;
+    private $available_stacks;
+    private $stack_handlers;
+    private $candidate_stacks;
+
+    private $thing;
+    private $start_time;
+    private $split_time;
+    private $operations_time;
+    private $operations;
+
+    private $log;
+    private $agent_input;
+    private $from;
+    public $uuid;
+    private $subject;
+    private $to;
+    private $stacks;
+    private $web_prefix;
+
+    private $state;
+    private $hash_state;
+
     /**
      *
      * @param unknown $uuid
@@ -555,6 +579,7 @@ var_dump($ex);
      */
     public function writeDatabase($field_text, $array, $uuid = null)
     {
+
 //$thing->log("Database writeDatabase log test");
 $response = ['data'=>[], 'error'=>null, 'status'=>'started'];
   //      $this->thing->log(
@@ -849,6 +874,12 @@ $uuid = Mongo::setStaticMongo(null, ['subject'=>$subject, 'to'=>$to]);
 
         return false;
     }
+
+    static function staticCreate($subject, $to)
+    {
+$uuid = Mongo::setStaticMongo(null, ['subject'=>$subject, 'to'=>$to]);
+    }
+
 
     // dev
     public function isUuid($text)

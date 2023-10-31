@@ -123,6 +123,9 @@ class Agent
         $this->default_font = null;
         $this->default_pdf_page_template = null;
 
+//        'pdf_page_template' => '/var/www/stackr.test/resources/snowflake/bubble.pdf',
+
+
         $stack_settings = $thing->container["stack"];
         foreach ($stack_settings as $setting_name => $setting_value) {
             // For 'backwards' compatibility.
@@ -135,6 +138,7 @@ class Agent
             $this->{"stack_" . $setting_name} =
                 $thing->container["stack"][$setting_name];
         }
+
 
         $this->web_prefix = $thing->container["stack"]["web_prefix"];
         $this->mail_postfix = $thing->container["stack"]["mail_postfix"];
@@ -2190,12 +2194,10 @@ echo "!shouldexit";
 $this->shutdownHandler();
 });
 */
-
         //if ($agent_class_name == 'Test') {return false;}
         set_error_handler([$this, "warning_handler"], E_WARNING | E_NOTICE);
 
         //set_error_handler("warning_handler", E_WARNING);
-
         try {
             $agent_namespace_name =
                 "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
@@ -2228,6 +2230,7 @@ $this->shutdownHandler();
             $thing->subject = $this->stripAgent($thing->subject);
 
             $agent = new $agent_namespace_name($thing, $agent_input);
+
             //$shouldExit = false;
 
             /*
@@ -2446,6 +2449,7 @@ if ($found_needles and count($found_needles)>0) {$found_needle = $found_needles[
             return;
         }
         $responsive_agents = [];
+
         foreach ($agents as $i => $agent_package) {
             // Allow for doing something smarter here with
             // word position and Bayes.  Agent scoring

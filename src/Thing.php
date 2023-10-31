@@ -24,6 +24,30 @@ class Thing
 
     public $from = null;
 
+    public $log;
+    private $start_time;
+    private $log_last;
+    private $bananas;
+    public $container;
+    private $char_max;
+    private $mail_postfix;
+    private $stack_uuid;
+    private $associate_prior;
+    private $associate_posterior;
+    private $web_prefix;
+    private $engine_state;
+    private $console_output;
+    private $logging_console;
+    private $logging_level_default;
+    private $logging_level_trigger;
+    private $queue_handler;
+    private $hash_algorithm;
+    public $uuid;
+    public $nuuid;
+
+    private $stack_account;
+    private $thing_account; 
+
     public function __construct($uuid, $test_message = null)
     {
 $this->log("Thing __construct", $uuid, $test_message);
@@ -220,24 +244,25 @@ $this->log("Thing database connected.");} else {$this->log("Problem with thing d
     {
         $this->log("getThing ". $uuid);
         if (null === $uuid) {
-
             $this->uuid = (string) Uuid::uuid4();
             $this->nuuid = substr($this->uuid, 0, 4);
 
             $this->log("Thing made a UUID. " . $this->uuid);
 
             // And then we pull out some Thing related svariables and settings.
+
+//            $this->db = new Database($this, [
+//                'uuid' => $this->uuid,
+//                'from' => 'null' . $this->mail_postfix,
+//            ]);
+
+
 /*
-            $this->db = new Database($this, [
-                'uuid' => $this->uuid,
-                'from' => 'null' . $this->mail_postfix,
-            ]);
-*/
             $this->db = new Database($this, [
                 'uuid' => $this->uuid,
                 'from' => null,
             ]);
-
+*/
 
 //            $this->db = new Database($this, null);
 
@@ -290,10 +315,10 @@ $this->log("Thing database connected.");} else {$this->log("Problem with thing d
             // Is link to the ->db broken when the Thing is deinstantiated.
             // Assume yes.
 
-            $this->db = new Database($this, [
-                'uuid' => $this->uuid,
-                'from' => 'null' . $this->mail_postfix,
-            ]);
+//            $this->db = new Database($this, [
+//                'uuid' => $this->uuid,
+//                'from' => 'null' . $this->mail_postfix,
+//            ]);
 
             $this->log("Thing made a db connector.");
             // Provide handler for Json translation from/to MySQL.
@@ -480,7 +505,10 @@ $this->log("Thing database connected.");} else {$this->log("Problem with thing d
         //Commented out 27 Feb 2018.  And it stopped creating mysql records.
         //$query = $this->db->Create($subject, $to); // 3s
 
-        $query = $this->db->Create($subject, $to); // 3s
+       // $query = $this->db->Create($subject, $to); // 3s
+
+        $query = Database::staticCreate($subject, $to); // 3s
+
 
         $this->log("Create. Database create call completed.");
         $this->to = $to;
@@ -619,7 +647,7 @@ And review Agent variables.
 
     public function Read($path, $field = null)
     {
-//var_dump("Thing Rd d, $this->db);
+return;
 $this->log("Thing Read path", $path);
 $this->log("Thing Read field", $field);
 
@@ -627,8 +655,6 @@ $this->log("Thing Read field", $field);
 if (!isset($this->db)) {
 $this->log("Thing Read db not set");
 $this->log("Read did not see a database connection.");
-//return;
-//return true;
 }
 
 
@@ -654,7 +680,7 @@ $this->log("Thing Read uuid", $this->uuid);
 //var_dump($u, $array_data);
 //exit();
 $array_data = Database::readStaticField($this->uuid, $field);
-
+var_dump("Thing read array_data", $array_data);
         if ($array_data == false) {
             //var_dump("Thing Read array_data " . $array_data);
             $this->log('No array_data returned.');
@@ -678,6 +704,7 @@ $this->log("Thing Read value", $value);
 
     public function Write($path, $value, $field = null)
     {
+return;
 $this->log("Thing Write path", json_encode($path));
 $this->log("Thing Write value", $value);
 $this->log("Thing Write field", $field);
@@ -693,17 +720,17 @@ $this->log("Thing Write field", $field);
 
 
 
-if ($this->db === null) {
+//if ($this->db === null) {
 
-$this->log("Thing Write did not see a database connection.");
-$this->log("Thing Write db null");
-var_dump("Thing Write db null");
+//$this->log("Thing Write did not see a database connection.");
+//$this->log("Thing Write db null");
+//var_dump("Thing Write db null");
 //return;
 //return true;
-}
+//}
 
 
-var_dump("foobar");
+//var_dump("foobar");
 
 // Default for field is assume variables
         if ($field == null) {
@@ -725,15 +752,19 @@ $this->log("Thing Write array_data", json_encode($array_data));
 
 
 if ($this->variables != null) {
-        $this->variables->setValueFromPath($array_data, $path, $value);
+//$test = new Variables($this, "variables");
+
+//var_dump("Thing this variables", $this->variables);
+$this->variables = new ThingJson($this, $this->uuid);
 }
+        $this->variables->setValueFromPath($array_data, $path, $value);
+//}
 //$this->array_handler->setPathValueArr($array_data, $path, $value);
 
 
 // Get the local array data
 
 $array_data = $this->variables->array_data;
-//var_dump("Thing Write this variables array_data", $array_data);
 var_dump("Thing Write this uuid", $this->uuid);
 var_dump("Thing Write this variables array_data", $array_data);
 $this->log("Thing Write array_data",$array_data);
@@ -758,8 +789,7 @@ $this->log("Thing Write array_data",$array_data);
 //var_dump("Thing Write test Database::readStaticField", $test_array_data);
 
 $test_array_data = Database::staticGet($this->uuid); // null ignores requirement
-//var_dump("Thing Write test Database::staticGet", $test_array_data);
-
+var_dump("Thing Write test Database::staticGet", $test_array_data);
 
 //
 
@@ -768,6 +798,7 @@ $this->log("Thing Write last_write", json_encode($last_write));
 $bytes_written = mb_strlen(serialize((array)$array_data), '8bit');
 //        var_dump("Thing Write array data", $array_data);
 $this->log("Thing Write bytes " . $bytes_written . " bytes");
+
     }
 
     public function loadAccounts()
@@ -1130,6 +1161,7 @@ echo "Previous uuid got " . ($prior_uuid) . "\n";
 
     function associatePosterior($nom_from, $nom_to)
     {
+return;
         // Get the UUID of the last entry in the db with
         // the same planned $to email address.
 

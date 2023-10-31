@@ -38,7 +38,7 @@ class Transit extends Agent  {
             "start" => array("stop 1" => array("stop 2", "stop 1"), "stop 3"),
             "stop 3"
         );
-        $this->loadChoice('train');
+        //$this->loadChoice('train');
 
         $this->keywords = array(
             'run',

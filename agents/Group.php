@@ -178,15 +178,16 @@ class Group extends Agent
 
     public function findGroup($name = null)
     {
+
         // devstack call variables directly
 
         // Retries the last <99> group names.
 
         $names = $this->thing->Write(["group", "action"], 'find');
 
-        $thingreport = $this->thing->db->setUser($this->from);
-        $thingreport = $this->thing->db->variableSearch(null, "group_id", 99);
-
+//        $thingreport = $this->thing->db->setUser($this->from);
+//>thing_report["png"]        $thingreport = $this->thing->db->variableSearch(null, "group_id", 99);
+$thingreport = [];
         $groups = [];
 
         foreach ($thingreport['things'] as $thing_obj) {
@@ -215,12 +216,17 @@ class Group extends Agent
             $this->thing_report['groups'] = $groups;
         }
 
+/*
         $this->createChoice(
             $this->agent_name,
             $this->node_list,
             "start"
         );
+
         $this->choices = $this->linksChoice("listen");
+*/
+
+
         $this->groups = $groups;
         return $this->thing_report['groups'];
     }
