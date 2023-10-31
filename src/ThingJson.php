@@ -24,6 +24,11 @@ private $json_data;
 private $array_data;
 private $field;
 
+private $mail_postfix;
+private $size_overflow;
+private $char_max;
+private $write_on_destruct;
+
     /**
      *
      * @param unknown $uuid

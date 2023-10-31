@@ -48,6 +48,17 @@ class Thing
     private $stack_account;
     private $thing_account; 
 
+    public $thing;
+
+    public $refresh_at;
+
+    private $associations;
+    private $state;
+
+    private $choice;
+
+    public $variables;
+
     public function __construct($uuid, $test_message = null)
     {
 $this->log("Thing __construct", $uuid, $test_message);

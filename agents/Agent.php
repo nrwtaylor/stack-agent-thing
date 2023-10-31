@@ -19,6 +19,13 @@ class Agent
 {
     public $input;
 
+    private $message;
+    private $info;
+    private $current_agent;
+
+    private $keyword;
+    private $responsive_agents;
+
     /**
      *
      * @param Thing   $thing
