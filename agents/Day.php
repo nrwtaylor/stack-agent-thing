@@ -33,6 +33,8 @@ class Day extends Agent
      */
     public function init()
     {
+//$this->timezone = "America/Vancouver";
+
         $this->dateline = false;
         $this->test = "Development code";
 
@@ -84,6 +86,8 @@ class Day extends Agent
 
         $this->default_prime_meridian_offset = 0;
         $this->default_julian_correlation["mesoamerican"] = 584283; //GMT
+
+
 
         // dev factor up to agent
         if (!isset($this->day)) {

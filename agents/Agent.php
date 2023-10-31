@@ -139,6 +139,10 @@ class Agent
                 $thing->container["stack"][$setting_name];
         }
 
+//$this->timezone = "America/Vancouver";
+
+
+
 
         $this->web_prefix = $thing->container["stack"]["web_prefix"];
         $this->mail_postfix = $thing->container["stack"]["mail_postfix"];
@@ -184,6 +188,15 @@ class Agent
             $this->settings =
                 $this->thing->container["api"][strtolower($this->agent_name)];
         }
+
+$this->timezone = "America/Vancouver";
+        if (
+            isset($this->thing->container["api"]["timezone"])
+        ) {
+            $this->timezone =
+                $this->thing->container["api"]["timezone"]["timezone"];
+        }
+
 
         $this->agent_version = "redpanda";
 
