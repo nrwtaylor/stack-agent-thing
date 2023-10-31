@@ -173,6 +173,49 @@ $cut_ngrams = [];
 
         foreach ($ngrams as $j => $ngram) {
             switch ($ngram) {
+
+                case "kokopelli":
+
+$data_source = "http://localhost/snapshot.json";
+
+    stream_context_set_default(array(
+            'ssl'                => array(
+            'peer_name'          => 'generic-server',
+            'verify_peer'        => FALSE,
+            'verify_peer_name'   => FALSE,
+            'allow_self_signed'  => TRUE
+             )));
+
+        $data = file_get_contents($data_source, FALSE);
+
+        if ($data == false) {
+            $this->response = "Could not ask Kokopelli.";
+//            $this->available_places_count = 0;
+//            $this->places_count = 0;
+            return true;
+            // Invalid query of some sort.
+        }
+// https://stackoverflow.com/questions/36036329/file-get-contents-peer-certificate-did-not-match
+                   $json_data = json_decode($data, true);
+                   unset($json_data['log']);
+
+                   $latitude = $json_data['latitude_decimal'];
+                   $longitude = $json_data['longitude_decimal'];
+
+                    $place_times["e871"] = [
+                        "text" => "kokopelli",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => $latitude,
+                        "longitude" => $longitude,
+                    ];
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["e871"];
+                    }
+
+                    break;
+
+
+
                 case "amsterdam":
                     $place_times["aa34"] = [
                         "text" => "amsterdam",
@@ -419,6 +462,100 @@ $cut_ngrams = [];
                     }
 
                     break;
+
+// https://whc.unesco.org/en/list/1501
+// https://www.antequerapatrimoniomundial.com/en/antequera-dolmens/tholos-el-romeral/
+
+/*
+The Tholos El Romeral is one of the very few examples in the Iberian Peninsula where the orientation is towards the half-west of the sky. Its axis points -another peculiarity- at the highest rock point of the El Torcal mountain range, the Camorro de las Siete Mesas. At noon, during the winter solstice, the sun light gets deep into the second sepulchre chamber. You can enjoy this phenomenon by previously booking.
+*/
+
+// https://en.wikipedia.org/wiki/Tholos_de_El_Romeral
+// Coordinates	37°02′04″N 4°32′08″W
+
+// circa 1,800 BC or perhaps 2,500 BC
+// https://www.thetravel.com/how-old-are-the-dolmens-of-antequera/
+
+                case "tholos de el romeral":
+                    $place_times["7f0f"] = [
+                        "text" => "tholos de el romeral",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 37.034444,
+                        "longitude" => -4.5355556,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["7f0f"];
+                    }
+
+                    break;
+
+// 37.024586° N, 4.5462917° W
+// circa 3,800 BC 
+// https://www.thetravel.com/how-old-are-the-dolmens-of-antequera/
+
+                case "dolmen of menga":
+                    $place_times["bd4c"] = [
+                        "text" => "dolmen of menga",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 37.024586,
+                        "longitude" => -4.5462917,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["bd4c"];
+                    }
+
+                    break;
+
+// https://en.wikipedia.org/wiki/Dolmen_de_Viera
+// Coordinates: 37.024116°N 04.548374°W
+
+// circa 3,800 BC
+// https://www.thetravel.com/how-old-are-the-dolmens-of-antequera/
+
+                case "dolmen de viera":
+                    $place_times["e6ec"] = [
+                        "text" => "dolmen de viera",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 37.024116,
+                        "longitude" => -4.548374,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["e6ec"];
+                    }
+
+                    break;
+
+// https://www.livescience.com/Spanish-stonehenge-dolmen-de-guadalperal.html
+// https://en.wikipedia.org/wiki/Dolmen_of_Guadalperal
+
+// 39°50′8.65″N 5°24′16.13″W
+// 39.835736, -5.404481
+
+                case "dolmen of guadalperal":
+                    $place_times["e6ed"] = [
+                        "text" => "dolmen of guadalperal",
+                        "datum_projected" => $datum_projected,
+                        "latitude" => 39.835736,
+                        "longitude" => -5.404481,
+                    ];
+
+                    if (!isset($first_place)) {
+                        $first_place = $place_times["e6ed"];
+                    }
+
+                    break;
+
+
+
+// Schulz Paulsson believes that the megaliths were first constructed by dwellers of northwest France during the second half of the fifth millennium BC.
+// https://www.smithsonianmag.com/articles/europe-megalithic-monuments-france-sea-routes-mediterranean-180971467/
+
+
+
+
 
                 // https://cdnc.ucr.edu/?a=d&d=SFC19110910.2.43.7&
                 // https://books.google.ca/books?id=qfTu-wAQAO8C&pg=PA143&lpg=PA143&dq=%22mare+island+observatory%22+latitude+longitude&source=bl&ots=lNCBamPF9R&sig=ACfU3U3YRTpMQYuU7Le1_8ZERWfu391uhQ&hl=en&sa=X&ved=2ahUKEwiav8GC__v2AhVTOH0KHW3RAYsQ6AF6BAgIEAM#v=onepage&q=%22mare%20island%20observatory%22%20latitude%20longitude&f=false
