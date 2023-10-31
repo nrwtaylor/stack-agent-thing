@@ -751,6 +751,21 @@ return $response;
     {
         $thingreport = Database::staticGet($uuid);
         $thing = $thingreport["thing"];
+//var_dump("Database readStaticFIeld thingReport", $thingreport);
+var_dump("Database readStaticField thing",$thing);
+//var_dump("Database readStaticField field", $field);
+//var_dump("Database readStaticField thing field", $thing[$field]);
+
+        if (isset($thing[$field])) {
+            // I think I should also do
+            //$this->$field = $thing->$field;
+
+            return $thing[$field];
+        } else {
+            return false;
+        }
+
+/*
         if (isset($thing->$field)) {
             // I think I should also do
             $this->$field = $thing->$field;
@@ -759,6 +774,10 @@ return $response;
         } else {
             return false;
         }
+*/
+
+
+
     }
 
     /**
@@ -1041,8 +1060,9 @@ $authorative_thing = $thing;
 
 static function staticGet($uuid) {
 
+var_dump("Database staticGet uuid", $uuid);
 $result = Mongo::getStaticMongo($uuid);
-
+var_dump("Database staticGet result", $result);
 
         $thingreport = [
             "uuid" => $uuid,
