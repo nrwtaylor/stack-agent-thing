@@ -25,6 +25,30 @@ class Database
 {
     public $var = "hello";
 
+    private $hash_algorithm;
+    private $get_prior;
+    private $available_stacks;
+    private $stack_handlers;
+    private $candidate_stacks;
+
+    private $thing;
+    private $start_time;
+    private $split_time;
+    private $operations_time;
+    private $operations;
+
+    private $log;
+    private $agent_input;
+    private $from;
+    public $uuid;
+    private $subject;
+    private $to;
+    private $stacks;
+    private $web_prefix;
+
+    private $state;
+    private $hash_state;
+
     /**
      *
      * @param unknown $uuid
@@ -555,6 +579,7 @@ var_dump($ex);
      */
     public function writeDatabase($field_text, $array, $uuid = null)
     {
+
 //$thing->log("Database writeDatabase log test");
 $response = ['data'=>[], 'error'=>null, 'status'=>'started'];
   //      $this->thing->log(
@@ -751,6 +776,21 @@ return $response;
     {
         $thingreport = Database::staticGet($uuid);
         $thing = $thingreport["thing"];
+//var_dump("Database readStaticFIeld thingReport", $thingreport);
+var_dump("Database readStaticField thing",$thing);
+//var_dump("Database readStaticField field", $field);
+//var_dump("Database readStaticField thing field", $thing[$field]);
+
+        if (isset($thing[$field])) {
+            // I think I should also do
+            //$this->$field = $thing->$field;
+
+            return $thing[$field];
+        } else {
+            return false;
+        }
+
+/*
         if (isset($thing->$field)) {
             // I think I should also do
             $this->$field = $thing->$field;
@@ -759,6 +799,10 @@ return $response;
         } else {
             return false;
         }
+*/
+
+
+
     }
 
     /**
@@ -830,6 +874,12 @@ $uuid = Mongo::setStaticMongo(null, ['subject'=>$subject, 'to'=>$to]);
 
         return false;
     }
+
+    static function staticCreate($subject, $to)
+    {
+$uuid = Mongo::setStaticMongo(null, ['subject'=>$subject, 'to'=>$to]);
+    }
+
 
     // dev
     public function isUuid($text)
@@ -1041,8 +1091,9 @@ $authorative_thing = $thing;
 
 static function staticGet($uuid) {
 
+var_dump("Database staticGet uuid", $uuid);
 $result = Mongo::getStaticMongo($uuid);
-
+var_dump("Database staticGet result", $result);
 
         $thingreport = [
             "uuid" => $uuid,

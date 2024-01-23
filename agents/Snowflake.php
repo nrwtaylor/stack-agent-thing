@@ -910,10 +910,11 @@ if ($cell['value'] != null) {
 
             // Vancouver Pride 2018
             if (
-                isset($this->event) and
+(                isset($this->event) and
                     $this->event != false and
                     $this->event->event_name == "vancouver pride 2018" or
-                isset($this->flag->state) and $this->flag->state == "rainbow"
+                isset($this->flag->state) and $this->flag->state == "rainbow")
+or ($this->hasText($this->input, "rainbow"))
             ) {
                 $this->selector_hex = substr($this->uuid, 0, 1); // A random number from 0 to 9.
                 $this->selector_dec = $this->hextodec($this->selector_hex);
@@ -1415,6 +1416,7 @@ if ($cell['value'] != null) {
                 //            $this->angle = ($this->selector_dec % 6) * 30;
 
                 switch (true) {
+                  //  case true:
                     case isset($this->event) and
                         $this->event != false and
                         $this->event->event_name == "vancouver pride 2018":
@@ -1438,7 +1440,7 @@ if ($cell['value'] != null) {
             }
 
             //if ($cell['name'] == 'boundary') {$color = $this->black;}
-
+//$color = $this->grey;
             if ($index == 2) {
                 $color = $this->white;
             }
@@ -1468,6 +1470,10 @@ if ($cell['value'] != null) {
             //$quantity = random_int(0,4);
             //$quantity = intval($n*5);
             $quantity = 2;
+
+        //$color = imagecolorallocate($this->image, 255, 0, 0);
+
+
 
             // Draw an individual hexagon (q,r,s) centred at at an angle and distance from (x,y)
             $this->drawHexagon(

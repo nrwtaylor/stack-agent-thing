@@ -17,6 +17,18 @@ class ThingJson
 {
     public $var = 'hello';
 
+private $start_time;
+public $container;
+private $write_fail_count;
+private $json_data;
+private $array_data;
+private $field;
+
+private $mail_postfix;
+private $size_overflow;
+private $char_max;
+private $write_on_destruct;
+
     /**
      *
      * @param unknown $uuid
@@ -402,6 +414,7 @@ class ThingJson
         if ($dest == null) {
             $dest = [];
         }
+
         //var_dump($dest);
         //return null;}
         $finalKey = array_pop($path);

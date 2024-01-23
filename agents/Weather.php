@@ -7,8 +7,8 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set("display_startup_errors", 1);
-ini_set("display_errors", 1);
+ini_set('display_startup_errors', 1);
+ini_set('display_errors', 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
@@ -29,7 +29,7 @@ class Weather extends Agent
     // <iframe title="Environment Canada Weather" width="287px" height="191px" src="//weather.gc.ca/wxlink/wxlink.html?cityCode=bc-74&amp;lang=e" allowtransparency="true" frameborder="0"></iframe>
     // <!-- End WeatherLink Fragment -->
 
-    public $var = "hello";
+    public $var = 'hello';
 
     /**
      *
@@ -40,7 +40,7 @@ class Weather extends Agent
     {
         $this->keyword = "environment";
         $this->test = "Development code"; // Always
-        $this->keywords = ["weather"];
+        $this->keywords = ['weather'];
 
         $this->variables_agent = new Variables(
             $this->thing,
@@ -53,30 +53,27 @@ class Weather extends Agent
             $this->verbosity = 2;
         }
 
-        $this->link = $this->settingsAgent(["weather", "link"], "https://weather.gc.ca/rss/city/bc-74_e.xml");
-
-        //$this->link = "https://weather.gc.ca/rss/city/bc-74_e.xml";
-        //$this->xml_link = "https://weather.gc.ca/rss/city/bc-74_e.xml";
-
-
-        $this->xml_link = $this->link;
+        // devstack identify place as vancouver
+        $this->link = "https://weather.gc.ca/rss/city/bc-74_e.xml";
+        $this->xml_link = "https://weather.gc.ca/rss/city/bc-74_e.xml";
 
         // https://www.weather.gc.ca/city/pages/bc-74_metric_e.html
         $link = str_replace("/rss/city/", "/city/pages/", $this->xml_link);
         $this->link = str_replace("_e.xml", "_metric_e.html", $link);
 
-        $this->thing->refresh_at = $this->thing->time(time() + 5 * 60); // Refresh after 5 minutes.
+        $this->thing->refresh_at = $this->thing->time(time() + 5*60); // Refresh after 5 minutes.
+
     }
 
     public function makeLink()
     {
-        //$this->link = "https://weather.gc.ca/rss/city/bc-74_e.xml";
-        //$this->xml_link = "https://weather.gc.ca/rss/city/bc-74_e.xml";
+        $this->link = "https://weather.gc.ca/rss/city/bc-74_e.xml";
+        $this->xml_link = "https://weather.gc.ca/rss/city/bc-74_e.xml";
 
         // https://www.weather.gc.ca/city/pages/bc-74_metric_e.html
         $link = str_replace("/rss/city/", "/city/pages/", $this->xml_link);
         $this->link = str_replace("_e.xml", "_metric_e.html", $link);
-        $this->thing_report["link"] = $this->link;
+        $this->thing_report['link'] = $this->link;
     }
 
     /**
@@ -115,8 +112,8 @@ class Weather extends Agent
                     $this->thisweekendWeather();
                     $this->response .= "Saw a request about this weekend. ";
                     break;
-                case "verbosity":
-                case "mode":
+                case 'verbosity':
+                case 'mode':
                     $number = $this->extractNumber();
                     if (is_numeric($number)) {
                         $this->verbosity = $number;
@@ -191,7 +188,7 @@ class Weather extends Agent
         $weather_text = "";
 
         $index = 0;
-        if (!isset($this->daily_forecast["sunday"][0]["night"])) {
+        if (!isset($this->daily_forecast['sunday'][0]['night'])) {
             $index = 1;
         }
 
@@ -222,7 +219,7 @@ class Weather extends Agent
         $weather_text = str_replace("  ", " ", $weather_text);
         $weather_text = trim($weather_text);
 
-        if (strpos(strrev($weather_text), ".") !== 0) {
+        if (strpos(strrev($weather_text), '.') !== 0) {
             $weather_text .= ". ";
         } else {
             $weather_text .= " ";
@@ -271,9 +268,6 @@ class Weather extends Agent
         );
 
         $this->refreshed_at = $this->current_time;
-
-$this->thing->Write(['weather','refreshed_at'], $this->refreshed_at);
-
     }
 
     /**
@@ -300,100 +294,46 @@ $this->thing->Write(['weather','refreshed_at'], $this->refreshed_at);
         $this->verbosity = $this->variables_agent->getVariable("verbosity");
     }
 
-
-public function lineWeather($contents, $searchfor) {
-
-
-//        $searchfor = "Current Conditions";
-
-        $pattern = preg_quote($searchfor, "/");
-        // finalise the regular expression, matching the whole line
-        $pattern = "/^.*" . $pattern . ".*\$/m";
-
-        // search, and store all matching occurences in $matches
-        $m = false;
-        if (preg_match_all($pattern, $contents, $matches)) {
-            $m = implode("\n", $matches[0]);
-            $this->matches = $matches;
-        }
-        // Condition text
-        $text = str_replace(
-            $searchfor,
-            "",
-            $this->matches[0][0]
-        );
-
-        $text = trim(
-            str_replace(": ", "", $text)
-        );
-return $text;
-
-
-}
     /**
      *
      * @return unknown
      */
     function getWeather()
     {
-        // Do we already have a weather report.
-        // Don't ask for it again.
-        if (isset($this->data)) {
-            return;
-        }
-
         $data_source = $this->xml_link;
-        try {
-            $this->data = @file_get_contents($data_source);
-        } catch (\Throwable $t) {
-            return true;
-        } catch (\Exception $e) {
-            return true;
-        }
-        if ($this->data == false) {
+
+        $data = file_get_contents($data_source);
+
+        if ($data == false) {
             return true;
             // Invalid weather setting.
         }
 
-        $xml = new \SimpleXMLElement($this->data);
-
-        //$this->weather_daily_call_count += 1;
-
-        if ($xml) {
-            $json = json_encode($xml);
-            $array = json_decode($json, true);
-            $this->title = $array["title"];
-            // Get the place of the reporting station.
-            $this->place = trim(explode("-", $this->title)[0]);
-            $this->watch = $array["entry"][0]["summary"];
-            $this->updated = $array["entry"][0]["updated"];
-        }
-        // Refactor now that we have a full JSON object
-        // Non structured data extraction below.
-
         // String html tags
         //$data = strip_tags($data);
-        $data = preg_replace("/<.*?>/", " ", $this->data);
+        $data = preg_replace("/<.*?>/", " ", $data);
         $contents = $data;
         $this->weather_contents = $data;
-/*
         $searchfor = "Current Conditions";
 
-        $pattern = preg_quote($searchfor, "/");
+        $pattern = preg_quote($searchfor, '/');
         // finalise the regular expression, matching the whole line
         $pattern = "/^.*" . $pattern . ".*\$/m";
+
         // search, and store all matching occurences in $matches
         $m = false;
         if (preg_match_all($pattern, $contents, $matches)) {
             $m = implode("\n", $matches[0]);
             $this->matches = $matches;
         }
+
         // Condition text
         $this->current_conditions = str_replace(
             $searchfor,
             "",
             $this->matches[0][0]
         );
+
         $this->current_conditions = str_replace(
             "&#xB0;",
             "°",
@@ -402,77 +342,65 @@ return $text;
         $this->current_conditions = trim(
             str_replace(": ", "", $this->current_conditions)
         );
-*/
-/*
-
- Temperature:  5.9&deg;C  
- Pressure:  101.8 kPa  
- Humidity:  99 % 
- Dewpoint:  5.7&deg;C  
- Wind:  SW 4 km/h 
- Air Quality Health Index:  N/A 
-
-*/
 
 
-$text_temperature = $this->lineWeather($contents, 'Temperature');
-        $text_temperature = str_replace(
-            "&deg;",
-            '°',
-            $text_temperature
+
+ $searchfor = "Observed at";
+
+        $pattern = preg_quote($searchfor, '/');
+        // finalise the regular expression, matching the whole line
+        $pattern = "/^.*" . $pattern . ".*\$/m";
+
+        // search, and store all matching occurences in $matches
+        $m = false;
+        if (preg_match_all($pattern, $contents, $matches)) {
+            $m = implode("\n", $matches[0]);
+            $this->matches = $matches;
+        }
+
+        // Condition text
+        $observed_at = str_replace(
+            $searchfor,
+            "",
+            $this->matches[0][0]
+        );
+
+        $observed_at = str_replace(
+            "&deg;C",
+            "°C",
+            $observed_at
+        );
+        $observed_at = trim(
+            str_replace(": ", "", $observed_at)
+        );
+        $observed_at = trim(
+            str_replace("Air Quality Health Index", "AQHI", $observed_at)
+        );
+
+        $observed_at = trim(
+            str_replace(']]>', "", $observed_at)
         );
 
 
-
-$text_pressure = $this->lineWeather($contents, 'Pressure');
-$text_humidity = $this->lineWeather($contents, 'Humidity');
-$text_dewpoint = $this->lineWeather($contents, 'Dewpoint');
-$text_wind = $this->lineWeather($contents, 'Wind');
-$text_air_quality_health_index = $this->lineWeather($contents, 'Air Quality Health Index');
-
-$text_observed_at = $this->lineWeather($contents, 'Observed at');
-
-$this->current_conditions = $text_temperature . " " . $text_pressure ." " . $text_wind;
-
-
-
-
-$dateline = $this->extractDateline($text_observed_at);
-//var_dump($text_observed_at);
-//$timestamp = $this->timestampDateline($dateline);
-
-$text = $dateline['year']."-" . $dateline['month'] . "-" . $dateline['day_number'] . "T" . $dateline['hour'] . ":" . $dateline['minute'];
-
-//var_dump($text);
-
-        $this->time_agent = new Time($this->thing, "time");
-        $this->working_datum = $this->time_agent->datumTime(
-           $text, "America/Vancouver"
+        $observed_at = trim(
+            str_replace("Pressure / Tendency", "Pressure", $observed_at)
         );
 
+$parts = explode("Condition", $observed_at);
 
-        $this->current_datum = $this->time_agent->datumTime(
-           $this->current_time, "America/Vancouver"
-        );
-//var_dump($this->working_datum);
-//var_dump($this->current_datum);
-$age = strtotime($this->timestampTime($this->current_datum)) - strtotime($this->timestampTime($this->working_datum));
-//var_dump($age);
-//var_dump($this->thing->human_time(-1 *$age));
+$this->observed_at = preg_replace('!\s+!', ' ', trim($parts[0]));
 
+$this->observed_place = explode(" ", $this->observed_at)[0];
 
-// dev improve dateline extraction for 12 am
+$t = $this->extractClocktime($this->observed_at);
 
-
-
-
-
-
+$this->observed_clocktime = implode(":", $t);
+$this->observed_conditions = preg_replace('!\s+!', ' ', trim($parts[1]));
 
         $contents = $data;
         $searchfor = "Forecast issued";
 
-        $pattern = preg_quote($searchfor, "/");
+        $pattern = preg_quote($searchfor, '/');
         // finalise the regular expression, matching the whole line
         $pattern = "/^.*" . $pattern . ".*\$/m";
 
@@ -543,7 +471,6 @@ $age = strtotime($this->timestampTime($this->current_datum)) - strtotime($this->
     /**
      *
      */
-
     public function respondResponse()
     {
         // Thing actions
@@ -554,23 +481,23 @@ $age = strtotime($this->timestampTime($this->current_datum)) - strtotime($this->
         //$from = "weather";
 
         $choices = false;
-        $this->thing_report["choices"] = $choices;
+        $this->thing_report['choices'] = $choices;
 
         //$this->makeSms();
         //$this->makeMessage();
 
-        $this->thing_report["email"] = $this->sms_message;
+        $this->thing_report['email'] = $this->sms_message;
         //$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
-        $this->thing_report["txt"] = $this->sms_message;
+        $this->thing_report['txt'] = $this->sms_message;
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report["info"] = $message_thing->thing_report["info"];
+            $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
 
-//        $this->makeWeb();
+        $this->makeWeb();
 
-        $this->thing_report["help"] = "This reads a web resource.";
+        $this->thing_report['help'] = 'This reads a web resource.';
     }
 
     /**
@@ -606,7 +533,7 @@ $age = strtotime($this->timestampTime($this->current_datum)) - strtotime($this->
         $web .= "Environment Canada feed last queried " . $ago . " ago.<br>";
 
         //        $this->sms_message = $sms_message;
-        $this->thing_report["web"] = $web;
+        $this->thing_report['web'] = $web;
     }
 
     /**
@@ -619,11 +546,9 @@ $age = strtotime($this->timestampTime($this->current_datum)) - strtotime($this->
                 $this->current_conditions . " > " . $this->forecast_conditions;
         }
 
-        $sms_message = "WEATHER ";
-        $sms_message .= ((isset($this->place)) ? strtoupper($this->place) . " " : null);
-        $sms_message .= "| ";
+        $sms_message = "WEATHER | ";
         $sms_message .= trim($this->response);
-        $sms_message .= " | link " . '' . $this->link . '';
+        $sms_message .= " | link " . $this->link;
         $sms_message .= " | source Environment Canada";
 
         $agent = new Clocktime($this->thing, $this->forecast_timestamp_time);
@@ -634,47 +559,11 @@ $age = strtotime($this->timestampTime($this->current_datum)) - strtotime($this->
             ":" .
             str_pad($agent->minute, 2, "0", STR_PAD_LEFT);
 
-
         // devstack - a conditioning algorithm.  In Sms.php?
         $sms_message = str_replace("°C", "C", $sms_message);
 
         $this->sms_message = $sms_message;
-        $this->thing_report["sms"] = $sms_message;
-    }
-
-    public function makeDiscord($text = null) {
-
-        if (!isset($this->response) or $this->response == null) {
-            $this->response =
-                $this->current_conditions . " > " . $this->forecast_conditions;
-        }
-
-        $sms_message = "WEATHER ";
-        $sms_message .= ((isset($this->place)) ? strtoupper($this->place) . " " : null);
-        $sms_message .= "\n";
-        $sms_message .= trim($this->response);
-        $sms_message .= "\n";
-$sms_message .= "" . '<' . $this->link . '>';
-$sms_message .= "\n";
-        $sms_message .= "source Environment Canada";
-//$sms_message .= " " . $this->update;
-$sms_message .= " " . $this->forecast_timestamp_time;
-//        $agent = new Clocktime($this->thing, $this->forecast_timestamp_time);
-/*
-        $sms_message .=
-            " " .
-            str_pad($agent->hour, 2, "0", STR_PAD_LEFT) .
-            ":" .
-            str_pad($agent->minute, 2, "0", STR_PAD_LEFT);
-
-
-        // devstack - a conditioning algorithm.  In Sms.php?
-        $sms_message = str_replace("°C", "C", $sms_message);
-*/
-
-        $this->discord_message = $sms_message;
-        $this->thing_report["discord"] = $sms_message;
-
+        $this->thing_report['sms'] = $sms_message;
     }
 
     /**
@@ -686,7 +575,7 @@ $sms_message .= " " . $this->forecast_timestamp_time;
         $message .= " " . "Courtesy of Environment Canada.";
 
         $this->message = $message;
-        $this->thing_report["message"] = $message;
+        $this->thing_report['message'] = $message;
     }
 
     /**
@@ -723,27 +612,6 @@ $sms_message .= " " . $this->forecast_timestamp_time;
         return $this->number;
     }
 
-    public function watchWeather() {
-        $this->watch_response = "";
-        if (!isset($this->watch)) {
-           $this->watch_response .= "No watch seen. ";
-           return;
-        }
-
-        if (strtolower($this->watch) == strtolower('No watches or warnings in effect.')) {
-           $this->watch_response = false;
-           return;
-        }
-
-        $this->watch_response .= $this->watch . " ";
-
-        return $this->watch_response;
-
-        //$this->xml_link = "https://weather.gc.ca/rss/city/bc-74_e.xml";
-
-
-    }
-
     /**
      *
      * @return unknown
@@ -766,10 +634,8 @@ $sms_message .= " " . $this->forecast_timestamp_time;
         // So this is really the 'sms' section
         // Keyword
         if (count($pieces) == 1) {
-            if ($this->input == "weather") {
+            if ($this->input == 'weather') {
                 $this->response =
-  //                  (isset($this->watch) ? "[" . $this->watch . "] " : null) .
-                    $this->watchWeather() . 
                     $this->current_conditions .
                     " > " .
                     $this->forecast_conditions;
@@ -779,6 +645,38 @@ $sms_message .= " " . $this->forecast_timestamp_time;
             // Drop through
             // return "Request not understood";
         }
+
+        if (count($pieces) == 1) {
+            if ($this->input == 'weather') {
+                $this->response =
+                    $this->current_conditions .
+                    " > " .
+                    $this->forecast_conditions;
+                return;
+            }
+
+            // Drop through
+            // return "Request not understood";
+        }
+
+        if (count($pieces) == 2) {
+            if ($this->input == 'observed weather') {
+                $this->response = $this->observed_place . " " . $this->observed_clocktime . " " . 
+                    $this->observed_conditions .' > ' .
+$this->forecast_conditions;
+                return;
+            }
+
+            // Drop through
+            // return "Request not understood";
+        }
+
+
+
+
+
+
+
         return "Message not understood";
         return false;
     }

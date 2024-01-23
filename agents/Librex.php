@@ -104,7 +104,7 @@ class Librex extends Word
     /**
      *
      */
-    function librexThing()
+    function deprecate_librexThing()
     {
         // Get all of this users Things
         // To search for the last Proword text provided.

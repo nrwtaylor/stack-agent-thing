@@ -32,7 +32,6 @@ class Sun extends Agent
         $this->thing_report["info"] =
             "This provides awareness of sun position and solar time.";
         $this->thing_report["help"] = "Try SUN. Then WEB.";
-
         $this->initSun();
     }
 
@@ -87,8 +86,31 @@ class Sun extends Agent
             $this->image = $agent->image;
             $this->PNG = $agent->PNG;
 
-            $this->thing_report['png'] = $agent->image_string;
+$this->thing_report['png'] = $agent->>thing_report["png"];
+           //>thing_report["png"] $this->thing_report['png'] = $agent->image_string;
         }
+/*
+        $this->thing_report['png'] = $imagedata;
+
+        $response =
+            '<img src="data:image/png;base64,' .
+            base64_encode($imagedata) .
+            '"alt="snowflake"/>';
+
+        $this->html_image =
+            '<img src="data:image/png;base64,' .
+            base64_encode($imagedata) .
+            '"alt="snowflake"/>';
+
+        $this->PNG_embed = "data:image/png;base64," . base64_encode($imagedata);
+
+        //        $this->thing_report['png'] = $image;
+
+        //        $this->PNG = $this->image;
+        $this->PNG = $imagedata;
+*/
+
+
     }
 
     public function makePNGs()

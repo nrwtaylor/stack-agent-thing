@@ -502,10 +502,21 @@ $this->thing->variables_thing = $this->variables_thing;
         $this->variables_thing->db->setFrom($this->identity);
 
         try {
+
+var_dump("Variable setVariable");
+
+var_dump("variable set name", $this->variable_set_name);
+var_dump("variable", $variable);
+var_dump("value", $value);
+
             $this->variables_thing->Write(
                 [$this->variable_set_name, $variable],
                 $value
             );
+
+
+
+
         } catch (Throwable $t) {
             //echo 'Caught throwable: ',  $t->getMessage(), "\n";
             // Executed only in PHP 7, will not match in PHP 5

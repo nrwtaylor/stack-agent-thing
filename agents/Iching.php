@@ -213,6 +213,26 @@ class IChing extends Agent
 
     public function makePNG()
     {
+        if (!isset($this->image)) {
+            $this->makeImage();
+        }
+
+        $agent = new Png($this->thing, "png");
+        $agent->makePNG($this->image);
+
+        $this->html_image = $agent->html_image;
+        $this->image = $agent->image;
+        $this->PNG = $agent->PNG;
+        $this->PNG_embed = $agent->PNG_embed;
+
+        $this->thing_report["png"] = $agent->PNG;
+    }
+
+
+
+/*
+    public function makePNG()
+    {
         $agent = new Png($this->thing, "png");
         $this->makeImage();
 
@@ -224,7 +244,7 @@ class IChing extends Agent
 
         $this->thing_report['png'] = $agent->image_string;
     }
-
+*/
     /**
      *
      */

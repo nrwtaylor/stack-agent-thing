@@ -15,6 +15,17 @@ class ThingChoice
 {
     public $var = "hello";
 
+    private $web_prefix;
+    private $name;
+    private $stack_state;
+    private $choice_association;
+    private $thing;
+
+    public $container;
+
+    private $uuid;
+    private $from;
+
     /**
      *
      * @param unknown $uuid

@@ -45,14 +45,38 @@ class Alert extends Agent
 
         $separator = "\r\n";
         $line = strtok($contents, $separator);
-        $this->alerts = false;
+        $this->alerts = [];
         while ($line !== false) {
-            $this->alerts = $line;
+            $this->alerts[] = ["text" => $line];
             break;
 
             // do something with $line
             $line = strtok($separator);
         }
+
+        // Get some more alerts
+
+        $transducers_handler = new Transducers($this->thing, "transducers");
+        $this->alerts = array_merge(
+            $this->alerts,
+            $transducers_handler->alertTransducers()
+        );
+    }
+
+    function textAlerts($alerts = null)
+    {
+        if ($alerts === null) {
+            $alerts = $this->alerts;
+        }
+
+        $t = "";
+        foreach ($alerts as $alert) {
+            $t .= " " . $alert["short_text"];
+        }
+
+        $t = trim($t, " ") . ". ";
+
+        return $t;
     }
 
     /**
@@ -61,7 +85,14 @@ class Alert extends Agent
     function makeSMS()
     {
         $this->node_list = ["alert" => ["alert"]];
-        $m = strtoupper($this->agent_name) . " | " . $this->response;
+        $m =
+"ALERT" .
+//            strtoupper($this->agent_name) .
+            " | " .
+            $this->textAlerts($this->alerts) .
+            " " .
+            $this->response;
+
         $this->sms_message = $m;
         $this->thing_report["sms"] = $m;
     }
@@ -78,8 +109,12 @@ class Alert extends Agent
     //https://stackoverflow.com/questions/11343403/php-exception-handling-on-datetime-object
     function isAlertValid($str)
     {
+        if (is_array($str)) {
+            return true;
+        }
+
         if ($str == false) {
-            return false;
+            return true;
         }
 
         return true;
@@ -92,31 +127,39 @@ class Alert extends Agent
      */
     function doAlert($text = null)
     {
-        //        $datum = null;
         $this->getAlerts();
         $timevalue = $text;
         if ($this->agent_input == "alert" and $text == null) {
-            $timevalue = "No current alerts.";
+            $timevalue = "No current alerts. ";
         }
         if ($text == "alert") {
-            $timevalue = "Alert not defined.";
+            $timevalue = "Alert not defined. ";
         }
 
         if ($timevalue == null) {
-            $timevalue = "Did not find an alert.";
+            $timevalue = "Did not find an alert. ";
         }
 
         if (!isset($this->alerts)) {
-            $m = "No alerts found.";
+            $m = "No alerts found. ";
         }
 
         if ($this->isAlertValid($this->alerts)) {
-            $m = "Found an alert. ";
+
+if (count($this->alerts) == 0) {
+
+            $this->flag = "green";
+            $m = "No alert found. ";
+
+} else {
+
+            $m = "Found " . (count($this->alerts) == 1 ? "an" : count($this->alerts)) . " alert" . (count($this->alerts) ==1 ? "" : "s"). ". ";
             $this->flag = "red";
-            $m .= $this->alerts;
+}
+            //$m .= $this->alerts;
         } else {
             $this->flag = "green";
-            $m = "No alert found.";
+            $m = "No alert found. ";
         }
 
         $this->response .= $m;
@@ -124,6 +167,8 @@ class Alert extends Agent
 
         return $timevalue;
     }
+
+    // Not sure what this is doing.
 
     public function extractAlert($text = null)
     {
@@ -146,7 +191,8 @@ class Alert extends Agent
         if (isset($matches) and count($matches) == 1) {
             $match = $matches[0];
         }
-        $this->response .= "Could not resolve the alert. ";
+
+        //$this->response .= "Could not resolve the alert. ";
 
         return $match;
     }

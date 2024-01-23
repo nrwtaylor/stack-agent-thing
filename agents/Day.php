@@ -33,6 +33,8 @@ class Day extends Agent
      */
     public function init()
     {
+//$this->timezone = "America/Vancouver";
+
         $this->dateline = false;
         $this->test = "Development code";
 
@@ -84,6 +86,8 @@ class Day extends Agent
 
         $this->default_prime_meridian_offset = 0;
         $this->default_julian_correlation["mesoamerican"] = 584283; //GMT
+
+
 
         // dev factor up to agent
         if (!isset($this->day)) {
@@ -2388,7 +2392,7 @@ Now draw the twilight.
 
         //$ngrams = $this->extractNgrams($this->input);
 
-        $ngrams = $this->extractNgrams($expand_places_input);
+        $ngrams = $this->extractNgrams($expand_places_input,4);
 
         $period_index = 0;
         $period_timestamp =
