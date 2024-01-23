@@ -1,0 +1,6350 @@
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$log is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 1234
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$start_time is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 1329
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$log_last is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 1323
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$bananas is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 30
+
+Deprecated: Return type of Pimple\Container::offsetExists($id) should either be compatible with ArrayAccess::offsetExists(mixed $offset): bool, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in /var/www/stackr.test/vendor/pimple/pimple/src/Pimple/Container.php on line 133
+
+Deprecated: Return type of Pimple\Container::offsetGet($id) should either be compatible with ArrayAccess::offsetGet(mixed $offset): mixed, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in /var/www/stackr.test/vendor/pimple/pimple/src/Pimple/Container.php on line 98
+
+Deprecated: Return type of Pimple\Container::offsetSet($id, $value) should either be compatible with ArrayAccess::offsetSet(mixed $offset, mixed $value): void, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in /var/www/stackr.test/vendor/pimple/pimple/src/Pimple/Container.php on line 79
+
+Deprecated: Return type of Pimple\Container::offsetUnset($id) should either be compatible with ArrayAccess::offsetUnset(mixed $offset): void, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in /var/www/stackr.test/vendor/pimple/pimple/src/Pimple/Container.php on line 143
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$container is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 76
+
+Deprecated: Return type of Slim\Collection::offsetExists($key) should either be compatible with ArrayAccess::offsetExists(mixed $offset): bool, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in /var/www/stackr.test/vendor/slim/slim/Slim/Collection.php on line 112
+
+Deprecated: Return type of Slim\Collection::offsetGet($key) should either be compatible with ArrayAccess::offsetGet(mixed $offset): mixed, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in /var/www/stackr.test/vendor/slim/slim/Slim/Collection.php on line 124
+
+Deprecated: Return type of Slim\Collection::offsetSet($key, $value) should either be compatible with ArrayAccess::offsetSet(mixed $offset, mixed $value): void, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in /var/www/stackr.test/vendor/slim/slim/Slim/Collection.php on line 135
+
+Deprecated: Return type of Slim\Collection::offsetUnset($key) should either be compatible with ArrayAccess::offsetUnset(mixed $offset): void, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in /var/www/stackr.test/vendor/slim/slim/Slim/Collection.php on line 145
+
+Deprecated: Return type of Slim\Collection::count() should either be compatible with Countable::count(): int, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in /var/www/stackr.test/vendor/slim/slim/Slim/Collection.php on line 155
+
+Deprecated: Return type of Slim\Collection::getIterator() should either be compatible with IteratorAggregate::getIterator(): Traversable, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in /var/www/stackr.test/vendor/slim/slim/Slim/Collection.php on line 165
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$char_max is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 107
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$mail_postfix is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 109
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$stack_uuid is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 110
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$associate_prior is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 112
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$associate_posterior is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 113
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$web_prefix is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 116
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$engine_state is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 117
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$console_output is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 119
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$logging_console is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 124
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$logging_level_default is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 130
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$logging_level_trigger is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 136
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$queue_handler is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 142
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$hash_algorithm is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 147
+
+Deprecated: Return type of Ramsey\Uuid\Uuid::jsonSerialize() should either be compatible with JsonSerializable::jsonSerialize(): mixed, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in /var/www/stackr.test/vendor/ramsey/uuid/src/Uuid.php on line 215
+
+Deprecated: Ramsey\Uuid\Uuid implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in /var/www/stackr.test/vendor/ramsey/uuid/src/Uuid.php on line 42
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$uuid is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 224
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Thing::$nuuid is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php on line 225
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$thing is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 42
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$start_time is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 84
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$split_time is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 85
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$operations_time is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 86
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$operations is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 87
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$log is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 88
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$agent_input is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 126
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$from is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 131
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$uuid is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 132
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$subject is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 133
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$to is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 134
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$stacks is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 139
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$web_prefix is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 158
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$state is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 159
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$hash_state is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 161
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$hash_algorithm is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 166
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$get_prior is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 172
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$available_stacks is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 177
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$stack_handlers is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 178
+
+Deprecated: Creation of dynamic property Nrwtaylor\StackAgentThing\Database::$candidate_stacks is deprecated in /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php on line 180
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+object(Error)#95 (7) {
+  ["message":protected]=>
+  string(52) "Call to a member function setValueFromPath() on null"
+  ["string":"Error":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+  ["line":protected]=>
+  int(725)
+  ["trace":"Error":private]=>
+  array(15) {
+    [0]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(622)
+      ["function"]=>
+      string(5) "Write"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [1]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(612)
+      ["function"]=>
+      string(16) "refreshedatAgent"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [2]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [3]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(538)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [4]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(277)
+      ["function"]=>
+      string(6) "__call"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [5]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(373)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [6]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(211)
+      ["function"]=>
+      string(15) "connectDatabase"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [7]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(236)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [8]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(154)
+      ["function"]=>
+      string(8) "getThing"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [9]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(121)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [10]=>
+    array(5) {
+      ["file"]=>
+      string(63) "/var/www/stackr.test/vendor/symfony/console/Command/Command.php"
+      ["line"]=>
+      int(253)
+      ["function"]=>
+      string(9) "{closure}"
+      ["class"]=>
+      string(7) "Closure"
+      ["type"]=>
+      string(2) "->"
+    }
+    [11]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(1009)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(41) "Symfony\Component\Console\Command\Command"
+      ["type"]=>
+      string(2) "->"
+    }
+    [12]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(273)
+      ["function"]=>
+      string(12) "doRunCommand"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [13]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(149)
+      ["function"]=>
+      string(5) "doRun"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [14]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(456)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+  }
+  ["previous":"Error":private]=>
+  NULL
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+object(Error)#97 (7) {
+  ["message":protected]=>
+  string(52) "Call to a member function setValueFromPath() on null"
+  ["string":"Error":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+  ["line":protected]=>
+  int(725)
+  ["trace":"Error":private]=>
+  array(16) {
+    [0]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(622)
+      ["function"]=>
+      string(5) "Write"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [1]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(612)
+      ["function"]=>
+      string(16) "refreshedatAgent"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [2]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [3]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Memcached.php"
+      ["line"]=>
+      int(202)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [4]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Memcached.php"
+      ["line"]=>
+      int(10)
+      ["function"]=>
+      string(13) "initMemcached"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Memcached"
+      ["type"]=>
+      string(2) "->"
+    }
+    [5]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(239)
+      ["function"]=>
+      string(4) "init"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Memcached"
+      ["type"]=>
+      string(2) "->"
+    }
+    [6]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(373)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [7]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(211)
+      ["function"]=>
+      string(15) "connectDatabase"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [8]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(236)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [9]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(154)
+      ["function"]=>
+      string(8) "getThing"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [10]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(121)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [11]=>
+    array(5) {
+      ["file"]=>
+      string(63) "/var/www/stackr.test/vendor/symfony/console/Command/Command.php"
+      ["line"]=>
+      int(253)
+      ["function"]=>
+      string(9) "{closure}"
+      ["class"]=>
+      string(7) "Closure"
+      ["type"]=>
+      string(2) "->"
+    }
+    [12]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(1009)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(41) "Symfony\Component\Console\Command\Command"
+      ["type"]=>
+      string(2) "->"
+    }
+    [13]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(273)
+      ["function"]=>
+      string(12) "doRunCommand"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [14]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(149)
+      ["function"]=>
+      string(5) "doRun"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [15]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(456)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+  }
+  ["previous":"Error":private]=>
+  NULL
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+object(Error)#93 (7) {
+  ["message":protected]=>
+  string(52) "Call to a member function setValueFromPath() on null"
+  ["string":"Error":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+  ["line":protected]=>
+  int(725)
+  ["trace":"Error":private]=>
+  array(13) {
+    [0]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(622)
+      ["function"]=>
+      string(5) "Write"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [1]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(612)
+      ["function"]=>
+      string(16) "refreshedatAgent"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [2]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [3]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(373)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [4]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(211)
+      ["function"]=>
+      string(15) "connectDatabase"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [5]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(236)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [6]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(154)
+      ["function"]=>
+      string(8) "getThing"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [7]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(121)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [8]=>
+    array(5) {
+      ["file"]=>
+      string(63) "/var/www/stackr.test/vendor/symfony/console/Command/Command.php"
+      ["line"]=>
+      int(253)
+      ["function"]=>
+      string(9) "{closure}"
+      ["class"]=>
+      string(7) "Closure"
+      ["type"]=>
+      string(2) "->"
+    }
+    [9]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(1009)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(41) "Symfony\Component\Console\Command\Command"
+      ["type"]=>
+      string(2) "->"
+    }
+    [10]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(273)
+      ["function"]=>
+      string(12) "doRunCommand"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [11]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(149)
+      ["function"]=>
+      string(5) "doRun"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [12]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(456)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+  }
+  ["previous":"Error":private]=>
+  NULL
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+object(Error)#198 (7) {
+  ["message":protected]=>
+  string(52) "Call to a member function setValueFromPath() on null"
+  ["string":"Error":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+  ["line":protected]=>
+  int(725)
+  ["trace":"Error":private]=>
+  array(22) {
+    [0]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(622)
+      ["function"]=>
+      string(5) "Write"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [1]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(612)
+      ["function"]=>
+      string(16) "refreshedatAgent"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [2]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [3]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(538)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [4]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(277)
+      ["function"]=>
+      string(6) "__call"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [5]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(373)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [6]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(211)
+      ["function"]=>
+      string(15) "connectDatabase"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [7]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(236)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [8]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(154)
+      ["function"]=>
+      string(8) "getThing"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [9]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(322)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [10]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(275)
+      ["function"]=>
+      string(14) "startVariables"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [11]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(126)
+      ["function"]=>
+      string(12) "getVariables"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [12]=>
+    array(5) {
+      ["file"]=>
+      string(70) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Web.php"
+      ["line"]=>
+      int(71)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [13]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(29) "Nrwtaylor\StackAgentThing\Web"
+      ["type"]=>
+      string(2) "->"
+    }
+    [14]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(998)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [15]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(257)
+      ["function"]=>
+      string(4) "make"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [16]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(181)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [17]=>
+    array(5) {
+      ["file"]=>
+      string(63) "/var/www/stackr.test/vendor/symfony/console/Command/Command.php"
+      ["line"]=>
+      int(253)
+      ["function"]=>
+      string(9) "{closure}"
+      ["class"]=>
+      string(7) "Closure"
+      ["type"]=>
+      string(2) "->"
+    }
+    [18]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(1009)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(41) "Symfony\Component\Console\Command\Command"
+      ["type"]=>
+      string(2) "->"
+    }
+    [19]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(273)
+      ["function"]=>
+      string(12) "doRunCommand"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [20]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(149)
+      ["function"]=>
+      string(5) "doRun"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [21]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(456)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+  }
+  ["previous":"Error":private]=>
+  NULL
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+object(Error)#200 (7) {
+  ["message":protected]=>
+  string(52) "Call to a member function setValueFromPath() on null"
+  ["string":"Error":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+  ["line":protected]=>
+  int(725)
+  ["trace":"Error":private]=>
+  array(23) {
+    [0]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(622)
+      ["function"]=>
+      string(5) "Write"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [1]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(612)
+      ["function"]=>
+      string(16) "refreshedatAgent"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [2]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [3]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Memcached.php"
+      ["line"]=>
+      int(202)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [4]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Memcached.php"
+      ["line"]=>
+      int(10)
+      ["function"]=>
+      string(13) "initMemcached"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Memcached"
+      ["type"]=>
+      string(2) "->"
+    }
+    [5]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(239)
+      ["function"]=>
+      string(4) "init"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Memcached"
+      ["type"]=>
+      string(2) "->"
+    }
+    [6]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(373)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [7]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(211)
+      ["function"]=>
+      string(15) "connectDatabase"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [8]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(236)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [9]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(154)
+      ["function"]=>
+      string(8) "getThing"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [10]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(322)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [11]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(275)
+      ["function"]=>
+      string(14) "startVariables"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [12]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(126)
+      ["function"]=>
+      string(12) "getVariables"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [13]=>
+    array(5) {
+      ["file"]=>
+      string(70) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Web.php"
+      ["line"]=>
+      int(71)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [14]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(29) "Nrwtaylor\StackAgentThing\Web"
+      ["type"]=>
+      string(2) "->"
+    }
+    [15]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(998)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [16]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(257)
+      ["function"]=>
+      string(4) "make"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [17]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(181)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [18]=>
+    array(5) {
+      ["file"]=>
+      string(63) "/var/www/stackr.test/vendor/symfony/console/Command/Command.php"
+      ["line"]=>
+      int(253)
+      ["function"]=>
+      string(9) "{closure}"
+      ["class"]=>
+      string(7) "Closure"
+      ["type"]=>
+      string(2) "->"
+    }
+    [19]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(1009)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(41) "Symfony\Component\Console\Command\Command"
+      ["type"]=>
+      string(2) "->"
+    }
+    [20]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(273)
+      ["function"]=>
+      string(12) "doRunCommand"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [21]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(149)
+      ["function"]=>
+      string(5) "doRun"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [22]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(456)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+  }
+  ["previous":"Error":private]=>
+  NULL
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+object(Error)#196 (7) {
+  ["message":protected]=>
+  string(52) "Call to a member function setValueFromPath() on null"
+  ["string":"Error":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+  ["line":protected]=>
+  int(725)
+  ["trace":"Error":private]=>
+  array(20) {
+    [0]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(622)
+      ["function"]=>
+      string(5) "Write"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [1]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(612)
+      ["function"]=>
+      string(16) "refreshedatAgent"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [2]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [3]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(373)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [4]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(211)
+      ["function"]=>
+      string(15) "connectDatabase"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [5]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(236)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [6]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(154)
+      ["function"]=>
+      string(8) "getThing"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [7]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(322)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [8]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(275)
+      ["function"]=>
+      string(14) "startVariables"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [9]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(126)
+      ["function"]=>
+      string(12) "getVariables"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [10]=>
+    array(5) {
+      ["file"]=>
+      string(70) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Web.php"
+      ["line"]=>
+      int(71)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [11]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(29) "Nrwtaylor\StackAgentThing\Web"
+      ["type"]=>
+      string(2) "->"
+    }
+    [12]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(998)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [13]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(257)
+      ["function"]=>
+      string(4) "make"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [14]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(181)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [15]=>
+    array(5) {
+      ["file"]=>
+      string(63) "/var/www/stackr.test/vendor/symfony/console/Command/Command.php"
+      ["line"]=>
+      int(253)
+      ["function"]=>
+      string(9) "{closure}"
+      ["class"]=>
+      string(7) "Closure"
+      ["type"]=>
+      string(2) "->"
+    }
+    [16]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(1009)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(41) "Symfony\Component\Console\Command\Command"
+      ["type"]=>
+      string(2) "->"
+    }
+    [17]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(273)
+      ["function"]=>
+      string(12) "doRunCommand"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [18]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(149)
+      ["function"]=>
+      string(5) "doRun"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [19]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(456)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+  }
+  ["previous":"Error":private]=>
+  NULL
+}
+string(32) "Class "MongoDB\Client" not found"
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "a37fa335-27e6-4f89-9568-98ef0908bcf0"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/a37fa335-27e6-4f89-9568-98ef0908bcf0."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+object(Error)#297 (7) {
+  ["message":protected]=>
+  string(52) "Call to a member function setValueFromPath() on null"
+  ["string":"Error":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+  ["line":protected]=>
+  int(725)
+  ["trace":"Error":private]=>
+  array(22) {
+    [0]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(622)
+      ["function"]=>
+      string(5) "Write"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [1]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(612)
+      ["function"]=>
+      string(16) "refreshedatAgent"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [2]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [3]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(538)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [4]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(277)
+      ["function"]=>
+      string(6) "__call"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [5]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(373)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [6]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(211)
+      ["function"]=>
+      string(15) "connectDatabase"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [7]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(236)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [8]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(154)
+      ["function"]=>
+      string(8) "getThing"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [9]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(340)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [10]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(275)
+      ["function"]=>
+      string(14) "startVariables"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [11]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(126)
+      ["function"]=>
+      string(12) "getVariables"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [12]=>
+    array(5) {
+      ["file"]=>
+      string(70) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Web.php"
+      ["line"]=>
+      int(71)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [13]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(29) "Nrwtaylor\StackAgentThing\Web"
+      ["type"]=>
+      string(2) "->"
+    }
+    [14]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(998)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [15]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(257)
+      ["function"]=>
+      string(4) "make"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [16]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(181)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [17]=>
+    array(5) {
+      ["file"]=>
+      string(63) "/var/www/stackr.test/vendor/symfony/console/Command/Command.php"
+      ["line"]=>
+      int(253)
+      ["function"]=>
+      string(9) "{closure}"
+      ["class"]=>
+      string(7) "Closure"
+      ["type"]=>
+      string(2) "->"
+    }
+    [18]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(1009)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(41) "Symfony\Component\Console\Command\Command"
+      ["type"]=>
+      string(2) "->"
+    }
+    [19]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(273)
+      ["function"]=>
+      string(12) "doRunCommand"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [20]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(149)
+      ["function"]=>
+      string(5) "doRun"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [21]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(456)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+  }
+  ["previous":"Error":private]=>
+  NULL
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+object(Error)#299 (7) {
+  ["message":protected]=>
+  string(52) "Call to a member function setValueFromPath() on null"
+  ["string":"Error":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+  ["line":protected]=>
+  int(725)
+  ["trace":"Error":private]=>
+  array(23) {
+    [0]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(622)
+      ["function"]=>
+      string(5) "Write"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [1]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(612)
+      ["function"]=>
+      string(16) "refreshedatAgent"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [2]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [3]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Memcached.php"
+      ["line"]=>
+      int(202)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [4]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Memcached.php"
+      ["line"]=>
+      int(10)
+      ["function"]=>
+      string(13) "initMemcached"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Memcached"
+      ["type"]=>
+      string(2) "->"
+    }
+    [5]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(239)
+      ["function"]=>
+      string(4) "init"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Memcached"
+      ["type"]=>
+      string(2) "->"
+    }
+    [6]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(373)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [7]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(211)
+      ["function"]=>
+      string(15) "connectDatabase"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [8]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(236)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [9]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(154)
+      ["function"]=>
+      string(8) "getThing"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [10]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(340)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [11]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(275)
+      ["function"]=>
+      string(14) "startVariables"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [12]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(126)
+      ["function"]=>
+      string(12) "getVariables"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [13]=>
+    array(5) {
+      ["file"]=>
+      string(70) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Web.php"
+      ["line"]=>
+      int(71)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [14]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(29) "Nrwtaylor\StackAgentThing\Web"
+      ["type"]=>
+      string(2) "->"
+    }
+    [15]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(998)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [16]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(257)
+      ["function"]=>
+      string(4) "make"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [17]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(181)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [18]=>
+    array(5) {
+      ["file"]=>
+      string(63) "/var/www/stackr.test/vendor/symfony/console/Command/Command.php"
+      ["line"]=>
+      int(253)
+      ["function"]=>
+      string(9) "{closure}"
+      ["class"]=>
+      string(7) "Closure"
+      ["type"]=>
+      string(2) "->"
+    }
+    [19]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(1009)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(41) "Symfony\Component\Console\Command\Command"
+      ["type"]=>
+      string(2) "->"
+    }
+    [20]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(273)
+      ["function"]=>
+      string(12) "doRunCommand"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [21]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(149)
+      ["function"]=>
+      string(5) "doRun"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [22]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(456)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+  }
+  ["previous":"Error":private]=>
+  NULL
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+object(Error)#295 (7) {
+  ["message":protected]=>
+  string(52) "Call to a member function setValueFromPath() on null"
+  ["string":"Error":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+  ["line":protected]=>
+  int(725)
+  ["trace":"Error":private]=>
+  array(20) {
+    [0]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(622)
+      ["function"]=>
+      string(5) "Write"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [1]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(612)
+      ["function"]=>
+      string(16) "refreshedatAgent"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [2]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [3]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(373)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [4]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(211)
+      ["function"]=>
+      string(15) "connectDatabase"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [5]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(236)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [6]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(154)
+      ["function"]=>
+      string(8) "getThing"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [7]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(340)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [8]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(275)
+      ["function"]=>
+      string(14) "startVariables"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [9]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Variables.php"
+      ["line"]=>
+      int(126)
+      ["function"]=>
+      string(12) "getVariables"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [10]=>
+    array(5) {
+      ["file"]=>
+      string(70) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Web.php"
+      ["line"]=>
+      int(71)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Variables"
+      ["type"]=>
+      string(2) "->"
+    }
+    [11]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(29) "Nrwtaylor\StackAgentThing\Web"
+      ["type"]=>
+      string(2) "->"
+    }
+    [12]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(998)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [13]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(257)
+      ["function"]=>
+      string(4) "make"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [14]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(181)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [15]=>
+    array(5) {
+      ["file"]=>
+      string(63) "/var/www/stackr.test/vendor/symfony/console/Command/Command.php"
+      ["line"]=>
+      int(253)
+      ["function"]=>
+      string(9) "{closure}"
+      ["class"]=>
+      string(7) "Closure"
+      ["type"]=>
+      string(2) "->"
+    }
+    [16]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(1009)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(41) "Symfony\Component\Console\Command\Command"
+      ["type"]=>
+      string(2) "->"
+    }
+    [17]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(273)
+      ["function"]=>
+      string(12) "doRunCommand"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [18]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(149)
+      ["function"]=>
+      string(5) "doRun"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [19]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(456)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+  }
+  ["previous":"Error":private]=>
+  NULL
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "a37fa335-27e6-4f89-9568-98ef0908bcf0"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/a37fa335-27e6-4f89-9568-98ef0908bcf0."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "a37fa335-27e6-4f89-9568-98ef0908bcf0"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/a37fa335-27e6-4f89-9568-98ef0908bcf0."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "a37fa335-27e6-4f89-9568-98ef0908bcf0"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/a37fa335-27e6-4f89-9568-98ef0908bcf0."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "a37fa335-27e6-4f89-9568-98ef0908bcf0"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/a37fa335-27e6-4f89-9568-98ef0908bcf0."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(32) "Class "MongoDB\Client" not found"
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "a37fa335-27e6-4f89-9568-98ef0908bcf0"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/a37fa335-27e6-4f89-9568-98ef0908bcf0."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "a37fa335-27e6-4f89-9568-98ef0908bcf0"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/a37fa335-27e6-4f89-9568-98ef0908bcf0."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "a37fa335-27e6-4f89-9568-98ef0908bcf0"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/a37fa335-27e6-4f89-9568-98ef0908bcf0."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "a37fa335-27e6-4f89-9568-98ef0908bcf0"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/a37fa335-27e6-4f89-9568-98ef0908bcf0."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  bool(false)
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(127) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  bool(false)
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(127) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  bool(false)
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(127) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  bool(false)
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(127) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  bool(false)
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(127) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  bool(false)
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(127) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  bool(false)
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(127) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  bool(false)
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(127) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  bool(false)
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(127) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  bool(false)
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(127) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(1) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(1) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(1) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(1) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(1) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(1) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+object(Error)#421 (7) {
+  ["message":protected]=>
+  string(52) "Call to a member function setValueFromPath() on null"
+  ["string":"Error":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+  ["line":protected]=>
+  int(725)
+  ["trace":"Error":private]=>
+  array(25) {
+    [0]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(622)
+      ["function"]=>
+      string(5) "Write"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [1]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(612)
+      ["function"]=>
+      string(16) "refreshedatAgent"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [2]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [3]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(538)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [4]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(277)
+      ["function"]=>
+      string(6) "__call"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [5]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(373)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [6]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(211)
+      ["function"]=>
+      string(15) "connectDatabase"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [7]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(236)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [8]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(154)
+      ["function"]=>
+      string(8) "getThing"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [9]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Error.php"
+      ["line"]=>
+      int(34)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [10]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(544)
+      ["function"]=>
+      string(10) "thingError"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Error"
+      ["type"]=>
+      string(2) "->"
+    }
+    [11]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(278)
+      ["function"]=>
+      string(6) "__call"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [12]=>
+    array(5) {
+      ["file"]=>
+      string(73) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Atsign.php"
+      ["line"]=>
+      int(155)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [13]=>
+    array(5) {
+      ["file"]=>
+      string(73) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Atsign.php"
+      ["line"]=>
+      int(46)
+      ["function"]=>
+      string(10) "getAtsigns"
+      ["class"]=>
+      string(32) "Nrwtaylor\StackAgentThing\Atsign"
+      ["type"]=>
+      string(2) "->"
+    }
+    [14]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(879)
+      ["function"]=>
+      string(7) "makeWeb"
+      ["class"]=>
+      string(32) "Nrwtaylor\StackAgentThing\Atsign"
+      ["type"]=>
+      string(2) "->"
+    }
+    [15]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(257)
+      ["function"]=>
+      string(4) "make"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [16]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(3028)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [17]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(2101)
+      ["function"]=>
+      string(11) "readSubject"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [18]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(251)
+      ["function"]=>
+      string(4) "read"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [19]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(263)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [20]=>
+    array(5) {
+      ["file"]=>
+      string(63) "/var/www/stackr.test/vendor/symfony/console/Command/Command.php"
+      ["line"]=>
+      int(253)
+      ["function"]=>
+      string(9) "{closure}"
+      ["class"]=>
+      string(7) "Closure"
+      ["type"]=>
+      string(2) "->"
+    }
+    [21]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(1009)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(41) "Symfony\Component\Console\Command\Command"
+      ["type"]=>
+      string(2) "->"
+    }
+    [22]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(273)
+      ["function"]=>
+      string(12) "doRunCommand"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [23]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(149)
+      ["function"]=>
+      string(5) "doRun"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [24]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(456)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+  }
+  ["previous":"Error":private]=>
+  NULL
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+object(Error)#423 (7) {
+  ["message":protected]=>
+  string(52) "Call to a member function setValueFromPath() on null"
+  ["string":"Error":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+  ["line":protected]=>
+  int(725)
+  ["trace":"Error":private]=>
+  array(26) {
+    [0]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(622)
+      ["function"]=>
+      string(5) "Write"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [1]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(612)
+      ["function"]=>
+      string(16) "refreshedatAgent"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [2]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [3]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Memcached.php"
+      ["line"]=>
+      int(202)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [4]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Memcached.php"
+      ["line"]=>
+      int(10)
+      ["function"]=>
+      string(13) "initMemcached"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Memcached"
+      ["type"]=>
+      string(2) "->"
+    }
+    [5]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(239)
+      ["function"]=>
+      string(4) "init"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Memcached"
+      ["type"]=>
+      string(2) "->"
+    }
+    [6]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(373)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [7]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(211)
+      ["function"]=>
+      string(15) "connectDatabase"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [8]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(236)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [9]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(154)
+      ["function"]=>
+      string(8) "getThing"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [10]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Error.php"
+      ["line"]=>
+      int(34)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [11]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(544)
+      ["function"]=>
+      string(10) "thingError"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Error"
+      ["type"]=>
+      string(2) "->"
+    }
+    [12]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(278)
+      ["function"]=>
+      string(6) "__call"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [13]=>
+    array(5) {
+      ["file"]=>
+      string(73) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Atsign.php"
+      ["line"]=>
+      int(155)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [14]=>
+    array(5) {
+      ["file"]=>
+      string(73) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Atsign.php"
+      ["line"]=>
+      int(46)
+      ["function"]=>
+      string(10) "getAtsigns"
+      ["class"]=>
+      string(32) "Nrwtaylor\StackAgentThing\Atsign"
+      ["type"]=>
+      string(2) "->"
+    }
+    [15]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(879)
+      ["function"]=>
+      string(7) "makeWeb"
+      ["class"]=>
+      string(32) "Nrwtaylor\StackAgentThing\Atsign"
+      ["type"]=>
+      string(2) "->"
+    }
+    [16]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(257)
+      ["function"]=>
+      string(4) "make"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [17]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(3028)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [18]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(2101)
+      ["function"]=>
+      string(11) "readSubject"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [19]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(251)
+      ["function"]=>
+      string(4) "read"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [20]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(263)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [21]=>
+    array(5) {
+      ["file"]=>
+      string(63) "/var/www/stackr.test/vendor/symfony/console/Command/Command.php"
+      ["line"]=>
+      int(253)
+      ["function"]=>
+      string(9) "{closure}"
+      ["class"]=>
+      string(7) "Closure"
+      ["type"]=>
+      string(2) "->"
+    }
+    [22]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(1009)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(41) "Symfony\Component\Console\Command\Command"
+      ["type"]=>
+      string(2) "->"
+    }
+    [23]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(273)
+      ["function"]=>
+      string(12) "doRunCommand"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [24]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(149)
+      ["function"]=>
+      string(5) "doRun"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [25]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(456)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+  }
+  ["previous":"Error":private]=>
+  NULL
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+object(Error)#419 (7) {
+  ["message":protected]=>
+  string(52) "Call to a member function setValueFromPath() on null"
+  ["string":"Error":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+  ["line":protected]=>
+  int(725)
+  ["trace":"Error":private]=>
+  array(23) {
+    [0]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(622)
+      ["function"]=>
+      string(5) "Write"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [1]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(612)
+      ["function"]=>
+      string(16) "refreshedatAgent"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [2]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [3]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(373)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [4]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(211)
+      ["function"]=>
+      string(15) "connectDatabase"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [5]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(236)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [6]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(154)
+      ["function"]=>
+      string(8) "getThing"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [7]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Error.php"
+      ["line"]=>
+      int(34)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [8]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(544)
+      ["function"]=>
+      string(10) "thingError"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Error"
+      ["type"]=>
+      string(2) "->"
+    }
+    [9]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(278)
+      ["function"]=>
+      string(6) "__call"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [10]=>
+    array(5) {
+      ["file"]=>
+      string(73) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Atsign.php"
+      ["line"]=>
+      int(155)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [11]=>
+    array(5) {
+      ["file"]=>
+      string(73) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Atsign.php"
+      ["line"]=>
+      int(46)
+      ["function"]=>
+      string(10) "getAtsigns"
+      ["class"]=>
+      string(32) "Nrwtaylor\StackAgentThing\Atsign"
+      ["type"]=>
+      string(2) "->"
+    }
+    [12]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(879)
+      ["function"]=>
+      string(7) "makeWeb"
+      ["class"]=>
+      string(32) "Nrwtaylor\StackAgentThing\Atsign"
+      ["type"]=>
+      string(2) "->"
+    }
+    [13]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(257)
+      ["function"]=>
+      string(4) "make"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [14]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(3028)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [15]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(2101)
+      ["function"]=>
+      string(11) "readSubject"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [16]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(251)
+      ["function"]=>
+      string(4) "read"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [17]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(263)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [18]=>
+    array(5) {
+      ["file"]=>
+      string(63) "/var/www/stackr.test/vendor/symfony/console/Command/Command.php"
+      ["line"]=>
+      int(253)
+      ["function"]=>
+      string(9) "{closure}"
+      ["class"]=>
+      string(7) "Closure"
+      ["type"]=>
+      string(2) "->"
+    }
+    [19]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(1009)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(41) "Symfony\Component\Console\Command\Command"
+      ["type"]=>
+      string(2) "->"
+    }
+    [20]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(273)
+      ["function"]=>
+      string(12) "doRunCommand"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [21]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(149)
+      ["function"]=>
+      string(5) "doRun"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [22]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(456)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+  }
+  ["previous":"Error":private]=>
+  NULL
+}
+string(32) "Class "MongoDB\Client" not found"
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+object(Error)#521 (7) {
+  ["message":protected]=>
+  string(52) "Call to a member function setValueFromPath() on null"
+  ["string":"Error":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+  ["line":protected]=>
+  int(725)
+  ["trace":"Error":private]=>
+  array(18) {
+    [0]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(622)
+      ["function"]=>
+      string(5) "Write"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [1]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(612)
+      ["function"]=>
+      string(16) "refreshedatAgent"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [2]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [3]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(538)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [4]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(277)
+      ["function"]=>
+      string(6) "__call"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [5]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(373)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [6]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(211)
+      ["function"]=>
+      string(15) "connectDatabase"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [7]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(236)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [8]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(154)
+      ["function"]=>
+      string(8) "getThing"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [9]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Error.php"
+      ["line"]=>
+      int(34)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [10]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(544)
+      ["function"]=>
+      string(10) "thingError"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Error"
+      ["type"]=>
+      string(2) "->"
+    }
+    [11]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(278)
+      ["function"]=>
+      string(6) "__call"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [12]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(263)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [13]=>
+    array(5) {
+      ["file"]=>
+      string(63) "/var/www/stackr.test/vendor/symfony/console/Command/Command.php"
+      ["line"]=>
+      int(253)
+      ["function"]=>
+      string(9) "{closure}"
+      ["class"]=>
+      string(7) "Closure"
+      ["type"]=>
+      string(2) "->"
+    }
+    [14]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(1009)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(41) "Symfony\Component\Console\Command\Command"
+      ["type"]=>
+      string(2) "->"
+    }
+    [15]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(273)
+      ["function"]=>
+      string(12) "doRunCommand"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [16]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(149)
+      ["function"]=>
+      string(5) "doRun"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [17]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(456)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+  }
+  ["previous":"Error":private]=>
+  NULL
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+object(Error)#523 (7) {
+  ["message":protected]=>
+  string(52) "Call to a member function setValueFromPath() on null"
+  ["string":"Error":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+  ["line":protected]=>
+  int(725)
+  ["trace":"Error":private]=>
+  array(19) {
+    [0]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(622)
+      ["function"]=>
+      string(5) "Write"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [1]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(612)
+      ["function"]=>
+      string(16) "refreshedatAgent"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [2]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [3]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Memcached.php"
+      ["line"]=>
+      int(202)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [4]=>
+    array(5) {
+      ["file"]=>
+      string(76) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Memcached.php"
+      ["line"]=>
+      int(10)
+      ["function"]=>
+      string(13) "initMemcached"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Memcached"
+      ["type"]=>
+      string(2) "->"
+    }
+    [5]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(239)
+      ["function"]=>
+      string(4) "init"
+      ["class"]=>
+      string(35) "Nrwtaylor\StackAgentThing\Memcached"
+      ["type"]=>
+      string(2) "->"
+    }
+    [6]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(373)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [7]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(211)
+      ["function"]=>
+      string(15) "connectDatabase"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [8]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(236)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [9]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(154)
+      ["function"]=>
+      string(8) "getThing"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [10]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Error.php"
+      ["line"]=>
+      int(34)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [11]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(544)
+      ["function"]=>
+      string(10) "thingError"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Error"
+      ["type"]=>
+      string(2) "->"
+    }
+    [12]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(278)
+      ["function"]=>
+      string(6) "__call"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [13]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(263)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [14]=>
+    array(5) {
+      ["file"]=>
+      string(63) "/var/www/stackr.test/vendor/symfony/console/Command/Command.php"
+      ["line"]=>
+      int(253)
+      ["function"]=>
+      string(9) "{closure}"
+      ["class"]=>
+      string(7) "Closure"
+      ["type"]=>
+      string(2) "->"
+    }
+    [15]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(1009)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(41) "Symfony\Component\Console\Command\Command"
+      ["type"]=>
+      string(2) "->"
+    }
+    [16]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(273)
+      ["function"]=>
+      string(12) "doRunCommand"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [17]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(149)
+      ["function"]=>
+      string(5) "doRun"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [18]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(456)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+  }
+  ["previous":"Error":private]=>
+  NULL
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+object(Error)#519 (7) {
+  ["message":protected]=>
+  string(52) "Call to a member function setValueFromPath() on null"
+  ["string":"Error":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+  ["line":protected]=>
+  int(725)
+  ["trace":"Error":private]=>
+  array(16) {
+    [0]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(622)
+      ["function"]=>
+      string(5) "Write"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [1]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(612)
+      ["function"]=>
+      string(16) "refreshedatAgent"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [2]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(247)
+      ["function"]=>
+      string(3) "get"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [3]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(373)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [4]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Database.php"
+      ["line"]=>
+      int(211)
+      ["function"]=>
+      string(15) "connectDatabase"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [5]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(236)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(34) "Nrwtaylor\StackAgentThing\Database"
+      ["type"]=>
+      string(2) "->"
+    }
+    [6]=>
+    array(5) {
+      ["file"]=>
+      string(69) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php"
+      ["line"]=>
+      int(154)
+      ["function"]=>
+      string(8) "getThing"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [7]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Error.php"
+      ["line"]=>
+      int(34)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Thing"
+      ["type"]=>
+      string(2) "->"
+    }
+    [8]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(544)
+      ["function"]=>
+      string(10) "thingError"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Error"
+      ["type"]=>
+      string(2) "->"
+    }
+    [9]=>
+    array(5) {
+      ["file"]=>
+      string(72) "/var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Agent.php"
+      ["line"]=>
+      int(278)
+      ["function"]=>
+      string(6) "__call"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [10]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(263)
+      ["function"]=>
+      string(11) "__construct"
+      ["class"]=>
+      string(31) "Nrwtaylor\StackAgentThing\Agent"
+      ["type"]=>
+      string(2) "->"
+    }
+    [11]=>
+    array(5) {
+      ["file"]=>
+      string(63) "/var/www/stackr.test/vendor/symfony/console/Command/Command.php"
+      ["line"]=>
+      int(253)
+      ["function"]=>
+      string(9) "{closure}"
+      ["class"]=>
+      string(7) "Closure"
+      ["type"]=>
+      string(2) "->"
+    }
+    [12]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(1009)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(41) "Symfony\Component\Console\Command\Command"
+      ["type"]=>
+      string(2) "->"
+    }
+    [13]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(273)
+      ["function"]=>
+      string(12) "doRunCommand"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [14]=>
+    array(5) {
+      ["file"]=>
+      string(59) "/var/www/stackr.test/vendor/symfony/console/Application.php"
+      ["line"]=>
+      int(149)
+      ["function"]=>
+      string(5) "doRun"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+    [15]=>
+    array(5) {
+      ["file"]=>
+      string(26) "/var/www/stackr.test/agent"
+      ["line"]=>
+      int(456)
+      ["function"]=>
+      string(3) "run"
+      ["class"]=>
+      string(37) "Symfony\Component\Console\Application"
+      ["type"]=>
+      string(2) "->"
+    }
+  }
+  ["previous":"Error":private]=>
+  NULL
+}
+string(32) "Class "MongoDB\Client" not found"
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  bool(false)
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(127) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  bool(false)
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(127) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  bool(false)
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(127) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  bool(false)
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(127) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  bool(false)
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(127) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(0) {
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  bool(false)
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(127) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+string(37) "Thing Write Database::readStaticField"
+bool(false)
+string(37) "Thing Write this variables array_data"
+array(2) {
+  ["nuuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    NULL
+  }
+  ["uuid"]=>
+  array(1) {
+    ["refreshed_at"]=>
+    string(20) "2023-10-15T01:28:34Z"
+  }
+}
+string(32) "Class "MongoDB\Client" not found"
+string(42) "Thing Write test Database::readStaticField"
+bool(false)
+string(36) "Thing Write test Database::staticGet"
+array(4) {
+  ["uuid"]=>
+  string(36) "69acb091-13ef-4a69-b199-696c48308695"
+  ["thing"]=>
+  bool(false)
+  ["info"]=>
+  string(163) "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing this->web_prefixapi/thing/69acb091-13ef-4a69-b199-696c48308695."
+  ["help"]=>
+  string(28) "Check your junk/spam folder."
+}
+Class "MongoDB\Client" not found 880 /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Mongo.php
+PHP 169ms default_console_user
+X 69ac  Added to stack.
