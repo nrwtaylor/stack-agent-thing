@@ -236,7 +236,7 @@ clean: ## Clean up the web folders and settings
 
 patch: ## Activate a patch
 	@echo "Copy files from working to operating stack."; \
-	sudo cp -rf * /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/
+	sudo cp -rf * /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/ 
 
 debug: ## Install enhanced debugging environment (dev optional?)
 	sudo apt install php-dev

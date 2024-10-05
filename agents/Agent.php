@@ -4,13 +4,25 @@
  *
  * @package default
  */
+
+// Class not found error for `MongoDB\Client`? so getting advice from 
+// https://dev.to/dechamp/php---how-to-fixclass---not-found-error-lgp9
+// Step 0
+//use 'MongoDB\Client';
+// created new errors
+// GOTO `agents/Mongo.php` to fix
+
+
 namespace Nrwtaylor\StackAgentThing;
 
 // Agent resolves message disposition
 
 ini_set("display_startup_errors", 1);
 ini_set("display_errors", 1);
-error_reporting(-1);
+//error_reporting(-1);
+error_reporting(E_ALL); // Class-not-found debugging
+// stackoverflow.com answer specific to MongoDB\Client
+//echo extension_loaded("mongodb") ? "loaded\n" : "not loaded\n";
 
 define("MAX_EXECUTION_TIME", 2); # seconds
 # 7 June 2022 i woz here

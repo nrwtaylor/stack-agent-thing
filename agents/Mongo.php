@@ -8,6 +8,9 @@ namespace Nrwtaylor\StackAgentThing;
 
 use MongoDB\Model\BSONDocument;
 
+// turn off error reporting to allow clean When.php
+error_reporting(0);
+
 class Mongo extends Agent
 {
     public $var = "hello";
@@ -70,6 +73,7 @@ return $collection;
 
         return $result;
     }
+print "2024 10 05 Hi\n";
 
     // use memcache model for get.
     static function getStaticMongo($text = null)
@@ -87,11 +91,11 @@ var_dump("Mongo getStaticMongo text", $text);
             $client = new \MongoDB\Client($path);
             $collection = $client->stack_db->things;
             $resultRaw = $collection->findOne(["uuid" => $text]);
-//var_dump("Mongo getStaticMongo resultRaw", $resultRaw);
+var_dump("Mongo getStaticMongo resultRaw", $resultRaw);
 //if ($resultRaw == null) {return false;}
 //$instance = new self();
 $result = Mongo::convertBSONDocumentToArray($resultRaw);
-//var_dump("Mongo getStaticMongo result", $result);
+var_dump("Mongo getStaticMongo result", $result);
         } catch (\Throwable $t) {
 var_dump("Mongo getStaticMongo throwable");
 var_dump($t->getMessage());
