@@ -19,10 +19,10 @@ namespace Nrwtaylor\StackAgentThing;
 
 ini_set("display_startup_errors", 1);
 ini_set("display_errors", 1);
-//error_reporting(-1);
-error_reporting(E_ALL); // Class-not-found debugging
-// stackoverflow.com answer specific to MongoDB\Client
-//echo extension_loaded("mongodb") ? "loaded\n" : "not loaded\n";
+error_reporting(-1);
+// Just need to hide errors for When.php
+//error_reporting(0);
+// item from Mongo.php is a vardump?
 
 define("MAX_EXECUTION_TIME", 2); # seconds
 # 7 June 2022 i woz here

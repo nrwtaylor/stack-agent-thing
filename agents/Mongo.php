@@ -9,7 +9,10 @@ namespace Nrwtaylor\StackAgentThing;
 use MongoDB\Model\BSONDocument;
 
 // turn off error reporting to allow clean When.php
+//error_reporting(E_ALL);
 //error_reporting(0);
+// 2024-10-05 - fix for When.php
+// turned off all open var_dumps by putting "//-" in front
 
 class Mongo extends Agent
 {
@@ -73,12 +76,12 @@ return $collection;
 
         return $result;
     }
-print "2024 10 05 Hi\n";
+//print "2024 10 05 ve7det\n";
 
     // use memcache model for get.
     static function getStaticMongo($text = null)
     {
-var_dump("Mongo getStaticMongo text", $text);
+//-var_dump("Mongo getStaticMongo text", $text);
         // Get mongo key by uuid.
 //        if (!$this->isReadyMongo()) {
 //            return;
@@ -91,19 +94,19 @@ var_dump("Mongo getStaticMongo text", $text);
             $client = new \MongoDB\Client($path);
             $collection = $client->stack_db->things;
             $resultRaw = $collection->findOne(["uuid" => $text]);
-var_dump("Mongo getStaticMongo resultRaw", $resultRaw);
+//-var_dump("Mongo getStaticMongo resultRaw", $resultRaw);
 //if ($resultRaw == null) {return false;}
 //$instance = new self();
 $result = Mongo::convertBSONDocumentToArray($resultRaw);
-var_dump("Mongo getStaticMongo result", $result);
+//-var_dump("Mongo getStaticMongo result", $result);
         } catch (\Throwable $t) {
-var_dump("Mongo getStaticMongo throwable");
-var_dump($t->getMessage());
+//-var_dump("Mongo getStaticMongo throwable");
+//-var_dump($t->getMessage());
 exit();
    //         $this->errorMongo($t->getMessage());
         } catch (\Error $ex) {
-var_dump("Mongo getStaticMongo error");
-var_dump($t->getMessage());
+//-var_dump("Mongo getStaticMongo error");
+//-var_dump($t->getMessage());
 exit();
    //         $this->errorMongo($ex->getMessage());
         }
@@ -183,11 +186,11 @@ $value["hhh"] = "jjj";
                 '$set' => $value,
             ], ['upsert'=>true]);
         } catch (\Throwable $t) {
-var_dump($t->getMessage());
+//-var_dump($t->getMessage());
 //            $this->errorMongo($t->getMessage());
             return true;
         } catch (\Error $ex) {
-var_dump($ex->getMessage());
+//-var_dump($ex->getMessage());
 //            $this->errorMongo($ex->getMessage());
             return true;
         }
@@ -481,11 +484,11 @@ $data["uuid"] = $uuid;
 */
 
         $d = $data;
-var_dump("provided data", $data);
+//-var_dump("provided data", $data);
         if (is_array($existing)) {
             $d = array_replace_recursive($existing, $data);
         }
-var_dump("array replace recursive", $d);
+//-var_dump("array replace recursive", $d);
 //exit();
         $u = Mongo::setStaticMongo($uuid, $d);
         if ($u == true) {
