@@ -9,7 +9,7 @@ namespace Nrwtaylor\StackAgentThing;
 use MongoDB\Model\BSONDocument;
 
 // turn off error reporting to allow clean When.php
-error_reporting(0);
+//error_reporting(0);
 
 class Mongo extends Agent
 {
