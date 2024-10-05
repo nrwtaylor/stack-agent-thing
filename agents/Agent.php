@@ -2359,7 +2359,8 @@ if ($pid == -1) {
 
 //var_dump($arr);
 //var_dump($this->agents);
-
+//var_dump($thing);
+error_reporting(E_ALL ^ E_NOTICE);
 $agents_handler = new Agents($thing, "agents");
 $agents_handler->getAgents();
 //var_dump($agents_handler->agents);
